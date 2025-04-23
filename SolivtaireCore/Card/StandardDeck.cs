@@ -1,6 +1,4 @@
-﻿using SolivtaireCore;
-
-namespace SolivtaireCore;
+﻿namespace SolivtaireCore;
 
 public class StandardDeck : Deck<Card>
 {

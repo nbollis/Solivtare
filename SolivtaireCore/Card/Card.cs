@@ -5,11 +5,12 @@
 /// </summary>
 /// <param name="suit"></param>
 /// <param name="rank"></param>
-public class Card(Suit suit, Rank rank) : ICard
+public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard
 {
-    public Suit Suit { get; } = suit;
-    public Rank Rank { get; } = rank;
-    public bool IsFaceUp { get; set; } = false;
+    public Suit Suit { get; init; } = suit;
+    public Rank Rank { get; init; } = rank;
+    public Color Color { get; init; } = suit.ToSuitColor();
+    public bool IsFaceUp { get; set; } = isFaceUp;
 
     public override string ToString() => $"{Rank} of {Suit}";
 
