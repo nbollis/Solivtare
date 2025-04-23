@@ -1,7 +1,7 @@
 ﻿namespace SolvitaireCore;
 
 /// <summary>
-/// A move of a single card from one pile to another made by a player.
+/// A move of a single card from one pile to another made by a agent.
 /// </summary>
 public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMove(fromPile, toPile), IMove
 {
@@ -21,7 +21,7 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMo
             case WastePile:
                 return true; // Stock and Waste piles accept any card  
 
-            // This is false because only game resets can move cards from the stock pile, not a player action
+            // This is false because only game resets can move cards from the stock pile, not a agent action
             case StockPile:
             default:
                 return false;

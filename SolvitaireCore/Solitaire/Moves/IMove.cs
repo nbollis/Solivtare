@@ -1,7 +1,7 @@
 ﻿namespace SolvitaireCore;
 
 /// <summary>
-/// Represents a move made by a player
+/// Represents a move made by a agent
 /// </summary>
 public interface IMove
 {

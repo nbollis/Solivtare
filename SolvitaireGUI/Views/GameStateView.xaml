@@ -1,0 +1,27 @@
+﻿<UserControl x:Class="SolvitaireGUI.GameStateView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SolvitaireGUI"
+             xmlns:solvitaireGuiFunctions="clr-namespace:SolvitaireGuiFunctions;assembly=SolvitaireGuiFunctions"
+             mc:Ignorable="d" 
+             d:DataContext="{x:Static solvitaireGuiFunctions:GameStateModel.Instance}"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <ItemsControl ItemsSource="{Binding FoundationPiles}">
+                <!-- DataTemplate for FoundationPile -->
+            </ItemsControl>
+
+            <ItemsControl ItemsSource="{Binding TableauPiles}">
+                <!-- DataTemplate for TableauPile -->
+            </ItemsControl>
+
+            <StackPanel Orientation="Horizontal">
+                <ContentControl Content="{Binding StockPile}" />
+                <ContentControl Content="{Binding WastePile}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

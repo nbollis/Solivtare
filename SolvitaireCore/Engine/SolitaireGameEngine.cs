@@ -11,20 +11,20 @@ public class SolitaireGameEngine : IGameEngine
         _deck = new StandardDeck();
     }
 
-    public void PlayGame(IPlayer player)
+    public void PlayGame(IAgent agent)
     {
         _deck.Shuffle();
         _state.DealCards(_deck);
         while (!_state.IsGameWon)
         {
-            IMove move = player.GetNextMove(_state);
+            IMove move = agent.GetNextMove(_state);
             if (move.IsValid(_state))
             {
                 move.Execute(_state);
             }
             else
             {
-                // Optionally break loop if invalid or no move (depends on player type)
+                // Optionally break loop if invalid or no move (depends on agent type)
                 //break;
             }
         }

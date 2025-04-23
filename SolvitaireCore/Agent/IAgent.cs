@@ -1,12 +1,12 @@
 ﻿namespace SolvitaireCore;
 
-public interface IPlayer
+public interface IAgent
 {
     string Name { get; }
     public IMove GetNextMove(GameState state);
 }
 
-public class RandomPlayer : IPlayer
+public class RandomAgent : IAgent
 {
     private Random _rng = new Random();
     public string Name => "Random Agent";

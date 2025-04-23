@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controls\" />
-    <Folder Include="Views\" />
+    <ProjectReference Include="..\SolvitaireCore\SolvitaireCore.csproj" />
+    <ProjectReference Include="..\SolvitaireGuiFunctions\SolvitaireGuiFunctions.csproj" />
   </ItemGroup>
 
 </Project>

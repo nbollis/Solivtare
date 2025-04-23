@@ -6,7 +6,17 @@
         xmlns:local="clr-namespace:SolvitaireGUI"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
 
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0">
+
+        </StackPanel>
+
+        <local:GameStateView Grid.Column="1" DataContext="{Binding GameStateViewModel}"/>
     </Grid>
 </Window>
