@@ -5,16 +5,19 @@
 /// </summary>
 /// <param name="suit"></param>
 /// <param name="rank"></param>
-public class Card(Suit suit, Rank rank) : IEquatable<Card>
+public class Card(Suit suit, Rank rank) : ICard
 {
     public Suit Suit { get; } = suit;
     public Rank Rank { get; } = rank;
     public bool IsFaceUp { get; set; } = false;
 
-    public bool Equals(Card? other)
+    public override string ToString() => $"{Rank} of {Suit}";
+
+    public bool Equals(ICard? other)
     {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
+        if (other.GetType() != GetType()) return false;
         return Suit == other.Suit && Rank == other.Rank;
     }
 
