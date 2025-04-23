@@ -77,6 +77,35 @@ namespace Test
                 // Act & Assert  
                 Assert.That(pile.CanAddCard(card), Is.False);
             }
+
+            [Test]
+            public void AddCards_WrongSuit_ShouldThrowInvalidOperationException()
+            {
+                // Arrange  
+                var pile = new FoundationPile(Suit.Clubs);
+                var cards = new List<Card>
+                {
+                    new Card(Suit.Clubs, Rank.Ace),
+                    new Card(Suit.Spades, Rank.Two)
+                };
+
+                // Act & Assert  
+                Assert.That(() => pile.AddCards(cards), Throws.InvalidOperationException);
+            }
+
+            [Test]
+            public void AddCards_WrongRank_ShouldThrowInvalidOperationException()
+            {
+                // Arrange  
+                var pile = new FoundationPile(Suit.Clubs);
+                var cards = new List<Card>
+                {
+                    new Card(Suit.Clubs, Rank.Ace),
+                    new Card(Suit.Clubs, Rank.Three)
+                };
+                // Act & Assert  
+                Assert.That(() => pile.AddCards(cards), Throws.InvalidOperationException);
+            }
         }
 
         [TestFixture]
@@ -139,6 +168,56 @@ namespace Test
 
                 // Act & Assert  
                 Assert.That(pile.CanAddCard(card), Is.False);
+            }
+
+            [Test]
+            public void AddCards_ValidCards_ShouldAddAllCards()
+            {
+                // Arrange  
+                var pile = new TableauPile();
+                var cards = new List<Card>
+                {
+                    new Card(Suit.Spades, Rank.King),
+                    new Card(Suit.Hearts, Rank.Queen),
+                    new Card(Suit.Spades, Rank.Jack)
+                };
+
+                // Act  
+                pile.AddCards(cards);
+
+                // Assert  
+                Assert.That(pile.Cards.Count, Is.EqualTo(3));
+                Assert.That(pile.TopCard, Is.EqualTo(cards[^1]));
+            }
+
+            [Test]
+            public void AddCards_WrongSuit_ShouldThrowInvalidOperationException()
+            {
+                // Arrange  
+                var pile = new TableauPile();
+                var cards = new List<Card>
+                {
+                    new Card(Suit.Spades, Rank.King),
+                    new Card(Suit.Hearts, Rank.Queen),
+                    new Card(Suit.Diamonds, Rank.Jack)
+                };
+                // Act & Assert  
+                Assert.That(() => pile.AddCards(cards), Throws.InvalidOperationException);
+            }
+
+            [Test]
+            public void AddCards_WrongRank_ShouldThrowInvalidOperationException()
+            {
+                // Arrange  
+                var pile = new TableauPile();
+                var cards = new List<Card>
+                {
+                    new Card(Suit.Spades, Rank.King),
+                    new Card(Suit.Hearts, Rank.Queen),
+                    new Card(Suit.Spades, Rank.Ten)
+                };
+                // Act & Assert  
+                Assert.That(() => pile.AddCards(cards), Throws.InvalidOperationException);
             }
         }
 
