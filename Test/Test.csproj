@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SolivtaireCore\SolivtaireCore.csproj" />
-    <ProjectReference Include="..\SolivtareCore\SolivtaireCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
