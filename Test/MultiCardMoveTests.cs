@@ -185,4 +185,25 @@ public class MultiCardMoveTests
         Assert.That(result, Is.False);
         Assert.That(() => move.Execute(new GameState()), Throws.InvalidOperationException);
     }
+
+    [Test]
+    public void MultiCardMove_ToString_ShouldReturnCorrectFormat()
+    {
+        // Arrange
+        var cards = new List<Card>
+        {
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Spades, Rank.Jack),
+            new Card(Suit.Clubs, Rank.Queen)
+        };
+        var fromPile = new StockPile(cards);
+        var toPile = new WastePile();
+        var move = new MultiCardMove(fromPile, toPile, cards);
+
+        // Act
+        var result = move.ToString();
+
+        // Assert
+        Assert.That(result, Is.EqualTo($"Move {string.Join(',', cards)} cards from {fromPile} to {toPile}"));
+    }
 }

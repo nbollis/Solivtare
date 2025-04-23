@@ -90,12 +90,12 @@ public class GameStateTests
         // Arrange  
         var gameState = new GameState(); // Set CardsPerCycle to 3  
         var stockCards = new List<Card>
-       {
+        {
            new Card(Suit.Hearts, Rank.Ace),
            new Card(Suit.Spades, Rank.Two),
            new Card(Suit.Diamonds, Rank.Three),
            new Card(Suit.Clubs, Rank.Four)
-       };
+        };
         gameState.StockPile.AddCards(stockCards);
 
         // Act  

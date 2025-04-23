@@ -130,4 +130,20 @@ public class SingleCardMoveTests
         // Act & Assert
         Assert.That(() => move.Execute(new GameState()), Throws.InvalidOperationException);
     }
+
+    [Test]
+    public void SingleCardMove_ToString_ShouldReturnCorrectFormat()
+    {
+        // Arrange
+        var card = new Card(Suit.Hearts, Rank.Ace);
+        var fromPile = new TableauPile();
+        var toPile = new FoundationPile(Suit.Hearts, [card]);
+        var move = new SingleCardMove(fromPile, toPile, card);
+
+        // Act
+        var result = move.ToString();
+
+        // Assert
+        Assert.That(result, Is.EqualTo($"Move {card} from {fromPile} to {toPile}"));
+    }
 }

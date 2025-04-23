@@ -67,7 +67,7 @@ public class GameState
     /// Moves cards from Stock to Waste pile. Moves CardsPerCycle or all remaining cards, whichever is less.
     /// </summary>
     public IMove CycleMove => new MultiCardMove(StockPile, WastePile,
-        StockPile.Cards.TakeLast(Math.Min(CardsPerCycle, StockPile.Count)).Reverse().ToList());
+        StockPile.Cards.TakeLast(Math.Min(CardsPerCycle, StockPile.Count)).ToList());
 
     public void MoveCard(IMove move)
     {
