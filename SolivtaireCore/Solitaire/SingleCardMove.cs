@@ -1,15 +1,5 @@
 ﻿namespace SolivtaireCore;
 
-public abstract class SolitaireMove(Pile fromPile, Pile toPile) : IMove
-{
-    public Pile FromPile { get; } = fromPile;
-    public Pile ToPile { get; } = toPile;
-
-    public abstract bool IsValid(GameState state);
-    public abstract void Execute(GameState state);
-
-}
-
 /// <summary>
 /// A move of a single card from one pile to another made by a player.
 /// </summary>
@@ -24,9 +14,9 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMo
 
         switch (ToPile)
         {
-            case FoundationPile foundationPile:
-            case TableauPile tableauPile:
-                return FromPile.CanAddCard(Card);
+            case FoundationPile:
+            case TableauPile:
+                return ToPile.CanAddCard(Card);
 
             case WastePile:
                 return true; // Stock and Waste piles accept any card  
@@ -52,73 +42,4 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMo
     }
 
     public override string ToString() => $"Move {Card} from {FromPile} to {ToPile}";
-}
-
-public class MultiCardMove(Pile fromPile, Pile toPile, List<Card> cards) : SolitaireMove(fromPile, toPile), IMove
-{
-    public List<Card> Cards { get; } = cards;
-
-    public override bool IsValid(GameState state)
-    {
-        if (FromPile.IsEmpty || !Cards.All(card => FromPile.Cards.Contains(card)))
-            return false;
-
-        switch (ToPile)
-        {
-            case FoundationPile foundationPile:
-                return false;
-
-            case TableauPile tableauPile:
-                return tableauPile.CanAddCards(Cards);
-
-            case WastePile:
-                return true; // Waste piles accept any card  
-
-            // This is false because only game resets can move cards from the stock pile, not a player action
-            case StockPile:
-            default:
-                return false;
-        }
-    }
-
-    public override void Execute(GameState state)
-    {
-        if (IsValid(state))
-        {
-            switch (ToPile)
-            {
-                case TableauPile tableauPile:
-
-                    // TODO: Implement logic for multiple card moves to tableau piles
-                    break;
-                case WastePile:
-                {
-                    foreach (var card in Cards)
-                    {
-                        FromPile.RemoveCard(card);
-                        ToPile.AddCard(card);
-                        card.IsFaceUp = true;
-                    }
-
-                    break;
-                }
-                case StockPile:
-                {
-                    foreach (var card in Cards)
-                    {
-                        FromPile.RemoveCard(card);
-                        ToPile.AddCard(card);
-                        card.IsFaceUp = false;
-                    }
-                    break;
-                }
-            }
-        }
-        else
-        {
-            throw new InvalidOperationException("Invalid move");
-        }
-    }
-
-    public override string ToString() => $"Move {string.Join(',', Cards)} cards from {FromPile} to {ToPile}";
 }

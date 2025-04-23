@@ -1,12 +1,9 @@
-﻿using System;
-using System.Reflection;
-
-namespace SolivtaireCore;
+﻿namespace SolivtaireCore;
 
 /// <summary>
 /// An abstract stack of cards
 /// </summary>
-public abstract class Pile
+public abstract class Pile 
 {
     /// <summary>
     /// Represents a pile of cards in a solitaire game
@@ -123,6 +120,22 @@ public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) 
         if (cards[0].Color == TopCard.Color)
             return false;
 
+        return true;
+    }
+
+    public bool RemoveCards(List<Card> cards)
+    {
+        if (!cards[^1].Equals(TopCard))
+            throw new InvalidOperationException($"Cards to remove do not end with the tableau Top Card");
+        
+        int startIndex = Cards.IndexOf(cards[0]);
+        if (startIndex == -1)
+            throw new InvalidOperationException($"First card to remove not in Tableau");
+
+        if (!IsValidCardSet(cards))
+            throw new InvalidOperationException($"Cards to remove are not a valid set");
+
+        Cards.RemoveRange(startIndex, cards.Count);
         return true;
     }
 
