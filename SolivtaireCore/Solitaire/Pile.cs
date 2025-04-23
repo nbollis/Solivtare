@@ -25,9 +25,6 @@ public abstract class Pile
         }
     }
 
-    //public abstract bool CanTakeCard();
-    //public abstract bool CanTakeCards(IEnumerable<Card> cards);
-
     public abstract bool CanAddCard(Card card);
 
     /// <summary>
@@ -55,6 +52,18 @@ public abstract class Pile
                 throw new InvalidOperationException($"Cannot add {card} to this pile.");
             Cards.Add(card);
         }
+    }
+
+    public virtual bool CanRemoveCard(Card card)
+    {
+        return !IsEmpty && card.Equals(TopCard);
+    }
+
+    public void RemoveCard(Card card)
+    {
+        if (!CanRemoveCard(card))
+            throw new InvalidOperationException($"Cannot remove {card} from this pile.");
+        Cards.Remove(card);
     }
 }
 

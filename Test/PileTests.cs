@@ -27,6 +27,101 @@ namespace Test
                 // Act & Assert  
                 Assert.That(() => pile.AddCard(card), Throws.InvalidOperationException);
             }
+
+            [Test]
+            public void Pile_RemoveCard_EmptyPile_ShouldThrowInvalidOperationException()
+            {
+                // Arrange
+                var pile = new TableauPile();
+                var card = new Card(Suit.Spades, Rank.Ace);
+
+                // Act & Assert
+                Assert.That(() => pile.RemoveCard(card), Throws.InvalidOperationException);
+            }
+
+            [Test]
+            public void Pile_RemoveCard_NonTopCard_ShouldThrowInvalidOperationException()
+            {
+                // Arrange
+                var pile = new TableauPile(new List<Card>
+                {
+                    new Card(Suit.Spades, Rank.King),
+                    new Card(Suit.Hearts, Rank.Queen)
+                });
+                var card = new Card(Suit.Spades, Rank.King);
+
+                // Act & Assert
+                Assert.That(() => pile.RemoveCard(card), Throws.InvalidOperationException);
+            }
+
+            [Test]
+            public void Pile_RemoveCard_TopCard_ShouldRemoveCard()
+            {
+                // Arrange
+                var pile = new TableauPile(new List<Card>
+                {
+                    new Card(Suit.Spades, Rank.King),
+                    new Card(Suit.Hearts, Rank.Queen)
+                });
+                var card = new Card(Suit.Hearts, Rank.Queen);
+
+                // Act
+                pile.RemoveCard(card);
+
+                // Assert
+                Assert.That(pile.Cards.Count, Is.EqualTo(1));
+                Assert.That(pile.TopCard, Is.EqualTo(new Card(Suit.Spades, Rank.King)));
+            }
+
+            [Test]
+            public void Pile_CanRemoveCard_EmptyPile_ShouldReturnFalse()
+            {
+                // Arrange
+                var pile = new TableauPile();
+                var card = new Card(Suit.Spades, Rank.Ace);
+
+                // Act
+                var result = pile.CanRemoveCard(card);
+
+                // Assert
+                Assert.That(result, Is.False);
+            }
+
+            [Test]
+            public void Pile_CanRemoveCard_NonTopCard_ShouldReturnFalse()
+            {
+                // Arrange
+                var pile = new TableauPile(new List<Card>
+                {
+                    new Card(Suit.Spades, Rank.King),
+                    new Card(Suit.Hearts, Rank.Queen)
+                });
+                var card = new Card(Suit.Spades, Rank.King);
+
+                // Act
+                var result = pile.CanRemoveCard(card);
+
+                // Assert
+                Assert.That(result, Is.False);
+            }
+
+            [Test]
+            public void Pile_CanRemoveCard_TopCard_ShouldReturnTrue()
+            {
+                // Arrange
+                var pile = new TableauPile(new List<Card>
+                {
+                    new Card(Suit.Spades, Rank.King),
+                    new Card(Suit.Hearts, Rank.Queen)
+                });
+                var card = new Card(Suit.Hearts, Rank.Queen);
+
+                // Act
+                var result = pile.CanRemoveCard(card);
+
+                // Assert
+                Assert.That(result, Is.True);
+            }
         }
 
 
