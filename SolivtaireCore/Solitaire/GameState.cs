@@ -2,6 +2,7 @@
 
 public class GameState
 {
+    public readonly int CardsPerCycle;
     public List<FoundationPile> FoundationPiles { get; } = new();
     public List<TableauPile> TableauPiles { get; } = new();
     public StockPile StockPile { get; } = new();
@@ -9,7 +10,7 @@ public class GameState
 
     public bool IsGameWon => FoundationPiles.All(pile => pile.Count == 13);
 
-    public GameState()
+    public GameState(int cardsPerCycle = 3)
     {
         for (int i = 0; i < 4; i++)
         {
@@ -19,6 +20,8 @@ public class GameState
         {
             TableauPiles.Add(new TableauPile());
         }
+
+        CardsPerCycle = cardsPerCycle;
     }
 
     public void Reset()
@@ -51,12 +54,30 @@ public class GameState
         {
             // cards.addrange here instead of add range so we do not trigger the validity check on deal
             TableauPiles[i].Cards.AddRange(tableauCards[i]);
-            TableauPiles[i].TopCard.IsFaceUp = true;
+            TableauPiles[i].Cards[^1].IsFaceUp = true; // flip the last card face up
         }
 
         while (deck.Cards.Count > 0)
         {
             StockPile.AddCard(deck.DrawCard());
+        }
+    }
+
+    /// <summary>
+    /// Moves cards from Stock to Waste pile. Moves CardsPerCycle or all remaining cards, whichever is less.
+    /// </summary>
+    public IMove CycleMove => new MultiCardMove(StockPile, WastePile,
+        StockPile.Cards.TakeLast(Math.Min(CardsPerCycle, StockPile.Count)).Reverse().ToList());
+
+    public void MoveCard(IMove move)
+    {
+        if (move.IsValid(this))
+        {
+            move.Execute(this);
+        }
+        else
+        {
+            throw new InvalidOperationException("Invalid move");
         }
     }
 }

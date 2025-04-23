@@ -83,4 +83,64 @@ public class GameStateTests
         }
         Assert.That(gameState.StockPile.Cards.Count, Is.EqualTo(52 - 28)); // 52 cards minus 28 dealt to tableau  
     }
+
+    [Test]
+    public void GameState_CycleMove_StockToWaste_ShouldMoveCorrectNumberOfCards()
+    {
+        // Arrange  
+        var gameState = new GameState(); // Set CardsPerCycle to 3  
+        var stockCards = new List<Card>
+       {
+           new Card(Suit.Hearts, Rank.Ace),
+           new Card(Suit.Spades, Rank.Two),
+           new Card(Suit.Diamonds, Rank.Three),
+           new Card(Suit.Clubs, Rank.Four)
+       };
+        gameState.StockPile.AddCards(stockCards);
+
+        // Act  
+        var move = gameState.CycleMove;
+        gameState.MoveCard(move);
+
+        // Assert  
+        Assert.That(gameState.StockPile.Cards.Count, Is.EqualTo(1));
+        Assert.That(gameState.WastePile.Cards.Count, Is.EqualTo(3));
+        Assert.That(gameState.WastePile.Cards, Is.EquivalentTo(stockCards.TakeLast(3)));
+    }
+
+    [Test]
+    public void GameState_CycleMove_StockToWaste_LessThanCardsPerCycle_ShouldMoveAllRemainingCards()
+    {
+        // Arrange  
+        var gameState = new GameState(5); // Set CardsPerCycle to 5  
+        var stockCards = new List<Card>
+       {
+           new Card(Suit.Hearts, Rank.Ace),
+           new Card(Suit.Spades, Rank.Two),
+           new Card(Suit.Diamonds, Rank.Three)
+       };
+        gameState.StockPile.AddCards(stockCards);
+
+        // Act  
+        var move = gameState.CycleMove;
+        gameState.MoveCard(move);
+
+        // Assert  
+        Assert.That(gameState.StockPile.Cards.Count, Is.EqualTo(0));
+        Assert.That(gameState.WastePile.Cards.Count, Is.EqualTo(3));
+        Assert.That(gameState.WastePile.Cards, Is.EquivalentTo(stockCards));
+    }
+
+    [Test]
+    public void GameState_CycleMove_EmptyStock_ShouldNotMoveCards()
+    {
+        // Arrange  
+        var gameState = new GameState(3);
+
+        // Act  
+        var move = gameState.CycleMove;
+
+        // Assert  
+        Assert.That(() => gameState.MoveCard(move), Throws.InvalidOperationException);
+    }
 }

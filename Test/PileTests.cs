@@ -314,6 +314,89 @@ namespace Test
                 // Act & Assert  
                 Assert.That(() => pile.AddCards(cards), Throws.InvalidOperationException);
             }
+
+            [Test]
+            public void IsValidCardSet_EmptyList_ShouldReturnFalse()
+            {
+                // Arrange  
+                var cards = new List<Card>();
+
+                // Act  
+                var result = TableauPile.IsValidCardSet(cards);
+
+                // Assert  
+                Assert.That(result, Is.False);
+            }
+
+            [Test]
+            public void IsValidCardSet_SingleCard_ShouldReturnTrue()
+            {
+                // Arrange  
+                var cards = new List<Card>
+                {
+                    new Card(Suit.Spades, Rank.King)
+                };
+
+                // Act  
+                var result = TableauPile.IsValidCardSet(cards);
+
+                // Assert  
+                Assert.That(result, Is.True);
+            }
+
+            [Test]
+            public void IsValidCardSet_ValidSequence_ShouldReturnTrue()
+            {
+                // Arrange  
+                var cards = new List<Card>
+                {
+                    new Card(Suit.Spades, Rank.King),
+                    new Card(Suit.Hearts, Rank.Queen),
+                    new Card(Suit.Spades, Rank.Jack)
+                };
+
+                // Act  
+                var result = TableauPile.IsValidCardSet(cards);
+
+                // Assert  
+                Assert.That(result, Is.True);
+            }
+
+            [Test]
+            public void IsValidCardSet_InvalidColorSequence_ShouldReturnFalse()
+            {
+                // Arrange  
+                var cards = new List<Card>
+                {
+                    new Card(Suit.Spades, Rank.King),
+                    new Card(Suit.Clubs, Rank.Queen),
+                    new Card(Suit.Spades, Rank.Jack)
+                };
+
+                // Act  
+                var result = TableauPile.IsValidCardSet(cards);
+
+                // Assert  
+                Assert.That(result, Is.False);
+            }
+
+            [Test]
+            public void IsValidCardSet_InvalidRankSequence_ShouldReturnFalse()
+            {
+                // Arrange  
+                var cards = new List<Card>
+                {
+                    new Card(Suit.Spades, Rank.King),
+                    new Card(Suit.Hearts, Rank.Jack),
+                    new Card(Suit.Spades, Rank.Ten)
+                };
+
+                // Act  
+                var result = TableauPile.IsValidCardSet(cards);
+
+                // Assert  
+                Assert.That(result, Is.False);
+            }
         }
 
         [TestFixture]

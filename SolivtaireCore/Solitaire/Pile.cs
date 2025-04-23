@@ -65,6 +65,7 @@ public abstract class Pile
             throw new InvalidOperationException($"Cannot remove {card} from this pile.");
         Cards.Remove(card);
     }
+
 }
 
 /// <summary>
@@ -95,6 +96,46 @@ public class TableauPile(IEnumerable<Card>? initialCards = null) : Pile(initialC
         if (IsEmpty)
             return card.Rank == Rank.King;
         return card.Color != TopCard.Color && card.Rank == TopCard.Rank - 1;
+    }
+
+    public bool CanAddCards(List<Card> cards)
+    {
+        // TODO: Indexes may be backwards, wait until implementation. 
+        // if the pile is empty, the top card to be added must be a king
+        if (IsEmpty && cards[0].Rank != Rank.King)
+            return false;
+
+        // if the card set is not alternating color and descending rank, do not add
+        if (!IsValidCardSet(cards))
+            return false;
+
+        // if the bottom card to add is greater than the top card, do not add
+        if (cards[0].Rank > TopCard.Rank)
+            return false;
+
+        // if the top card is not the same color as the bottom card, do not add
+        if (cards[0].Color == TopCard.Color)
+            return false;
+
+        return true;
+    }
+
+    /// <summary>
+    /// Determines if a valid set of cards can be played on this pile. 
+    /// </summary>
+    /// <param name="cards"></param>
+    /// <returns></returns>
+    public static bool IsValidCardSet(List<Card> cards)
+    {
+        if (!cards.Any()) return false;
+        if (cards.Count == 1) return true;
+
+        for (int i = 1; i < cards.Count; i++)
+        {
+            if (cards[i].Color == cards[i - 1].Color || cards[i].Rank != cards[i - 1].Rank - 1)
+                return false;
+        }
+        return true;
     }
 }
 
