@@ -2,7 +2,9 @@
 
 public class GameState
 {
+    private static readonly SolitaireMoveGenerator MoveGenerator = new();
     public readonly int CardsPerCycle;
+
     public List<FoundationPile> FoundationPiles { get; } = new();
     public List<TableauPile> TableauPiles { get; } = new();
     public StockPile StockPile { get; } = new();
@@ -68,6 +70,11 @@ public class GameState
     /// </summary>
     public IMove CycleMove => new MultiCardMove(StockPile, WastePile,
         StockPile.Cards.TakeLast(Math.Min(CardsPerCycle, StockPile.Count)).ToList());
+
+    public IEnumerable<IMove> GetLegalMoves()
+    {
+        return MoveGenerator.GenerateMoves(this);
+    }
 
     public void MoveCard(IMove move)
     {
