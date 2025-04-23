@@ -1,6 +1,6 @@
 ﻿using SolvitaireCore;
 
-namespace Test;
+namespace Test.Solitaire;
 
 [TestFixture]
 public class SuitExtensionsTests

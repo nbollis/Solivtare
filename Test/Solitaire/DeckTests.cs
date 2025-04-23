@@ -1,7 +1,6 @@
 using SolvitaireCore;
-using NUnit.Framework;
 
-namespace Test;
+namespace Test.Solitaire;
 
 [TestFixture]
 public class DeckTests
