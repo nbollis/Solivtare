@@ -1,4 +1,4 @@
-﻿namespace SolivtareCore;
+﻿namespace SolivtaireCore;
 
 public enum Rank
 {

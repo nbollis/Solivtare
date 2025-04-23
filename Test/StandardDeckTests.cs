@@ -1,4 +1,4 @@
-using SolivtareCore;
+using SolivtaireCore;
 
 namespace Test;
 
