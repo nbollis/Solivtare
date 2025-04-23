@@ -1,4 +1,4 @@
-﻿namespace SolivtaireCore;
+﻿namespace SolvitaireCore;
 public enum Suit
 {
     Hearts,

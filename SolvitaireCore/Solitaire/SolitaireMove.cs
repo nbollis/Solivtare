@@ -1,4 +1,4 @@
-﻿namespace SolivtaireCore;
+﻿namespace SolvitaireCore;
 
 public abstract class SolitaireMove(Pile fromPile, Pile toPile) : IMove
 {

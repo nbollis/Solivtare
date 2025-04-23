@@ -1,4 +1,4 @@
-using SolivtaireCore;
+using SolvitaireCore;
 
 namespace Test
 {

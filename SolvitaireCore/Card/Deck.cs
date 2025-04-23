@@ -1,4 +1,4 @@
-﻿namespace SolivtaireCore;
+﻿namespace SolvitaireCore;
 
 public abstract class Deck<TCard> where TCard : ICard
 {

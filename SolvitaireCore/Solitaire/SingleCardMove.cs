@@ -1,4 +1,4 @@
-﻿namespace SolivtaireCore;
+﻿namespace SolvitaireCore;
 
 /// <summary>
 /// A move of a single card from one pile to another made by a player.

@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SolivtaireCore\SolivtaireCore.csproj" />
+    <ProjectReference Include="..\SolivtaireCore\SolvitaireCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

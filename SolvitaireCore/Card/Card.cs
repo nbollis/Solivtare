@@ -1,4 +1,4 @@
-﻿namespace SolivtaireCore;
+﻿namespace SolvitaireCore;
 
 /// <summary>
 /// Represents a single card in a standard deck.

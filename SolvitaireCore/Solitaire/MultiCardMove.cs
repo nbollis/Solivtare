@@ -1,4 +1,4 @@
-﻿namespace SolivtaireCore;
+﻿namespace SolvitaireCore;
 
 public class MultiCardMove(Pile fromPile, Pile toPile, List<Card> cards) : SolitaireMove(fromPile, toPile), IMove
 {

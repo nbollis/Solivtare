@@ -1,4 +1,4 @@
-using SolivtaireCore;
+using SolvitaireCore;
 using NUnit.Framework;
 
 namespace Test;
