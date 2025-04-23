@@ -43,7 +43,7 @@ namespace Test
             public void Pile_RemoveCard_NonTopCard_ShouldThrowInvalidOperationException()
             {
                 // Arrange
-                var pile = new TableauPile(new List<Card>
+                var pile = new TableauPile(0, new List<Card>
                 {
                     new Card(Suit.Spades, Rank.King),
                     new Card(Suit.Hearts, Rank.Queen)
@@ -58,7 +58,7 @@ namespace Test
             public void Pile_RemoveCard_TopCard_ShouldRemoveCard()
             {
                 // Arrange
-                var pile = new TableauPile(new List<Card>
+                var pile = new TableauPile(0, new List<Card>
                 {
                     new Card(Suit.Spades, Rank.King),
                     new Card(Suit.Hearts, Rank.Queen)
@@ -91,7 +91,7 @@ namespace Test
             public void Pile_CanRemoveCard_NonTopCard_ShouldReturnFalse()
             {
                 // Arrange
-                var pile = new TableauPile(new List<Card>
+                var pile = new TableauPile(0, new List<Card>
                 {
                     new Card(Suit.Spades, Rank.King),
                     new Card(Suit.Hearts, Rank.Queen)
@@ -109,7 +109,7 @@ namespace Test
             public void Pile_CanRemoveCard_TopCard_ShouldReturnTrue()
             {
                 // Arrange
-                var pile = new TableauPile(new List<Card>
+                var pile = new TableauPile(0, new List<Card>
                 {
                     new Card(Suit.Spades, Rank.King),
                     new Card(Suit.Hearts, Rank.Queen)
@@ -247,7 +247,7 @@ namespace Test
             public void CanAddCard_NonEmptyPile_ShouldAllowOppositeColorAndLowerRank()
             {
                 // Arrange  
-                var pile = new TableauPile([new Card(Suit.Hearts, Rank.Queen)]);
+                var pile = new TableauPile(0, [new Card(Suit.Hearts, Rank.Queen)]);
                 var card = new Card(Suit.Spades, Rank.Jack);
 
                 // Act & Assert  
@@ -258,7 +258,7 @@ namespace Test
             public void CanAddCard_SameColor_ShouldNotAllowCard()
             {
                 // Arrange  
-                var pile = new TableauPile([new Card(Suit.Hearts, Rank.Queen)]);
+                var pile = new TableauPile(0, [new Card(Suit.Hearts, Rank.Queen)]);
                 var card = new Card(Suit.Diamonds, Rank.Jack);
 
                 // Act & Assert  

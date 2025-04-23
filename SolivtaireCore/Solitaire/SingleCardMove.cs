@@ -1,15 +1,23 @@
 ﻿namespace SolivtaireCore;
 
-/// <summary>
-/// A move of a single card from one pile to another made by a player.
-/// </summary>
-public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : IMove
+public abstract class SolitaireMove(Pile fromPile, Pile toPile) : IMove
 {
     public Pile FromPile { get; } = fromPile;
     public Pile ToPile { get; } = toPile;
+
+    public abstract bool IsValid(GameState state);
+    public abstract void Execute(GameState state);
+
+}
+
+/// <summary>
+/// A move of a single card from one pile to another made by a player.
+/// </summary>
+public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMove(fromPile, toPile), IMove
+{
     public Card Card { get; } = card;
 
-    public bool IsValid(GameState state)
+    public override bool IsValid(GameState state)
     {
         if (FromPile.IsEmpty || !FromPile.TopCard.Equals(Card))
             return false;
@@ -30,7 +38,7 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : IMove
         }
     }
 
-    public void Execute(GameState state)
+    public override void Execute(GameState state)
     {
         if (IsValid(state))
         {
@@ -42,15 +50,15 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : IMove
             throw new InvalidOperationException("Invalid move");
         }
     }
+
+    public override string ToString() => $"Move {Card} from {FromPile} to {ToPile}";
 }
 
-public class MultiCardMove(Pile fromPile, Pile toPile, List<Card> cards) : IMove
+public class MultiCardMove(Pile fromPile, Pile toPile, List<Card> cards) : SolitaireMove(fromPile, toPile), IMove
 {
-    public Pile FromPile { get; } = fromPile;
-    public Pile ToPile { get; } = toPile;
     public List<Card> Cards { get; } = cards;
 
-    public bool IsValid(GameState state)
+    public override bool IsValid(GameState state)
     {
         if (FromPile.IsEmpty || !Cards.All(card => FromPile.Cards.Contains(card)))
             return false;
@@ -73,7 +81,7 @@ public class MultiCardMove(Pile fromPile, Pile toPile, List<Card> cards) : IMove
         }
     }
 
-    public void Execute(GameState state)
+    public override void Execute(GameState state)
     {
         if (IsValid(state))
         {
@@ -111,4 +119,6 @@ public class MultiCardMove(Pile fromPile, Pile toPile, List<Card> cards) : IMove
             throw new InvalidOperationException("Invalid move");
         }
     }
+
+    public override string ToString() => $"Move {string.Join(',', Cards)} cards from {FromPile} to {ToPile}";
 }

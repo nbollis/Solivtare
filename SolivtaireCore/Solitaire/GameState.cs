@@ -18,7 +18,7 @@ public class GameState
         }
         for (int i = 0; i < 7; i++)
         {
-            TableauPiles.Add(new TableauPile());
+            TableauPiles.Add(new TableauPile(i));
         }
 
         CardsPerCycle = cardsPerCycle;

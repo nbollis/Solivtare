@@ -12,7 +12,7 @@ public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard
     public Color Color { get; init; } = suit.ToSuitColor();
     public bool IsFaceUp { get; set; } = isFaceUp;
 
-    public override string ToString() => $"{Rank} of {Suit}";
+    public override string ToString() => $"{Rank}{Suit.ToSuitCharacter()}";
 
     public bool Equals(ICard? other)
     {

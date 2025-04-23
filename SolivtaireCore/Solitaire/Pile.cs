@@ -1,4 +1,7 @@
-﻿namespace SolivtaireCore;
+﻿using System;
+using System.Reflection;
+
+namespace SolivtaireCore;
 
 /// <summary>
 /// An abstract stack of cards
@@ -83,14 +86,17 @@ public class FoundationPile(Suit suit, IEnumerable<Card>? initialCards = null) :
             return card.Rank == Rank.Ace && card.Suit == Suit;
         return card.Suit == Suit && card.Rank == TopCard.Rank + 1;
     }
+
+    public override string ToString() => $"Foundation[{Suit}]";
 }
 
 /// <summary>
 /// Pile of cards that can be played on (columns in solitaire).
 /// </summary>
 /// <param name="initialCards"></param>
-public class TableauPile(IEnumerable<Card>? initialCards = null) : Pile(initialCards)
+public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) : Pile(initialCards)
 {
+    public readonly int Index = index;
     public override bool CanAddCard(Card card)
     {
         if (IsEmpty)
@@ -137,6 +143,8 @@ public class TableauPile(IEnumerable<Card>? initialCards = null) : Pile(initialC
         }
         return true;
     }
+
+    public override string ToString() => $"Tableau[{Index}]";
 }
 
 /// <summary>
@@ -146,6 +154,7 @@ public class TableauPile(IEnumerable<Card>? initialCards = null) : Pile(initialC
 public class StockPile(IEnumerable<Card>? initialCards = null) : Pile(initialCards)
 {
     public override bool CanAddCard(Card card) => true; // Stock pile can accept any card
+    public override string ToString() => "Stock"; 
 }
 
 
@@ -156,4 +165,5 @@ public class StockPile(IEnumerable<Card>? initialCards = null) : Pile(initialCar
 public class WastePile(IEnumerable<Card>? initialCards = null) : Pile(initialCards)
 {
     public override bool CanAddCard(Card card) => true; // Waste pile can accept any card
+    public override string ToString() => "Waste";
 }
