@@ -18,7 +18,7 @@ public class MultiCardMove(Pile fromPile, Pile toPile, List<Card> cards) : Solit
                 return tableauPile.CanAddCards(Cards);
 
             case WastePile:
-                return FromPile is StockPile; 
+                return FromPile is StockPile;
 
             case StockPile: // Stock pile is only valid for a full waste refresh
                 return ToPile.Count == 0 && FromPile is WastePile waste && waste.Count == Cards.Count;
@@ -34,7 +34,7 @@ public class MultiCardMove(Pile fromPile, Pile toPile, List<Card> cards) : Solit
         {
             switch (ToPile)
             {
-                case TableauPile when FromPile is TableauPile fromTableau :
+                case TableauPile when FromPile is TableauPile fromTableau:
                     fromTableau.RemoveCards(cards);
                     ToPile.AddCards(cards);
                     break;

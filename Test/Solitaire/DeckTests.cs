@@ -40,6 +40,10 @@ public class DeckTests
         var cards = new List<TestCard>
        {
            new TestCard(Suit.Hearts, Rank.Ace),
+           new TestCard(Suit.Spades, Rank.Three),
+           new TestCard(Suit.Spades, Rank.Two),
+           new TestCard(Suit.Spades, Rank.Five),
+           new TestCard(Suit.Spades, Rank.Seven),
            new TestCard(Suit.Spades, Rank.King),
            new TestCard(Suit.Diamonds, Rank.Queen)
        };

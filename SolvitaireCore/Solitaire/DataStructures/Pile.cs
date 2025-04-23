@@ -3,7 +3,7 @@
 /// <summary>
 /// An abstract stack of cards
 /// </summary>
-public abstract class Pile 
+public abstract class Pile
 {
     /// <summary>
     /// Represents a pile of cards in a solitaire game

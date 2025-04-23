@@ -40,7 +40,7 @@ public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) 
     {
         if (!cards[^1].Equals(TopCard))
             throw new InvalidOperationException($"Cards to remove do not end with the tableau Top Card");
-        
+
         int startIndex = Cards.IndexOf(cards[0]);
         if (startIndex == -1)
             throw new InvalidOperationException($"First card to remove not in Tableau");
