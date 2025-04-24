@@ -1,6 +1,8 @@
-﻿namespace SolvitaireCore;
+﻿using System.Collections;
 
-public abstract class Deck<TCard> : ICloneable where TCard : ICard
+namespace SolvitaireCore;
+
+public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard> where TCard : ICard
 {
     protected Random Random { get; } = new Random();
     public List<TCard> Cards { get; private set; }
@@ -40,4 +42,14 @@ public abstract class Deck<TCard> : ICloneable where TCard : ICard
         clonedDeck.Cards = [..Cards];
         return clonedDeck;
     }
+
+    public TCard this[int index]
+    {
+        get => Cards[index];
+        set => Cards[index] = value;
+    }
+
+    public IEnumerator<TCard> GetEnumerator() => Cards.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

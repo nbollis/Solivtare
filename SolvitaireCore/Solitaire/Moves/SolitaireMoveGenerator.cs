@@ -56,9 +56,9 @@ public class SolitaireMoveGenerator : IMoveGenerator
             foreach (var targetTableau in state.TableauPiles)
             {
                 if (targetTableau.Index == tableau.Index) continue; // Skip the same tableau
-                if (targetTableau.CanAddCard(topCard))
+                if (targetTableau.CanAddCard(topCard!))
                 {
-                    validMoves.Add(new SingleCardMove(tableau, targetTableau, topCard));
+                    validMoves.Add(new SingleCardMove(tableau, targetTableau, topCard!));
                 }
             }
 
@@ -74,6 +74,7 @@ public class SolitaireMoveGenerator : IMoveGenerator
 
                 foreach (var targetTableau in state.TableauPiles)
                 {
+
                     if (targetTableau.Index == tableau.Index) continue; // Skip the same tableau
 
                     if (cardsToMove.Count == 1 && targetTableau.CanAddCard(cardsToMove[0]))

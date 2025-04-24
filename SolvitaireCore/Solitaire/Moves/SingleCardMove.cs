@@ -33,6 +33,13 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMo
         if (IsValid(state))
         {
             FromPile.RemoveCard(Card);
+            switch (FromPile)
+            {
+                case TableauPile:
+                    if (FromPile.TopCard != null) 
+                        FromPile.TopCard.IsFaceUp = true;
+                    break;
+            }
             ToPile.AddCard(Card);
         }
         else

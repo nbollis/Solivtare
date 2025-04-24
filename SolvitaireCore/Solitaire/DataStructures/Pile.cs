@@ -32,8 +32,8 @@ public abstract class Pile : INotifyPropertyChanged
 
     public int Count => Cards.Count;
     public bool IsEmpty => Count == 0;
-    public Card TopCard => Cards.LastOrDefault()!;
-    public Card BottomCard => Cards.FirstOrDefault()!;
+    public Card? TopCard => Cards.LastOrDefault();
+    public Card? BottomCard => Cards.FirstOrDefault();
 
     protected Pile(IEnumerable<Card>? initialCards = null)
     {

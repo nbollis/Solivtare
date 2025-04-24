@@ -56,4 +56,21 @@ public class DeckTests
         Assert.That(deck.Cards, Is.Not.EqualTo(cards));
         Assert.That(deck.Cards, Is.EquivalentTo(cards));
     }
+
+    [Test]
+    public void Deck_Clone_IsSame()
+    {
+        var deck = new StandardDeck();
+        deck.Shuffle();
+
+        var clone = deck.Clone() as StandardDeck;
+
+        Assert.That(clone, Is.Not.Null);
+        Assert.That(clone.Cards.Count, Is.EqualTo(deck.Cards.Count));
+
+        for (int i = 0; i < deck.Cards.Count; i++)
+        {
+            Assert.That(deck[i], Is.EqualTo(clone[i]));
+        }
+    }
 }

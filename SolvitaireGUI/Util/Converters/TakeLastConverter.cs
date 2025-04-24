@@ -1,14 +1,18 @@
 ﻿using System.Globalization;
-using System.Windows.Data;
+using SolvitaireCore;
 
 namespace SolvitaireGUI;
 
-public class FanOffsetConverter : BaseValueConverter<FanOffsetConverter>
+public class TakeLastConverter : BaseValueConverter<TakeLastConverter>
 {
     public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        int index = (int)value;
-        return index * 20; // 25 pixels vertical offset per card
+        if (value is IEnumerable<Card> cards && int.TryParse(parameter?.ToString(), out int count))
+        {
+            return cards.Reverse().Take(count).Reverse().ToList();
+        }
+
+        return value;
     }
 
     public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>

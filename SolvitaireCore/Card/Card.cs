@@ -1,4 +1,6 @@
-﻿namespace SolvitaireCore;
+﻿using System.ComponentModel;
+
+namespace SolvitaireCore;
 
 /// <summary>
 /// Represents a single card in a standard deck.
@@ -7,10 +9,23 @@
 /// <param name="rank"></param>
 public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public Suit Suit { get; } = suit;
     public Rank Rank { get; } = rank;
     public Color Color { get; } = suit.ToSuitColor();
-    public bool IsFaceUp { get; set; } = isFaceUp;
+
+    private bool _isFaceUp = isFaceUp;
+    public bool IsFaceUp
+    {
+        get => _isFaceUp;
+        set
+        {
+            if (_isFaceUp == value) return;
+            _isFaceUp = value;
+            OnPropertyChanged(nameof(IsFaceUp));
+        }
+    }
 
     public override string ToString() => $"{Rank}{Suit.ToSuitCharacter()}";
 
@@ -34,4 +49,6 @@ public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard
     {
         return HashCode.Combine((int)Suit, (int)Rank);
     }
+    private void OnPropertyChanged(string propertyName) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

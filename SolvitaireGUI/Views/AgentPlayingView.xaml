@@ -10,8 +10,8 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
@@ -22,6 +22,14 @@
                         Command="{Binding ResetGameCommand}" />
                 <Button Content="New Game" 
                         Command="{Binding NewGameCommand}" />
+
+                <ListView x:Name="LegalMovesListView" VerticalAlignment="Stretch"  
+                         ItemsSource="{Binding LegalMoves}"  
+                         SelectedItem="{Binding SelectedMove, Mode=TwoWay}"/>  
+                <Button Content="Make Specific Move"  
+                       Command="{Binding MakeSpecificMoveCommand}"  
+                       CommandParameter="{Binding SelectedItem, ElementName=LegalMovesListView}"/>
+
             </StackPanel>
         </Grid>
 

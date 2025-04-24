@@ -11,19 +11,18 @@ public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) 
     {
         if (IsEmpty)
             return card.Rank == Rank.King;
-        return card.Color != TopCard.Color && card.Rank == TopCard.Rank - 1;
+        return card.Color != TopCard!.Color && card.Rank == TopCard!.Rank - 1;
     }
 
     public bool CanAddCards(List<Card> cards)
     {
-        // TODO: Indexes may be backwards, wait until implementation. 
-        // if the pile is empty, the top card to be added must be a king
-        if (IsEmpty && cards[0].Rank != Rank.King)
-            return false;
-
         // if the card set is not alternating color and descending rank, do not add
         if (!IsValidCardSet(cards))
             return false;
+
+        // if the pile is empty, the top card to be added must be a king
+        if (IsEmpty)
+            return cards[^1].Rank == Rank.King;
 
         // if the bottom card to add is greater than the top card, do not add
         if (cards[0].Rank > TopCard.Rank)
@@ -33,7 +32,10 @@ public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) 
         if (cards[0].Color == TopCard.Color)
             return false;
 
-        return true;
+        if (cards[0].Rank == TopCard.Rank - 1)
+            return true;
+
+        return false;
     }
 
     public bool RemoveCards(List<Card> cards)
@@ -75,5 +77,5 @@ public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) 
         return true;
     }
 
-    public override string ToString() => $"Tableau[{Index}]";
+    public override string ToString() => $"Tableau[{Index}]-{TopCard}";
 }

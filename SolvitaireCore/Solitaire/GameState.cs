@@ -6,8 +6,10 @@ namespace SolvitaireCore;
 
 public class GameState : INotifyPropertyChanged
 {
-    private static readonly SolitaireMoveGenerator MoveGenerator = new();
+    // This is the number of cards to move from stock to waste when cycling
     public readonly int CardsPerCycle;
+
+    #region Piles
 
     private List<TableauPile> _tableauPiles;
     public List<TableauPile> TableauPiles
@@ -53,6 +55,8 @@ public class GameState : INotifyPropertyChanged
         }
     }
 
+    #endregion
+
     public bool IsGameWon => FoundationPiles.All(pile => pile.Count == 13);
 
     public GameState(int cardsPerCycle = 3)
@@ -74,22 +78,8 @@ public class GameState : INotifyPropertyChanged
         CardsPerCycle = cardsPerCycle;
     }
 
-    public void Reset()
-    {
-        foreach (var pile in FoundationPiles)
-        {
-            pile.Cards.Clear();
-        }
-        foreach (var pile in TableauPiles)
-        {
-            pile.Cards.Clear();
-        }
-        StockPile.Cards.Clear();
-        WastePile.Cards.Clear();
-
-        RefreshUi();
-    }
-
+    #region Set Up GameState
+    
     public void DealCards(StandardDeck deck)
     {
         Card[][] tableauCards = new Card[TableauPiles.Count][];
@@ -116,12 +106,33 @@ public class GameState : INotifyPropertyChanged
         RefreshUi();
     }
 
+    public void Reset()
+    {
+        foreach (var pile in FoundationPiles)
+        {
+            pile.Cards.Clear();
+        }
+        foreach (var pile in TableauPiles)
+        {
+            pile.Cards.Clear();
+        }
+        StockPile.Cards.Clear();
+        WastePile.Cards.Clear();
+
+        RefreshUi();
+    }
+
+    #endregion
+
+    #region Move Making
+
+    private static readonly SolitaireMoveGenerator MoveGenerator = new();
     /// <summary>
     /// Moves cards from Stock to Waste pile. Moves CardsPerCycle or all remaining cards, whichever is less.
     /// </summary>
     public IMove CycleMove => new MultiCardMove(StockPile, WastePile,
         StockPile.Cards.TakeLast(Math.Min(CardsPerCycle, StockPile.Count)).ToList());
-
+    
     public IEnumerable<IMove> GetLegalMoves()
     {
         return MoveGenerator.GenerateMoves(this);
@@ -139,6 +150,13 @@ public class GameState : INotifyPropertyChanged
         }
         RefreshUi();
     }
+
+    #endregion
+
+
+    
+
+    
 
     #region UI Interaction
 

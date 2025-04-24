@@ -3,7 +3,7 @@
 public interface IAgent
 {
     string Name { get; }
-    public IMove GetNextMove(GameState state);
+    public IMove GetNextMove(IEnumerable<IMove> legalMoves);
 }
 
 public class RandomAgent : IAgent
@@ -12,9 +12,9 @@ public class RandomAgent : IAgent
     public string Name => "Random Agent";
 
 
-    public IMove GetNextMove(GameState state)
+    public IMove GetNextMove(IEnumerable<IMove> legalMoves)
     {
-        var moves = state.GetLegalMoves().ToList();
+        var moves = legalMoves.ToList();
         if (moves.Count == 0) return null;
         return moves[_rng.Next(moves.Count)];
     }

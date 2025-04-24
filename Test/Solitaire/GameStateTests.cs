@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using SolvitaireCore;
 
 namespace Test.Solitaire;
@@ -142,5 +143,30 @@ public class GameStateTests
 
         // Assert  
         Assert.That(() => gameState.MoveCard(move), Throws.InvalidOperationException);
+    }
+
+    [Test]
+    public void GameState_GenerateLegalMoves_AreAllLegal()
+    {
+        var deck = new StandardDeck();
+        for (int j = 0; j < 20; j++)
+        {
+            deck.Shuffle();
+
+            var clone = deck.Clone() as StandardDeck;
+            var gameState = new GameState();
+            gameState.DealCards(clone!);
+            var moves = gameState.GetLegalMoves().ToList();
+            GameState[] gameStates = new GameState[moves.Count];
+            for (int i = 0; i < moves.Count; i++)
+            {
+                gameStates[i] = new GameState();
+                gameStates[i].DealCards(deck.Clone() as StandardDeck);
+
+                Assert.That(moves[i].IsValid(gameStates[i]), Is.True);
+                gameStates[i].MoveCard(moves[i]);
+            }
+        }
+        
     }
 }

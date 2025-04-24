@@ -2,6 +2,7 @@
 
 public class SolitaireGameEngine : IGameEngine
 {
+    private IMoveGenerator _moveGenerator;
     private GameState _state;
     private StandardDeck _deck;
 
@@ -9,6 +10,7 @@ public class SolitaireGameEngine : IGameEngine
     {
         _state = new GameState();
         _deck = new StandardDeck();
+        _moveGenerator = new SolitaireMoveGenerator();
     }
 
     public void PlayGame(IAgent agent)
@@ -17,7 +19,7 @@ public class SolitaireGameEngine : IGameEngine
         _state.DealCards(_deck);
         while (!_state.IsGameWon)
         {
-            IMove move = agent.GetNextMove(_state);
+            IMove move = agent.GetNextMove(_moveGenerator.GenerateMoves(_state));
             if (move.IsValid(_state))
             {
                 move.Execute(_state);
