@@ -1,67 +1,26 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-
 namespace SolvitaireCore;
 
-public class GameState : INotifyPropertyChanged
+public class SolitaireGameState : IGameState<ISolitaireMove>
 {
     // This is the number of cards to move from stock to waste when cycling
     public readonly int CardsPerCycle;
 
-    #region Piles
 
-    private List<TableauPile> _tableauPiles;
-    public List<TableauPile> TableauPiles
-    {
-        get => _tableauPiles;
-        set
-        {
-            _tableauPiles = value;
-            OnPropertyChanged();
-        }
-    }
+    public List<TableauPile> TableauPiles { get; set; }
 
-    private List<FoundationPile> _foundationPiles;
-    public List<FoundationPile> FoundationPiles
-    {
-        get => _foundationPiles;
-        set
-        {
-            _foundationPiles = value;
-            OnPropertyChanged();
-        }
-    }
+    public List<FoundationPile> FoundationPiles { get; set; }
 
-    private StockPile _stockPile;
-    public StockPile StockPile
-    {
-        get => _stockPile;
-        set
-        {
-            _stockPile = value;
-            OnPropertyChanged();
-        }
-    }
+    public StockPile StockPile { get; set; }
 
-    private WastePile _wastePile;
-    public WastePile WastePile
-    {
-        get => _wastePile;
-        set
-        {
-            _wastePile = value;
-            OnPropertyChanged();
-        }
-    }
-
-    #endregion
+    public WastePile WastePile { get; set; }
 
     // TODO: Find more lose conditions: Those that involve an infinite loop
     public bool IsGameLost => !GetLegalMoves().Any();
     public bool IsGameWon => FoundationPiles.All(pile => pile.Count == 13);
 
-    public GameState(int cardsPerCycle = 3)
+
+    public SolitaireGameState(int cardsPerCycle = 3)
     {
         StockPile = new StockPile();
         WastePile = new WastePile();
@@ -80,7 +39,7 @@ public class GameState : INotifyPropertyChanged
         CardsPerCycle = cardsPerCycle;
     }
 
-    #region Set Up GameState
+    #region Set Up SolitaireGameState
     
     public void DealCards(StandardDeck deck)
     {
@@ -104,8 +63,6 @@ public class GameState : INotifyPropertyChanged
         {
             StockPile.AddCard(deck.DrawCard() as Card);
         }
-
-        RefreshUi();
     }
 
     public void Reset()
@@ -120,8 +77,6 @@ public class GameState : INotifyPropertyChanged
         }
         StockPile.Cards.Clear();
         WastePile.Cards.Clear();
-
-        RefreshUi();
     }
 
     #endregion
@@ -132,15 +87,15 @@ public class GameState : INotifyPropertyChanged
     /// <summary>
     /// Moves cards from Stock to Waste pile. Moves CardsPerCycle or all remaining cards, whichever is less.
     /// </summary>
-    public IMove CycleMove => new MultiCardMove(StockPile, WastePile,
+    public ISolitaireMove CycleMove => new MultiCardMove(StockPile, WastePile,
         StockPile.Cards.TakeLast(Math.Min(CardsPerCycle, StockPile.Count)).ToList());
     
-    public IEnumerable<IMove> GetLegalMoves()
+    public IEnumerable<ISolitaireMove> GetLegalMoves()
     {
         return MoveGenerator.GenerateMoves(this);
     }
 
-    public void MoveCard(IMove move)
+    public void ExecuteMove(ISolitaireMove move)
     {
         if (move.IsValid(this))
         {
@@ -150,13 +105,12 @@ public class GameState : INotifyPropertyChanged
         {
             throw new InvalidOperationException("Invalid move");
         }
-        RefreshUi();
     }
 
     #endregion
 
 
-    public bool Equals(GameState? other)
+    public bool Equals(SolitaireGameState? other)
     {
         if (other == null) return false;
         if (ReferenceEquals(this, other)) return true;
@@ -189,21 +143,4 @@ public class GameState : INotifyPropertyChanged
             return false;
         return true;
     }
-
-
-    #region UI Interaction
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged([CallerMemberName] string propertyName = null!) =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-    public void RefreshUi()
-    {
-        OnPropertyChanged(nameof(StockPile));
-        OnPropertyChanged(nameof(WastePile));
-        OnPropertyChanged(nameof(TableauPiles));
-        OnPropertyChanged(nameof(FoundationPiles));
-    }
-
-    #endregion
 }

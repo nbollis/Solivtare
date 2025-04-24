@@ -7,7 +7,7 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMo
 {
     public Card Card { get; } = card;
 
-    public override bool IsValid(GameState state)
+    public override bool IsValid(IGameState state)
     {
         if (FromPile.IsEmpty || !FromPile.TopCard.Equals(Card))
             return false;
@@ -28,7 +28,7 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMo
         }
     }
 
-    public override void Execute(GameState state)
+    public override void Execute(IGameState state)
     {
         if (IsValid(state))
         {

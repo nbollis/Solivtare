@@ -4,7 +4,7 @@ public class MultiCardMove(Pile fromPile, Pile toPile, IEnumerable<Card> cards) 
 {
     public List<Card> Cards { get; } = cards.ToList();
 
-    public override bool IsValid(GameState state)
+    public override bool IsValid(IGameState state)
     {
         if (FromPile.IsEmpty || !Cards.All(card => FromPile.Cards.Contains(card)))
             return false;
@@ -28,7 +28,7 @@ public class MultiCardMove(Pile fromPile, Pile toPile, IEnumerable<Card> cards) 
         }
     }
 
-    public override void Execute(GameState state)
+    public override void Execute(IGameState state)
     {
         if (IsValid(state))
         {

@@ -15,7 +15,7 @@ public class SingleCardMoveTests
         var move = new SingleCardMove(tableauPile, foundationPile, card);
 
         // Act
-        var result = move.IsValid(new GameState());
+        var result = move.IsValid(new SolitaireGameState());
 
         // Assert
         Assert.That(result, Is.True);
@@ -31,7 +31,7 @@ public class SingleCardMoveTests
         var move = new SingleCardMove(tableauPile, foundationPile, card);
 
         // Act
-        var result = move.IsValid(new GameState());
+        var result = move.IsValid(new SolitaireGameState());
 
         // Assert
         Assert.That(result, Is.False);
@@ -47,7 +47,7 @@ public class SingleCardMoveTests
         var move = new SingleCardMove(from, to, card);
 
         // Act
-        var result = move.IsValid(new GameState());
+        var result = move.IsValid(new SolitaireGameState());
 
         // Assert
         Assert.That(result, Is.True);
@@ -63,7 +63,7 @@ public class SingleCardMoveTests
         var move = new SingleCardMove(from, to, card);
 
         // Act
-        var result = move.IsValid(new GameState());
+        var result = move.IsValid(new SolitaireGameState());
 
         // Assert
         Assert.That(result, Is.False);
@@ -79,7 +79,7 @@ public class SingleCardMoveTests
         var move = new SingleCardMove(stockPile, wastePile, card);
 
         // Act
-        var result = move.IsValid(new GameState());
+        var result = move.IsValid(new SolitaireGameState());
 
         // Assert
         Assert.That(result, Is.True);
@@ -95,7 +95,7 @@ public class SingleCardMoveTests
         var move = new SingleCardMove(tableauPile, stockPile, card);
 
         // Act
-        var result = move.IsValid(new GameState());
+        var result = move.IsValid(new SolitaireGameState());
 
         // Assert
         Assert.That(result, Is.False);
@@ -111,7 +111,7 @@ public class SingleCardMoveTests
         var move = new SingleCardMove(tableauPile, foundationPile, card);
 
         // Act
-        move.Execute(new GameState());
+        move.Execute(new SolitaireGameState());
 
         // Assert
         Assert.That(tableauPile.Cards.Count, Is.EqualTo(0));
@@ -128,7 +128,7 @@ public class SingleCardMoveTests
         var move = new SingleCardMove(tableauPile, foundationPile, card);
 
         // Act & Assert
-        Assert.That(() => move.Execute(new GameState()), Throws.InvalidOperationException);
+        Assert.That(() => move.Execute(new SolitaireGameState()), Throws.InvalidOperationException);
     }
 
     [Test]

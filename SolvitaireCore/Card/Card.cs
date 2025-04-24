@@ -1,35 +1,16 @@
 ﻿using System.ComponentModel;
-using System.Text.Json.Serialization;
 
 namespace SolvitaireCore;
 
 /// <summary>
-/// Represents a single card in a standard deck.
+/// Represents a minimalized card object for game logic.
 /// </summary>
-/// <param name="suit"></param>
-/// <param name="rank"></param>
-public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard, INotifyPropertyChanged
+public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    public Suit Suit { get; } = suit;
-    public Rank Rank { get; } = rank;
-
-    [JsonIgnore]
+    public virtual Suit Suit { get; } = suit;
+    public virtual Rank Rank { get; } = rank;
     public Color Color { get; } = suit.ToSuitColor();
-
-    private bool _isFaceUp = isFaceUp;
-    [JsonIgnore]
-    public bool IsFaceUp
-    {
-        get => _isFaceUp;
-        set
-        {
-            if (_isFaceUp == value) return;
-            _isFaceUp = value;
-            OnPropertyChanged(nameof(IsFaceUp));
-        }
-    }
+    public virtual bool IsFaceUp { get; set; } = isFaceUp;
 
     public override string ToString() => $"{Rank}{Suit.ToSuitCharacter()}";
 
@@ -37,7 +18,6 @@ public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard, INotifyP
     {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
-        if (other.GetType() != GetType()) return false;
         return Suit == other.Suit && Rank == other.Rank;
     }
 
@@ -46,13 +26,31 @@ public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard, INotifyP
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != GetType()) return false;
-        return Equals((Card)obj);
+        return Equals((ICard)obj);
     }
 
-    public override int GetHashCode()
+    public override int GetHashCode() => HashCode.Combine((int)Suit, (int)Rank);
+}
+
+public class ObservableCard(Suit suit, Rank rank, bool isFaceUp = false)
+    : Card(suit, rank, isFaceUp), INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged(string propertyName)
     {
-        return HashCode.Combine((int)Suit, (int)Rank);
-    }
-    private void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public override bool IsFaceUp
+    {
+        get => base.IsFaceUp;
+        set
+        {
+            if (base.IsFaceUp != value)
+            {
+                base.IsFaceUp = value;
+                OnPropertyChanged(nameof(IsFaceUp));
+            }
+        }
+    } 
 }

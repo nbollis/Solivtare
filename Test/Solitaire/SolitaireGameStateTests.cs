@@ -4,13 +4,13 @@ using SolvitaireCore;
 namespace Test.Solitaire;
 
 [TestFixture]
-public class GameStateTests
+public class SolitaireGameStateTests
 {
     [Test]
     public void GameState_IsGameWon_AllFoundationPilesComplete_ShouldReturnTrue()
     {
         // Arrange  
-        var gameState = new GameState();
+        var gameState = new SolitaireGameState();
         foreach (var pile in gameState.FoundationPiles)
         {
             for (int i = 1; i <= 13; i++)
@@ -30,7 +30,7 @@ public class GameStateTests
     public void GameState_IsGameWon_NotAllFoundationPilesComplete_ShouldReturnFalse()
     {
         // Arrange  
-        var gameState = new GameState();
+        var gameState = new SolitaireGameState();
         foreach (var pile in gameState.FoundationPiles)
         {
             for (int i = 1; i <= 12; i++)
@@ -50,7 +50,7 @@ public class GameStateTests
     public void GameState_Reset_ShouldClearAllPiles()
     {
         // Arrange  
-        var gameState = new GameState();
+        var gameState = new SolitaireGameState();
         gameState.FoundationPiles[0].Cards.Add(new Card(Suit.Hearts, Rank.Ace));
         gameState.TableauPiles[0].Cards.Add(new Card(Suit.Spades, Rank.King));
         gameState.StockPile.Cards.Add(new Card(Suit.Clubs, Rank.Queen));
@@ -70,7 +70,7 @@ public class GameStateTests
     public void GameState_DealCards_ShouldDistributeCardsCorrectly()
     {
         // Arrange  
-        var gameState = new GameState();
+        var gameState = new SolitaireGameState();
         var deck = new StandardDeck();
 
         // Act  
@@ -89,7 +89,7 @@ public class GameStateTests
     public void GameState_CycleMove_StockToWaste_ShouldMoveCorrectNumberOfCards()
     {
         // Arrange  
-        var gameState = new GameState(); // Set CardsPerCycle to 3  
+        var gameState = new SolitaireGameState(); // Set CardsPerCycle to 3  
         var stockCards = new List<Card>
         {
            new Card(Suit.Hearts, Rank.Ace),
@@ -101,7 +101,7 @@ public class GameStateTests
 
         // Act  
         var move = gameState.CycleMove;
-        gameState.MoveCard(move);
+        gameState.ExecuteMove(move);
 
         // Assert  
         Assert.That(gameState.StockPile.Cards.Count, Is.EqualTo(1));
@@ -113,7 +113,7 @@ public class GameStateTests
     public void GameState_CycleMove_StockToWaste_LessThanCardsPerCycle_ShouldMoveAllRemainingCards()
     {
         // Arrange  
-        var gameState = new GameState(5); // Set CardsPerCycle to 5  
+        var gameState = new SolitaireGameState(5); // Set CardsPerCycle to 5  
         var stockCards = new List<Card>
        {
            new Card(Suit.Hearts, Rank.Ace),
@@ -124,7 +124,7 @@ public class GameStateTests
 
         // Act  
         var move = gameState.CycleMove;
-        gameState.MoveCard(move);
+        gameState.ExecuteMove(move);
 
         // Assert  
         Assert.That(gameState.StockPile.Cards.Count, Is.EqualTo(0));
@@ -136,13 +136,13 @@ public class GameStateTests
     public void GameState_CycleMove_EmptyStock_ShouldNotMoveCards()
     {
         // Arrange  
-        var gameState = new GameState(3);
+        var gameState = new SolitaireGameState(3);
 
         // Act  
         var move = gameState.CycleMove;
 
         // Assert  
-        Assert.That(() => gameState.MoveCard(move), Throws.InvalidOperationException);
+        Assert.That(() => gameState.ExecuteMove(move), Throws.InvalidOperationException);
     }
 
     [Test]
@@ -155,18 +155,18 @@ public class GameStateTests
 
             var clone = referenceDeck.Clone() as StandardDeck;
 
-            var gameState = new GameState();
+            var gameState = new SolitaireGameState();
             gameState.DealCards(clone!);
             var moves = gameState.GetLegalMoves().ToList();
 
-            GameState[] gameStates = new GameState[moves.Count];
+            SolitaireGameState[] gameStates = new SolitaireGameState[moves.Count];
             for (int i = 0; i < moves.Count; i++)
             {
-                gameStates[i] = new GameState();
+                gameStates[i] = new SolitaireGameState();
                 gameStates[i].DealCards(referenceDeck.Clone() as StandardDeck);
 
                 Assert.That(moves[i].IsValid(gameStates[i]), Is.True);
-                gameStates[i].MoveCard(moves[i]);
+                gameStates[i].ExecuteMove(moves[i]);
             }
         }
         
@@ -176,12 +176,12 @@ public class GameStateTests
     public void GameState_DealIsConsistent()
     {
         var referenceDeck = new StandardDeck();
-        var referenceGameState = new GameState();
+        var referenceGameState = new SolitaireGameState();
         referenceGameState.DealCards(referenceDeck.Clone() as StandardDeck);
 
         for (int j = 0; j < 20; j++)
         {
-            var gameState = new GameState();
+            var gameState = new SolitaireGameState();
             gameState.DealCards(referenceDeck.Clone() as StandardDeck);
             Assert.That(gameState.Equals(referenceGameState));
         }

@@ -1,10 +1,17 @@
 ﻿namespace SolvitaireCore;
 
-public class SolitaireMoveGenerator : IMoveGenerator
+public class SolitaireMoveGenerator : IMoveGenerator<ISolitaireMove>
 {
-    public IEnumerable<IMove> GenerateMoves(GameState state)
+    public IEnumerable<ISolitaireMove> GenerateMoves(IGameState<ISolitaireMove> state)
     {
-        var validMoves = new List<IMove>();
+        if (state is SolitaireGameState sol)
+            return GenerateMoves(sol);
+        return [];
+    }
+
+    public IEnumerable<ISolitaireMove> GenerateMoves(SolitaireGameState state)
+    {
+        var validMoves = new List<ISolitaireMove>();
 
         // Waste → XX
         if (!state.WastePile.IsEmpty)

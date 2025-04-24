@@ -10,3 +10,13 @@ public class StandardDeck : Deck
                 Cards.Add(new Card(suit, rank));
     }
 }
+
+public class ObservableStandardDeck : StandardDeck
+{
+    public ObservableStandardDeck()
+    {
+        foreach (Suit suit in Enum.GetValues(typeof(Suit)))
+        foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+            Cards.Add(new ObservableCard(suit, rank));
+    }
+}

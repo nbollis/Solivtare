@@ -3,19 +3,19 @@ namespace SolvitaireGUI;
 
 public class GameStateViewModel : BaseViewModel
 {
-    public GameStateViewModel(GameState gameState)
+    public GameStateViewModel(SolitaireGameState solitaireGameState)
     {
-        GameState = gameState;
+        SolitaireGameState = solitaireGameState;
     }
 
-    private GameState _gameState;
-    public GameState GameState
+    private SolitaireGameState _solitaireGameState;
+    public SolitaireGameState SolitaireGameState
     {
-        get => _gameState;
+        get => _solitaireGameState;
         set
         {
-            _gameState = value;
-            OnPropertyChanged(nameof(GameState));
+            _solitaireGameState = value;
+            OnPropertyChanged(nameof(SolitaireGameState));
             OnPropertyChanged(nameof(TableauPiles));
             OnPropertyChanged(nameof(FoundationPiles));
             OnPropertyChanged(nameof(StockPile));
@@ -23,18 +23,14 @@ public class GameStateViewModel : BaseViewModel
         }
     }
 
-    public List<TableauPile> TableauPiles => GameState.TableauPiles;
-    public List<FoundationPile> FoundationPiles => GameState.FoundationPiles;
-    public StockPile StockPile => GameState.StockPile;
-    public WastePile WastePile => GameState.WastePile;
+    public List<TableauPile> TableauPiles => SolitaireGameState.TableauPiles;
+    public List<FoundationPile> FoundationPiles => SolitaireGameState.FoundationPiles;
+    public StockPile StockPile => SolitaireGameState.StockPile;
+    public WastePile WastePile => SolitaireGameState.WastePile;
 
-    public void MakeMove(IMove move)
+    public void MakeMove(ISolitaireMove move)
     {
-        GameState.MoveCard(move);
-        OnPropertyChanged(nameof(TableauPiles));
-        OnPropertyChanged(nameof(FoundationPiles));
-        OnPropertyChanged(nameof(StockPile));
-        OnPropertyChanged(nameof(WastePile));
+        SolitaireGameState.ExecuteMove(move);
     }
 
     public void Refresh() => OnPropertyChanged(string.Empty); // To manually refresh bindings
@@ -42,18 +38,18 @@ public class GameStateViewModel : BaseViewModel
 
 public class GameStateModel : GameStateViewModel
 {
-    private static GameState _gameState;
+    private static SolitaireGameState _solitaireGameState;
     public static GameStateModel Instance => new();
 
     static GameStateModel()
     {
-        _gameState = new GameState();
+        _solitaireGameState = new SolitaireGameState();
         var deck = new StandardDeck();
         deck.Shuffle();
-        _gameState.DealCards(deck);
+        _solitaireGameState.DealCards(deck);
     }
 
-    public GameStateModel() : base(_gameState)
+    public GameStateModel() : base(_solitaireGameState)
     {
         Refresh();
     }

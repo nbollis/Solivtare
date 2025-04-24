@@ -35,10 +35,10 @@ public class AgentPlayingViewModel : BaseViewModel
         _deck.Shuffle();
 
         var deck = _deck.Clone() as StandardDeck;
-        var gameState = new GameState();
+        var gameState = new SolitaireGameState();
         gameState.DealCards(deck);
         GameStateViewModel = new GameStateViewModel(gameState);
-        LegalMoves = new ObservableCollection<IMove>(GameStateViewModel.GameState.GetLegalMoves());
+        LegalMoves = new ObservableCollection<IMove>(GameStateViewModel.SolitaireGameState.GetLegalMoves());
         Agent = new RandomAgent();
 
 
@@ -55,9 +55,9 @@ public class AgentPlayingViewModel : BaseViewModel
         foreach (var card in deck)
             card.IsFaceUp = false;
 
-        var gameState = new GameState();
+        var gameState = new SolitaireGameState();
         gameState.DealCards(deck!);
-        GameStateViewModel.GameState = gameState;
+        GameStateViewModel.SolitaireGameState = gameState;
         Refresh();
     }
 
@@ -106,7 +106,7 @@ public class AgentPlayingViewModel : BaseViewModel
 
     private async void StartAgent()
     {
-        while (!GameStateViewModel.GameState.IsGameWon)
+        while (!GameStateViewModel.SolitaireGameState.IsGameWon)
         {
             await Task.Run(() =>
             {
@@ -123,7 +123,7 @@ public class AgentPlayingViewModel : BaseViewModel
 
     public void Refresh()
     {
-        LegalMoves = new ObservableCollection<IMove>(GameStateViewModel.GameState.GetLegalMoves());
+        LegalMoves = new ObservableCollection<IMove>(GameStateViewModel.SolitaireGameState.GetLegalMoves());
         OnPropertyChanged(nameof(GameStateViewModel));
         OnPropertyChanged(nameof(Agent));
 
