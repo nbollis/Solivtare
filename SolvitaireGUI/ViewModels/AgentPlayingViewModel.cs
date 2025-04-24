@@ -7,9 +7,9 @@ namespace SolvitaireGUI;
 
 public class AgentPlayingViewModel : BaseViewModel
 {
-    private Stack<ISolitaireMove> _previousMoves;
+    private readonly Stack<ISolitaireMove> _previousMoves;
     private GameStateViewModel _gameStateViewModel;
-    private StandardDeck _deck;
+    private readonly StandardDeck _deck;
     public GameStateViewModel GameStateViewModel
     {
         get => _gameStateViewModel;
@@ -34,7 +34,8 @@ public class AgentPlayingViewModel : BaseViewModel
         Agent = new RandomAgent();
         AllAgents = new()
         {
-            Agent
+            Agent,
+            new SimpleEvaluationAgent(new SimpleSolitaireEvaluator())
         };
 
         ResetGameCommand = new RelayCommand(ResetGame);
@@ -85,7 +86,7 @@ public class AgentPlayingViewModel : BaseViewModel
             {
                 await Task.Run(() =>
                 {
-                    var move = Agent.GetNextMove(LegalMoves);
+                    var move = Agent.GetNextMove(GameStateViewModel.BaseGameState);
                     App.Current.Dispatcher.Invoke(() =>
                     {
                         GameStateViewModel.ApplyMove(move);
@@ -118,7 +119,7 @@ public class AgentPlayingViewModel : BaseViewModel
 
     private void AgentMakeMove()
     {
-        var move = Agent.GetNextMove(LegalMoves);
+        var move = Agent.GetNextMove(GameStateViewModel.BaseGameState);
         GameStateViewModel.ApplyMove(move);
         _previousMoves.Push(move);
         Refresh();

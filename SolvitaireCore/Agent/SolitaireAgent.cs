@@ -1,6 +1,6 @@
 ﻿namespace SolvitaireCore;
 
-public interface ISolitaireAgent : IAgent<ISolitaireMove>
+public interface ISolitaireAgent : IAgent<ISolitaireMove, SolitaireGameState>
 {
 
 }

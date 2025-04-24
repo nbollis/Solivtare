@@ -32,6 +32,14 @@ public class MultiCardMoveTests
         Assert.That(from.Cards.Count, Is.EqualTo(0));
         Assert.That(to.Cards.Count, Is.EqualTo(4));
         Assert.That(to.TopCard, Is.EqualTo(cards.Last()));
+
+        move.Undo(new SolitaireGameState());
+
+        // Assert
+        Assert.That(from.Cards.Count, Is.EqualTo(3));
+        Assert.That(from.TopCard, Is.EqualTo(cards.Last()));
+        Assert.That(to.Cards.Count, Is.EqualTo(1));
+        Assert.That(to.TopCard, Is.EqualTo(new Card(Suit.Clubs, Rank.King)));
     }
 
     [Test]
@@ -93,6 +101,20 @@ public class MultiCardMoveTests
         {
             Assert.That(card.IsFaceUp, Is.False);
         }
+
+        move.Undo(new SolitaireGameState());
+
+        // Assert
+        Assert.That(waste.Cards.Count, Is.EqualTo(3));
+        Assert.That(waste.TopCard, Is.EqualTo(wasteTop));
+        Assert.That(waste.BottomCard, Is.EqualTo(wasteBottom));
+        Assert.That(stock.Cards.Count, Is.EqualTo(0));
+        Assert.That(stock.TopCard, Is.Null);
+        Assert.That(stock.BottomCard, Is.Null);
+        foreach (var card in waste.Cards)
+        {
+            Assert.That(card.IsFaceUp, Is.True);
+        }
     }
 
     [Test]
@@ -135,6 +157,25 @@ public class MultiCardMoveTests
         Assert.That(waste.Cards.Count, Is.EqualTo(3));
         Assert.That(waste.TopCard, Is.EqualTo(new Card(Suit.Hearts, Rank.Ten)));
         Assert.That(waste.BottomCard, Is.EqualTo(new Card(Suit.Clubs, Rank.Two)));
+        foreach (var card in waste.Cards)
+        {
+            Assert.That(card.IsFaceUp, Is.True);
+        }
+
+        move.Undo(new SolitaireGameState());
+
+        // Assert
+        Assert.That(stock.Cards.Count, Is.EqualTo(5));
+        Assert.That(stock.TopCard, Is.EqualTo(new Card(Suit.Clubs, Rank.Two)));
+        Assert.That(stock.BottomCard, Is.EqualTo(new Card(Suit.Hearts, Rank.Queen)));
+        Assert.That(waste.Cards.Count, Is.EqualTo(0));
+        Assert.That(waste.TopCard, Is.Null);
+        Assert.That(waste.BottomCard, Is.Null);
+        foreach (var card in stock.Cards)
+        {
+            Assert.That(card.IsFaceUp, Is.False);
+        }
+
         foreach (var card in waste.Cards)
         {
             Assert.That(card.IsFaceUp, Is.True);

@@ -1,9 +1,11 @@
-﻿namespace SolvitaireCore;
+﻿using System.Collections;
+
+namespace SolvitaireCore;
 
 /// <summary>
 /// An abstract stack of cards
 /// </summary>
-public abstract class Pile 
+public abstract class Pile  : IEnumerable<Card>
 {
     /// <summary>
     /// Represents a pile of cards in a solitaire game
@@ -72,4 +74,7 @@ public abstract class Pile
             throw new InvalidOperationException($"Cannot remove {card} from this pile.");
         Cards.Remove(card);
     }
+
+    public IEnumerator<Card> GetEnumerator() => Cards.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

@@ -6,7 +6,9 @@ public interface IAgent
     string Name { get; }
 }
 
-public interface IAgent<TMove> : IAgent where TMove : IMove
+public interface IAgent<TMove, TGameState> : IAgent 
+    where TMove : IMove
+    where TGameState : IGameState<TMove>
 {
-    public TMove GetNextMove(IEnumerable<TMove> legalMoves);
+    public TMove GetNextMove(TGameState gameState);
 }

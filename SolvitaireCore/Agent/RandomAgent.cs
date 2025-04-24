@@ -6,9 +6,9 @@ public class RandomAgent : ISolitaireAgent
     public string Name => "Random Agent";
 
 
-    public ISolitaireMove GetNextMove(IEnumerable<ISolitaireMove> legalMoves)
+    public ISolitaireMove GetNextMove(SolitaireGameState gameState)
     {
-        var moves = legalMoves.ToList();
+        var moves = gameState.GetLegalMoves().ToList();
         if (moves.Count == 0) return null;
         return moves[_rng.Next(moves.Count)];
     }
