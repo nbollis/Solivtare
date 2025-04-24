@@ -1,7 +1,5 @@
-﻿using SolvitaireCore;
-
-namespace SolvitaireGuiFunctions;
-
+﻿
+namespace SolvitaireGUI;
 public class MainWindowViewModel : BaseViewModel
 {
     private AgentPlayingViewModel _agentPlayingViewModel;

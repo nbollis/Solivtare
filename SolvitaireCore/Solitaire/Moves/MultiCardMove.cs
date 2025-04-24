@@ -68,5 +68,13 @@ public class MultiCardMove(Pile fromPile, Pile toPile, IEnumerable<Card> cards) 
         }
     }
 
-    public override string ToString() => $"Move {string.Join(',', Cards)} cards from {FromPile} to {ToPile}";
+    public override string ToString()
+    {
+        if (ToPile is WastePile)
+            return $"Cycle {Cards.Count} Cards";
+        if (ToPile is StockPile)
+            return $"Refresh Stock Pile";
+        
+        return $"Move {string.Join(',', Cards)} cards from {FromPile} to {ToPile}";
+    }
 }

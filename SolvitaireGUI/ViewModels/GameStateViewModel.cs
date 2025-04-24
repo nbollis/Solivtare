@@ -1,5 +1,5 @@
 ﻿using SolvitaireCore;
-namespace SolvitaireGuiFunctions;
+namespace SolvitaireGUI;
 
 public class GameStateViewModel : BaseViewModel
 {

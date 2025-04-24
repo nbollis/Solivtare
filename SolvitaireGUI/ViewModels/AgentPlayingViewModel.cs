@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using SolvitaireCore;
+using SolvitaireGuiFunctions;
 
-namespace SolvitaireGuiFunctions;
+namespace SolvitaireGUI;
 
 public class AgentPlayingViewModel : BaseViewModel
 {
@@ -51,6 +46,7 @@ public class AgentPlayingViewModel : BaseViewModel
         MakeMoveCommand = new RelayCommand(MakeMove);
         NewGameCommand = new RelayCommand(NewGame);
         MakeSpecificMoveCommand = new DelegateCommand(MakeSpecificMove);
+        StartAgentCommand = new RelayCommand(StartAgent);
     }
 
     private void ResetGame()
@@ -105,9 +101,25 @@ public class AgentPlayingViewModel : BaseViewModel
     private void NewGame()
     {
         _deck.Shuffle();
-        Refresh();
+        ResetGame();
     }
 
+    private async void StartAgent()
+    {
+        while (!GameStateViewModel.GameState.IsGameWon)
+        {
+            await Task.Run(() =>
+            {
+                var move = Agent.GetNextMove(LegalMoves);
+                App.Current.Dispatcher.Invoke(() =>
+                {
+                    GameStateViewModel.MakeMove(move);
+                    Refresh();
+                });
+            });
+            await Task.Delay(100); // Optional: Add a small delay for better UI responsiveness  
+        }
+    }
 
     public void Refresh()
     {
