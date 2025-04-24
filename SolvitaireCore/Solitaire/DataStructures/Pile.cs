@@ -44,6 +44,12 @@ public abstract class Pile : INotifyPropertyChanged
         }
     }
 
+    public Card this[int index]
+    {
+        get => Cards[index];
+        set => Cards[index] = value;
+    }
+
     public abstract bool CanAddCard(Card card);
 
     /// <summary>

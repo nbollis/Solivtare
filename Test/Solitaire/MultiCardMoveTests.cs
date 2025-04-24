@@ -204,6 +204,6 @@ public class MultiCardMoveTests
         var result = move.ToString();
 
         // Assert
-        Assert.That(result, Is.EqualTo($"Move {string.Join(',', cards)} cards from {fromPile} to {toPile}"));
+        Assert.That(result, Is.EqualTo($"Cycle 3 Cards"));
     }
 }

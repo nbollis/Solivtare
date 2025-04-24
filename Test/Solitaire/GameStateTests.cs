@@ -148,25 +148,43 @@ public class GameStateTests
     [Test]
     public void GameState_GenerateLegalMoves_AreAllLegal()
     {
-        var deck = new StandardDeck();
+        var referenceDeck = new StandardDeck();
         for (int j = 0; j < 20; j++)
         {
-            deck.Shuffle();
+            referenceDeck.Shuffle();
 
-            var clone = deck.Clone() as StandardDeck;
+            var clone = referenceDeck.Clone() as StandardDeck;
+
             var gameState = new GameState();
             gameState.DealCards(clone!);
             var moves = gameState.GetLegalMoves().ToList();
+
             GameState[] gameStates = new GameState[moves.Count];
             for (int i = 0; i < moves.Count; i++)
             {
                 gameStates[i] = new GameState();
-                gameStates[i].DealCards(deck.Clone() as StandardDeck);
+                gameStates[i].DealCards(referenceDeck.Clone() as StandardDeck);
 
                 Assert.That(moves[i].IsValid(gameStates[i]), Is.True);
                 gameStates[i].MoveCard(moves[i]);
             }
         }
         
+    }
+
+    [Test]
+    public void GameState_DealIsConsistent()
+    {
+        var referenceDeck = new StandardDeck();
+        var referenceGameState = new GameState();
+        referenceGameState.DealCards(referenceDeck.Clone() as StandardDeck);
+
+        for (int j = 0; j < 20; j++)
+        {
+            var gameState = new GameState();
+            gameState.DealCards(referenceDeck.Clone() as StandardDeck);
+            Assert.That(gameState.Equals(referenceGameState));
+        }
+
     }
 }

@@ -2,7 +2,8 @@
 
 public class StandardDeck : Deck
 {
-    public StandardDeck()
+    public StandardDeck() : this(42) { }
+    public StandardDeck(int seed = 42) : base(seed)
     {
         foreach (Suit suit in Enum.GetValues(typeof(Suit)))
             foreach (Rank rank in Enum.GetValues(typeof(Rank)))

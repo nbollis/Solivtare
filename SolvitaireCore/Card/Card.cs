@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace SolvitaireCore;
 
@@ -13,9 +14,12 @@ public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard, INotifyP
 
     public Suit Suit { get; } = suit;
     public Rank Rank { get; } = rank;
+
+    [JsonIgnore]
     public Color Color { get; } = suit.ToSuitColor();
 
     private bool _isFaceUp = isFaceUp;
+    [JsonIgnore]
     public bool IsFaceUp
     {
         get => _isFaceUp;

@@ -3,14 +3,16 @@ using System.Text.Json;
 
 namespace SolvitaireCore;
 
-public abstract class Deck : Deck<Card> { }
+public abstract class Deck(int seed = 42) : Deck<Card>(seed) { }
+
 public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<Deck<TCard>> where TCard : ICard
 {
-    protected Random Random { get; } = new Random();
+    protected Random Random { get; }
     public List<TCard> Cards { get; private set; }
 
-    protected Deck()
+    protected Deck(int seed = 42)
     {
+        Random = new Random(seed);
         Cards = new List<TCard>();
     }
 
@@ -29,11 +31,10 @@ public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<D
 
     public void Shuffle()
     {
-        Random rng = new Random();
         int n = Cards.Count;
         while (n > 1)
         {
-            int k = rng.Next(n--);
+            int k = Random.Next(n--);
             (Cards[k], Cards[n]) = (Cards[n], Cards[k]);
         }
     }

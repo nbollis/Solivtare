@@ -57,6 +57,8 @@ public class GameState : INotifyPropertyChanged
 
     #endregion
 
+    // TODO: Find more lose conditions: Those that involve an infinite loop
+    public bool IsGameLost => !GetLegalMoves().Any();
     public bool IsGameWon => FoundationPiles.All(pile => pile.Count == 13);
 
     public GameState(int cardsPerCycle = 3)
@@ -88,7 +90,7 @@ public class GameState : INotifyPropertyChanged
             tableauCards[i] = new Card[i + 1];
             for (int j = 0; j < tableauCards[i].Length; j++)
             {
-                tableauCards[i][j] = deck.DrawCard();
+                tableauCards[i][j] = deck.DrawCard() as Card;
             }
         }
         for (int i = 0; i < TableauPiles.Count; i++)
@@ -100,7 +102,7 @@ public class GameState : INotifyPropertyChanged
 
         while (deck.Cards.Count > 0)
         {
-            StockPile.AddCard(deck.DrawCard());
+            StockPile.AddCard(deck.DrawCard() as Card);
         }
 
         RefreshUi();
@@ -154,9 +156,40 @@ public class GameState : INotifyPropertyChanged
     #endregion
 
 
-    
+    public bool Equals(GameState? other)
+    {
+        if (other == null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        for (var index = 0; index < FoundationPiles.Count; index++)
+        {
+            var foundationPile = FoundationPiles[index];
+            var otherFoundationPile = other.FoundationPiles[index];
+            if (foundationPile.Count != otherFoundationPile.Count)
+                return false;
+            if (foundationPile.TopCard != otherFoundationPile.TopCard)
+                return false;
+        }
 
-    
+        for (var index = 0; index < TableauPiles.Count; index++)
+        {
+            var tableauPile = TableauPiles[index];
+            var otherTableauPile = other.TableauPiles[index];
+            if (tableauPile.Count != otherTableauPile.Count)
+                return false;
+            for (int i = 0; i < tableauPile.Count; i++)
+            {
+                if (tableauPile[i] != otherTableauPile[i])
+                    return false;
+            }
+        }
+
+        if (StockPile.Count != other.StockPile.Count)
+            return false;
+        if (WastePile.Count != other.WastePile.Count)
+            return false;
+        return true;
+    }
+
 
     #region UI Interaction
 
