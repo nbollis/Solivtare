@@ -1,6 +1,6 @@
 ﻿namespace SolvitaireCore;
 
-public class StandardDeck : Deck<Card>
+public class StandardDeck : Deck
 {
     public StandardDeck()
     {

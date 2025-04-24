@@ -73,4 +73,18 @@ public class DeckTests
             Assert.That(deck[i], Is.EqualTo(clone[i]));
         }
     }
+
+    [Test]
+    public void Deck_SerializeDeserialize_IsSame()
+    {
+        var deck = new StandardDeck();
+
+        for (int i = 0; i < 10; i++)
+        {
+            deck.Shuffle();
+            var json = Deck.SerializeDeck(deck);
+            var deserialized = Deck.DeserializeDeck(json);
+            Assert.That(deck.Equals(deserialized));
+        }
+    }
 }
