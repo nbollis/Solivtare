@@ -5,7 +5,7 @@ namespace SolvitaireCore;
 
 public abstract class Deck(int seed = 42) : Deck<Card>(seed) { }
 
-public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<Deck<TCard>> where TCard : ICard
+public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<Deck<TCard>> where TCard : class, ICard
 {
     protected Random Random { get; }
     public List<TCard> Cards { get; private set; }
@@ -52,6 +52,14 @@ public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<D
         set => Cards[index] = value;
     }
 
+    public void FlipAllCardsDown()
+    {
+        foreach (var card in Cards)
+        {
+            card.IsFaceUp = false;
+        }
+    }
+
     public static string SerializeDeck(Deck<Card> deck)
     {
         var serializableCards = deck.Cards.Select(c => new SerializableCard(c.Suit, c.Rank, c.IsFaceUp)).ToList();
@@ -70,10 +78,6 @@ public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<D
         }
         return deck;
     }
-
-    public IEnumerator<TCard> GetEnumerator() => Cards.GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public bool Equals(Deck<TCard>? other)
     {
@@ -102,4 +106,8 @@ public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<D
     {
         return Cards.GetHashCode();
     }
+
+    public IEnumerator<TCard> GetEnumerator() => Cards.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

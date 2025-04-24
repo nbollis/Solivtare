@@ -43,25 +43,27 @@ public class SolitaireGameState : IGameState<ISolitaireMove>
     
     public void DealCards(StandardDeck deck)
     {
+        int cardIndex = -1;
+        deck.FlipAllCardsDown();
         Card[][] tableauCards = new Card[TableauPiles.Count][];
         for (int i = 0; i < TableauPiles.Count; i++)
         {
             tableauCards[i] = new Card[i + 1];
             for (int j = 0; j < tableauCards[i].Length; j++)
             {
-                tableauCards[i][j] = deck.DrawCard() as Card;
+                tableauCards[i][j] = deck[++cardIndex];
             }
         }
         for (int i = 0; i < TableauPiles.Count; i++)
         {
-            // new collection here instead of add range so we do not trigger the validity check on deal
-            TableauPiles[i].Cards = new ObservableCollection<Card>(tableauCards[i]);
+            // AddRange here instead of add range so we do not trigger the validity check on deal
+            TableauPiles[i].Cards.AddRange(tableauCards[i]);
             TableauPiles[i].Cards[^1].IsFaceUp = true; // flip the last card face up
         }
 
-        while (deck.Cards.Count > 0)
+        while (cardIndex < 51)
         {
-            StockPile.AddCard(deck.DrawCard() as Card);
+            StockPile.AddCard(deck[++cardIndex]);
         }
     }
 

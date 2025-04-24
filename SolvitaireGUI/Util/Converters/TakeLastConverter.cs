@@ -7,10 +7,8 @@ public class TakeLastConverter : BaseValueConverter<TakeLastConverter>
 {
     public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is IEnumerable<Card> cards && int.TryParse(parameter?.ToString(), out int count))
-        {
+        if (value is IEnumerable<object> cards && int.TryParse(parameter?.ToString(), out int count))
             return cards.Reverse().Take(count).Reverse().ToList();
-        }
 
         return value;
     }

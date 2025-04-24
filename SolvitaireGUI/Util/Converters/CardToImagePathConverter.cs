@@ -10,7 +10,7 @@ public class CardToImagePathMultiConverter : IMultiValueConverter
 {
     public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
     {
-        if (values.Length < 2 || values[0] is not bool isFaceUp || values[1] is not Card card)
+        if (values.Length < 2 || values[0] is not bool isFaceUp || values[1] is not BindableCard card)
             return DependencyProperty.UnsetValue;
 
         string imagePath;

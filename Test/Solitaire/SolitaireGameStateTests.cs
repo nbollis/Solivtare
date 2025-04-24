@@ -153,17 +153,15 @@ public class SolitaireGameStateTests
         {
             referenceDeck.Shuffle();
 
-            var clone = referenceDeck.Clone() as StandardDeck;
-
             var gameState = new SolitaireGameState();
-            gameState.DealCards(clone!);
+            gameState.DealCards(referenceDeck);
             var moves = gameState.GetLegalMoves().ToList();
 
             SolitaireGameState[] gameStates = new SolitaireGameState[moves.Count];
             for (int i = 0; i < moves.Count; i++)
             {
                 gameStates[i] = new SolitaireGameState();
-                gameStates[i].DealCards(referenceDeck.Clone() as StandardDeck);
+                gameStates[i].DealCards(referenceDeck);
 
                 Assert.That(moves[i].IsValid(gameStates[i]), Is.True);
                 gameStates[i].ExecuteMove(moves[i]);
@@ -177,14 +175,13 @@ public class SolitaireGameStateTests
     {
         var referenceDeck = new StandardDeck();
         var referenceGameState = new SolitaireGameState();
-        referenceGameState.DealCards(referenceDeck.Clone() as StandardDeck);
+        referenceGameState.DealCards(referenceDeck);
 
         for (int j = 0; j < 20; j++)
         {
             var gameState = new SolitaireGameState();
-            gameState.DealCards(referenceDeck.Clone() as StandardDeck);
+            gameState.DealCards(referenceDeck);
             Assert.That(gameState.Equals(referenceGameState));
         }
-
     }
 }

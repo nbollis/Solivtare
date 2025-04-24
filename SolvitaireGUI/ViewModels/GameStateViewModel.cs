@@ -1,39 +1,64 @@
 ﻿using SolvitaireCore;
+using System.Collections.ObjectModel;
 namespace SolvitaireGUI;
 
 public class GameStateViewModel : BaseViewModel
 {
-    public GameStateViewModel(SolitaireGameState solitaireGameState)
+    public SolitaireGameState BaseGameState { get; }
+
+    public bool IsGameWon => BaseGameState.IsGameWon;
+    public bool IsGameLost => BaseGameState.IsGameLost;
+
+
+    public ObservableCollection<BindablePile> TableauPiles { get; } = new();
+    public ObservableCollection<BindablePile> FoundationPiles { get; } = new();
+    public BindablePile StockPile { get; } = new();
+    public BindablePile WastePile { get; } = new();
+
+
+    public GameStateViewModel(SolitaireGameState gameState)
     {
-        SolitaireGameState = solitaireGameState;
+        BaseGameState = gameState;
+        Sync();
     }
 
-    private SolitaireGameState _solitaireGameState;
-    public SolitaireGameState SolitaireGameState
+    public void ApplyMove(ISolitaireMove move)
     {
-        get => _solitaireGameState;
-        set
+        BaseGameState.ExecuteMove(move);
+        Sync();
+    }
+
+    public IEnumerable<ISolitaireMove> GetLegalMoves()
+    {
+        return BaseGameState.GetLegalMoves();
+    }
+
+    public void Sync()
+    {
+        TableauPiles.Clear();
+        foreach (var pile in BaseGameState.TableauPiles)
         {
-            _solitaireGameState = value;
-            OnPropertyChanged(nameof(SolitaireGameState));
-            OnPropertyChanged(nameof(TableauPiles));
-            OnPropertyChanged(nameof(FoundationPiles));
-            OnPropertyChanged(nameof(StockPile));
-            OnPropertyChanged(nameof(WastePile));
+            var bindable = new BindablePile();
+            bindable.UpdateFromPile(pile);
+            TableauPiles.Add(bindable);
         }
+
+        FoundationPiles.Clear();
+        foreach (var pile in BaseGameState.FoundationPiles)
+        {
+            var bindable = new BindablePile();
+            bindable.UpdateFromPile(pile);
+            FoundationPiles.Add(bindable);
+        }
+
+        StockPile.UpdateFromPile(BaseGameState.StockPile);
+        WastePile.UpdateFromPile(BaseGameState.WastePile);
+
+        OnPropertyChanged(nameof(TableauPiles));
+        OnPropertyChanged(nameof(FoundationPiles));
+        OnPropertyChanged(nameof(StockPile));
+        OnPropertyChanged(nameof(WastePile));
     }
-
-    public List<TableauPile> TableauPiles => SolitaireGameState.TableauPiles;
-    public List<FoundationPile> FoundationPiles => SolitaireGameState.FoundationPiles;
-    public StockPile StockPile => SolitaireGameState.StockPile;
-    public WastePile WastePile => SolitaireGameState.WastePile;
-
-    public void MakeMove(ISolitaireMove move)
-    {
-        SolitaireGameState.ExecuteMove(move);
-    }
-
-    public void Refresh() => OnPropertyChanged(string.Empty); // To manually refresh bindings
 }
 
 public class GameStateModel : GameStateViewModel
@@ -44,13 +69,13 @@ public class GameStateModel : GameStateViewModel
     static GameStateModel()
     {
         _solitaireGameState = new SolitaireGameState();
-        var deck = new StandardDeck();
+        var deck = new ObservableStandardDeck();
         deck.Shuffle();
         _solitaireGameState.DealCards(deck);
     }
 
     public GameStateModel() : base(_solitaireGameState)
     {
-        Refresh();
+        Sync();
     }
 }

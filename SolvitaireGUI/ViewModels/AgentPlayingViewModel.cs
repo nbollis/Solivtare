@@ -7,10 +7,11 @@ namespace SolvitaireGUI;
 
 public class AgentPlayingViewModel : BaseViewModel
 {
+    private GameStateViewModel _gameStateViewModel;
     private StandardDeck _deck;
-    private IAgent _agent;
+    private ISolitaireAgent _agent;
 
-    public IAgent Agent
+    public ISolitaireAgent Agent
     {
         get => _agent;
         set
@@ -20,8 +21,15 @@ public class AgentPlayingViewModel : BaseViewModel
         }
     }
 
-    public GameStateViewModel GameStateViewModel { get; set; }
-
+    public GameStateViewModel GameStateViewModel
+    {
+        get => _gameStateViewModel;
+        set
+        {
+            _gameStateViewModel = value;
+            OnPropertyChanged(nameof(GameStateViewModel));
+        }
+    }
 
     public ICommand StartAgentCommand { get; set; }
     public ICommand ResetGameCommand { get; set; }
@@ -31,14 +39,14 @@ public class AgentPlayingViewModel : BaseViewModel
 
     public AgentPlayingViewModel()
     {
-        _deck ??= new StandardDeck();
+        _deck ??= new ObservableStandardDeck();
         _deck.Shuffle();
 
-        var deck = _deck.Clone() as StandardDeck;
         var gameState = new SolitaireGameState();
-        gameState.DealCards(deck);
+        gameState.DealCards(_deck);
+
         GameStateViewModel = new GameStateViewModel(gameState);
-        LegalMoves = new ObservableCollection<IMove>(GameStateViewModel.SolitaireGameState.GetLegalMoves());
+        LegalMoves = new ObservableCollection<ISolitaireMove>(GameStateViewModel.GetLegalMoves());
         Agent = new RandomAgent();
 
 
@@ -51,13 +59,11 @@ public class AgentPlayingViewModel : BaseViewModel
 
     private void ResetGame()
     {
-        var deck = _deck.Clone() as StandardDeck ?? throw new InvalidCastException();
-        foreach (var card in deck)
-            card.IsFaceUp = false;
-
+        _deck.FlipAllCardsDown();
         var gameState = new SolitaireGameState();
-        gameState.DealCards(deck!);
-        GameStateViewModel.SolitaireGameState = gameState;
+        gameState.DealCards(_deck!);
+
+        GameStateViewModel = new(gameState);
         Refresh();
     }
 
@@ -72,8 +78,8 @@ public class AgentPlayingViewModel : BaseViewModel
         }
     }
 
-    private ObservableCollection<IMove> _legalMoves;
-    public ObservableCollection<IMove> LegalMoves
+    private ObservableCollection<ISolitaireMove> _legalMoves;
+    public ObservableCollection<ISolitaireMove> LegalMoves
     {
         get => _legalMoves;
         set
@@ -86,15 +92,15 @@ public class AgentPlayingViewModel : BaseViewModel
     private void MakeMove()
     {
         var move = Agent.GetNextMove(LegalMoves);
-        GameStateViewModel.MakeMove(move);
+        GameStateViewModel.ApplyMove(move);
         Refresh();
     }
 
     private void MakeSpecificMove(object? moveObject)
     {
-        if (moveObject is not IMove move)
+        if (moveObject is not ISolitaireMove move)
             return;
-        GameStateViewModel.MakeMove(move);
+        GameStateViewModel.ApplyMove(move);
         Refresh();
     }
 
@@ -106,14 +112,14 @@ public class AgentPlayingViewModel : BaseViewModel
 
     private async void StartAgent()
     {
-        while (!GameStateViewModel.SolitaireGameState.IsGameWon)
+        while (!GameStateViewModel.IsGameWon)
         {
             await Task.Run(() =>
             {
                 var move = Agent.GetNextMove(LegalMoves);
                 App.Current.Dispatcher.Invoke(() =>
                 {
-                    GameStateViewModel.MakeMove(move);
+                    GameStateViewModel.ApplyMove(move);
                     Refresh();
                 });
             });
@@ -123,7 +129,7 @@ public class AgentPlayingViewModel : BaseViewModel
 
     public void Refresh()
     {
-        LegalMoves = new ObservableCollection<IMove>(GameStateViewModel.SolitaireGameState.GetLegalMoves());
+        LegalMoves = new ObservableCollection<ISolitaireMove>(GameStateViewModel.GetLegalMoves());
         OnPropertyChanged(nameof(GameStateViewModel));
         OnPropertyChanged(nameof(Agent));
 

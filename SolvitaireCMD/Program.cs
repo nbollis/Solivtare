@@ -17,7 +17,7 @@ namespace MyApp
                 File.WriteAllText(path, ""); // create and clear
 
             Deck[] decks = new Deck[threads];
-            SolitaireAgent[] agents = new SolitaireAgent[threads];
+            ISolitaireAgent[] agents = new ISolitaireAgent[threads];
 
             for (int i = 0; i < threads; i++)
             {
@@ -49,7 +49,7 @@ namespace MyApp
             Task.WaitAll(workers); // This blocks forever unless you later add cancellation
         }
 
-        public static void RunGameWithAgentUntilWinOrTimeout(Deck deck, SolitaireAgent agent, SolitaireMoveGenerator moveGenerator, string logFilePath, int threadId)
+        public static void RunGameWithAgentUntilWinOrTimeout(Deck deck, ISolitaireAgent agent, SolitaireMoveGenerator moveGenerator, string logFilePath, int threadId)
         {
             var gameState = new SolitaireGameState();
             gameState.DealCards(deck.Clone() as StandardDeck);

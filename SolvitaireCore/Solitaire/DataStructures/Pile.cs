@@ -1,34 +1,15 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-
-namespace SolvitaireCore;
+﻿namespace SolvitaireCore;
 
 /// <summary>
 /// An abstract stack of cards
 /// </summary>
-public abstract class Pile : INotifyPropertyChanged
+public abstract class Pile 
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void OnPropertyChanged([CallerMemberName] string propertyName = null!) =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-    private ObservableCollection<Card> _cards = new();
-
     /// <summary>
     /// Represents a pile of cards in a solitaire game
     /// </summary>
     /// <remarks> Top card is the last card in the list. </remarks>
-    public ObservableCollection<Card> Cards
-    {
-        get => _cards;
-        set
-        {
-            _cards = value;
-            OnPropertyChanged();
-        }
-    }
+    public List<Card> Cards { get;  }
 
     public int Count => Cards.Count;
     public bool IsEmpty => Count == 0;
@@ -37,6 +18,7 @@ public abstract class Pile : INotifyPropertyChanged
 
     protected Pile(IEnumerable<Card>? initialCards = null)
     {
+        Cards = [];
         if (initialCards == null) return;
         foreach (var card in initialCards)
         {
@@ -62,7 +44,6 @@ public abstract class Pile : INotifyPropertyChanged
         if (!CanAddCard(card))
             throw new InvalidOperationException($"Cannot add {card} to this pile.");
         Cards.Add(card);
-        OnPropertyChanged(nameof(TopCard));
     }
 
     /// <summary>
@@ -78,7 +59,6 @@ public abstract class Pile : INotifyPropertyChanged
                 throw new InvalidOperationException($"Cannot add {card} to this pile.");
             Cards.Add(card);
         }
-        OnPropertyChanged(nameof(TopCard));
     }
 
     public virtual bool CanRemoveCard(Card card)
@@ -91,6 +71,5 @@ public abstract class Pile : INotifyPropertyChanged
         if (!CanRemoveCard(card))
             throw new InvalidOperationException($"Cannot remove {card} from this pile.");
         Cards.Remove(card);
-        OnPropertyChanged(nameof(TopCard));
     }
 }
