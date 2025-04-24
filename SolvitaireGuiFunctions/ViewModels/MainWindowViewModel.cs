@@ -4,16 +4,16 @@ namespace SolvitaireGuiFunctions;
 
 public class MainWindowViewModel : BaseViewModel
 {
-    private GameStateViewModel _gameStateViewModel;
+    private AgentPlayingViewModel _agentPlayingViewModel;
 
-    public GameStateViewModel GameStateViewModel
+    public AgentPlayingViewModel AgentPlayingViewModel
     {
-        get => _gameStateViewModel;
+        get => _agentPlayingViewModel;
         set 
         { 
-            _gameStateViewModel = value;
-            OnPropertyChanged(nameof(GameStateViewModel));
-            _gameStateViewModel.Refresh();
+            _agentPlayingViewModel = value;
+            OnPropertyChanged(nameof(AgentPlayingViewModel));
+            _agentPlayingViewModel.Refresh();
         }
     }
 
@@ -23,6 +23,7 @@ public class MainWindowViewModel : BaseViewModel
         var deck = new StandardDeck();
         deck.Shuffle();
         gameState.DealCards(deck);
-        GameStateViewModel = new GameStateViewModel(gameState);
+        AgentPlayingViewModel = new AgentPlayingViewModel();
+        AgentPlayingViewModel.GameStateViewModel.GameState = gameState;
     }
 }

@@ -8,20 +8,96 @@
              mc:Ignorable="d" 
              d:DataContext="{x:Static solvitaireGuiFunctions:GameStateModel.Instance}"
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <local:CardToImagePathConverter x:Key="CardToImageConverter" />
+        <local:FanOffsetConverter x:Key="FanOffsetConverter"/>
+        <DataTemplate x:Key="CardTemplate">
+            <Grid>
+                <Image Width="80" Height="120"
+                       Source="{Binding Converter={StaticResource CardToImageConverter}}" />
+            </Grid>
+        </DataTemplate>
+        <ItemsPanelTemplate x:Key="FannedPanel">
+            <Canvas IsItemsHost="True" />
+        </ItemsPanelTemplate>
+        <Style x:Key="FannedItemStyle" TargetType="ContentPresenter">
+            <Setter Property="Canvas.Top" Value="{Binding RelativeSource={RelativeSource Self}, Path=(ItemsControl.AlternationIndex), Converter={StaticResource FanOffsetConverter}}" />
+            <Setter Property="Panel.ZIndex" Value="{Binding RelativeSource={RelativeSource Self}, Path=(ItemsControl.AlternationIndex)}" />
+        </Style>
+    </UserControl.Resources>
+
     <Grid>
-        <StackPanel Orientation="Vertical">
-            <ItemsControl ItemsSource="{Binding FoundationPiles}">
-                <!-- DataTemplate for FoundationPile -->
-            </ItemsControl>
 
-            <ItemsControl ItemsSource="{Binding TableauPiles}">
-                <!-- DataTemplate for TableauPile -->
-            </ItemsControl>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="2*" />
+        </Grid.RowDefinitions>
 
-            <StackPanel Orientation="Horizontal">
-                <ContentControl Content="{Binding StockPile}" />
-                <ContentControl Content="{Binding WastePile}" />
-            </StackPanel>
-        </StackPanel>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <ItemsControl Grid.Column="0" Grid.Row="0" ItemsSource="{Binding StockPile.Cards}"
+                      ItemTemplate="{StaticResource CardTemplate}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+
+        <ItemsControl Grid.Column="1" Grid.Row="0" ItemsSource="{Binding WastePile.Cards}"
+                      ItemTemplate="{StaticResource CardTemplate}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+
+        <!-- DataTemplate for FoundationPiles -->
+        <ItemsControl Grid.Column="3" Grid.Row="0" Grid.ColumnSpan="4" 
+                      ItemsSource="{Binding FoundationPiles}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ItemsControl ItemsSource="{Binding Cards}" 
+                                  ItemTemplate="{StaticResource CardTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- DataTemplate for TableauPiles -->
+        <ItemsControl Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="7" ItemsSource="{Binding TableauPiles}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="1" Columns="7" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ItemsControl ItemsSource="{Binding Cards}"
+                                  ItemTemplate="{StaticResource CardTemplate}"
+                                  ItemsPanel="{StaticResource FannedPanel}"
+                                  ItemContainerStyle="{StaticResource FannedItemStyle}"
+                                  AlternationCount="1000" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.Margin>
+                <Thickness>5</Thickness>
+            </ItemsControl.Margin>
+        </ItemsControl>
     </Grid>
 </UserControl>

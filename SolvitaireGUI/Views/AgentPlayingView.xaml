@@ -4,7 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SolvitaireGUI"
+             xmlns:solvitaireGuiFunctions="clr-namespace:SolvitaireGuiFunctions;assembly=SolvitaireGuiFunctions"
              mc:Ignorable="d" 
+             d:DataContext="{x:Static solvitaireGuiFunctions:AgentPlayingModel.Instance}"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -13,11 +15,18 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
-
+            <StackPanel HorizontalAlignment="Left">
+                <Button Content="Make Move" 
+                        Command="{Binding MakeMoveCommand}" />
+                <Button Content="Reset Game" 
+                        Command="{Binding ResetGameCommand}" />
+                <Button Content="New Game" 
+                        Command="{Binding NewGameCommand}" />
+            </StackPanel>
         </Grid>
 
         <ContentControl Grid.Column="1">
-            <local:GameStateView></local:GameStateView>
+            <local:GameStateView DataContext="{Binding GameStateViewModel}"/>
         </ContentControl>
     </Grid>
 </UserControl>

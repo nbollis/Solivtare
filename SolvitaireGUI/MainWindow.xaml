@@ -10,13 +10,9 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0">
 
-        </StackPanel>
-
-        <local:GameStateView Grid.Column="1" DataContext="{Binding GameStateViewModel}"/>
+        <local:AgentPlayingView Grid.Column="0" DataContext="{Binding AgentPlayingViewModel}"/>
     </Grid>
 </Window>

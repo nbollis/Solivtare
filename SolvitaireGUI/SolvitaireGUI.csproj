@@ -9,8 +9,120 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Cards\10C.png" />
+    <None Remove="Resources\Cards\10D.png" />
+    <None Remove="Resources\Cards\10H.png" />
+    <None Remove="Resources\Cards\10S.png" />
+    <None Remove="Resources\Cards\2C.png" />
+    <None Remove="Resources\Cards\2D.png" />
+    <None Remove="Resources\Cards\2H.png" />
+    <None Remove="Resources\Cards\2S.png" />
+    <None Remove="Resources\Cards\3C.png" />
+    <None Remove="Resources\Cards\3D.png" />
+    <None Remove="Resources\Cards\3H.png" />
+    <None Remove="Resources\Cards\3S.png" />
+    <None Remove="Resources\Cards\4C.png" />
+    <None Remove="Resources\Cards\4D.png" />
+    <None Remove="Resources\Cards\4H.png" />
+    <None Remove="Resources\Cards\4S.png" />
+    <None Remove="Resources\Cards\5C.png" />
+    <None Remove="Resources\Cards\5D.png" />
+    <None Remove="Resources\Cards\5H.png" />
+    <None Remove="Resources\Cards\5S.png" />
+    <None Remove="Resources\Cards\6C.png" />
+    <None Remove="Resources\Cards\6D.png" />
+    <None Remove="Resources\Cards\6H.png" />
+    <None Remove="Resources\Cards\6S.png" />
+    <None Remove="Resources\Cards\7C.png" />
+    <None Remove="Resources\Cards\7D.png" />
+    <None Remove="Resources\Cards\7H.png" />
+    <None Remove="Resources\Cards\7S.png" />
+    <None Remove="Resources\Cards\8C.png" />
+    <None Remove="Resources\Cards\8D.png" />
+    <None Remove="Resources\Cards\8H.png" />
+    <None Remove="Resources\Cards\8S.png" />
+    <None Remove="Resources\Cards\9C.png" />
+    <None Remove="Resources\Cards\9D.png" />
+    <None Remove="Resources\Cards\9H.png" />
+    <None Remove="Resources\Cards\9S.png" />
+    <None Remove="Resources\Cards\AC.png" />
+    <None Remove="Resources\Cards\AD.png" />
+    <None Remove="Resources\Cards\AH.png" />
+    <None Remove="Resources\Cards\AS.png" />
+    <None Remove="Resources\Cards\AS2.png" />
+    <None Remove="Resources\Cards\back.png" />
+    <None Remove="Resources\Cards\JC.png" />
+    <None Remove="Resources\Cards\JD.png" />
+    <None Remove="Resources\Cards\JH.png" />
+    <None Remove="Resources\Cards\JS.png" />
+    <None Remove="Resources\Cards\KC.png" />
+    <None Remove="Resources\Cards\KD.png" />
+    <None Remove="Resources\Cards\KH.png" />
+    <None Remove="Resources\Cards\KS.png" />
+    <None Remove="Resources\Cards\QC.png" />
+    <None Remove="Resources\Cards\QH.png" />
+    <None Remove="Resources\Cards\QS.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SolvitaireCore\SolvitaireCore.csproj" />
     <ProjectReference Include="..\SolvitaireGuiFunctions\SolvitaireGuiFunctions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Cards\10C.png" />
+    <Resource Include="Resources\Cards\10D.png" />
+    <Resource Include="Resources\Cards\10H.png" />
+    <Resource Include="Resources\Cards\10S.png" />
+    <Resource Include="Resources\Cards\2C.png" />
+    <Resource Include="Resources\Cards\2D.png" />
+    <Resource Include="Resources\Cards\2H.png" />
+    <Resource Include="Resources\Cards\2S.png" />
+    <Resource Include="Resources\Cards\3C.png" />
+    <Resource Include="Resources\Cards\3D.png" />
+    <Resource Include="Resources\Cards\3H.png" />
+    <Resource Include="Resources\Cards\3S.png" />
+    <Resource Include="Resources\Cards\4C.png" />
+    <Resource Include="Resources\Cards\4D.png" />
+    <Resource Include="Resources\Cards\4H.png" />
+    <Resource Include="Resources\Cards\4S.png" />
+    <Resource Include="Resources\Cards\5C.png" />
+    <Resource Include="Resources\Cards\5D.png" />
+    <Resource Include="Resources\Cards\5H.png" />
+    <Resource Include="Resources\Cards\5S.png" />
+    <Resource Include="Resources\Cards\6C.png" />
+    <Resource Include="Resources\Cards\6D.png" />
+    <Resource Include="Resources\Cards\6H.png" />
+    <Resource Include="Resources\Cards\6S.png" />
+    <Resource Include="Resources\Cards\7C.png" />
+    <Resource Include="Resources\Cards\7D.png" />
+    <Resource Include="Resources\Cards\7H.png" />
+    <Resource Include="Resources\Cards\7S.png" />
+    <Resource Include="Resources\Cards\8C.png" />
+    <Resource Include="Resources\Cards\8D.png" />
+    <Resource Include="Resources\Cards\8H.png" />
+    <Resource Include="Resources\Cards\8S.png" />
+    <Resource Include="Resources\Cards\9C.png" />
+    <Resource Include="Resources\Cards\9D.png" />
+    <Resource Include="Resources\Cards\9H.png" />
+    <Resource Include="Resources\Cards\9S.png" />
+    <Resource Include="Resources\Cards\AC.png" />
+    <Resource Include="Resources\Cards\AD.png" />
+    <Resource Include="Resources\Cards\AH.png" />
+    <Resource Include="Resources\Cards\AS.png" />
+    <Resource Include="Resources\Cards\AS2.png" />
+    <Resource Include="Resources\Cards\back.png" />
+    <Resource Include="Resources\Cards\JC.png" />
+    <Resource Include="Resources\Cards\JD.png" />
+    <Resource Include="Resources\Cards\JH.png" />
+    <Resource Include="Resources\Cards\JS.png" />
+    <Resource Include="Resources\Cards\KC.png" />
+    <Resource Include="Resources\Cards\KD.png" />
+    <Resource Include="Resources\Cards\KH.png" />
+    <Resource Include="Resources\Cards\KS.png" />
+    <Resource Include="Resources\Cards\QC.png" />
+    <Resource Include="Resources\Cards\QH.png" />
+    <Resource Include="Resources\Cards\QS.png" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 ﻿namespace SolvitaireCore;
 
-public abstract class Deck<TCard> where TCard : ICard
+public abstract class Deck<TCard> : ICloneable where TCard : ICard
 {
     protected Random Random { get; } = new Random();
     public List<TCard> Cards { get; private set; }
@@ -32,5 +32,12 @@ public abstract class Deck<TCard> where TCard : ICard
             int k = rng.Next(n--);
             (Cards[k], Cards[n]) = (Cards[n], Cards[k]);
         }
+    }
+
+    public object Clone()
+    {
+        var clonedDeck = (Deck<TCard>)Activator.CreateInstance(GetType())!;
+        clonedDeck.Cards = [..Cards];
+        return clonedDeck;
     }
 }

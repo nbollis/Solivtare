@@ -28,6 +28,12 @@ public class GameStateViewModel : BaseViewModel
     public StockPile StockPile => GameState.StockPile;
     public WastePile WastePile => GameState.WastePile;
 
+    public void MakeMove(IMove move)
+    {
+        GameState.MoveCard(move);
+        Refresh();
+    }
+
     public void Refresh() => OnPropertyChanged(string.Empty); // To manually refresh bindings
 }
 

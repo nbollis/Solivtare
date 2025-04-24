@@ -42,7 +42,6 @@ public class GameState
 
     public void DealCards(StandardDeck deck)
     {
-        deck.Shuffle();
         Card[][] tableauCards = new Card[TableauPiles.Count][];
         for (int i = 0; i < TableauPiles.Count; i++)
         {
