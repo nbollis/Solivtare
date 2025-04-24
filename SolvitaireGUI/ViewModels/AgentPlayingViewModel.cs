@@ -7,8 +7,49 @@ namespace SolvitaireGUI;
 
 public class AgentPlayingViewModel : BaseViewModel
 {
+    private Stack<ISolitaireMove> _previousMoves;
     private GameStateViewModel _gameStateViewModel;
     private StandardDeck _deck;
+    public GameStateViewModel GameStateViewModel
+    {
+        get => _gameStateViewModel;
+        set
+        {
+            _gameStateViewModel = value;
+            OnPropertyChanged(nameof(GameStateViewModel));
+        }
+    }
+
+    public AgentPlayingViewModel()
+    {
+        _previousMoves = new();
+        _deck ??= new ObservableStandardDeck(23);
+        _deck.Shuffle();
+
+        var gameState = new SolitaireGameState();
+        gameState.DealCards(_deck);
+
+        GameStateViewModel = new GameStateViewModel(gameState);
+        LegalMoves = new ObservableCollection<ISolitaireMove>(GameStateViewModel.GetLegalMoves());
+        Agent = new RandomAgent();
+        AllAgents = new()
+        {
+            Agent
+        };
+
+        ResetGameCommand = new RelayCommand(ResetGame);
+        MakeMoveCommand = new RelayCommand(AgentMakeMove);
+        UndoMoveCommand = new RelayCommand(UndoMove);
+        NewGameCommand = new RelayCommand(NewGame);
+        MakeSpecificMoveCommand = new DelegateCommand(MakeSpecificMove);
+        StartAgentCommand = new RelayCommand(StartAgent);
+        StopAgentCommand = new RelayCommand(StopAgent);
+    }
+
+
+    #region Agent Playing
+
+    private CancellationTokenSource? _agentCancellationTokenSource;
     private ISolitaireAgent _agent;
 
     public ISolitaireAgent Agent
@@ -21,51 +62,71 @@ public class AgentPlayingViewModel : BaseViewModel
         }
     }
 
-    public GameStateViewModel GameStateViewModel
+    public ObservableCollection<ISolitaireAgent> AllAgents { get; set; }
+
+    public ICommand StartAgentCommand { get; set; }
+    public ICommand StopAgentCommand { get; set; }
+    public ICommand MakeMoveCommand { get; set; }
+
+    private async void StartAgent()
     {
-        get => _gameStateViewModel;
-        set
+        if (_agentCancellationTokenSource != null)
         {
-            _gameStateViewModel = value;
-            OnPropertyChanged(nameof(GameStateViewModel));
+            // Agent is already running
+            return;
+        }
+
+        _agentCancellationTokenSource = new CancellationTokenSource();
+        var token = _agentCancellationTokenSource.Token;
+
+        try
+        {
+            while (!GameStateViewModel.IsGameWon && !token.IsCancellationRequested)
+            {
+                await Task.Run(() =>
+                {
+                    var move = Agent.GetNextMove(LegalMoves);
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        GameStateViewModel.ApplyMove(move);
+                        _previousMoves.Push(move);
+                        Refresh();
+                    });
+                }, token);
+
+                await Task.Delay(100, token); // Optional: Add a small delay for better UI responsiveness
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // Task was canceled, handle if necessary
+        }
+        finally
+        {
+            _agentCancellationTokenSource = null;
         }
     }
 
-    public ICommand StartAgentCommand { get; set; }
-    public ICommand ResetGameCommand { get; set; }
-    public ICommand MakeMoveCommand { get; set; }
-    public ICommand NewGameCommand { get; set; }
-    public ICommand MakeSpecificMoveCommand { get; set; }
-
-    public AgentPlayingViewModel()
+    private void StopAgent()
     {
-        _deck ??= new ObservableStandardDeck();
-        _deck.Shuffle();
-
-        var gameState = new SolitaireGameState();
-        gameState.DealCards(_deck);
-
-        GameStateViewModel = new GameStateViewModel(gameState);
-        LegalMoves = new ObservableCollection<ISolitaireMove>(GameStateViewModel.GetLegalMoves());
-        Agent = new RandomAgent();
-
-
-        ResetGameCommand = new RelayCommand(ResetGame);
-        MakeMoveCommand = new RelayCommand(MakeMove);
-        NewGameCommand = new RelayCommand(NewGame);
-        MakeSpecificMoveCommand = new DelegateCommand(MakeSpecificMove);
-        StartAgentCommand = new RelayCommand(StartAgent);
+        if (_agentCancellationTokenSource != null)
+        {
+            _agentCancellationTokenSource.Cancel();
+            _agentCancellationTokenSource = null;
+        }
     }
 
-    private void ResetGame()
+    private void AgentMakeMove()
     {
-        _deck.FlipAllCardsDown();
-        var gameState = new SolitaireGameState();
-        gameState.DealCards(_deck!);
-
-        GameStateViewModel = new(gameState);
+        var move = Agent.GetNextMove(LegalMoves);
+        GameStateViewModel.ApplyMove(move);
+        _previousMoves.Push(move);
         Refresh();
     }
+
+    #endregion
+
+    #region Human Interaction
 
     private IMove _selectedMove;
     public IMove SelectedMove
@@ -89,18 +150,39 @@ public class AgentPlayingViewModel : BaseViewModel
         }
     }
 
-    private void MakeMove()
-    {
-        var move = Agent.GetNextMove(LegalMoves);
-        GameStateViewModel.ApplyMove(move);
-        Refresh();
-    }
-
+    public ICommand MakeSpecificMoveCommand { get; set; }
+    public ICommand UndoMoveCommand { get; set; }
     private void MakeSpecificMove(object? moveObject)
     {
         if (moveObject is not ISolitaireMove move)
             return;
         GameStateViewModel.ApplyMove(move);
+        _previousMoves.Push(move);
+        Refresh();
+    }
+
+    private void UndoMove()
+    {
+        if (!_previousMoves.TryPop(out var move)) 
+            return;
+        GameStateViewModel.UndoMove(move);
+        Refresh();
+    }
+
+    #endregion
+
+    #region Play Setup
+
+    public ICommand ResetGameCommand { get; set; }
+    public ICommand NewGameCommand { get; set; }
+    private void ResetGame()
+    {
+        _previousMoves.Clear();
+        _deck.FlipAllCardsDown();
+        var gameState = new SolitaireGameState();
+        gameState.DealCards(_deck!);
+
+        GameStateViewModel = new(gameState);
         Refresh();
     }
 
@@ -110,29 +192,13 @@ public class AgentPlayingViewModel : BaseViewModel
         ResetGame();
     }
 
-    private async void StartAgent()
-    {
-        while (!GameStateViewModel.IsGameWon)
-        {
-            await Task.Run(() =>
-            {
-                var move = Agent.GetNextMove(LegalMoves);
-                App.Current.Dispatcher.Invoke(() =>
-                {
-                    GameStateViewModel.ApplyMove(move);
-                    Refresh();
-                });
-            });
-            await Task.Delay(100); // Optional: Add a small delay for better UI responsiveness  
-        }
-    }
+    #endregion
 
     public void Refresh()
     {
         LegalMoves = new ObservableCollection<ISolitaireMove>(GameStateViewModel.GetLegalMoves());
         OnPropertyChanged(nameof(GameStateViewModel));
         OnPropertyChanged(nameof(Agent));
-
     }
 }
 

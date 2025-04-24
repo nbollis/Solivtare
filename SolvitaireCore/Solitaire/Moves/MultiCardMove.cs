@@ -68,6 +68,44 @@ public class MultiCardMove(Pile fromPile, Pile toPile, IEnumerable<Card> cards) 
         }
     }
 
+    public override void Undo(IGameState state)
+    {
+        switch (ToPile)
+        {
+            case TableauPile toTableau when FromPile is TableauPile fromTableau:
+
+                // tableau we pulled from still has cards
+                if (FromPile.TopCard != null)
+                {
+                    // bottom of our stack does not fits on top of this one, so we should flip it back over
+                    if (!FromPile.CanAddCard(Cards[0]))
+                        FromPile.TopCard.IsFaceUp = false;
+
+                }
+
+                toTableau.RemoveCards(Cards);
+                FromPile.Cards.AddRange(Cards);
+                break;
+            case WastePile:
+                foreach (var card in Cards)
+                {
+                    ToPile.RemoveCard(card);
+                    FromPile.Cards.Add(card);
+                    card.IsFaceUp = false;
+                }
+                break;
+            case StockPile:
+                foreach (var card in Cards)
+                {
+                    ToPile.RemoveCard(card);
+                    FromPile.AddCard(card);
+                    card.IsFaceUp = true;
+                }
+                break;
+        }
+
+    }
+
     public override string ToString()
     {
         if (ToPile is WastePile)

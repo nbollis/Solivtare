@@ -3,7 +3,7 @@
 /// <summary>
 /// A move of a single card from one pile to another made by a agent.
 /// </summary>
-public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMove(fromPile, toPile), IMove
+public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMove(fromPile, toPile)
 {
     public Card Card { get; } = card;
 
@@ -26,6 +26,19 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMo
             default:
                 return false;
         }
+    }
+
+    public override void Undo(IGameState state)
+    {
+        ToPile.RemoveCard(Card);
+        switch (FromPile)
+        {
+            case TableauPile:
+                if (FromPile.TopCard != null)
+                    FromPile.TopCard.IsFaceUp = false;
+                break;
+        }
+        FromPile.Cards.Add(Card);
     }
 
     public override void Execute(IGameState state)

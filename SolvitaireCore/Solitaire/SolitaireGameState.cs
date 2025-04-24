@@ -109,6 +109,11 @@ public class SolitaireGameState : IGameState<ISolitaireMove>
         }
     }
 
+    public void UndoMove(ISolitaireMove move)
+    {
+        move.Undo(this);
+    }
+
     #endregion
 
 

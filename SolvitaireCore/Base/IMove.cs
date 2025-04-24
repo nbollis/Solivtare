@@ -7,4 +7,5 @@ public interface IMove
 {
     bool IsValid(IGameState state);
     void Execute(IGameState state);
+    void Undo(IGameState state);
 }

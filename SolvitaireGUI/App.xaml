@@ -8,6 +8,23 @@
         <System:Double x:Key="CardHeight">120</System:Double>
         <System:Double x:Key="CardWidth">80</System:Double>
 
+        <!-- Colors -->
+        <SolidColorBrush x:Key="ButtonColor" Color="#78C2D9" />
+
+
+        <!-- Styles -->
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource ButtonColor}" />
+            <Setter Property="FontWeight" Value="Bold"></Setter>
+        </Style>
+
+        <Style x:Key="RoundedButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="5"/>
+                </Style>
+            </Style.Resources>
+        </Style>
 
     </Application.Resources>
 </Application>

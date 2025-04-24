@@ -13,10 +13,11 @@ public class StandardDeck : Deck
 
 public class ObservableStandardDeck : StandardDeck
 {
-    public ObservableStandardDeck()
+    public ObservableStandardDeck(int seed = 42) : base(seed)
     {
+        Cards.Clear();
         foreach (Suit suit in Enum.GetValues(typeof(Suit)))
-        foreach (Rank rank in Enum.GetValues(typeof(Rank)))
-            Cards.Add(new ObservableCard(suit, rank));
+            foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+                Cards.Add(new ObservableCard(suit, rank));
     }
 }

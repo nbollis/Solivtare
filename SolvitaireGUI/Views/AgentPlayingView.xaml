@@ -10,14 +10,56 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="400"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
-            <StackPanel HorizontalAlignment="Left" Width="400">
-                <Button Content="Make Move" 
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Column="0"  Grid.Row="0">
+                <Label Content="Agent Types" />
+                <ListView  ItemsSource="{Binding AllAgents}" 
+                           SelectedItem="{Binding Agent, Mode=TwoWay}">
+                </ListView>
+            </StackPanel>
+
+            <Grid Grid.Column="1" Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Button Grid.Column="0" Grid.Row="0" Content="Make Move" Width="100" Height="40"  
+                        Style="{StaticResource RoundedButtonStyle}"
                         Command="{Binding MakeMoveCommand}" />
+                <Button Grid.Column="1" Grid.Row="0" Content="Undo Move" Width="100" Height="40" 
+                        Style="{StaticResource RoundedButtonStyle}"
+                        Command="{Binding UndoMoveCommand}" />
+                <Button Grid.Column="0" Grid.Row="1" Content="Start Agent" Width="100" Height="40"
+                        Style="{StaticResource RoundedButtonStyle}"
+                        Command="{Binding StartAgentCommand}" />
+                <Button Grid.Column="1" Grid.Row="1" Content="Stop Agent" Width="100" Height="40"
+                        Style="{StaticResource RoundedButtonStyle}"
+                        Command="{Binding StopAgentCommand}" />
+            </Grid>
+
+            <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" 
+                        HorizontalAlignment="Left" >
+                
                 <Button Content="Reset Game" 
                         Command="{Binding ResetGameCommand}" />
                 <Button Content="New Game" 
@@ -29,8 +71,6 @@
                 <Button Content="Make Specific Move"  
                        Command="{Binding MakeSpecificMoveCommand}"  
                        CommandParameter="{Binding SelectedItem, ElementName=LegalMovesListView}"/>
-
-                <Button Content="Start Agent" Command="{Binding StartAgentCommand}"></Button>
 
             </StackPanel>
         </Grid>

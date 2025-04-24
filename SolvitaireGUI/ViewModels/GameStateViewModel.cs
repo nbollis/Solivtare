@@ -28,6 +28,12 @@ public class GameStateViewModel : BaseViewModel
         Sync();
     }
 
+    public void UndoMove(ISolitaireMove move)
+    {
+        BaseGameState.UndoMove(move);
+        Sync();
+    }
+
     public IEnumerable<ISolitaireMove> GetLegalMoves()
     {
         return BaseGameState.GetLegalMoves();
