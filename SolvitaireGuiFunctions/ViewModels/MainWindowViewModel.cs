@@ -19,11 +19,6 @@ public class MainWindowViewModel : BaseViewModel
 
     public MainWindowViewModel()
     {
-        var gameState = new GameState();
-        var deck = new StandardDeck();
-        deck.Shuffle();
-        gameState.DealCards(deck);
         AgentPlayingViewModel = new AgentPlayingViewModel();
-        AgentPlayingViewModel.GameStateViewModel.GameState = gameState;
     }
 }

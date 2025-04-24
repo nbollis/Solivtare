@@ -56,6 +56,7 @@ public abstract class Pile : INotifyPropertyChanged
         if (!CanAddCard(card))
             throw new InvalidOperationException($"Cannot add {card} to this pile.");
         Cards.Add(card);
+        OnPropertyChanged(nameof(TopCard));
     }
 
     /// <summary>
@@ -71,6 +72,7 @@ public abstract class Pile : INotifyPropertyChanged
                 throw new InvalidOperationException($"Cannot add {card} to this pile.");
             Cards.Add(card);
         }
+        OnPropertyChanged(nameof(TopCard));
     }
 
     public virtual bool CanRemoveCard(Card card)
@@ -83,5 +85,6 @@ public abstract class Pile : INotifyPropertyChanged
         if (!CanRemoveCard(card))
             throw new InvalidOperationException($"Cannot remove {card} from this pile.");
         Cards.Remove(card);
+        OnPropertyChanged(nameof(TopCard));
     }
 }

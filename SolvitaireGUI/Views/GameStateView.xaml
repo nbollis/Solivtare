@@ -12,12 +12,19 @@
     <UserControl.Resources>
         <local:TopCardConverter x:Key="TopCardConverter" />
         <local:TakeLastConverter x:Key="TakeLastConverter" />
-        <local:CardToImagePathConverter x:Key="CardToImageConverter" />
+        <local:CardToImagePathMultiConverter x:Key="CardToImageMultiConverter" />
         <local:FanOffsetConverter x:Key="FanOffsetConverter"/>
         <DataTemplate x:Key="CardTemplate">
             <Grid>
-                <Image Width="{StaticResource CardWidth}" Height="{StaticResource CardHeight}"
-                       Source="{Binding  Converter={StaticResource CardToImageConverter}}" />
+                <Image Width="{StaticResource CardWidth}" Height="{StaticResource CardHeight}">
+                    <Image.Source>
+                        <MultiBinding Converter="{StaticResource CardToImageMultiConverter}">
+                            <Binding Path="IsFaceUp" />
+                            <Binding Path="." />
+                            <!-- the full Card object -->
+                        </MultiBinding>
+                    </Image.Source>
+                </Image>
             </Grid>
         </DataTemplate>
         <ItemsPanelTemplate x:Key="FannedPanel">
@@ -51,7 +58,18 @@
 
         <ContentControl Grid.Column="1" Grid.Row="1" DataContext="{Binding StockPile}">
             <Grid>
-                <Image Width="80" Height="120" Source="/Resources/Cards/back.png" />
+                <Image Width="80" Height="120">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Source" Value="/Resources/Cards/back.png" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Cards.Count}" Value="0">
+                                    <Setter Property="Source" Value="{x:Null}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
             </Grid>
         </ContentControl>
 
@@ -86,11 +104,15 @@
                       ItemsSource="{Binding FoundationPiles}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Border BorderBrush="LightSlateGray" BorderThickness="2" 
-                            CornerRadius="20" Margin="2 0">
-                        <ContentControl Content="{Binding Cards, Converter={StaticResource TopCardConverter}}"
-                                        ContentTemplate="{StaticResource CardTemplate}" />
-                    </Border>
+                    <StackPanel>
+                        <!--<TextBlock Text="{Binding Cards.Count}" />-->
+                        <!--<ItemsControl ItemsSource="{Binding Cards, Converter={StaticResource TopCardConverter}}"
+                                      ItemTemplate="{StaticResource CardTemplate}"
+                                   />-->
+        
+                        <ContentControl Content="{Binding TopCard}" ContentTemplate="{StaticResource CardTemplate}" />
+   
+                    </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
             <ItemsControl.ItemsPanel>
@@ -111,19 +133,10 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <ItemsControl ItemsSource="{Binding Cards}"
+                                  ItemTemplate="{StaticResource CardTemplate}"
                                   ItemsPanel="{StaticResource FannedPanel}"
                                   ItemContainerStyle="{StaticResource FannedItemStyle}"
-                                  AlternationCount="1000" >
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Image Width="{StaticResource CardWidth}" Height="{StaticResource CardHeight}"
-                                       Source="{Binding IsFaceUp,  
-                                    Converter={StaticResource CardToImageConverter},
-                                    ConverterParameter={Binding }}" />
-
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                                  AlternationCount="1000" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
             <ItemsControl.Margin>

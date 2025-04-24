@@ -7,7 +7,7 @@ namespace SolvitaireCore;
 /// </summary>
 /// <param name="suit"></param>
 /// <param name="rank"></param>
-public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard
+public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard, INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 

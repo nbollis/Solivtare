@@ -30,6 +30,8 @@
                        Command="{Binding MakeSpecificMoveCommand}"  
                        CommandParameter="{Binding SelectedItem, ElementName=LegalMovesListView}"/>
 
+                <Button Content="Start Agent" Command="{Binding StartAgentCommand}"></Button>
+
             </StackPanel>
         </Grid>
 

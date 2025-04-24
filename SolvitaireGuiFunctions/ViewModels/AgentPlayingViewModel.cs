@@ -28,7 +28,7 @@ public class AgentPlayingViewModel : BaseViewModel
     public GameStateViewModel GameStateViewModel { get; set; }
 
 
-
+    public ICommand StartAgentCommand { get; set; }
     public ICommand ResetGameCommand { get; set; }
     public ICommand MakeMoveCommand { get; set; }
     public ICommand NewGameCommand { get; set; }
@@ -55,7 +55,10 @@ public class AgentPlayingViewModel : BaseViewModel
 
     private void ResetGame()
     {
-        var deck = _deck.Clone() as StandardDeck;
+        var deck = _deck.Clone() as StandardDeck ?? throw new InvalidCastException();
+        foreach (var card in deck)
+            card.IsFaceUp = false;
+
         var gameState = new GameState();
         gameState.DealCards(deck!);
         GameStateViewModel.GameState = gameState;
@@ -94,7 +97,7 @@ public class AgentPlayingViewModel : BaseViewModel
     private void MakeSpecificMove(object? moveObject)
     {
         if (moveObject is not IMove move)
-            throw new ArgumentException("Move must be of type IMove", nameof(moveObject));
+            return;
         GameStateViewModel.MakeMove(move);
         Refresh();
     }
@@ -104,6 +107,7 @@ public class AgentPlayingViewModel : BaseViewModel
         _deck.Shuffle();
         Refresh();
     }
+
 
     public void Refresh()
     {

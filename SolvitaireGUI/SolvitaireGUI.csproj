@@ -60,6 +60,7 @@
     <None Remove="Resources\Cards\KH.png" />
     <None Remove="Resources\Cards\KS.png" />
     <None Remove="Resources\Cards\QC.png" />
+    <None Remove="Resources\Cards\QD.png" />
     <None Remove="Resources\Cards\QH.png" />
     <None Remove="Resources\Cards\QS.png" />
   </ItemGroup>
@@ -121,6 +122,7 @@
     <Resource Include="Resources\Cards\KH.png" />
     <Resource Include="Resources\Cards\KS.png" />
     <Resource Include="Resources\Cards\QC.png" />
+    <Resource Include="Resources\Cards\QD.png" />
     <Resource Include="Resources\Cards\QH.png" />
     <Resource Include="Resources\Cards\QS.png" />
   </ItemGroup>

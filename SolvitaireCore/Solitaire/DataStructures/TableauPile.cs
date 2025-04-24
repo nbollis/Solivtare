@@ -22,7 +22,7 @@ public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) 
 
         // if the pile is empty, the top card to be added must be a king
         if (IsEmpty)
-            return cards[^1].Rank == Rank.King;
+            return cards[0].Rank == Rank.King;
 
         // if the bottom card to add is greater than the top card, do not add
         if (cards[0].Rank > TopCard.Rank)

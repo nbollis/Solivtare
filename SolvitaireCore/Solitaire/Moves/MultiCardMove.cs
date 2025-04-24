@@ -37,6 +37,8 @@ public class MultiCardMove(Pile fromPile, Pile toPile, IEnumerable<Card> cards) 
                 case TableauPile when FromPile is TableauPile fromTableau:
                     fromTableau.RemoveCards(Cards);
                     ToPile.AddCards(Cards);
+                    if (FromPile.TopCard != null)
+                        FromPile.TopCard.IsFaceUp = true;
                     break;
 
                 case WastePile:
