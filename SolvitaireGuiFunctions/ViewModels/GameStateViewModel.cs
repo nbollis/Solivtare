@@ -31,7 +31,10 @@ public class GameStateViewModel : BaseViewModel
     public void MakeMove(IMove move)
     {
         GameState.MoveCard(move);
-        Refresh();
+        OnPropertyChanged(nameof(TableauPiles));
+        OnPropertyChanged(nameof(FoundationPiles));
+        OnPropertyChanged(nameof(StockPile));
+        OnPropertyChanged(nameof(WastePile));
     }
 
     public void Refresh() => OnPropertyChanged(string.Empty); // To manually refresh bindings

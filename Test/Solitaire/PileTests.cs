@@ -8,13 +8,13 @@ namespace Test.Solitaire
         public class PileTests
         {
             [Test]
-            public void Pile_TopCard_EmptyPile_ShouldThrowInvalidOperationException()
+            public void Pile_TopCard_EmptyPile_ShouldBeNull()
             {
                 // Arrange  
                 var pile = new TableauPile();
 
                 // Act & Assert  
-                Assert.That(() => { var topCard = pile.TopCard; }, Throws.InvalidOperationException);
+                Assert.That(pile.TopCard, Is.Null);
             }
 
             [Test]

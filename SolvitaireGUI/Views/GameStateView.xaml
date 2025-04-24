@@ -14,7 +14,7 @@
         <local:FanOffsetConverter x:Key="FanOffsetConverter"/>
         <DataTemplate x:Key="CardTemplate">
             <Grid>
-                <Image Width="80" Height="120"
+                <Image Width="{StaticResource CardWidth}" Height="{StaticResource CardHeight}"
                        Source="{Binding Converter={StaticResource CardToImageConverter}}" />
             </Grid>
         </DataTemplate>
@@ -27,14 +27,16 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Background="Green">
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
+            <RowDefinition Height="10" />
+            <RowDefinition Height="140" />
             <RowDefinition Height="2*" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
@@ -42,18 +44,16 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="10" />
         </Grid.ColumnDefinitions>
 
-        <ItemsControl Grid.Column="0" Grid.Row="0" ItemsSource="{Binding StockPile.Cards}"
-                      ItemTemplate="{StaticResource CardTemplate}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Vertical" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-        </ItemsControl>
+        <ContentControl Grid.Column="1" Grid.Row="1" DataContext="{Binding StockPile}">
+            <Grid>
+                <Image Width="80" Height="120" Source="/Resources/Cards/back.png" />
+            </Grid>
+        </ContentControl>
 
-        <ItemsControl Grid.Column="1" Grid.Row="0" ItemsSource="{Binding WastePile.Cards}"
+        <ItemsControl Grid.Column="2" Grid.Row="2" ItemsSource="{Binding WastePile.Cards}"
                       ItemTemplate="{StaticResource CardTemplate}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -63,7 +63,7 @@
         </ItemsControl>
 
         <!-- DataTemplate for FoundationPiles -->
-        <ItemsControl Grid.Column="3" Grid.Row="0" Grid.ColumnSpan="4" 
+        <ItemsControl Grid.Column="4" Grid.Row="1" Grid.ColumnSpan="4" 
                       ItemsSource="{Binding FoundationPiles}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
@@ -80,7 +80,8 @@
         </ItemsControl>
 
         <!-- DataTemplate for TableauPiles -->
-        <ItemsControl Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="7" ItemsSource="{Binding TableauPiles}">
+        <ItemsControl Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="7" 
+                      ItemsSource="{Binding TableauPiles}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid Rows="1" Columns="7" />

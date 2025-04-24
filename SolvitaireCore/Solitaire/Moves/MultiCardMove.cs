@@ -1,8 +1,8 @@
 ﻿namespace SolvitaireCore;
 
-public class MultiCardMove(Pile fromPile, Pile toPile, List<Card> cards) : SolitaireMove(fromPile, toPile), IMove
+public class MultiCardMove(Pile fromPile, Pile toPile, IEnumerable<Card> cards) : SolitaireMove(fromPile, toPile), IMove
 {
-    public List<Card> Cards { get; } = cards;
+    public List<Card> Cards { get; } = cards.ToList();
 
     public override bool IsValid(GameState state)
     {
@@ -35,8 +35,8 @@ public class MultiCardMove(Pile fromPile, Pile toPile, List<Card> cards) : Solit
             switch (ToPile)
             {
                 case TableauPile when FromPile is TableauPile fromTableau:
-                    fromTableau.RemoveCards(cards);
-                    ToPile.AddCards(cards);
+                    fromTableau.RemoveCards(Cards);
+                    ToPile.AddCards(Cards);
                     break;
 
                 case WastePile:

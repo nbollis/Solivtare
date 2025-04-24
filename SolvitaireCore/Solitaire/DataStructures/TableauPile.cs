@@ -48,7 +48,12 @@ public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) 
         if (!IsValidCardSet(cards))
             throw new InvalidOperationException($"Cards to remove are not a valid set");
 
-        Cards.RemoveRange(startIndex, cards.Count);
+        // Replace RemoveRange with a loop to remove cards individually  
+        for (int i = cards.Count - 1; i >= 0; i--)
+        {
+            Cards.RemoveAt(startIndex + i);
+        }
+
         return true;
     }
 

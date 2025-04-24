@@ -1,20 +1,39 @@
-﻿namespace SolvitaireCore;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
+namespace SolvitaireCore;
 
 /// <summary>
 /// An abstract stack of cards
 /// </summary>
-public abstract class Pile
+public abstract class Pile : INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string propertyName = null!) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    private ObservableCollection<Card> _cards = new();
+
     /// <summary>
     /// Represents a pile of cards in a solitaire game
     /// </summary>
     /// <remarks> Top card is the last card in the list. </remarks>
-    public List<Card> Cards { get; } = [];
+    public ObservableCollection<Card> Cards
+    {
+        get => _cards;
+        set
+        {
+            _cards = value;
+            OnPropertyChanged();
+        }
+    }
+
     public int Count => Cards.Count;
     public bool IsEmpty => Count == 0;
-
-    public Card TopCard => IsEmpty ? throw new InvalidOperationException("Pile is empty.") : Cards[^1];
-    public Card BottomCard => IsEmpty ? throw new InvalidOperationException("Pile is empty.") : Cards[0];
+    public Card TopCard => Cards.LastOrDefault()!;
+    public Card BottomCard => Cards.FirstOrDefault()!;
 
     protected Pile(IEnumerable<Card>? initialCards = null)
     {

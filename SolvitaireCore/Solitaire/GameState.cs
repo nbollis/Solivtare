@@ -1,19 +1,67 @@
-﻿namespace SolvitaireCore;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
-public class GameState
+namespace SolvitaireCore;
+
+public class GameState : INotifyPropertyChanged
 {
     private static readonly SolitaireMoveGenerator MoveGenerator = new();
     public readonly int CardsPerCycle;
 
-    public List<FoundationPile> FoundationPiles { get; } = new();
-    public List<TableauPile> TableauPiles { get; } = new();
-    public StockPile StockPile { get; } = new();
-    public WastePile WastePile { get; } = new();
+    private List<TableauPile> _tableauPiles;
+    public List<TableauPile> TableauPiles
+    {
+        get => _tableauPiles;
+        set
+        {
+            _tableauPiles = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private List<FoundationPile> _foundationPiles;
+    public List<FoundationPile> FoundationPiles
+    {
+        get => _foundationPiles;
+        set
+        {
+            _foundationPiles = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private StockPile _stockPile;
+    public StockPile StockPile
+    {
+        get => _stockPile;
+        set
+        {
+            _stockPile = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private WastePile _wastePile;
+    public WastePile WastePile
+    {
+        get => _wastePile;
+        set
+        {
+            _wastePile = value;
+            OnPropertyChanged();
+        }
+    }
 
     public bool IsGameWon => FoundationPiles.All(pile => pile.Count == 13);
 
     public GameState(int cardsPerCycle = 3)
     {
+        StockPile = new StockPile();
+        WastePile = new WastePile();
+        TableauPiles = new List<TableauPile>();
+        FoundationPiles = new List<FoundationPile>();
+
         for (int i = 0; i < 4; i++)
         {
             FoundationPiles.Add(new FoundationPile((Suit)i));
@@ -38,6 +86,8 @@ public class GameState
         }
         StockPile.Cards.Clear();
         WastePile.Cards.Clear();
+
+        RefreshUi();
     }
 
     public void DealCards(StandardDeck deck)
@@ -53,8 +103,8 @@ public class GameState
         }
         for (int i = 0; i < TableauPiles.Count; i++)
         {
-            // cards.addrange here instead of add range so we do not trigger the validity check on deal
-            TableauPiles[i].Cards.AddRange(tableauCards[i]);
+            // new collection here instead of add range so we do not trigger the validity check on deal
+            TableauPiles[i].Cards = new ObservableCollection<Card>(tableauCards[i]);
             TableauPiles[i].Cards[^1].IsFaceUp = true; // flip the last card face up
         }
 
@@ -62,6 +112,8 @@ public class GameState
         {
             StockPile.AddCard(deck.DrawCard());
         }
+
+        RefreshUi();
     }
 
     /// <summary>
@@ -85,5 +137,22 @@ public class GameState
         {
             throw new InvalidOperationException("Invalid move");
         }
+        RefreshUi();
     }
+
+    #region UI Interaction
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private void OnPropertyChanged([CallerMemberName] string propertyName = null!) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    public void RefreshUi()
+    {
+        OnPropertyChanged(nameof(StockPile));
+        OnPropertyChanged(nameof(WastePile));
+        OnPropertyChanged(nameof(TableauPiles));
+        OnPropertyChanged(nameof(FoundationPiles));
+    }
+
+    #endregion
 }
