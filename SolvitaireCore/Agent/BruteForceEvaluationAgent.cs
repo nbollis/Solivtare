@@ -3,14 +3,15 @@
 /// <summary>  
 /// A simple evaluation agent that uses a heuristic evaluation function to select the best move.  
 /// </summary>  
-public class BruteForceEvaluationAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) : ISolitaireAgent
+public class BruteForceEvaluationAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) 
+    : ISolitaireAgent
 {
     public string Name => "Brute Force Agent";
     public int LookAheadSteps { get; } = maxLookahead;
 
-    public ISolitaireMove GetNextMove(SolitaireGameState gameState)
+    public SolitaireMove GetNextMove(SolitaireGameState gameState)
     {
-        ISolitaireMove bestMove = null;
+        SolitaireMove bestMove = null;
         double bestScore = double.NegativeInfinity;
 
         foreach (var move in gameState.GetLegalMoves())

@@ -8,9 +8,9 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
     public string Name => "AlphaBeta Agent";
     public int LookAheadSteps { get; } = maxLookahead;
 
-    public ISolitaireMove GetNextMove(SolitaireGameState gameState)
+    public SolitaireMove GetNextMove(SolitaireGameState gameState)
     {
-        ISolitaireMove bestMove = null;
+        SolitaireMove bestMove = null;
         double bestScore = double.NegativeInfinity;
         double alpha = double.NegativeInfinity;
         double beta = double.PositiveInfinity;
@@ -41,7 +41,7 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
         return bestMove ?? throw new InvalidOperationException("No valid moves available.");
     }
 
-    private IEnumerable<ISolitaireMove> OrderMoves(SolitaireGameState gameState, IEnumerable<ISolitaireMove> moves)
+    private IEnumerable<SolitaireMove> OrderMoves(SolitaireGameState gameState, IEnumerable<SolitaireMove> moves)
     {
         return moves.OrderByDescending(move =>
         {

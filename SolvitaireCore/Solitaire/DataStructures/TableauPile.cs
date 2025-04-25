@@ -4,9 +4,9 @@
 /// Pile of cards that can be played on (columns in solitaire).
 /// </summary>
 /// <param name="initialCards"></param>
-public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) : Pile(initialCards)
+public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) 
+    : Pile(index, initialCards)
 {
-    public readonly int Index = index;
     public override bool CanAddCard(Card card)
     {
         if (IsEmpty)

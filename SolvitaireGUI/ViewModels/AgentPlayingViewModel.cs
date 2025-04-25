@@ -7,7 +7,7 @@ namespace SolvitaireGUI;
 
 public class AgentPlayingViewModel : BaseViewModel
 {
-    private readonly Stack<ISolitaireMove> _previousMoves;
+    private readonly Stack<SolitaireMove> _previousMoves;
     private GameStateViewModel _gameStateViewModel;
     private readonly StandardDeck _deck;
     public GameStateViewModel GameStateViewModel
@@ -28,9 +28,8 @@ public class AgentPlayingViewModel : BaseViewModel
 
         var gameState = new SolitaireGameState();
         gameState.DealCards(_deck);
-
         GameStateViewModel = new GameStateViewModel(gameState);
-        LegalMoves = new ObservableCollection<ISolitaireMove>(GameStateViewModel.GetLegalMoves());
+        LegalMoves = new ObservableCollection<SolitaireMove>(GameStateViewModel.GetLegalMoves());
         Agent = new RandomAgent();
         AllAgents = new()
         {
@@ -38,6 +37,8 @@ public class AgentPlayingViewModel : BaseViewModel
             new BruteForceEvaluationAgent(new SimpleSolitaireEvaluator()),
             new AlphaBetaEvaluationAgent(new SecondSolitaireEvaluator()),
         };
+
+        _shadowGameState = GameStateViewModel.BaseGameState.Clone();
 
         ResetGameCommand = new RelayCommand(ResetGame);
         MakeMoveCommand = new RelayCommand(AgentMakeMove);
@@ -51,6 +52,7 @@ public class AgentPlayingViewModel : BaseViewModel
 
     #region Agent Playing
 
+    private SolitaireGameState _shadowGameState; // Used during gameplay to not update UI while moves are made and unmade
     private CancellationTokenSource? _agentCancellationTokenSource;
     private ISolitaireAgent _agent;
 
@@ -85,16 +87,14 @@ public class AgentPlayingViewModel : BaseViewModel
         {
             while (!GameStateViewModel.IsGameWon && !token.IsCancellationRequested)
             {
-                await Task.Run(() =>
-                {
-                    var move = Agent.GetNextMove(GameStateViewModel.BaseGameState);
-                    App.Current.Dispatcher.Invoke(() =>
-                    {
-                        GameStateViewModel.ApplyMove(move);
-                        _previousMoves.Push(move);
-                        Refresh();
-                    });
-                }, token);
+                // Use the shadow game state for the agent's search
+                var move = await Task.Run(() => Agent.GetNextMove(_shadowGameState), token);
+
+                // Apply the move to the real game state and update the shadow state
+                GameStateViewModel.ApplyMove(move);
+                _shadowGameState.ExecuteMove(move);
+                _previousMoves.Push(move);
+                Refresh();
 
                 await Task.Delay(100, token); // Optional: Add a small delay for better UI responsiveness
             }
@@ -120,8 +120,12 @@ public class AgentPlayingViewModel : BaseViewModel
 
     private void AgentMakeMove()
     {
-        var move = Agent.GetNextMove(GameStateViewModel.BaseGameState);
+        // Use the shadow game state for the agent's search
+        var move = Agent.GetNextMove(_shadowGameState);
+
+        // Apply the move to the real game state and update the shadow state
         GameStateViewModel.ApplyMove(move);
+        _shadowGameState.ExecuteMove(move);
         _previousMoves.Push(move);
         Refresh();
     }
@@ -130,8 +134,8 @@ public class AgentPlayingViewModel : BaseViewModel
 
     #region Human Interaction
 
-    private IMove _selectedMove;
-    public IMove SelectedMove
+    private SolitaireMove _selectedMove;
+    public SolitaireMove SelectedMove
     {
         get => _selectedMove;
         set
@@ -141,8 +145,8 @@ public class AgentPlayingViewModel : BaseViewModel
         }
     }
 
-    private ObservableCollection<ISolitaireMove> _legalMoves;
-    public ObservableCollection<ISolitaireMove> LegalMoves
+    private ObservableCollection<SolitaireMove> _legalMoves;
+    public ObservableCollection<SolitaireMove> LegalMoves
     {
         get => _legalMoves;
         set
@@ -156,18 +160,21 @@ public class AgentPlayingViewModel : BaseViewModel
     public ICommand UndoMoveCommand { get; set; }
     private void MakeSpecificMove(object? moveObject)
     {
-        if (moveObject is not ISolitaireMove move)
+        if (moveObject is not SolitaireMove move)
             return;
+
         GameStateViewModel.ApplyMove(move);
+        _shadowGameState.ExecuteMove(move);
         _previousMoves.Push(move);
         Refresh();
     }
 
     private void UndoMove()
     {
-        if (!_previousMoves.TryPop(out var move)) 
+        if (!_previousMoves.TryPop(out var move))
             return;
         GameStateViewModel.UndoMove(move);
+        _shadowGameState.UndoMove(move);
         Refresh();
     }
 
@@ -185,6 +192,7 @@ public class AgentPlayingViewModel : BaseViewModel
         gameState.DealCards(_deck!);
 
         GameStateViewModel = new(gameState);
+        _shadowGameState = gameState.Clone(); // Sync the shadow state
         Refresh();
     }
 
@@ -198,7 +206,7 @@ public class AgentPlayingViewModel : BaseViewModel
 
     public void Refresh()
     {
-        LegalMoves = new ObservableCollection<ISolitaireMove>(GameStateViewModel.GetLegalMoves());
+        LegalMoves = new ObservableCollection<SolitaireMove>(GameStateViewModel.GetLegalMoves());
         OnPropertyChanged(nameof(GameStateViewModel));
         OnPropertyChanged(nameof(Agent));
     }

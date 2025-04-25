@@ -3,21 +3,26 @@
 /// <summary>
 /// A move of a single card from one pile to another made by a agent.
 /// </summary>
-public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMove(fromPile, toPile)
+public class SingleCardMove(int fromPileIndex, int toPileIndex, Card card) 
+    : SolitaireMove(fromPileIndex, toPileIndex), IMove<SolitaireGameState>
 {
     public Card Card { get; } = card;
     private bool _originalIsFaceUp;
     private bool? _originalPreviousTableauCardIsFaceUp = null;
-    public override bool IsValid()
+
+    public override bool IsValid(SolitaireGameState gameState)
     {
-        if (FromPile.IsEmpty || !FromPile.TopCard.Equals(Card))
+        var fromPile = gameState.GetPileByIndex(FromPileIndex);
+        var toPile = gameState.GetPileByIndex(ToPileIndex);
+
+        if (fromPile.IsEmpty || !fromPile.TopCard.Equals(Card))
             return false;
 
-        switch (ToPile)
+        switch (toPile)
         {
             case FoundationPile:
             case TableauPile:
-                return ToPile.CanAddCard(Card);
+                return toPile.CanAddCard(Card);
 
             case WastePile:
                 return true; // Stock and Waste piles accept any card  
@@ -29,39 +34,45 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMo
         }
     }
 
-    public override void Undo()
+    public override void Undo(SolitaireGameState gameState)
     {
-        ToPile.RemoveCard(Card);
-        switch (FromPile)
+        var fromPile = gameState.GetPileByIndex(FromPileIndex);
+        var toPile = gameState.GetPileByIndex(ToPileIndex);
+
+        toPile.RemoveCard(Card);
+        switch (fromPile)
         {
-            case TableauPile when ToPile is TableauPile:
-                if (FromPile.TopCard != null && _originalPreviousTableauCardIsFaceUp != null)
+            case TableauPile when toPile is TableauPile:
+                if (fromPile.TopCard != null && _originalPreviousTableauCardIsFaceUp != null)
                 {
-                    FromPile.TopCard.IsFaceUp = _originalPreviousTableauCardIsFaceUp.Value;
+                    fromPile.TopCard.IsFaceUp = _originalPreviousTableauCardIsFaceUp.Value;
                 }
                 break;
         }
         Card.IsFaceUp = _originalIsFaceUp; // Restore the original face-up state
-        FromPile.Cards.Add(Card);
+        fromPile.Cards.Add(Card);
     }
 
-    public override void Execute()
+    public override void Execute(SolitaireGameState gameState)
     {
-        if (IsValid())
+        var fromPile = gameState.GetPileByIndex(FromPileIndex);
+        var toPile = gameState.GetPileByIndex(ToPileIndex);
+
+        if (IsValid(gameState))
         {
             _originalIsFaceUp = Card.IsFaceUp; // Save the original state
-            FromPile.RemoveCard(Card);
-            switch (FromPile)
+            fromPile.RemoveCard(Card);
+            switch (fromPile)
             {
                 case TableauPile:
-                    if (FromPile.TopCard != null)
+                    if (fromPile.TopCard != null)
                     {
-                        _originalPreviousTableauCardIsFaceUp = FromPile.TopCard.IsFaceUp;
-                        FromPile.TopCard.IsFaceUp = true;
+                        _originalPreviousTableauCardIsFaceUp = fromPile.TopCard.IsFaceUp;
+                        fromPile.TopCard.IsFaceUp = true;
                     }
                     break;
             }
-            ToPile.AddCard(Card);
+            toPile.AddCard(Card);
         }
         else
         {
@@ -69,5 +80,5 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMo
         }
     }
 
-    public override string ToString() => $"Move {Card} from {FromPile} to {ToPile}";
+    public override string ToString() => $"Move {Card} from {FromPileIndex} to {ToPileIndex}";
 }

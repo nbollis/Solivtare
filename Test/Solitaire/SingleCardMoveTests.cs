@@ -9,13 +9,15 @@ public class SingleCardMoveTests
     public void SingleCardMove_IsValid_ValidMoveToFoundation_ShouldReturnTrue()
     {
         // Arrange
-        var foundationPile = new FoundationPile(Suit.Hearts);
-        var tableauPile = new TableauPile(0, new List<Card> { new Card(Suit.Hearts, Rank.Ace) });
-        var card = tableauPile.TopCard;
-        var move = new SingleCardMove(tableauPile, foundationPile, card);
+        var gameState = new SolitaireGameState();
+        var foundationPile = gameState.FoundationPiles.First(p => p.Suit == Suit.Hearts);
+        var tableauPile = gameState.TableauPiles[0];
+        tableauPile.Cards.Add(new Card(Suit.Hearts, Rank.Ace, true));
+        var card = tableauPile.TopCard!;
+        var move = new SingleCardMove(tableauPile.Index, foundationPile.Index, card);
 
         // Act
-        var result = move.IsValid();
+        var result = move.IsValid(gameState);
 
         // Assert
         Assert.That(result, Is.True);
@@ -25,13 +27,15 @@ public class SingleCardMoveTests
     public void SingleCardMove_IsValid_InvalidMoveToFoundation_ShouldReturnFalse()
     {
         // Arrange
-        var foundationPile = new FoundationPile(Suit.Hearts);
-        var tableauPile = new TableauPile(0, new List<Card> { new Card(Suit.Spades, Rank.Ace) });
-        var card = tableauPile.TopCard;
-        var move = new SingleCardMove(tableauPile, foundationPile, card);
+        var gameState = new SolitaireGameState();
+        var foundationPile = gameState.FoundationPiles.First(p => p.Suit == Suit.Hearts);
+        var tableauPile = gameState.TableauPiles[0];
+        tableauPile.Cards.Add(new Card(Suit.Spades, Rank.Ace, true));
+        var card = tableauPile.TopCard!;
+        var move = new SingleCardMove(tableauPile.Index, foundationPile.Index, card);
 
         // Act
-        var result = move.IsValid();
+        var result = move.IsValid(gameState);
 
         // Assert
         Assert.That(result, Is.False);
@@ -41,13 +45,16 @@ public class SingleCardMoveTests
     public void SingleCardMove_IsValid_ValidMoveToTableau_ShouldReturnTrue()
     {
         // Arrange
-        var from = new TableauPile(0, new List<Card> { new Card(Suit.Hearts, Rank.Queen) });
-        var to = new TableauPile(1, new List<Card> { new Card(Suit.Spades, Rank.King) });
-        var card = from.TopCard;
-        var move = new SingleCardMove(from, to, card);
+        var gameState = new SolitaireGameState();
+        var from = gameState.TableauPiles[0];
+        var to = gameState.TableauPiles[1];
+        from.Cards.Add(new Card(Suit.Hearts, Rank.Queen, true));
+        to.Cards.Add(new Card(Suit.Spades, Rank.King, true));
+        var card = from.TopCard!;
+        var move = new SingleCardMove(from.Index, to.Index, card);
 
         // Act
-        var result = move.IsValid();
+        var result = move.IsValid(gameState);
 
         // Assert
         Assert.That(result, Is.True);
@@ -57,13 +64,16 @@ public class SingleCardMoveTests
     public void SingleCardMove_IsValid_InvalidMoveToTableau_ShouldReturnFalse()
     {
         // Arrange
-        var to = new TableauPile(0, new List<Card> { new Card(Suit.Hearts, Rank.Queen) });
-        var from = new TableauPile(1, new List<Card> { new Card(Suit.Hearts, Rank.King) });
-        var card = from.TopCard;
-        var move = new SingleCardMove(from, to, card);
+        var gameState = new SolitaireGameState();
+        var from = gameState.TableauPiles[0];
+        var to = gameState.TableauPiles[1];
+        from.Cards.Add(new Card(Suit.Hearts, Rank.King, true));
+        to.Cards.Add(new Card(Suit.Hearts, Rank.Queen, true));
+        var card = from.TopCard!;
+        var move = new SingleCardMove(from.Index, to.Index, card);
 
         // Act
-        var result = move.IsValid();
+        var result = move.IsValid(gameState);
 
         // Assert
         Assert.That(result, Is.False);
@@ -73,13 +83,15 @@ public class SingleCardMoveTests
     public void SingleCardMove_IsValid_MoveToWaste_ShouldReturnTrue()
     {
         // Arrange
-        var wastePile = new WastePile();
-        var stockPile = new StockPile(new List<Card> { new Card(Suit.Clubs, Rank.Ten) });
-        var card = stockPile.TopCard;
-        var move = new SingleCardMove(stockPile, wastePile, card);
+        var gameState = new SolitaireGameState();
+        var stockPile = gameState.StockPile;
+        var wastePile = gameState.WastePile;
+        stockPile.Cards.Add(new Card(Suit.Clubs, Rank.Ten, true));
+        var card = stockPile.TopCard!;
+        var move = new SingleCardMove(stockPile.Index, wastePile.Index, card);
 
         // Act
-        var result = move.IsValid();
+        var result = move.IsValid(gameState);
 
         // Assert
         Assert.That(result, Is.True);
@@ -89,13 +101,15 @@ public class SingleCardMoveTests
     public void SingleCardMove_IsValid_MoveToStock_ShouldReturnFalse()
     {
         // Arrange
-        var stockPile = new StockPile();
-        var tableauPile = new TableauPile(0, new List<Card> { new Card(Suit.Spades, Rank.Ace) });
-        var card = tableauPile.TopCard;
-        var move = new SingleCardMove(tableauPile, stockPile, card);
+        var gameState = new SolitaireGameState();
+        var stockPile = gameState.StockPile;
+        var tableauPile = gameState.TableauPiles[0];
+        tableauPile.Cards.Add(new Card(Suit.Spades, Rank.Ace, true));
+        var card = tableauPile.TopCard!;
+        var move = new SingleCardMove(tableauPile.Index, stockPile.Index, card);
 
         // Act
-        var result = move.IsValid();
+        var result = move.IsValid(gameState);
 
         // Assert
         Assert.That(result, Is.False);
@@ -105,13 +119,15 @@ public class SingleCardMoveTests
     public void SingleCardMove_Execute_ValidMove_ShouldMoveCard()
     {
         // Arrange
-        var foundationPile = new FoundationPile(Suit.Hearts);
-        var tableauPile = new TableauPile(0, new List<Card> { new Card(Suit.Hearts, Rank.Ace) });
-        var card = tableauPile.TopCard;
-        var move = new SingleCardMove(tableauPile, foundationPile, card);
+        var gameState = new SolitaireGameState();
+        var foundationPile = gameState.FoundationPiles.First(p => p.Suit == Suit.Hearts);
+        var tableauPile = gameState.TableauPiles[0];
+        tableauPile.Cards.Add(new Card(Suit.Hearts, Rank.Ace, true));
+        var card = tableauPile.TopCard!;
+        var move = new SingleCardMove(tableauPile.Index, foundationPile.Index, card);
 
         // Act
-        move.Execute();
+        move.Execute(gameState);
 
         // Assert
         Assert.That(tableauPile.Cards.Count, Is.EqualTo(0));
@@ -122,28 +138,32 @@ public class SingleCardMoveTests
     public void SingleCardMove_Execute_InvalidMove_ShouldThrowInvalidOperationException()
     {
         // Arrange
-        var foundationPile = new FoundationPile(Suit.Hearts);
-        var tableauPile = new TableauPile(0, new List<Card> { new Card(Suit.Spades, Rank.Ace) });
-        var card = tableauPile.TopCard;
-        var move = new SingleCardMove(tableauPile, foundationPile, card);
+        var gameState = new SolitaireGameState();
+        var foundationPile = gameState.FoundationPiles.First(p => p.Suit == Suit.Hearts);
+        var tableauPile = gameState.TableauPiles[0];
+        tableauPile.Cards.Add(new Card(Suit.Spades, Rank.Ace, true));
+        var card = tableauPile.TopCard!;
+        var move = new SingleCardMove(tableauPile.Index, foundationPile.Index, card);
 
         // Act & Assert
-        Assert.That(() => move.Execute(), Throws.InvalidOperationException);
+        Assert.That(() => move.Execute(gameState), Throws.InvalidOperationException);
     }
 
     [Test]
     public void SingleCardMove_ToString_ShouldReturnCorrectFormat()
     {
         // Arrange
-        var card = new Card(Suit.Hearts, Rank.Ace);
-        var fromPile = new TableauPile();
-        var toPile = new FoundationPile(Suit.Hearts, [card]);
-        var move = new SingleCardMove(fromPile, toPile, card);
+        var gameState = new SolitaireGameState();
+        var card = new Card(Suit.Hearts, Rank.Ace, true);
+        var fromPile = gameState.TableauPiles[0];
+        var toPile = gameState.FoundationPiles.First(p => p.Suit == Suit.Hearts);
+        fromPile.Cards.Add(card);
+        var move = new SingleCardMove(fromPile.Index, toPile.Index, card);
 
         // Act
         var result = move.ToString();
 
         // Assert
-        Assert.That(result, Is.EqualTo($"Move {card} from {fromPile} to {toPile}"));
+        Assert.That(result, Is.EqualTo($"Move {card} from {fromPile.Index} to {toPile.Index}"));
     }
 }

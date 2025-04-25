@@ -1,7 +1,6 @@
-﻿using System.Collections.ObjectModel;
-namespace SolvitaireCore;
+﻿namespace SolvitaireCore;
 
-public class SolitaireGameState : IGameState<ISolitaireMove>
+public class SolitaireGameState : IGameState<SolitaireMove>
 {
     // This is the number of cards to move from stock to waste when cycling
     public readonly int CardsPerCycle;
@@ -23,19 +22,21 @@ public class SolitaireGameState : IGameState<ISolitaireMove>
 
     public SolitaireGameState(int cardsPerCycle = 3)
     {
-        StockPile = new StockPile();
-        WastePile = new WastePile();
+        
         TableauPiles = new List<TableauPile>();
         FoundationPiles = new List<FoundationPile>();
 
-        for (int i = 0; i < 4; i++)
-        {
-            FoundationPiles.Add(new FoundationPile((Suit)i));
-        }
+        int index = -1;
         for (int i = 0; i < 7; i++)
         {
-            TableauPiles.Add(new TableauPile(i));
+            TableauPiles.Add(new TableauPile(++index));
         }
+        for (int i = 0; i < 4; i++)
+        {
+            FoundationPiles.Add(new FoundationPile((Suit)i, ++index));
+        }
+        StockPile = new StockPile(++index);
+        WastePile = new WastePile(++index);
 
         CardsPerCycle = cardsPerCycle;
     }
@@ -90,19 +91,19 @@ public class SolitaireGameState : IGameState<ISolitaireMove>
     /// <summary>
     /// Moves cards from Stock to Waste pile. Moves CardsPerCycle or all remaining cards, whichever is less.
     /// </summary>
-    public ISolitaireMove CycleMove => new MultiCardMove(StockPile, WastePile,
+    public SolitaireMove CycleMove => new MultiCardMove(StockIndex, WasteIndex,
         StockPile.Cards.TakeLast(Math.Min(CardsPerCycle, StockPile.Count)).ToList());
     
-    public IEnumerable<ISolitaireMove> GetLegalMoves()
+    public IEnumerable<SolitaireMove> GetLegalMoves()
     {
         return MoveGenerator.GenerateMoves(this);
     }
 
-    public void ExecuteMove(ISolitaireMove move)
+    public void ExecuteMove(SolitaireMove move)
     {
-        if (move.IsValid())
+        if (move.IsValid(this))
         {
-            move.Execute();
+            move.Execute(this);
         }
         else
         {
@@ -110,9 +111,56 @@ public class SolitaireGameState : IGameState<ISolitaireMove>
         }
     }
 
-    public void UndoMove(ISolitaireMove move)
+    public void UndoMove(SolitaireMove move)
     {
-        move.Undo();
+        move.Undo(this);
+    }
+
+    #endregion
+
+    public Pile GetPileByIndex(int index)
+    {
+        if (index < TableauPiles.Count)
+            return TableauPiles[index];
+        index -= TableauPiles.Count;
+
+        if (index < FoundationPiles.Count)
+            return FoundationPiles[index];
+        index -= FoundationPiles.Count;
+
+        if (index == 0)
+            return StockPile;
+        index--;
+
+        if (index == 0)
+            return WastePile;
+
+        throw new ArgumentOutOfRangeException(nameof(index), "Invalid pile index");
+    }
+
+    #region Pile Indexing
+
+    public static int StockIndex = 11;
+    public static int WasteIndex = 12;
+
+    public static string GetPileStringByIndex(int index)
+    {
+        if (index < 7)
+            return $"Tableau[{index + 1}]";
+        index -= 7;
+
+        if (index < 4)
+            return $"Foundation[{index + 1}]";
+        index -= 4;
+
+        if (index == 0)
+            return "Stock";
+        index--;
+
+        if (index == 0)
+            return "Waste";
+
+        return string.Empty;
     }
 
     #endregion
@@ -158,9 +206,9 @@ public class SolitaireGameState : IGameState<ISolitaireMove>
             CycleCount = this.CycleCount
         };
 
-        clone.StockPile = new StockPile(this.StockPile.Cards.Select(card => card.Clone()).ToList());
-        clone.WastePile = new WastePile(this.WastePile.Cards.Select(card => card.Clone()).ToList());
-        clone.FoundationPiles = this.FoundationPiles.Select(pile => new FoundationPile(pile.Suit, pile.Cards.Select(card => card.Clone()).ToList())).ToList();
+        clone.StockPile = new StockPile(StockIndex, this.StockPile.Cards.Select(card => card.Clone()).ToList());
+        clone.WastePile = new WastePile(WasteIndex,this.WastePile.Cards.Select(card => card.Clone()).ToList());
+        clone.FoundationPiles = this.FoundationPiles.Select(pile => new FoundationPile(pile.Suit, pile.Index, pile.Cards.Select(card => card.Clone()).ToList())).ToList();
         clone.TableauPiles = this.TableauPiles.Select(pile => new TableauPile(pile.Index, pile.Cards.Select(card => card.Clone()).ToList())).ToList();
 
         return clone;

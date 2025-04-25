@@ -22,19 +22,19 @@ public class GameStateViewModel : BaseViewModel
         Sync();
     }
 
-    public void ApplyMove(ISolitaireMove move)
+    public void ApplyMove(SolitaireMove move)
     {
         BaseGameState.ExecuteMove(move);
         Sync();
     }
 
-    public void UndoMove(ISolitaireMove move)
+    public void UndoMove(SolitaireMove move)
     {
         BaseGameState.UndoMove(move);
         Sync();
     }
 
-    public IEnumerable<ISolitaireMove> GetLegalMoves()
+    public IEnumerable<SolitaireMove> GetLegalMoves()
     {
         return BaseGameState.GetLegalMoves();
     }

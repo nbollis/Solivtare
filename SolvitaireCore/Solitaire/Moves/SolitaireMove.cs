@@ -1,11 +1,13 @@
 ﻿namespace SolvitaireCore;
 
-public abstract class SolitaireMove(Pile fromPile, Pile toPile) : ISolitaireMove
+public abstract class SolitaireMove(int fromPileIndex, int toPileIndex) 
+    : IMove<SolitaireGameState>
 {
-    public Pile FromPile { get; } = fromPile;
-    public Pile ToPile { get; } = toPile;
+    public int FromPileIndex { get; } = fromPileIndex;
+    public int ToPileIndex { get; } = toPileIndex;
 
-    public abstract bool IsValid();
-    public abstract void Execute();
-    public abstract void Undo();
+    public abstract bool IsValid(SolitaireGameState gameState);
+    public abstract void Execute(SolitaireGameState gameState);
+    public abstract void Undo(SolitaireGameState gameState);
+
 }

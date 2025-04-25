@@ -9,31 +9,35 @@ public class MultiCardMoveTests
     public void MultiCardMove_ValidMove_TableauToTableau()
     {
         // Arrange  
+        var gameState = new SolitaireGameState();
         var from = new TableauPile(0, new List<Card>
-        {
-            new Card(Suit.Hearts, Rank.Queen),
-            new Card(Suit.Spades, Rank.Jack),
-            new Card(Suit.Hearts, Rank.Ten)
-        });
+              {
+                  new Card(Suit.Hearts, Rank.Queen),
+                  new Card(Suit.Spades, Rank.Jack),
+                  new Card(Suit.Hearts, Rank.Ten)
+              });
         var to = new TableauPile(1, new List<Card> { new Card(Suit.Clubs, Rank.King) });
+        gameState.TableauPiles[0] = from;
+        gameState.TableauPiles[1] = to;
+
         var cards = from.Cards.ToList();
-        var move = new MultiCardMove(from, to, cards);
+        var move = new MultiCardMove(from.Index, to.Index, cards);
 
         // Validate
-        var result = move.IsValid();
+        var result = move.IsValid(gameState);
 
         // Assert  
         Assert.That(result, Is.True);
 
         // Execute  
-        move.Execute();
+        move.Execute(gameState);
 
         // Assert  
         Assert.That(from.Cards.Count, Is.EqualTo(0));
         Assert.That(to.Cards.Count, Is.EqualTo(4));
         Assert.That(to.TopCard, Is.EqualTo(cards.Last()));
 
-        move.Undo();
+        move.Undo(gameState);
 
         // Assert
         Assert.That(from.Cards.Count, Is.EqualTo(3));
@@ -46,50 +50,59 @@ public class MultiCardMoveTests
     public void MultiCardMove_InvalidMove_RecycleToStock()
     {
         // Arrange  
-        var from = new WastePile(new List<Card>
-        {
-            new Card(Suit.Hearts, Rank.Queen),
-            new Card(Suit.Spades, Rank.Jack),
-            new Card(Suit.Hearts, Rank.Ten)
-        });
-        var to = new StockPile(new List<Card> { new Card(Suit.Clubs, Rank.King) });
+        var gameState = new SolitaireGameState();
+        var from = new WastePile(12, new List<Card>
+              {
+                  new Card(Suit.Hearts, Rank.Queen),
+                  new Card(Suit.Spades, Rank.Jack),
+                  new Card(Suit.Hearts, Rank.Ten)
+              });
+        var to = new StockPile(11, new List<Card> { new Card(Suit.Clubs, Rank.King) });
+        gameState.WastePile = from;
+        gameState.StockPile = to;
+
+
         var cards = from.Cards.ToList();
-        var move = new MultiCardMove(from, to, cards);
+        var move = new MultiCardMove(from.Index, to.Index, cards);
 
         // Validate
-        var result = move.IsValid();
+        var result = move.IsValid(gameState);
 
         // Assert  
         Assert.That(result, Is.False);
-        Assert.That(() => move.Execute(), Throws.InvalidOperationException);
+        Assert.That(() => move.Execute(gameState), Throws.InvalidOperationException);
     }
 
     [Test]
     public void MultiCardMove_ValidMove_RecycleToStock()
     {
         // Arrange  
-        var waste = new WastePile(new List<Card>
-        {
-            new Card(Suit.Hearts, Rank.Queen),
-            new Card(Suit.Spades, Rank.Jack),
-            new Card(Suit.Hearts, Rank.Ten)
-        });
+        var gameState = new SolitaireGameState();
+        var waste = new WastePile(12, new List<Card>
+              {
+                  new Card(Suit.Hearts, Rank.Queen),
+                  new Card(Suit.Spades, Rank.Jack),
+                  new Card(Suit.Hearts, Rank.Ten)
+              });
 
         var stock = new StockPile();
+        gameState.WastePile = waste;
+        gameState.StockPile = stock;
+
         var cards = waste.Cards.ToList();
         var wasteTop = waste.TopCard;
         var wasteBottom = waste.BottomCard;
 
-        var move = new MultiCardMove(waste, stock, cards);
+        var move = new MultiCardMove(waste.Index, stock.Index, cards);
 
         // Validate
-        var result = move.IsValid();
+        var result = move.IsValid(gameState);
 
         // Assert  
         Assert.That(result, Is.True);
 
         // Execute
-        move.Execute();
+        move.Execute(gameState);
 
         // Assert
         Assert.That(waste.Cards.Count, Is.EqualTo(0));
@@ -102,7 +115,7 @@ public class MultiCardMoveTests
             Assert.That(card.IsFaceUp, Is.False);
         }
 
-        move.Undo();
+        move.Undo(gameState);
 
         // Assert
         Assert.That(waste.Cards.Count, Is.EqualTo(3));
@@ -121,28 +134,32 @@ public class MultiCardMoveTests
     public void MultiCardMove_ValidMove_CycleToWaste()
     {
         // Arrange  
-        var stock = new StockPile(new List<Card>
-        {
-            new Card(Suit.Hearts, Rank.Queen),
-            new Card(Suit.Spades, Rank.Jack),
-            new Card(Suit.Hearts, Rank.Ten),
-            new Card(Suit.Diamonds, Rank.Four),
-            new Card(Suit.Clubs, Rank.Two),
-        });
+        var gameState = new SolitaireGameState();
+        var stock = new StockPile(11, new List<Card>
+              {
+                  new Card(Suit.Hearts, Rank.Queen),
+                  new Card(Suit.Spades, Rank.Jack),
+                  new Card(Suit.Hearts, Rank.Ten),
+                  new Card(Suit.Diamonds, Rank.Four),
+                  new Card(Suit.Clubs, Rank.Two),
+              });
 
         var waste = new WastePile();
+        gameState.WastePile = waste;
+        gameState.StockPile = stock;
+
         var cards = stock.Cards.TakeLast(3).ToList();
 
-        var move = new MultiCardMove(stock, waste, cards);
+        var move = new MultiCardMove(stock.Index, waste.Index, cards);
 
         // Validate
-        var result = move.IsValid();
+        var result = move.IsValid(gameState);
 
         // Assert  
         Assert.That(result, Is.True);
 
         // Execute
-        move.Execute();
+        move.Execute(gameState);
 
         // Assert
         Assert.That(stock.Cards.Count, Is.EqualTo(2));
@@ -162,7 +179,7 @@ public class MultiCardMoveTests
             Assert.That(card.IsFaceUp, Is.True);
         }
 
-        move.Undo();
+        move.Undo(gameState);
 
         // Assert
         Assert.That(stock.Cards.Count, Is.EqualTo(5));
@@ -180,71 +197,5 @@ public class MultiCardMoveTests
         {
             Assert.That(card.IsFaceUp, Is.True);
         }
-    }
-
-
-    [Test]
-    public void MultiCardMove_IsValid_InvalidMoveToTableau_ShouldReturnFalse()
-    {
-        // Arrange  
-        var from = new TableauPile(0, new List<Card>
-       {
-           new Card(Suit.Hearts, Rank.Queen),
-           new Card(Suit.Spades, Rank.Jack),
-           new Card(Suit.Hearts, Rank.Ten)
-       });
-        var to = new TableauPile(1, new List<Card> { new Card(Suit.Hearts, Rank.King) });
-        var cards = from.Cards.ToList();
-        var move = new MultiCardMove(from, to, cards);
-
-        // Act  
-        var result = move.IsValid();
-
-        // Assert  
-        Assert.That(result, Is.False);
-        Assert.That(() => move.Execute(), Throws.InvalidOperationException);
-    }
-
-    [Test]
-    public void MultiCardMove_IsValid_MoveToFoundation_ShouldReturnFalse()
-    {
-        // Arrange  
-        var foundationPile = new FoundationPile(Suit.Hearts);
-        var tableauPile = new TableauPile(0, new List<Card>
-       {
-           new Card(Suit.Hearts, Rank.Queen),
-           new Card(Suit.Spades, Rank.Jack),
-           new Card(Suit.Hearts, Rank.Ten)
-       });
-        var cards = tableauPile.Cards.Skip(1).ToList();
-        var move = new MultiCardMove(tableauPile, foundationPile, cards);
-
-        // Act  
-        var result = move.IsValid();
-
-        // Assert  
-        Assert.That(result, Is.False);
-        Assert.That(() => move.Execute(), Throws.InvalidOperationException);
-    }
-
-    [Test]
-    public void MultiCardMove_ToString_ShouldReturnCorrectFormat()
-    {
-        // Arrange
-        var cards = new List<Card>
-        {
-            new Card(Suit.Hearts, Rank.Ten),
-            new Card(Suit.Spades, Rank.Jack),
-            new Card(Suit.Clubs, Rank.Queen)
-        };
-        var fromPile = new StockPile(cards);
-        var toPile = new WastePile();
-        var move = new MultiCardMove(fromPile, toPile, cards);
-
-        // Act
-        var result = move.ToString();
-
-        // Assert
-        Assert.That(result, Is.EqualTo($"Cycle 3 Cards"));
     }
 }

@@ -163,7 +163,7 @@ public class SolitaireGameStateTests
                 gameStates[i] = new SolitaireGameState();
                 gameStates[i].DealCards(referenceDeck);
 
-                Assert.That(moves[i].IsValid(), Is.True);
+                Assert.That(moves[i].IsValid(gameStates[i]), Is.True);
                 gameStates[i].ExecuteMove(moves[i]);
             }
         }

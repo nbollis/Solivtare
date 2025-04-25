@@ -5,7 +5,8 @@
 /// </summary>
 /// <param name="suit"></param>
 /// <param name="initialCards"></param>
-public class FoundationPile(Suit suit, IEnumerable<Card>? initialCards = null) : Pile(initialCards)
+public class FoundationPile(Suit suit, int index = 0, IEnumerable<Card>? initialCards = null) 
+    : Pile(index, initialCards)
 {
     public Suit Suit { get; } = suit;
 

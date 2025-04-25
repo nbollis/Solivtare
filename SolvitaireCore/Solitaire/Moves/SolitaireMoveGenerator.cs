@@ -1,17 +1,17 @@
 ﻿namespace SolvitaireCore;
 
-public class SolitaireMoveGenerator : IMoveGenerator<ISolitaireMove>
+public class SolitaireMoveGenerator 
 {
-    public IEnumerable<ISolitaireMove> GenerateMoves(IGameState<ISolitaireMove> state)
+    public IEnumerable<SolitaireMove> GenerateMoves(IGameState<SolitaireMove> state)
     {
         if (state is SolitaireGameState sol)
             return GenerateMoves(sol);
         return [];
     }
 
-    public IEnumerable<ISolitaireMove> GenerateMoves(SolitaireGameState state)
+    public IEnumerable<SolitaireMove> GenerateMoves(SolitaireGameState state)
     {
-        var validMoves = new List<ISolitaireMove>();
+        var validMoves = new List<SolitaireMove>();
 
         // Waste → XX
         if (!state.WastePile.IsEmpty)
@@ -24,7 +24,7 @@ public class SolitaireMoveGenerator : IMoveGenerator<ISolitaireMove>
                 if (!foundation.CanAddCard(state.WastePile.TopCard))
                     continue;
 
-                validMoves.Add(new SingleCardMove(state.WastePile, foundation, topCard));
+                validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, foundation.Index, topCard));
                 break;
             }
 
@@ -33,7 +33,7 @@ public class SolitaireMoveGenerator : IMoveGenerator<ISolitaireMove>
             {
                 if (tableau.CanAddCard(topCard))
                 {
-                    validMoves.Add(new SingleCardMove(state.WastePile, tableau, topCard));
+                    validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, tableau.Index, topCard));
                 }
             }
         }
@@ -48,7 +48,7 @@ public class SolitaireMoveGenerator : IMoveGenerator<ISolitaireMove>
             {
                 if (foundation.CanAddCard(topCard))
                 {
-                    validMoves.Add(new SingleCardMove(tableau, foundation, topCard));
+                    validMoves.Add(new SingleCardMove(tableau.Index, foundation.Index, topCard));
                 }
             }
         }
@@ -65,7 +65,7 @@ public class SolitaireMoveGenerator : IMoveGenerator<ISolitaireMove>
                 if (targetTableau.Index == tableau.Index) continue; // Skip the same tableau
                 if (targetTableau.CanAddCard(topCard!))
                 {
-                    validMoves.Add(new SingleCardMove(tableau, targetTableau, topCard!));
+                    validMoves.Add(new SingleCardMove(tableau.Index, targetTableau.Index, topCard!));
                 }
             }
 
@@ -85,9 +85,9 @@ public class SolitaireMoveGenerator : IMoveGenerator<ISolitaireMove>
                     if (targetTableau.Index == tableau.Index) continue; // Skip the same tableau
 
                     if (cardsToMove.Count == 1 && targetTableau.CanAddCard(cardsToMove[0]))
-                        validMoves.Add(new SingleCardMove(tableau, targetTableau, cardsToMove[0]));
+                        validMoves.Add(new SingleCardMove(tableau.Index, targetTableau.Index, cardsToMove[0]));
                     else if (targetTableau.CanAddCards(cardsToMove))
-                        validMoves.Add(new MultiCardMove(tableau, targetTableau, cardsToMove));
+                        validMoves.Add(new MultiCardMove(tableau.Index, targetTableau.Index, cardsToMove));
                 }
             }
         }
@@ -102,7 +102,7 @@ public class SolitaireMoveGenerator : IMoveGenerator<ISolitaireMove>
             {
                 if (targetTableau.CanAddCard(topCard))
                 {
-                    validMoves.Add(new SingleCardMove(foundation, targetTableau, topCard));
+                    validMoves.Add(new SingleCardMove(foundation.Index, targetTableau.Index, topCard));
                 }
             }
         }
@@ -116,7 +116,7 @@ public class SolitaireMoveGenerator : IMoveGenerator<ISolitaireMove>
         // Waste -> Stock (Recycle) // TODO: Maybe set a cap here?
         if (state.StockPile.IsEmpty && !state.WastePile.IsEmpty)
         {
-            validMoves.Add(new MultiCardMove(state.WastePile, state.StockPile, state.WastePile.Cards));
+            validMoves.Add(new MultiCardMove(state.WastePile.Index, state.StockPile.Index, state.WastePile.Cards));
         }
 
         return validMoves;

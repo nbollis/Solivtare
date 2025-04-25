@@ -13,13 +13,16 @@ public abstract class Pile  : IEnumerable<Card>
     /// <remarks> Top card is the last card in the list. </remarks>
     public List<Card> Cards { get;  }
 
+    public readonly int Index;
     public int Count => Cards.Count;
     public bool IsEmpty => Count == 0;
     public Card? TopCard => Cards.LastOrDefault();
     public Card? BottomCard => Cards.FirstOrDefault();
 
-    protected Pile(IEnumerable<Card>? initialCards = null)
+    protected Pile(int index, IEnumerable<Card>? initialCards = null)
     {
+        Index = index;
+
         Cards = [];
         if (initialCards == null) return;
         foreach (var card in initialCards)
