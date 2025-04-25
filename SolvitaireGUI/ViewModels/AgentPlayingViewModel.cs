@@ -54,9 +54,9 @@ public class AgentPlayingViewModel : BaseViewModel
 
     private SolitaireGameState _shadowGameState; // Used during gameplay to not update UI while moves are made and unmade
     private CancellationTokenSource? _agentCancellationTokenSource;
-    private ISolitaireAgent _agent;
+    private SolitaireAgent _agent;
 
-    public ISolitaireAgent Agent
+    public SolitaireAgent Agent
     {
         get => _agent;
         set
@@ -66,7 +66,7 @@ public class AgentPlayingViewModel : BaseViewModel
         }
     }
 
-    public ObservableCollection<ISolitaireAgent> AllAgents { get; set; }
+    public ObservableCollection<SolitaireAgent> AllAgents { get; set; }
 
     public ICommand StartAgentCommand { get; set; }
     public ICommand StopAgentCommand { get; set; }
@@ -190,6 +190,7 @@ public class AgentPlayingViewModel : BaseViewModel
         _deck.FlipAllCardsDown();
         var gameState = new SolitaireGameState();
         gameState.DealCards(_deck!);
+        Agent.ResetState();
 
         GameStateViewModel = new(gameState);
         _shadowGameState = gameState.Clone(); // Sync the shadow state

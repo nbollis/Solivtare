@@ -35,6 +35,9 @@ public class SecondSolitaireEvaluator : SolitaireEvaluator
             }
         }
 
+        // Add a small punishment for cards in the stock pile
+        score -= 0.01 * state.StockPile.Count;
+
         return score;
     }
 }

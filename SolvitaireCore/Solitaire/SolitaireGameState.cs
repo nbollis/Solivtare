@@ -1,6 +1,6 @@
 ﻿namespace SolvitaireCore;
 
-public class SolitaireGameState : IGameState<SolitaireMove>
+public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<SolitaireGameState>
 {
     // This is the number of cards to move from stock to waste when cycling
     public readonly int CardsPerCycle;
@@ -193,6 +193,50 @@ public class SolitaireGameState : IGameState<SolitaireMove>
         if (WastePile.Count != other.WastePile.Count)
             return false;
         return true;
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            int hash = 17;
+
+            // Hash FoundationPiles  
+            foreach (var foundationPile in FoundationPiles)
+            {
+                foreach (var card in foundationPile.Cards)
+                {
+                    hash = hash * 31 + card.GetHashCode();
+                }
+            }
+
+            // Hash TableauPiles  
+            foreach (var tableauPile in TableauPiles)
+            {
+                foreach (var card in tableauPile.Cards)
+                {
+                    hash = hash * 31 + card.GetHashCode();
+                }
+            }
+
+            // Hash StockPile  
+            foreach (var card in StockPile.Cards)
+            {
+                hash = hash * 31 + card.GetHashCode();
+            }
+
+            // Hash WastePile  
+            foreach (var card in WastePile.Cards)
+            {
+                hash = hash * 31 + card.GetHashCode();
+            }
+
+            // Include CycleCount and CardsPerCycle  
+            hash = hash * 31 + CycleCount.GetHashCode();
+            hash = hash * 31 + CardsPerCycle.GetHashCode();
+
+            return hash;
+        }
     }
 
     public SolitaireGameState Clone()

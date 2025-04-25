@@ -4,12 +4,12 @@
 /// A simple evaluation agent that uses a heuristic evaluation function to select the best move.  
 /// </summary>  
 public class BruteForceEvaluationAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) 
-    : ISolitaireAgent
+    : SolitaireAgent
 {
-    public string Name => "Brute Force Agent";
+    public override string Name => "Brute Force Agent";
     public int LookAheadSteps { get; } = maxLookahead;
 
-    public SolitaireMove GetNextMove(SolitaireGameState gameState)
+    public override SolitaireMove GetNextMove(SolitaireGameState gameState)
     {
         SolitaireMove bestMove = null;
         double bestScore = double.NegativeInfinity;
