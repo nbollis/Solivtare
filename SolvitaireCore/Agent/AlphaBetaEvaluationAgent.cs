@@ -3,7 +3,7 @@
 /// <summary>  
 /// A simple evaluation agent that uses a heuristic evaluation function to select the best move.  
 /// </summary>  
-public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLookahead = 20) : ISolitaireAgent
+public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) : ISolitaireAgent
 {
     public string Name => "AlphaBeta Agent";
     public int LookAheadSteps { get; } = maxLookahead;
@@ -11,29 +11,25 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
     public SolitaireMove GetNextMove(SolitaireGameState gameState)
     {
         SolitaireMove bestMove = null;
-        double bestScore = double.NegativeInfinity;
-        double alpha = double.NegativeInfinity;
-        double beta = double.PositiveInfinity;
 
-        var orderedMoves = OrderMoves(gameState, gameState.GetLegalMoves());
-        foreach (var move in orderedMoves)
+        // Iterative Deepening: Search for best of depth 1 and use that to determine the order to search depth 2 and so on. 
+        // You would think this would make the search slower, but alpha-beta gains far outweigh. 
+        for (int depth = 1; depth <= LookAheadSteps; depth++)
         {
-            gameState.ExecuteMove(move);
-            double score = EvaluateWithLookahead(gameState, LookAheadSteps - 1, alpha, beta, false);
-            gameState.UndoMove(move);
+            double alpha = double.NegativeInfinity;
+            double beta = double.PositiveInfinity;
 
-            if (score > bestScore)
+            foreach (var move in OrderMoves(gameState, gameState.GetLegalMoves()))
             {
-                bestScore = score;
-                bestMove = move;
-            }
+                gameState.ExecuteMove(move);
+                double score = EvaluateWithLookahead(gameState, depth - 1, alpha, beta, false);
+                gameState.UndoMove(move);
 
-            alpha = Math.Max(alpha, bestScore);
-
-            // Prune the branch if alpha is greater than or equal to beta
-            if (beta <= alpha)
-            {
-                break;
+                if (score > alpha)
+                {
+                    alpha = score;
+                    bestMove = move;
+                }
             }
         }
 

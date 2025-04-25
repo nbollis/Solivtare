@@ -140,27 +140,23 @@ public class SolitaireGameState : IGameState<SolitaireMove>
 
     #region Pile Indexing
 
+    public static int TableaStartIndex = 0;
+    public static int TableauEndIndex = 6;
+    public static int FoundationStartIndex = 7;
+    public static int FoundationEndIndex = 10;
     public static int StockIndex = 11;
     public static int WasteIndex = 12;
 
     public static string GetPileStringByIndex(int index)
     {
-        if (index < 7)
-            return $"Tableau[{index + 1}]";
-        index -= 7;
-
-        if (index < 4)
-            return $"Foundation[{index + 1}]";
-        index -= 4;
-
-        if (index == 0)
-            return "Stock";
-        index--;
-
-        if (index == 0)
-            return "Waste";
-
-        return string.Empty;
+        return index switch
+        {
+            < 7 => $"Tableau[{index + 1}]",
+            < 11 => $"Foundation[{index - 6}]",
+            11 => "Stock",
+            12 => "Waste",
+            _ => string.Empty
+        };
     }
 
     #endregion

@@ -113,7 +113,7 @@ public class SolitaireMoveGenerator
             validMoves.Add(state.CycleMove);
         }
 
-        // Waste -> Stock (Recycle) // TODO: Maybe set a cap here?
+        // Waste -> Stock (Recycle) 
         if (state.StockPile.IsEmpty && !state.WastePile.IsEmpty)
         {
             validMoves.Add(new MultiCardMove(state.WastePile.Index, state.StockPile.Index, state.WastePile.Cards));
