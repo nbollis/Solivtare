@@ -5,7 +5,8 @@ public class SolitaireGameState : IGameState<ISolitaireMove>
 {
     // This is the number of cards to move from stock to waste when cycling
     public readonly int CardsPerCycle;
-
+    public readonly int MaximumCycles = int.MaxValue;
+    public int CycleCount = 0;
 
     public List<TableauPile> TableauPiles { get; set; }
 
@@ -16,7 +17,7 @@ public class SolitaireGameState : IGameState<ISolitaireMove>
     public WastePile WastePile { get; set; }
 
     // TODO: Find more lose conditions: Those that involve an infinite loop
-    public bool IsGameLost => !GetLegalMoves().Any();
+    public bool IsGameLost => !GetLegalMoves().Any() || CycleCount > MaximumCycles;
     public bool IsGameWon => FoundationPiles.All(pile => pile.Count == 13);
 
 
@@ -99,9 +100,9 @@ public class SolitaireGameState : IGameState<ISolitaireMove>
 
     public void ExecuteMove(ISolitaireMove move)
     {
-        if (move.IsValid(this))
+        if (move.IsValid())
         {
-            move.Execute(this);
+            move.Execute();
         }
         else
         {
@@ -111,11 +112,10 @@ public class SolitaireGameState : IGameState<ISolitaireMove>
 
     public void UndoMove(ISolitaireMove move)
     {
-        move.Undo(this);
+        move.Undo();
     }
 
     #endregion
-
 
     public bool Equals(SolitaireGameState? other)
     {
@@ -149,5 +149,20 @@ public class SolitaireGameState : IGameState<ISolitaireMove>
         if (WastePile.Count != other.WastePile.Count)
             return false;
         return true;
+    }
+
+    public SolitaireGameState Clone()
+    {
+        var clone = new SolitaireGameState(CardsPerCycle)
+        {
+            CycleCount = this.CycleCount
+        };
+
+        clone.StockPile = new StockPile(this.StockPile.Cards.Select(card => card.Clone()).ToList());
+        clone.WastePile = new WastePile(this.WastePile.Cards.Select(card => card.Clone()).ToList());
+        clone.FoundationPiles = this.FoundationPiles.Select(pile => new FoundationPile(pile.Suit, pile.Cards.Select(card => card.Clone()).ToList())).ToList();
+        clone.TableauPiles = this.TableauPiles.Select(pile => new TableauPile(pile.Index, pile.Cards.Select(card => card.Clone()).ToList())).ToList();
+
+        return clone;
     }
 }

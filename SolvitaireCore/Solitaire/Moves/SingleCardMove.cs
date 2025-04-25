@@ -6,8 +6,9 @@
 public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMove(fromPile, toPile)
 {
     public Card Card { get; } = card;
-
-    public override bool IsValid(IGameState state)
+    private bool _originalIsFaceUp;
+    private bool? _originalPreviousTableauCardIsFaceUp = null;
+    public override bool IsValid()
     {
         if (FromPile.IsEmpty || !FromPile.TopCard.Equals(Card))
             return false;
@@ -28,29 +29,36 @@ public class SingleCardMove(Pile fromPile, Pile toPile, Card card) : SolitaireMo
         }
     }
 
-    public override void Undo(IGameState state)
+    public override void Undo()
     {
         ToPile.RemoveCard(Card);
         switch (FromPile)
         {
-            case TableauPile:
-                if (FromPile.TopCard != null)
-                    FromPile.TopCard.IsFaceUp = false;
+            case TableauPile when ToPile is TableauPile:
+                if (FromPile.TopCard != null && _originalPreviousTableauCardIsFaceUp != null)
+                {
+                    FromPile.TopCard.IsFaceUp = _originalPreviousTableauCardIsFaceUp.Value;
+                }
                 break;
         }
+        Card.IsFaceUp = _originalIsFaceUp; // Restore the original face-up state
         FromPile.Cards.Add(Card);
     }
 
-    public override void Execute(IGameState state)
+    public override void Execute()
     {
-        if (IsValid(state))
+        if (IsValid())
         {
+            _originalIsFaceUp = Card.IsFaceUp; // Save the original state
             FromPile.RemoveCard(Card);
             switch (FromPile)
             {
                 case TableauPile:
-                    if (FromPile.TopCard != null) 
+                    if (FromPile.TopCard != null)
+                    {
+                        _originalPreviousTableauCardIsFaceUp = FromPile.TopCard.IsFaceUp;
                         FromPile.TopCard.IsFaceUp = true;
+                    }
                     break;
             }
             ToPile.AddCard(Card);

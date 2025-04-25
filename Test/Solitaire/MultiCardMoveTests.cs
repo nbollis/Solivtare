@@ -20,20 +20,20 @@ public class MultiCardMoveTests
         var move = new MultiCardMove(from, to, cards);
 
         // Validate
-        var result = move.IsValid(new SolitaireGameState());
+        var result = move.IsValid();
 
         // Assert  
         Assert.That(result, Is.True);
 
         // Execute  
-        move.Execute(new SolitaireGameState());
+        move.Execute();
 
         // Assert  
         Assert.That(from.Cards.Count, Is.EqualTo(0));
         Assert.That(to.Cards.Count, Is.EqualTo(4));
         Assert.That(to.TopCard, Is.EqualTo(cards.Last()));
 
-        move.Undo(new SolitaireGameState());
+        move.Undo();
 
         // Assert
         Assert.That(from.Cards.Count, Is.EqualTo(3));
@@ -57,11 +57,11 @@ public class MultiCardMoveTests
         var move = new MultiCardMove(from, to, cards);
 
         // Validate
-        var result = move.IsValid(new SolitaireGameState());
+        var result = move.IsValid();
 
         // Assert  
         Assert.That(result, Is.False);
-        Assert.That(() => move.Execute(new SolitaireGameState()), Throws.InvalidOperationException);
+        Assert.That(() => move.Execute(), Throws.InvalidOperationException);
     }
 
     [Test]
@@ -83,13 +83,13 @@ public class MultiCardMoveTests
         var move = new MultiCardMove(waste, stock, cards);
 
         // Validate
-        var result = move.IsValid(new SolitaireGameState());
+        var result = move.IsValid();
 
         // Assert  
         Assert.That(result, Is.True);
 
         // Execute
-        move.Execute(new SolitaireGameState());
+        move.Execute();
 
         // Assert
         Assert.That(waste.Cards.Count, Is.EqualTo(0));
@@ -102,7 +102,7 @@ public class MultiCardMoveTests
             Assert.That(card.IsFaceUp, Is.False);
         }
 
-        move.Undo(new SolitaireGameState());
+        move.Undo();
 
         // Assert
         Assert.That(waste.Cards.Count, Is.EqualTo(3));
@@ -136,13 +136,13 @@ public class MultiCardMoveTests
         var move = new MultiCardMove(stock, waste, cards);
 
         // Validate
-        var result = move.IsValid(new SolitaireGameState());
+        var result = move.IsValid();
 
         // Assert  
         Assert.That(result, Is.True);
 
         // Execute
-        move.Execute(new SolitaireGameState());
+        move.Execute();
 
         // Assert
         Assert.That(stock.Cards.Count, Is.EqualTo(2));
@@ -162,7 +162,7 @@ public class MultiCardMoveTests
             Assert.That(card.IsFaceUp, Is.True);
         }
 
-        move.Undo(new SolitaireGameState());
+        move.Undo();
 
         // Assert
         Assert.That(stock.Cards.Count, Is.EqualTo(5));
@@ -198,11 +198,11 @@ public class MultiCardMoveTests
         var move = new MultiCardMove(from, to, cards);
 
         // Act  
-        var result = move.IsValid(new SolitaireGameState());
+        var result = move.IsValid();
 
         // Assert  
         Assert.That(result, Is.False);
-        Assert.That(() => move.Execute(new SolitaireGameState()), Throws.InvalidOperationException);
+        Assert.That(() => move.Execute(), Throws.InvalidOperationException);
     }
 
     [Test]
@@ -220,11 +220,11 @@ public class MultiCardMoveTests
         var move = new MultiCardMove(tableauPile, foundationPile, cards);
 
         // Act  
-        var result = move.IsValid(new SolitaireGameState());
+        var result = move.IsValid();
 
         // Assert  
         Assert.That(result, Is.False);
-        Assert.That(() => move.Execute(new SolitaireGameState()), Throws.InvalidOperationException);
+        Assert.That(() => move.Execute(), Throws.InvalidOperationException);
     }
 
     [Test]

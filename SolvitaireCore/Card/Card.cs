@@ -30,6 +30,8 @@ public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard
     }
 
     public override int GetHashCode() => HashCode.Combine((int)Suit, (int)Rank);
+
+    public Card Clone() => new(Suit, Rank, IsFaceUp);
 }
 
 public class ObservableCard(Suit suit, Rank rank, bool isFaceUp = false)

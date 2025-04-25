@@ -5,7 +5,7 @@
 /// </summary>
 public interface IMove
 {
-    bool IsValid(IGameState state);
-    void Execute(IGameState state);
-    void Undo(IGameState state);
+    bool IsValid();
+    void Execute();
+    void Undo();
 }

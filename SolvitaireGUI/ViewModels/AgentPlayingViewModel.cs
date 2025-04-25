@@ -35,7 +35,8 @@ public class AgentPlayingViewModel : BaseViewModel
         AllAgents = new()
         {
             Agent,
-            new SimpleEvaluationAgent(new SimpleSolitaireEvaluator())
+            new BruteForceEvaluationAgent(new SimpleSolitaireEvaluator()),
+            new AlphaBetaEvaluationAgent(new SecondSolitaireEvaluator()),
         };
 
         ResetGameCommand = new RelayCommand(ResetGame);

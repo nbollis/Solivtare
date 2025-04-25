@@ -3,8 +3,9 @@
 public class MultiCardMove(Pile fromPile, Pile toPile, IEnumerable<Card> cards) : SolitaireMove(fromPile, toPile), IMove
 {
     public List<Card> Cards { get; } = cards.ToList();
+    private List<bool> _originalIsFaceUpStates;
 
-    public override bool IsValid(IGameState state)
+    public override bool IsValid()
     {
         if (FromPile.IsEmpty || !Cards.All(card => FromPile.Cards.Contains(card)))
             return false;
@@ -28,10 +29,12 @@ public class MultiCardMove(Pile fromPile, Pile toPile, IEnumerable<Card> cards) 
         }
     }
 
-    public override void Execute(IGameState state)
+    public override void Execute()
     {
-        if (IsValid(state))
+        if (IsValid())
         {
+            _originalIsFaceUpStates = Cards.Select(card => card.IsFaceUp).ToList(); // Save the original states
+
             switch (ToPile)
             {
                 case TableauPile when FromPile is TableauPile fromTableau:
@@ -68,7 +71,7 @@ public class MultiCardMove(Pile fromPile, Pile toPile, IEnumerable<Card> cards) 
         }
     }
 
-    public override void Undo(IGameState state)
+    public override void Undo()
     {
         switch (ToPile)
         {
