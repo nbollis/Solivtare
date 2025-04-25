@@ -12,6 +12,18 @@ public abstract class SolitaireAgent : IAgent<SolitaireMove, SolitaireGameState>
 
     // Transposition table for memoization where the Key is the hash of the game state and the Value is the score.
     protected readonly Dictionary<int, TranspositionTableEntry> TranspositionTable = new();
+
+
+    /// <summary>
+    /// Determines if the current game state is unwinnable.
+    /// </summary>
+    /// <param name="gameState">The current game state.</param>
+    /// <returns>True if the game is unwinnable, otherwise false.</returns>
+    public virtual bool IsGameUnwinnable(SolitaireGameState gameState)
+    {
+        // Default implementation: Check if there are no legal moves and the game is not won.
+        return !gameState.IsGameWon;
+    }
 }
 
 public class TranspositionTableEntry

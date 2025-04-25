@@ -30,6 +30,8 @@
                 <ListView  ItemsSource="{Binding AllAgents}" 
                            SelectedItem="{Binding Agent, Mode=TwoWay}">
                 </ListView>
+
+                <TextBlock Text="{Binding Evaluation}" Margin="40"></TextBlock>
             </StackPanel>
 
             <Grid Grid.Column="1" Grid.Row="0">

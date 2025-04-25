@@ -13,23 +13,29 @@ public class SolitaireMoveGenerator
     {
         var validMoves = new List<SolitaireMove>();
 
+        // Cache frequently accessed properties
+        var wastePile = state.WastePile;
+        var stockPile = state.StockPile;
+        var tableauPiles = state.TableauPiles;
+        var foundationPiles = state.FoundationPiles;
+
         // Waste → XX
-        if (!state.WastePile.IsEmpty)
+        if (!wastePile.IsEmpty)
         {
-            var topCard = state.WastePile.TopCard;
+            var topCard = wastePile.TopCard!;
 
             // Waste → Foundation
-            foreach (var foundation in state.FoundationPiles)
+            foreach (var foundation in foundationPiles)
             {
-                if (!foundation.CanAddCard(state.WastePile.TopCard))
-                    continue;
-
-                validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, foundation.Index, topCard));
-                break;
+                if (foundation.CanAddCard(topCard))
+                {
+                    validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, foundation.Index, topCard));
+                    break; // Only one foundation move is possible
+                }
             }
 
             // Waste → Tableau
-            foreach (var tableau in state.TableauPiles)
+            foreach (var tableau in tableauPiles)
             {
                 if (tableau.CanAddCard(topCard))
                 {
@@ -39,84 +45,76 @@ public class SolitaireMoveGenerator
         }
 
         // Tableau → Foundation
-        foreach (var tableau in state.TableauPiles)
+        foreach (var tableau in tableauPiles)
         {
-            if (!tableau.Cards.Any()) continue;
+            if (tableau.IsEmpty) continue;
 
-            var topCard = tableau.TopCard;
-            foreach (var foundation in state.FoundationPiles)
+            var topCard = tableau.TopCard!;
+            foreach (var foundation in foundationPiles)
             {
                 if (foundation.CanAddCard(topCard))
                 {
                     validMoves.Add(new SingleCardMove(tableau.Index, foundation.Index, topCard));
+                    break; // Only one foundation move is possible
                 }
             }
         }
 
         // Tableau → Tableau
-        foreach (var tableau in state.TableauPiles)
+        foreach (var tableau in tableauPiles)
         {
-            if (!tableau.Cards.Any()) continue; // Skip empty tableau
+            if (tableau.IsEmpty) continue;
 
-            // Single Card Move
-            var topCard = tableau.TopCard;
-            foreach (var targetTableau in state.TableauPiles)
+            var faceUpCards = tableau.Cards;
+            var faceUpStartIndex = tableau.Cards.FindIndex(c => c.IsFaceUp);
+
+            if (faceUpStartIndex == -1) continue;
+
+            for (int i = faceUpStartIndex; i < faceUpCards.Count; i++)
             {
-                if (targetTableau.Index == tableau.Index) continue; // Skip the same tableau
-                if (targetTableau.CanAddCard(topCard!))
+                var cardsToMove = faceUpCards.GetRange(i, faceUpCards.Count - i);
+
+                foreach (var targetTableau in tableauPiles)
                 {
-                    validMoves.Add(new SingleCardMove(tableau.Index, targetTableau.Index, topCard!));
-                }
-            }
-
-            if (tableau.Cards.Count == 1) continue; // Skip if only one card
-
-
-            var faceUp = tableau.Cards.Where(c => c.IsFaceUp).ToList();
-
-            // All Multi card moves
-            for (int i = 0; i < faceUp.Count - 1; i++)
-            {
-                var cardsToMove = faceUp.Skip(i).ToList();
-
-                foreach (var targetTableau in state.TableauPiles)
-                {
-
-                    if (targetTableau.Index == tableau.Index) continue; // Skip the same tableau
+                    if (targetTableau.Index == tableau.Index) continue;
 
                     if (cardsToMove.Count == 1 && targetTableau.CanAddCard(cardsToMove[0]))
+                    {
                         validMoves.Add(new SingleCardMove(tableau.Index, targetTableau.Index, cardsToMove[0]));
+                    }
                     else if (targetTableau.CanAddCards(cardsToMove))
+                    {
                         validMoves.Add(new MultiCardMove(tableau.Index, targetTableau.Index, cardsToMove));
+                    }
                 }
             }
         }
 
         // Foundation → Tableau
-        foreach (var foundation in state.FoundationPiles)
+        foreach (var foundation in foundationPiles)
         {
-            if (!foundation.Cards.Any()) continue;
-            var topCard = foundation.TopCard;
+            if (foundation.IsEmpty) continue;
 
-            foreach (var targetTableau in state.TableauPiles)
+            var topCard = foundation.TopCard!;
+            foreach (var tableau in tableauPiles)
             {
-                if (targetTableau.CanAddCard(topCard))
+                if (tableau.CanAddCard(topCard))
                 {
-                    validMoves.Add(new SingleCardMove(foundation.Index, targetTableau.Index, topCard));
+                    validMoves.Add(new SingleCardMove(foundation.Index, tableau.Index, topCard));
                 }
             }
         }
 
-        // Stock -> Waste (Cycling)
-        if (!state.StockPile.IsEmpty)
+        // Stock → Waste (Cycling)
+        if (!stockPile.IsEmpty)
         {
             validMoves.Add(state.CycleMove);
         }
 
-        // Waste -> Stock (Recycle) 
-        if (state.StockPile.IsEmpty && !state.WastePile.IsEmpty)
+        // Waste → Stock (Recycle)
+        if (stockPile.IsEmpty && !wastePile.IsEmpty)
         {
-            validMoves.Add(new MultiCardMove(state.WastePile.Index, state.StockPile.Index, state.WastePile.Cards));
+            validMoves.Add(new MultiCardMove(wastePile.Index, stockPile.Index, wastePile.Cards));
         }
 
         return validMoves;

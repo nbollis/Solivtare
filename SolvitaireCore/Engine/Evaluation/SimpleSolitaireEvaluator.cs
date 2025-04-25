@@ -26,12 +26,10 @@ public class SecondSolitaireEvaluator : SolitaireEvaluator
                 // reward face up and punish face down cards in tableau
                 if (card.IsFaceUp)
                     score += 0.1;
+                else if (card.Rank is Rank.Ace) // Really punish a face down ace in tableau
+                    score -= 1;
                 else
                     score -= 0.1;
-
-                // Really punish an ace in tableau
-                if (card.Rank is Rank.Ace)
-                    score -= 1;
             }
         }
 

@@ -22,6 +22,7 @@ public class AgentPlayingViewModel : BaseViewModel
 
     public AgentPlayingViewModel()
     {
+        _evaluator = new SecondSolitaireEvaluator();
         _previousMoves = new();
         _deck ??= new ObservableStandardDeck(23);
         _deck.Shuffle();
@@ -34,8 +35,8 @@ public class AgentPlayingViewModel : BaseViewModel
         AllAgents = new()
         {
             Agent,
-            new BruteForceEvaluationAgent(new SimpleSolitaireEvaluator()),
-            new AlphaBetaEvaluationAgent(new SecondSolitaireEvaluator()),
+            new BruteForceEvaluationAgent(_evaluator),
+            new AlphaBetaEvaluationAgent(_evaluator),
         };
 
         _shadowGameState = GameStateViewModel.BaseGameState.Clone();
@@ -52,9 +53,21 @@ public class AgentPlayingViewModel : BaseViewModel
 
     #region Agent Playing
 
+    private SolitaireEvaluator _evaluator;
     private SolitaireGameState _shadowGameState; // Used during gameplay to not update UI while moves are made and unmade
     private CancellationTokenSource? _agentCancellationTokenSource;
     private SolitaireAgent _agent;
+    private double _evaluation;
+
+    public double Evaluation
+    {
+        get => _evaluation;
+        set
+        {
+            _evaluation = value;
+            OnPropertyChanged(nameof(Evaluation));
+        }
+    }
 
     public SolitaireAgent Agent
     {
@@ -85,8 +98,17 @@ public class AgentPlayingViewModel : BaseViewModel
 
         try
         {
+            
             while (!GameStateViewModel.IsGameWon && !token.IsCancellationRequested)
             {
+                // Check if the game is unwinnable
+                if (Agent.IsGameUnwinnable(_shadowGameState))
+                {
+                    // Terminate the current game and start a new one
+                    //StopAgent();
+                    NewGame();
+                }
+
                 // Use the shadow game state for the agent's search
                 var move = await Task.Run(() => Agent.GetNextMove(_shadowGameState), token);
 
@@ -94,6 +116,7 @@ public class AgentPlayingViewModel : BaseViewModel
                 GameStateViewModel.ApplyMove(move);
                 _shadowGameState.ExecuteMove(move);
                 _previousMoves.Push(move);
+                Evaluation = _evaluator.Evaluate(_shadowGameState);
                 Refresh();
 
                 await Task.Delay(100, token); // Optional: Add a small delay for better UI responsiveness
