@@ -80,5 +80,8 @@ public class SingleCardMove(int fromPileIndex, int toPileIndex, Card card)
         }
     }
 
-    public override string ToString() => $"Move {Card} from {FromPileIndex} to {ToPileIndex}";
+    public override string ToString()
+    {
+        return $"Move {Card} from {SolitaireGameState.GetPileStringByIndex(FromPileIndex)} to {SolitaireGameState.GetPileStringByIndex(ToPileIndex)}";
+    }
 }

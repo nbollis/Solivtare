@@ -2,13 +2,6 @@
 
 public class SolitaireMoveGenerator 
 {
-    public IEnumerable<SolitaireMove> GenerateMoves(IGameState<SolitaireMove> state)
-    {
-        if (state is SolitaireGameState sol)
-            return GenerateMoves(sol);
-        return [];
-    }
-
     public IEnumerable<SolitaireMove> GenerateMoves(SolitaireGameState state)
     {
         var validMoves = new List<SolitaireMove>();
@@ -112,7 +105,7 @@ public class SolitaireMoveGenerator
         }
 
         // Waste → Stock (Recycle)
-        if (stockPile.IsEmpty && !wastePile.IsEmpty)
+        if (stockPile.IsEmpty && !wastePile.IsEmpty && state.CycleCount <= state.MaximumCycles)
         {
             validMoves.Add(new MultiCardMove(wastePile.Index, stockPile.Index, wastePile.Cards));
         }

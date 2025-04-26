@@ -100,7 +100,7 @@
         </ItemsControl>
 
         <!-- DataTemplate for FoundationPiles -->
-        <ItemsControl Grid.Column="4" Grid.Row="1" Grid.ColumnSpan="4" 
+        <ItemsControl Grid.Column="4" Grid.Row="1" Grid.ColumnSpan="4" Margin="0 10 0 0"
                       ItemsSource="{Binding FoundationPiles}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>

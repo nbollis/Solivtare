@@ -5,7 +5,7 @@ namespace SolvitaireCore;
 /// <summary>  
 /// A simple evaluation agent that uses a heuristic evaluation function to select the best move.  
 /// </summary>  
-public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) : SolitaireAgent
+public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLookahead = 5) : SolitaireAgent
 {
     private SolitaireMove? _previousBestMove;
 
@@ -26,7 +26,7 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
             foreach (var move in OrderMoves(gameState, gameState.GetLegalMoves()))
             {
                 gameState.ExecuteMove(move);
-                double score = EvaluateWithLookahead(gameState, depth - 1, alpha, beta, false);
+                double score = EvaluateWithLookahead(gameState, depth - 1, alpha, beta);
                 gameState.UndoMove(move);
 
                 if (score > alpha)
@@ -58,7 +58,7 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
         foreach (var move in OrderMoves(gameState, gameState.GetLegalMoves()))
         {
             gameState.ExecuteMove(move);
-            double score = EvaluateWithLookahead(gameState, LookAheadSteps - 1, alpha, beta, false);
+            double score = EvaluateWithLookahead(gameState, LookAheadSteps - 1, alpha, beta);
             gameState.UndoMove(move);
 
             if (moveScores.TryGetValue(move, out var previousScore) && score > previousScore)
@@ -136,7 +136,7 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
         });
     }
 
-    private double EvaluateWithLookahead(SolitaireGameState gameState, int depth, double alpha, double beta, bool isMaximizingPlayer)
+    private double EvaluateWithLookahead(SolitaireGameState gameState, int depth, double alpha, double beta)
     {
         // Generate a hash for the current game state
         int stateHash = gameState.GetHashCode();
@@ -168,45 +168,21 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
             return score;
         }
 
-        double bestScore;
-        if (isMaximizingPlayer)
+        double bestScore = double.NegativeInfinity;
+        // Order moves to improve alpha-beta pruning
+        foreach (var move in OrderMoves(gameState, gameState.GetLegalMoves()))
         {
-            bestScore = double.NegativeInfinity;
+            gameState.ExecuteMove(move);
+            double eval = EvaluateWithLookahead(gameState, depth - 1, alpha, beta);
+            gameState.UndoMove(move);
 
-            foreach (var move in gameState.GetLegalMoves())
+            bestScore = Math.Max(bestScore, eval);
+            alpha = Math.Max(alpha, eval);
+
+            // Prune the branch if alpha is greater than or equal to beta
+            if (beta <= alpha)
             {
-                gameState.ExecuteMove(move);
-                double eval = EvaluateWithLookahead(gameState, depth - 1, alpha, beta, false);
-                gameState.UndoMove(move);
-
-                bestScore = Math.Max(bestScore, eval);
-                alpha = Math.Max(alpha, eval);
-
-                // Prune the branch if alpha is greater than or equal to beta
-                if (beta <= alpha)
-                {
-                    break;
-                }
-            }
-        }
-        else
-        {
-            bestScore = double.PositiveInfinity;
-
-            foreach (var move in gameState.GetLegalMoves())
-            {
-                gameState.ExecuteMove(move);
-                double eval = EvaluateWithLookahead(gameState, depth - 1, alpha, beta, true);
-                gameState.UndoMove(move);
-
-                bestScore = Math.Min(bestScore, eval);
-                beta = Math.Min(beta, eval);
-
-                // Prune the branch if alpha is greater than or equal to beta
-                if (beta <= alpha)
-                {
-                    break;
-                }
+                break;
             }
         }
 

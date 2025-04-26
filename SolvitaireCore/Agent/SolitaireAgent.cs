@@ -22,7 +22,7 @@ public abstract class SolitaireAgent : IAgent<SolitaireMove, SolitaireGameState>
     public virtual bool IsGameUnwinnable(SolitaireGameState gameState)
     {
         // Default implementation: Check if there are no legal moves and the game is not won.
-        return !gameState.IsGameWon;
+        return false;
     }
 }
 

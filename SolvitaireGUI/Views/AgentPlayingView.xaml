@@ -29,6 +29,11 @@
                 <Label Content="Agent Types" />
                 <ListView  ItemsSource="{Binding AllAgents}" 
                            SelectedItem="{Binding Agent, Mode=TwoWay}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Label Content="{Binding Name}"/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
                 </ListView>
 
                 <TextBlock Text="{Binding Evaluation}" Margin="40"></TextBlock>
@@ -76,7 +81,17 @@
 
                 <ListView x:Name="LegalMovesListView" DockPanel.Dock="Bottom" 
                          ItemsSource="{Binding LegalMoves}"  
-                         SelectedItem="{Binding SelectedMove, Mode=TwoWay}"/>  
+                         SelectedItem="{Binding SelectedMove, Mode=TwoWay}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel >
+                                <TextBlock Text="{Binding Evaluation, StringFormat={}{0:F3}}" 
+                                       Width="50" DockPanel.Dock="Left"  VerticalAlignment="Top"/>
+                                <TextBlock Text="{Binding MoveString}"  VerticalAlignment="Top" />
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>  
 
 
             </DockPanel>

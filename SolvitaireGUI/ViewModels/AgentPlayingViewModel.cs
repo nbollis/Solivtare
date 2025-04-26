@@ -30,7 +30,7 @@ public class AgentPlayingViewModel : BaseViewModel
         var gameState = new SolitaireGameState();
         gameState.DealCards(_deck);
         GameStateViewModel = new GameStateViewModel(gameState);
-        LegalMoves = new ObservableCollection<SolitaireMove>(GameStateViewModel.GetLegalMoves());
+        LegalMoves = new();
         Agent = new RandomAgent();
         AllAgents = new()
         {
@@ -48,6 +48,7 @@ public class AgentPlayingViewModel : BaseViewModel
         MakeSpecificMoveCommand = new DelegateCommand(MakeSpecificMove);
         StartAgentCommand = new RelayCommand(StartAgent);
         StopAgentCommand = new RelayCommand(StopAgent);
+        Refresh();
     }
 
 
@@ -116,7 +117,6 @@ public class AgentPlayingViewModel : BaseViewModel
                 GameStateViewModel.ApplyMove(move);
                 _shadowGameState.ExecuteMove(move);
                 _previousMoves.Push(move);
-                Evaluation = _evaluator.Evaluate(_shadowGameState);
                 Refresh();
 
                 await Task.Delay(100, token); // Optional: Add a small delay for better UI responsiveness
@@ -157,8 +157,8 @@ public class AgentPlayingViewModel : BaseViewModel
 
     #region Human Interaction
 
-    private SolitaireMove _selectedMove;
-    public SolitaireMove SelectedMove
+    private MoveViewModel _selectedMove;
+    public MoveViewModel SelectedMove
     {
         get => _selectedMove;
         set
@@ -168,8 +168,8 @@ public class AgentPlayingViewModel : BaseViewModel
         }
     }
 
-    private ObservableCollection<SolitaireMove> _legalMoves;
-    public ObservableCollection<SolitaireMove> LegalMoves
+    private ObservableCollection<MoveViewModel> _legalMoves;
+    public ObservableCollection<MoveViewModel> LegalMoves
     {
         get => _legalMoves;
         set
@@ -183,8 +183,18 @@ public class AgentPlayingViewModel : BaseViewModel
     public ICommand UndoMoveCommand { get; set; }
     private void MakeSpecificMove(object? moveObject)
     {
-        if (moveObject is not SolitaireMove move)
-            return;
+        SolitaireMove move;
+        switch (moveObject)
+        {
+            case MoveViewModel vm:
+                move = vm.Move;
+                break;
+            case SolitaireMove mo:
+                move = mo;
+                break;
+            default:
+                return;
+        }
 
         GameStateViewModel.ApplyMove(move);
         _shadowGameState.ExecuteMove(move);
@@ -230,7 +240,16 @@ public class AgentPlayingViewModel : BaseViewModel
 
     public void Refresh()
     {
-        LegalMoves = new ObservableCollection<SolitaireMove>(GameStateViewModel.GetLegalMoves());
+        LegalMoves.Clear();
+        foreach (var move in GameStateViewModel.GetLegalMoves())
+        {
+            _shadowGameState.ExecuteMove(move);
+            double eval = _evaluator.Evaluate(_shadowGameState);
+            _shadowGameState.UndoMove(move);
+            LegalMoves.Add(new MoveViewModel(move, eval));
+        }
+
+        Evaluation = _evaluator.Evaluate(_shadowGameState);
         OnPropertyChanged(nameof(GameStateViewModel));
         OnPropertyChanged(nameof(Agent));
     }
