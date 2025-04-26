@@ -12,9 +12,9 @@ public class FoundationPile(Suit suit, int index = 0, IEnumerable<Card>? initial
 
     public override bool CanAddCard(Card card)
     {
-        if (IsEmpty)
+        if (Cards.Count == 0)
             return card.Rank == Rank.Ace && card.Suit == Suit;
-        return card.Suit == Suit && card.Rank == TopCard.Rank + 1;
+        return card.Suit == Suit && card.Rank == TopCard!.Rank + 1;
     }
 
     public override string ToString() => $"Foundation[{Suit}]";

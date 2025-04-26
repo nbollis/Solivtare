@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SolvitaireCMD": {
+      "commandName": "Project",
+      "commandLineArgs": "60"
+    }
+  }
+}

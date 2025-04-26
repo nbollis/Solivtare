@@ -11,11 +11,11 @@ public abstract class Pile  : IEnumerable<Card>
     /// Represents a pile of cards in a solitaire game
     /// </summary>
     /// <remarks> Top card is the last card in the list. </remarks>
-    public List<Card> Cards { get;  }
+    public List<Card> Cards { get; }
 
     public readonly int Index;
     public int Count => Cards.Count;
-    public bool IsEmpty => Count == 0;
+    public bool IsEmpty => Cards.Count == 0;
     public Card? TopCard => Cards.LastOrDefault();
     public Card? BottomCard => Cards.FirstOrDefault();
 
@@ -44,7 +44,7 @@ public abstract class Pile  : IEnumerable<Card>
     /// </summary>
     /// <param name="card">The card to add to the pile.</param>
     /// <exception cref="InvalidOperationException">Thrown if the card cannot be added to the pile.</exception>
-    public void AddCard(Card card)
+    public virtual void AddCard(Card card)
     {
         if (!CanAddCard(card))
             throw new InvalidOperationException($"Cannot add {card} to this pile.");
@@ -56,7 +56,7 @@ public abstract class Pile  : IEnumerable<Card>
     /// </summary>
     /// <param name="cards">The collection of cards to add to the pile.</param>
     /// <exception cref="InvalidOperationException">Thrown if any card in the collection cannot be added to the pile.</exception>
-    public void AddCards(IEnumerable<Card> cards)
+    public virtual void AddCards(IEnumerable<Card> cards)
     {
         foreach (var card in cards)
         {

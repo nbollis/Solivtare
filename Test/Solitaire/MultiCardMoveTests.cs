@@ -70,7 +70,7 @@ public class MultiCardMoveTests
 
         // Assert  
         Assert.That(result, Is.False);
-        Assert.That(() => move.Execute(gameState), Throws.InvalidOperationException);
+        Assert.That(() => gameState.ExecuteMove(move), Throws.InvalidOperationException);
     }
 
     [Test]

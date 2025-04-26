@@ -22,7 +22,6 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
 
     public SolitaireGameState(int cardsPerCycle = 3)
     {
-        
         TableauPiles = new List<TableauPile>();
         FoundationPiles = new List<FoundationPile>();
 
@@ -71,6 +70,8 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
 
     public void Reset()
     {
+        CycleCount = 0;
+
         foreach (var pile in FoundationPiles)
         {
             pile.Cards.Clear();
@@ -88,21 +89,30 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     #region Move Making
 
     private static readonly SolitaireMoveGenerator MoveGenerator = new();
+
     /// <summary>
     /// Moves cards from Stock to Waste pile. Moves CardsPerCycle or all remaining cards, whichever is less.
     /// </summary>
     public SolitaireMove CycleMove => new MultiCardMove(StockIndex, WasteIndex,
-        StockPile.Cards.TakeLast(Math.Min(CardsPerCycle, StockPile.Count)).ToList());
-    
+        StockPile.Cards.TakeLast(Math.Min(CardsPerCycle, StockPile.Count)));
+
+    private bool _isDirty = true; // true if the moves have changed since last call
+    private List<SolitaireMove>? _cachedMoves;
     public IEnumerable<SolitaireMove> GetLegalMoves()
     {
-        return MoveGenerator.GenerateMoves(this);
+        if (_cachedMoves is null || _isDirty)
+        {
+            _cachedMoves = MoveGenerator.GenerateMoves(this).ToList();
+            _isDirty = false;
+        }
+        return _cachedMoves;
     }
 
     public void ExecuteMove(SolitaireMove move)
     {
         if (move.IsValid(this))
         {
+            _isDirty = true;
             move.Execute(this);
         }
         else
@@ -113,6 +123,7 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
 
     public void UndoMove(SolitaireMove move)
     {
+        _isDirty = true;
         move.Undo(this);
     }
 

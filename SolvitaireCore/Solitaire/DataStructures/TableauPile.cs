@@ -3,15 +3,38 @@
 /// <summary>
 /// Pile of cards that can be played on (columns in solitaire).
 /// </summary>
-/// <param name="initialCards"></param>
-public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) 
-    : Pile(index, initialCards)
+public class TableauPile : Pile
 {
+    /// <summary>
+    /// Pile of cards that can be played on (columns in solitaire).
+    /// </summary>
+    /// <param name="initialCards"></param>
+    public TableauPile(int index = 0, IEnumerable<Card>? initialCards = null) : base(index, initialCards)
+    {
+        if (initialCards != null && Cards.Any())
+        {
+            CurrentRank = Cards[^1].Rank;
+            CurrentColor = Cards[^1].Color;
+        }
+    }
+
+    public Rank CurrentRank { get; private set; }
+    public Color CurrentColor { get; private set; }
+
     public override bool CanAddCard(Card card)
     {
-        if (IsEmpty)
+        if (Cards.Count == 0)
             return card.Rank == Rank.King;
-        return card.Color != TopCard!.Color && card.Rank == TopCard!.Rank - 1;
+        return card.Color != CurrentColor && card.Rank == CurrentRank - 1;
+    }
+
+    public override void AddCard(Card card)
+    {
+        if (!CanAddCard(card))
+            throw new InvalidOperationException($"Cannot add {card} to this pile.");
+        Cards.Add(card);
+        CurrentRank = card.Rank;
+        CurrentColor = card.Color;
     }
 
     public bool CanAddCards(List<Card> cards)
@@ -21,26 +44,41 @@ public class TableauPile(int index = 0, IEnumerable<Card>? initialCards = null)
             return false;
 
         // if the pile is empty, the top card to be added must be a king
-        if (IsEmpty)
+        if (Cards.Count == 0)
             return cards[0].Rank == Rank.King;
 
-        // if the bottom card to add is greater than the top card, do not add
-        if (cards[0].Rank > TopCard.Rank)
-            return false;
-
         // if the top card is not the same color as the bottom card, do not add
-        if (cards[0].Color == TopCard.Color)
+        if (cards[0].Color == CurrentColor)
             return false;
 
-        if (cards[0].Rank == TopCard.Rank - 1)
+        if (cards[0].Rank == CurrentRank - 1)
             return true;
 
         return false;
     }
 
+    /// <summary>
+    /// Adds multiple cards to the pile one at a time and checks if each card can be added prior to adding.
+    /// </summary>
+    /// <param name="cards">The collection of cards to add to the pile.</param>
+    /// <exception cref="InvalidOperationException">Thrown if any card in the collection cannot be added to the pile.</exception>
+    public override void AddCards(IEnumerable<Card> cards)
+    {
+        foreach (var card in cards)
+        {
+            if (!CanAddCard(card))
+                throw new InvalidOperationException($"Cannot add {card} to this pile.");
+            AddCard(card);
+        }
+
+        // Update the current rank and color based on the last card added
+        CurrentColor = Cards[^1].Color;
+        CurrentRank = Cards[^1].Rank;
+    }
+
     public bool RemoveCards(List<Card> cards)
     {
-        if (!cards[^1].Equals(TopCard))
+        if (!cards[^1].Equals(Cards[^1]))
             throw new InvalidOperationException($"Cards to remove do not end with the tableau Top Card");
 
         int startIndex = Cards.IndexOf(cards[0]);

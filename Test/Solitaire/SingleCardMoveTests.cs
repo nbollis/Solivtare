@@ -49,7 +49,7 @@ public class SingleCardMoveTests
         var from = gameState.TableauPiles[0];
         var to = gameState.TableauPiles[1];
         from.Cards.Add(new Card(Suit.Hearts, Rank.Queen, true));
-        to.Cards.Add(new Card(Suit.Spades, Rank.King, true));
+        to.AddCard(new Card(Suit.Spades, Rank.King, true));
         var card = from.TopCard!;
         var move = new SingleCardMove(from.Index, to.Index, card);
 
