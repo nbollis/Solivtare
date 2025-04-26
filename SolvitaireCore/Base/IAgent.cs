@@ -1,12 +1,7 @@
 ﻿namespace SolvitaireCore;
 
-
-public interface IAgent
+public interface IAgent<in TGameState>
 {
     string Name { get; }
-}
-
-public interface IAgent<out TMove, in TGameState> : IAgent 
-{
-    public TMove GetNextMove(TGameState gameState);
+    public AgentDecision GetNextAction(TGameState gameState);
 }

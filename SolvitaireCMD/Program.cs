@@ -49,7 +49,7 @@ namespace MyApp
 
             while (gameState is { IsGameWon: false, IsGameLost: false } && stopwatch.Elapsed.TotalSeconds < 1200)
             {
-                var move = agent.GetNextMove(gameState);
+                var move = agent.GetNextAction(gameState);
 
                 try
                 {

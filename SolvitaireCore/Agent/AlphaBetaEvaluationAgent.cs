@@ -1,5 +1,4 @@
-﻿using static System.Formats.Asn1.AsnWriter;
-
+﻿
 namespace SolvitaireCore;
 
 /// <summary>  
@@ -12,9 +11,15 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
     public override string Name => "AlphaBeta Agent";
     public int LookAheadSteps { get; } = maxLookahead;
 
-    public override SolitaireMove GetNextMove(SolitaireGameState gameState)
+    public override AgentDecision GetNextAction(SolitaireGameState gameState)
     {
-        SolitaireMove bestMove = null;
+        SolitaireMove bestMove = null!;
+
+        var moves = gameState.GetLegalMoves().ToList();
+        if (moves.Count == 0 || IsGameUnwinnable(gameState))
+        {
+            return AgentDecision.SkipGame();
+        }
 
         // Iterative Deepening: Search for best of depth 1 and use that to determine the order to search depth 2 and so on. 
         // You would think this would make the search slower, but alpha-beta gains far outweigh. 
@@ -23,7 +28,7 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
             double alpha = double.NegativeInfinity;
             double beta = double.PositiveInfinity;
 
-            foreach (var move in OrderMoves(gameState, gameState.GetLegalMoves()))
+            foreach (var move in OrderMoves(gameState, moves))
             {
                 gameState.ExecuteMove(move);
                 double score = EvaluateWithLookahead(gameState, depth - 1, alpha, beta);
@@ -41,7 +46,7 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
         }
 
 
-        return bestMove ?? throw new InvalidOperationException("No valid moves available.");
+        return AgentDecision.PlayMove(bestMove);
     }
 
     public override bool IsGameUnwinnable(SolitaireGameState gameState)

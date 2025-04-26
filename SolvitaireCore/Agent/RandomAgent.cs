@@ -2,14 +2,17 @@
 
 public class RandomAgent : SolitaireAgent
 {
-    private Random _rng = new Random();
+    private readonly Random _random = new Random();
     public override string Name => "Random Agent";
 
 
-    public override SolitaireMove GetNextMove(SolitaireGameState gameState)
+    public override AgentDecision GetNextAction(SolitaireGameState gameState)
     {
         var moves = gameState.GetLegalMoves().ToList();
-        if (moves.Count == 0) return null;
-        return moves[_rng.Next(moves.Count)];
+        if (moves.Count == 0)
+            return AgentDecision.SkipGame();
+
+        var move = moves[_random.Next(moves.Count)];
+        return AgentDecision.PlayMove(move);
     }
 }

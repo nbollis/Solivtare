@@ -164,6 +164,6 @@ public class SingleCardMoveTests
         var result = move.ToString();
 
         // Assert
-        Assert.That(result, Is.EqualTo($"Move {card} from {fromPile.Index} to {toPile.Index}"));
+        Assert.That(result, Is.EqualTo($"Move {card} from Tableau[1] to Foundation[1]"));
     }
 }

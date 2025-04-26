@@ -1,18 +1,19 @@
 ﻿namespace SolvitaireCore;
 
-public abstract class SolitaireAgent : IAgent<SolitaireMove, SolitaireGameState>
+public abstract class SolitaireAgent : IAgent<SolitaireGameState>
 {
     public abstract string Name { get; }
-    public abstract SolitaireMove GetNextMove(SolitaireGameState gameState);
+    public abstract AgentDecision GetNextAction(SolitaireGameState gameState);
+
+    /// <summary>
+    /// Transposition table for memoization where the Key is the hash of the game state and the Value is the score.
+    /// </summary>
+    protected readonly Dictionary<int, TranspositionTableEntry> TranspositionTable = new();
 
     public virtual void ResetState()
     {
         TranspositionTable.Clear();
     }
-
-    // Transposition table for memoization where the Key is the hash of the game state and the Value is the score.
-    protected readonly Dictionary<int, TranspositionTableEntry> TranspositionTable = new();
-
 
     /// <summary>
     /// Determines if the current game state is unwinnable.

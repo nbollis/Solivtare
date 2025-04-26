@@ -9,10 +9,16 @@ public class BruteForceEvaluationAgent(SolitaireEvaluator evaluator, int maxLook
     public override string Name => "Brute Force Agent";
     public int LookAheadSteps { get; } = maxLookahead;
 
-    public override SolitaireMove GetNextMove(SolitaireGameState gameState)
+    public override AgentDecision GetNextAction(SolitaireGameState gameState)
     {
-        SolitaireMove bestMove = null;
+        SolitaireMove bestMove = null!;
         double bestScore = double.NegativeInfinity;
+
+        var moves = gameState.GetLegalMoves().ToList();
+        if (moves.Count == 0 || IsGameUnwinnable(gameState))
+        {
+            return AgentDecision.SkipGame();
+        }
 
         foreach (var move in gameState.GetLegalMoves())
         {
@@ -26,7 +32,7 @@ public class BruteForceEvaluationAgent(SolitaireEvaluator evaluator, int maxLook
             }
         }
 
-        return bestMove ?? throw new InvalidOperationException("No valid moves available.");
+        return AgentDecision.PlayMove(bestMove);
     }
 
     private double EvaluateWithLookahead(SolitaireGameState gameState, int depth)

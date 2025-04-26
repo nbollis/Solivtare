@@ -102,22 +102,26 @@ public class AgentPlayingViewModel : BaseViewModel
             
             while (!GameStateViewModel.IsGameWon && !token.IsCancellationRequested)
             {
-                // Check if the game is unwinnable
-                if (Agent.IsGameUnwinnable(_shadowGameState))
+                // Use the shadow game state for the agent's search
+                var decision = await Task.Run(() => Agent.GetNextAction(_shadowGameState), token);
+
+                if (decision.ShouldSkipGame)
                 {
-                    // Terminate the current game and start a new one
-                    //StopAgent();
-                    NewGame();
+                    // Handle the case where the agent decides to skip the game
+                    break;
+                }
+                else if (decision.Move != null)
+                {
+                    // Apply the move to the real game state and update the shadow state
+                    MakeSpecificMove(decision.Move);
+                }
+                else
+                {
+                    Console.WriteLine("❌ Invalid move or no move available.");
+                    break;
                 }
 
-                // Use the shadow game state for the agent's search
-                var move = await Task.Run(() => Agent.GetNextMove(_shadowGameState), token);
-
-                // Apply the move to the real game state and update the shadow state
-                GameStateViewModel.ApplyMove(move);
-                _shadowGameState.ExecuteMove(move);
-                _previousMoves.Push(move);
-                Refresh();
+                
 
                 await Task.Delay(100, token); // Optional: Add a small delay for better UI responsiveness
             }
@@ -144,13 +148,22 @@ public class AgentPlayingViewModel : BaseViewModel
     private void AgentMakeMove()
     {
         // Use the shadow game state for the agent's search
-        var move = Agent.GetNextMove(_shadowGameState);
+        var action = Agent.GetNextAction(_shadowGameState);
+        if (action.ShouldSkipGame)
+        {
+            NewGame();
+            return;
+        }
+        if (action.Move != null)
+        {
+            var move = action.Move;
 
-        // Apply the move to the real game state and update the shadow state
-        GameStateViewModel.ApplyMove(move);
-        _shadowGameState.ExecuteMove(move);
-        _previousMoves.Push(move);
-        Refresh();
+            // Apply the move to the real game state and update the shadow state
+            GameStateViewModel.ApplyMove(move);
+            _shadowGameState.ExecuteMove(move);
+            _previousMoves.Push(move);
+            Refresh();
+        }
     }
 
     #endregion
@@ -191,6 +204,12 @@ public class AgentPlayingViewModel : BaseViewModel
                 break;
             case SolitaireMove mo:
                 move = mo;
+                break;
+            case AgentDecision { ShouldSkipGame: true }:
+                NewGame();
+                return;
+            case AgentDecision decision:
+                move = decision.Move ?? throw new InvalidOperationException("Decision does not contain a valid move.");
                 break;
             default:
                 return;
