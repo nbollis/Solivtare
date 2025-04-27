@@ -3,6 +3,7 @@
 public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TChromosome>
 {
     protected readonly Random Random;
+    public double Fitness { get; set; } = double.NegativeInfinity;
     public Dictionary<string, double> MutableStatsByName { get; set; }
 
     protected Chromosome(Random random)
@@ -110,5 +111,19 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
     {
         MutableStatsByName = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, double>>(json)
                              ?? new Dictionary<string, double>();
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            int hash = 17;
+            foreach (var kvp in MutableStatsByName)
+            {
+                hash = hash * 23 + kvp.Key.GetHashCode();
+                hash = hash * 23 + kvp.Value.GetHashCode();
+            }
+            return hash;
+        }
     }
 }
