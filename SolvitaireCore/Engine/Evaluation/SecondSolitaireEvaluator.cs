@@ -1,4 +1,6 @@
-﻿namespace SolvitaireCore;
+﻿using static System.Formats.Asn1.AsnWriter;
+
+namespace SolvitaireCore;
 
 public class SecondSolitaireEvaluator : SolitaireEvaluator
 {
@@ -21,7 +23,7 @@ public class SecondSolitaireEvaluator : SolitaireEvaluator
         foreach (var tableau in state.TableauPiles)
         {
             int faceDownCount = tableau.Cards.TakeWhile(card => !card.IsFaceUp).Count();
-            score -= 0.75 *  faceDownCount; // Penalize face-down cards
+            score -= 0.75 * faceDownCount; // Penalize face-down cards
 
             score += 0.5 * (tableau.Count - faceDownCount); // reward face-up cards
 
@@ -29,7 +31,7 @@ public class SecondSolitaireEvaluator : SolitaireEvaluator
                 score += 0.2;
             else if (tableau.BottomCard.IsFaceUp) // reward bottom card of pile exposed. 
             {
-                score += 0.2; 
+                score += 0.2;
                 if (tableau.BottomCard.Rank == Rank.King) // extra reward that card being a king
                     score += 0.4;
             }
