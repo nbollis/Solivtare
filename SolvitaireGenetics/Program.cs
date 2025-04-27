@@ -1,18 +1,92 @@
-﻿using System;
-using SolvitaireCore;
+﻿using CommandLine;
+using CommandLine.Text;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace SolvitaireGenetics
 {
     internal class Program
     {
-        static void Main(string[] args)
+        internal static string VersionNumber = "1.0.0"; // Update this as necessary
+        static int Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            // an error code of 0 is returned if the program ran successfully.
+            // otherwise, an error code of >0 is returned.
+            // this makes it easier to determine via scripts when the program fails.
+            int errorCode = 0;
+
+            var parser = new Parser(with => with.HelpWriter = null);
+            var parserResult = parser.ParseArguments<CommandLineParameters>(args);
+
+            parserResult
+                .WithParsed<CommandLineParameters>(options => errorCode = Run(options))
+                .WithNotParsed(errs => errorCode = DisplayHelp(parserResult, errs));
+
+            return errorCode;
         }
-    }
 
-    public class CommandLineParameters
-    {
+        private static int Run(CommandLineParameters options)
+        {
+            // Set it all up
+            GeneticSolitaireAlgorithm algorithm;
+            try
+            {
+                // Set up dependency injection and logging
+                var serviceProvider = new ServiceCollection()
+                    .AddLogging(builder =>
+                    {
+                        builder.AddConsole(); // Optional: Log to the console
+                        builder.AddFile("Logs/GeneticAlgorithm.log"); // Log to a file
+                    })
+                    .BuildServiceProvider();
 
+                // Get the logger
+                var logger = serviceProvider.GetRequiredService<ILogger<GeneticSolitaireAlgorithm>>();
+
+                if (logger is null)
+                    throw new ArgumentNullException(nameof(logger));
+
+                // Run the genetic algorithm
+                algorithm = new GeneticSolitaireAlgorithm(
+                        populationSize: options.PopulationSize,
+                        mutationRate: options.MutationRate,
+                        tournamentSize: options.TournamentSize,
+                        maxMovesPerAgent: options.MaxMovesPerGeneration,
+                        maxGamesPerAgent: options.MaxGamesPerGeneration,
+                        logger: logger); // Pass the logger to the algorithm
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred during setup: {ex.Message}");
+                return 1; // Return a non-zero error code
+            }
+
+            // Run the genetic algorithm
+            try
+            {
+                algorithm.RunEvolution(options.Generations);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while running the algorithm: {ex.Message}");
+                return 2; // Return a non-zero error code
+            }
+
+
+            return 0;
+        }
+
+        private static int DisplayHelp<T>(ParserResult<T> result, IEnumerable<Error> errs)
+        {
+            var helpText = HelpText.AutoBuild(result, h =>
+            {
+                h.AdditionalNewLineAfterOption = false;
+                h.Heading = $"Solvitaire Genetics {VersionNumber}"; // Change as necessary
+                return HelpText.DefaultParsingErrorsHandler(result, h);
+            }, e => e);
+
+            Console.WriteLine(helpText);
+            return 1;
+        }
     }
 }

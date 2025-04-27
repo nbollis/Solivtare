@@ -1,4 +1,4 @@
-﻿namespace SolvitaireCore;
+﻿namespace SolvitaireGenetics;
 
 public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TChromosome>
 {

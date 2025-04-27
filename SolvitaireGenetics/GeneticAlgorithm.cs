@@ -13,11 +13,12 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
     // Fitness cache
     private readonly Dictionary<int, double> _fitnessCache = new();
 
-    public GeneticAlgorithm(int populationSize, double mutationRate, int tournamentSize)
+    public GeneticAlgorithm(int populationSize, double mutationRate, int tournamentSize, ILogger<GeneticAlgorithm<TChromosome>> logger)
     {
         _populationSize = populationSize;
         _mutationRate = mutationRate;
         _tournamentSize = tournamentSize;
+        _logger = logger;
     }
 
     protected abstract double EvaluateFitness(TChromosome chromosome);
@@ -52,7 +53,8 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
             TChromosome bestChromosome = population[0];
             TChromosome averageChromosome = Chromosome<TChromosome>.GetAverageChromosome(population);
 
-            _logger.LogInformation($"Generation {generation}: Best fitness = {bestFitness}, BestChromosome = {bestChromosome.SerializeWeights()}, AverageChromosome = {averageChromosome.SerializeWeights()}");
+            _logger.LogInformation($"Generation {generation}: Best fitness = {bestFitness}, Average fitness = {fitness.Average()}");
+            _logger.LogInformation($"BestChromosome = {bestChromosome.SerializeWeights()}, AverageChromosome = {averageChromosome.SerializeWeights()}");
         }
 
         return population[0]; // Best chromosome
@@ -131,7 +133,8 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
     private readonly int _maxMovesPerAgent;
     private readonly int _maxGamesPerAgent;
 
-    public GeneticSolitaireAlgorithm(int populationSize, double mutationRate, int tournamentSize, int maxMovesPerAgent, int maxGamesPerAgent) : base(populationSize, mutationRate, tournamentSize)
+    public GeneticSolitaireAlgorithm(int populationSize, double mutationRate, int tournamentSize, int maxMovesPerAgent, int maxGamesPerAgent, ILogger<GeneticSolitaireAlgorithm> logger)
+        : base(populationSize, mutationRate, tournamentSize, logger)
     {
         _maxMovesPerAgent = maxMovesPerAgent;
         _maxGamesPerAgent = maxGamesPerAgent;

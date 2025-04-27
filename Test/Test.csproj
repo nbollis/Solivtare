@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SolvitaireCore\SolvitaireCore.csproj" />
+    <ProjectReference Include="..\SolvitaireGenetics\SolvitaireGenetics.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿namespace SolvitaireCore;
+﻿namespace SolvitaireGenetics;
 
 public class SolitaireChromosome : Chromosome<SolitaireChromosome>
 {
