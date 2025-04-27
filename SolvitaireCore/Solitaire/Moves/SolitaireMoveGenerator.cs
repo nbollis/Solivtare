@@ -65,23 +65,33 @@ public class SolitaireMoveGenerator
 
             for (int i = 0; i < faceUpCards.Count; i++)
             {
-                (int fromIndex, int length) toMove = (i, faceUpCards.Count - i);
+                var cards = faceUpCards.TakeLast(i+1).ToList();
                 foreach (var targetTableau in tableauPiles)
                 {
                     if (targetTableau.Index == tableau.Index) 
                         continue;
 
-                    var topCard = faceUpCards[toMove.fromIndex];
-                    if (targetTableau.CurrentColor == topCard.Color) continue; // Cannot move to a tableau of the same color
-                    if (targetTableau.CurrentRank != topCard.Rank + 1) continue; // Cannot move to a tableau of the same rank
-
-                    if (faceUpCards.Count == 1 && targetTableau.CanAddCard(faceUpCards[toMove.fromIndex]))
+                    var topCard = cards[0];
+                    if (cards.Count == 1)
                     {
-                        validMoves.Add(new SingleCardMove(tableau.Index, targetTableau.Index, topCard));
+                        if (targetTableau.CanAddCard(topCard))
+                            validMoves.Add(new SingleCardMove(tableau.Index, targetTableau.Index, topCard));
+                        continue;
                     }
-                    else if (targetTableau.CanAddCards(faceUpCards.GetRange(toMove.fromIndex, toMove.length)))
+                    
+                    if (targetTableau.Count > 0)
                     {
-                        validMoves.Add(new MultiCardMove(tableau.Index, targetTableau.Index, faceUpCards.GetRange(toMove.fromIndex, toMove.length)));
+                        if (targetTableau.CurrentColor == topCard.Color)
+                            continue; // Cannot move to a tableau of the same color
+                        if (targetTableau.CurrentRank != topCard.Rank + 1)
+                            continue; // Cannot move to a tableau of the same rank
+                    }
+                    else if (topCard.Rank != Rank.King)
+                        continue;
+
+                    if (targetTableau.CanAddCards(cards))
+                    {
+                        validMoves.Add(new MultiCardMove(tableau.Index, targetTableau.Index, cards));
                     }
                     
                 }

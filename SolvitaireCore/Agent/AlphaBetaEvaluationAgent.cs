@@ -30,9 +30,7 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
 
             foreach (var move in OrderMoves(gameState, moves))
             {
-                gameState.ExecuteMove(move);
-                double score = EvaluateWithLookahead(gameState, depth - 1, alpha, beta);
-                gameState.UndoMove(move);
+                double score = gameState.EvaluateMove(move, evaluator);
 
                 if (score > alpha)
                 {
@@ -177,9 +175,7 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
         // Order moves to improve alpha-beta pruning
         foreach (var move in OrderMoves(gameState, gameState.GetLegalMoves()))
         {
-            gameState.ExecuteMove(move);
-            double eval = EvaluateWithLookahead(gameState, depth - 1, alpha, beta);
-            gameState.UndoMove(move);
+            double eval = gameState.EvaluateMove(move, evaluator);
 
             bestScore = Math.Max(bestScore, eval);
             alpha = Math.Max(alpha, eval);

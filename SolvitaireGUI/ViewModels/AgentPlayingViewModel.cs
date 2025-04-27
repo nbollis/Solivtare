@@ -157,12 +157,7 @@ public class AgentPlayingViewModel : BaseViewModel
         if (action.Move != null)
         {
             var move = action.Move;
-
-            // Apply the move to the real game state and update the shadow state
-            GameStateViewModel.ApplyMove(move);
-            _shadowGameState.ExecuteMove(move);
-            _previousMoves.Push(move);
-            Refresh();
+            MakeSpecificMove(move);
         }
     }
 

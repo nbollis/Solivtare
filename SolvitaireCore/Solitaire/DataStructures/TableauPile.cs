@@ -44,14 +44,11 @@ public class TableauPile : Pile
         }
 
         // if the top card is not the same color as the bottom card, do not add
-        if (TopCard.IsFaceUp)
-        {
-            if (cards[0].Color == CurrentColor)
-                return false;
+        if (cards[0].Color == CurrentColor)
+            return false;
 
-            if (cards[0].Rank == CurrentRank - 1)
-                return true;
-        }
+        if (cards[0].Rank != CurrentRank - 1)
+            return false;
 
         // if the card set is not alternating color and descending rank, do not add
         return IsValidCardSet(cards);

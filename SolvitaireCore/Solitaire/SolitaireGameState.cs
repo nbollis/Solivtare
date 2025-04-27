@@ -113,6 +113,14 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
         return _cachedMoves;
     }
 
+    public double EvaluateMove(SolitaireMove move, IStateEvaluator<SolitaireGameState> evaluator)
+    {
+        ExecuteMove(move);
+        var eval = evaluator.Evaluate(this);
+        UndoMove(move);
+        return eval;
+    }
+
     public void ExecuteMove(SolitaireMove move)
     {
         if (move.IsValid(this))
@@ -167,7 +175,10 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
                     toPile.AddCards(multi.Cards);
 
                     if (fromPile.Count > 0)
-                        fromPile.TopCard!.IsFaceUp = true; // set the top card to face up
+                    {
+                        _originalPreviousIsFaceUp = fromPile.TopCard!.IsFaceUp;
+                        fromPile.TopCard.IsFaceUp = true;
+                    }
                 }
             }
         }
@@ -184,12 +195,23 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
             CycleCount--;
         if (move is SingleCardMove single)
         {
+            if (single.ToPileIndex == WasteIndex)
+            {
+                WastePile.RemoveCard(single.Card);
+                StockPile.AddCard(single.Card);
+            }
+            else if (single.ToPileIndex == StockIndex)
+            {
+                StockPile.RemoveCard(single.Card);
+                WastePile.AddCard(single.Card);
+            }
+
             var fromPile = GetPileByIndex(move.FromPileIndex);
             var toPile = GetPileByIndex(move.ToPileIndex);
 
             toPile.RemoveCard(single.Card);
             single.Card.IsFaceUp = _originalIsFaceUp; // Restore the original face-up state
-            if (fromPile is TableauPile && fromPile.Count > 0)
+            if (single.FromPileIndex <= TableauEndIndex && fromPile.Count > 0)
             {
                 fromPile.TopCard.IsFaceUp = _originalPreviousIsFaceUp;
             }
@@ -220,8 +242,10 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
                 var toPile = TableauPiles[multi.ToPileIndex];
                 var fromPile = TableauPiles[multi.FromPileIndex];
 
-                if (fromPile.Count > 0 && !fromPile.CanAddCard(multi.Cards[0]))
-                    fromPile.TopCard!.IsFaceUp = false;
+                if (fromPile.Count > 0)
+                {
+                    fromPile.TopCard!.IsFaceUp = _originalPreviousIsFaceUp;
+                }
 
                 fromPile.Cards.AddRange(multi.Cards);
                 fromPile.Refresh();
