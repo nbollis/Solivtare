@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolvitaireGUI", "Solvitaire
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolvitaireCMD", "SolvitaireCMD\SolvitaireCMD.csproj", "{AE70814A-9AB6-4E75-9318-78F751D7110D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolvitaireGenetics", "SolvitaireGenetics\SolvitaireGenetics.csproj", "{209CBEB5-D1A2-4661-81D7-F406F1D8D73D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{AE70814A-9AB6-4E75-9318-78F751D7110D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE70814A-9AB6-4E75-9318-78F751D7110D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE70814A-9AB6-4E75-9318-78F751D7110D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{209CBEB5-D1A2-4661-81D7-F406F1D8D73D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{209CBEB5-D1A2-4661-81D7-F406F1D8D73D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{209CBEB5-D1A2-4661-81D7-F406F1D8D73D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{209CBEB5-D1A2-4661-81D7-F406F1D8D73D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

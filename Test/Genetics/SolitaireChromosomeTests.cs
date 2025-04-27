@@ -1,4 +1,4 @@
-using SolvitaireCore;
+using SolvitaireGenetics;
 
 namespace Test.Genetics;
 
