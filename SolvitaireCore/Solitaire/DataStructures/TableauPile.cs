@@ -28,33 +28,33 @@ public class TableauPile : Pile
         return card.Color != CurrentColor && card.Rank == CurrentRank - 1;
     }
 
-    public override void AddCard(Card card)
+    internal override void AddCard(Card card)
     {
-        if (!CanAddCard(card))
-            throw new InvalidOperationException($"Cannot add {card} to this pile.");
-        Cards.Add(card);
+        base.AddCard(card);
         CurrentRank = card.Rank;
         CurrentColor = card.Color;
     }
 
     public bool CanAddCards(List<Card> cards)
     {
-        // if the card set is not alternating color and descending rank, do not add
-        if (!IsValidCardSet(cards))
-            return false;
-
         // if the pile is empty, the top card to be added must be a king
         if (Cards.Count == 0)
+        {
             return cards[0].Rank == Rank.King;
+        }
 
         // if the top card is not the same color as the bottom card, do not add
-        if (cards[0].Color == CurrentColor)
-            return false;
+        if (TopCard.IsFaceUp)
+        {
+            if (cards[0].Color == CurrentColor)
+                return false;
 
-        if (cards[0].Rank == CurrentRank - 1)
-            return true;
+            if (cards[0].Rank == CurrentRank - 1)
+                return true;
+        }
 
-        return false;
+        // if the card set is not alternating color and descending rank, do not add
+        return IsValidCardSet(cards);
     }
 
     /// <summary>
@@ -64,16 +64,14 @@ public class TableauPile : Pile
     /// <exception cref="InvalidOperationException">Thrown if any card in the collection cannot be added to the pile.</exception>
     public override void AddCards(IEnumerable<Card> cards)
     {
-        foreach (var card in cards)
-        {
-            if (!CanAddCard(card))
-                throw new InvalidOperationException($"Cannot add {card} to this pile.");
-            AddCard(card);
-        }
+        base.AddCards(cards);
+        Refresh();
+    }
 
-        // Update the current rank and color based on the last card added
-        CurrentColor = Cards[^1].Color;
-        CurrentRank = Cards[^1].Rank;
+    internal override void RemoveCard(Card card)
+    {
+        base.RemoveCard(card);
+        Refresh();
     }
 
     public bool RemoveCards(List<Card> cards)
@@ -94,6 +92,7 @@ public class TableauPile : Pile
             Cards.RemoveAt(startIndex + i);
         }
 
+        Refresh();
         return true;
     }
 
@@ -104,8 +103,13 @@ public class TableauPile : Pile
     /// <returns></returns>
     public static bool IsValidCardSet(List<Card> cards)
     {
-        if (!cards.Any()) return false;
-        if (cards.Count == 1) return true;
+        switch (cards.Count)
+        {
+            case 0:
+                return false;
+            case 1:
+                return true;
+        }
 
         for (int i = 1; i < cards.Count; i++)
         {
@@ -115,5 +119,20 @@ public class TableauPile : Pile
         return true;
     }
 
-    public override string ToString() => $"Tableau[{Index}]-{TopCard}";
+    public void Refresh()
+    {
+        // Update the current rank and color based on the last card added
+        if (TopCard == null)
+        {
+            CurrentColor = (Color)(-1);
+            CurrentRank = (Rank)(-1);
+        }
+        else
+        {
+            CurrentColor = Cards[^1].Color;
+            CurrentRank = Cards[^1].Rank;
+        }
+    }
+
+    public override string ToString() => $"Tableau[{Index+1}]-{TopCard}";
 }

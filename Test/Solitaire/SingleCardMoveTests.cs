@@ -48,13 +48,22 @@ public class SingleCardMoveTests
         var gameState = new SolitaireGameState();
         var from = gameState.TableauPiles[0];
         var to = gameState.TableauPiles[1];
+        from.Cards.Add(new Card(Suit.Hearts, Rank.Three, false));
         from.Cards.Add(new Card(Suit.Hearts, Rank.Queen, true));
-        to.AddCard(new Card(Suit.Spades, Rank.King, true));
+        to.TryAddCard(new Card(Suit.Spades, Rank.King, true));
         var card = from.TopCard!;
         var move = new SingleCardMove(from.Index, to.Index, card);
 
         // Act
+        Assert.That(from.BottomCard.IsFaceUp, Is.False);
         var result = move.IsValid(gameState);
+        gameState.ExecuteMove(move);
+
+        Assert.That(from.BottomCard.IsFaceUp, Is.True);
+        gameState.UndoMove(move);
+        Assert.That(from.BottomCard.IsFaceUp, Is.False);
+
+
 
         // Assert
         Assert.That(result, Is.True);
@@ -127,7 +136,7 @@ public class SingleCardMoveTests
         var move = new SingleCardMove(tableauPile.Index, foundationPile.Index, card);
 
         // Act
-        move.Execute(gameState);
+        gameState.ExecuteMove(move);
 
         // Assert
         Assert.That(tableauPile.Cards.Count, Is.EqualTo(0));
@@ -146,7 +155,7 @@ public class SingleCardMoveTests
         var move = new SingleCardMove(tableauPile.Index, foundationPile.Index, card);
 
         // Act & Assert
-        Assert.That(() => move.Execute(gameState), Throws.InvalidOperationException);
+        Assert.That(() => gameState.ExecuteMove(move), Throws.InvalidOperationException);
     }
 
     [Test]

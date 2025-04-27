@@ -262,10 +262,10 @@ public class AgentPlayingViewModel : BaseViewModel
         LegalMoves.Clear();
         foreach (var move in GameStateViewModel.GetLegalMoves())
         {
-            _shadowGameState.ExecuteMove(move);
-            double eval = _evaluator.Evaluate(_shadowGameState);
-            _shadowGameState.UndoMove(move);
-            LegalMoves.Add(new MoveViewModel(move, eval));
+            //_shadowGameState.ExecuteMove(move);
+            //double eval = _evaluator.Evaluate(_shadowGameState);
+            //_shadowGameState.UndoMove(move);
+            LegalMoves.Add(new MoveViewModel(move, 0));
         }
 
         Evaluation = _evaluator.Evaluate(_shadowGameState);

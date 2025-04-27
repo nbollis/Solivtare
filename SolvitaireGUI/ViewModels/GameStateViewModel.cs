@@ -36,7 +36,8 @@ public class GameStateViewModel : BaseViewModel
 
     public IEnumerable<SolitaireMove> GetLegalMoves()
     {
-        return BaseGameState.GetLegalMoves();
+        var moves =  BaseGameState.GetLegalMoves();
+        return moves;
     }
 
     public void Sync()

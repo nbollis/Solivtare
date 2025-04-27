@@ -11,6 +11,4 @@ public interface IMove
 public interface IMove<in TGameState>: IMove where TGameState : IGameState
 {
     bool IsValid(TGameState gameState);
-    void Execute(TGameState gameState);
-    void Undo(TGameState gameState);
 }

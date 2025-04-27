@@ -18,29 +18,29 @@ namespace Test.Solitaire
             }
 
             [Test]
-            public void Pile_AddCard_InvalidCard_ShouldThrowInvalidOperationException()
+            public void Pile_AddCard_InvalidCard_TryAddReturnsFalse()
             {
                 // Arrange  
                 var pile = new FoundationPile(Suit.Clubs);
                 var card = new Card(Suit.Spades, Rank.Two);
 
                 // Act & Assert  
-                Assert.That(() => pile.AddCard(card), Throws.InvalidOperationException);
+                Assert.That(pile.TryAddCard(card), Is.False);
             }
 
             [Test]
-            public void Pile_RemoveCard_EmptyPile_ShouldThrowInvalidOperationException()
+            public void Pile_RemoveCard_EmptyPile_TryRemoveIsFalse()
             {
                 // Arrange
                 var pile = new TableauPile();
                 var card = new Card(Suit.Spades, Rank.Ace);
 
                 // Act & Assert
-                Assert.That(() => pile.RemoveCard(card), Throws.InvalidOperationException);
+                Assert.That(pile.TryRemoveCard(card), Is.False);
             }
 
             [Test]
-            public void Pile_RemoveCard_NonTopCard_ShouldThrowInvalidOperationException()
+            public void Pile_RemoveCard_NonTopCard_TryRemoveIsFalse()
             {
                 // Arrange
                 var pile = new TableauPile(0, new List<Card>
@@ -51,7 +51,7 @@ namespace Test.Solitaire
                 var card = new Card(Suit.Spades, Rank.King);
 
                 // Act & Assert
-                Assert.That(() => pile.RemoveCard(card), Throws.InvalidOperationException);
+                Assert.That(pile.TryRemoveCard(card), Is.False);
             }
 
             [Test]
@@ -66,7 +66,7 @@ namespace Test.Solitaire
                 var card = new Card(Suit.Hearts, Rank.Queen);
 
                 // Act
-                pile.RemoveCard(card);
+                pile.TryRemoveCard(card);
 
                 // Assert
                 Assert.That(pile.Cards.Count, Is.EqualTo(1));
@@ -144,7 +144,7 @@ namespace Test.Solitaire
             {
                 // Arrange  
                 var pile = new FoundationPile(Suit.Hearts);
-                pile.AddCard(new Card(Suit.Hearts, Rank.Ace));
+                pile.TryAddCard(new Card(Suit.Hearts, Rank.Ace));
                 var card = new Card(Suit.Hearts, Rank.Two);
 
                 // Act & Assert  
@@ -167,7 +167,7 @@ namespace Test.Solitaire
             {
                 // Arrange  
                 var pile = new FoundationPile(Suit.Hearts);
-                pile.AddCard(new Card(Suit.Hearts, Rank.Ace));
+                pile.TryAddCard(new Card(Suit.Hearts, Rank.Ace));
                 var card = new Card(Suit.Hearts, Rank.Three);
                 // Act & Assert  
                 Assert.That(pile.CanAddCard(card), Is.False);
@@ -301,7 +301,7 @@ namespace Test.Solitaire
             }
 
             [Test]
-            public void AddCards_WrongRank_ShouldThrowInvalidOperationException()
+            public void AddCards_WrongRank_TryAddShouldFail()
             {
                 // Arrange  
                 var pile = new TableauPile();

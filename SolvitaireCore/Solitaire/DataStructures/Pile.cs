@@ -39,18 +39,16 @@ public abstract class Pile  : IEnumerable<Card>
 
     public abstract bool CanAddCard(Card card);
 
-    /// <summary>
-    /// Adds a single card to the pile if the card can be added to the pile. 
-    /// </summary>
-    /// <param name="card">The card to add to the pile.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the card cannot be added to the pile.</exception>
-    public virtual void AddCard(Card card)
+    internal virtual void AddCard(Card card) => Cards.Add(card);
+    public bool TryAddCard(Card card)
     {
-        if (!CanAddCard(card))
-            throw new InvalidOperationException($"Cannot add {card} to this pile.");
-        Cards.Add(card);
+        if (CanAddCard(card))
+        {
+            AddCard(card);
+            return true;
+        }
+        return false;
     }
-
     /// <summary>
     /// Adds multiple cards to the pile one at a time and checks if each card can be added prior to adding.
     /// </summary>
@@ -62,7 +60,7 @@ public abstract class Pile  : IEnumerable<Card>
         {
             if (!CanAddCard(card))
                 throw new InvalidOperationException($"Cannot add {card} to this pile.");
-            Cards.Add(card);
+            AddCard(card);
         }
     }
 
@@ -71,10 +69,18 @@ public abstract class Pile  : IEnumerable<Card>
         return !IsEmpty && card.Equals(TopCard);
     }
 
-    public void RemoveCard(Card card)
+    public bool TryRemoveCard(Card card)
     {
-        if (!CanRemoveCard(card))
-            throw new InvalidOperationException($"Cannot remove {card} from this pile.");
+        if (CanRemoveCard(card))
+        {
+            RemoveCard(card);
+            return true;
+        }
+        return false;
+    }
+
+    internal virtual void RemoveCard(Card card)
+    {
         Cards.Remove(card);
     }
 

@@ -58,37 +58,32 @@ public class SolitaireMoveGenerator
         {
             if (tableau.IsEmpty) continue;
 
-            var faceUpCards = tableau.Cards;
             var faceUpStartIndex = tableau.Cards.FindIndex(c => c.IsFaceUp);
-
             if (faceUpStartIndex == -1) continue;
 
-            for (int i = faceUpStartIndex; i < faceUpCards.Count; i++)
+            var faceUpCards = tableau.Cards.GetRange(faceUpStartIndex, tableau.Cards.Count - faceUpStartIndex);
+
+            for (int i = 0; i < faceUpCards.Count; i++)
             {
                 (int fromIndex, int length) toMove = (i, faceUpCards.Count - i);
-                //var cardsToMove = faceUpCards.GetRange(i, faceUpCards.Count - i);
-
                 foreach (var targetTableau in tableauPiles)
                 {
-                    if (targetTableau.Index == tableau.Index) continue;
-                    if (targetTableau.Count == 0)
-                    {
-                        if (faceUpCards[toMove.fromIndex].Rank == Rank.King)
-                            validMoves.Add(new MultiCardMove(tableau.Index, targetTableau.Index, faceUpCards.GetRange(toMove.fromIndex, toMove.length)));
-                        continue; // Cannot move to an empty tableau unless it's a King
-                    }
-                    if (targetTableau.CurrentColor == faceUpCards[toMove.fromIndex].Color) continue; // Cannot move to a tableau of the same color
-                    if (targetTableau.CurrentRank != faceUpCards[toMove.fromIndex].Rank + 1) continue; // Cannot move to a tableau of the same rank
+                    if (targetTableau.Index == tableau.Index) 
+                        continue;
 
+                    var topCard = faceUpCards[toMove.fromIndex];
+                    if (targetTableau.CurrentColor == topCard.Color) continue; // Cannot move to a tableau of the same color
+                    if (targetTableau.CurrentRank != topCard.Rank + 1) continue; // Cannot move to a tableau of the same rank
 
-                    if (toMove.length == 1 && targetTableau.CanAddCard(faceUpCards[toMove.fromIndex]))
+                    if (faceUpCards.Count == 1 && targetTableau.CanAddCard(faceUpCards[toMove.fromIndex]))
                     {
-                        validMoves.Add(new SingleCardMove(tableau.Index, targetTableau.Index, faceUpCards[toMove.fromIndex]));
+                        validMoves.Add(new SingleCardMove(tableau.Index, targetTableau.Index, topCard));
                     }
                     else if (targetTableau.CanAddCards(faceUpCards.GetRange(toMove.fromIndex, toMove.length)))
                     {
                         validMoves.Add(new MultiCardMove(tableau.Index, targetTableau.Index, faceUpCards.GetRange(toMove.fromIndex, toMove.length)));
                     }
+                    
                 }
             }
         }

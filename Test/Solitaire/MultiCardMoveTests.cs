@@ -30,14 +30,14 @@ public class MultiCardMoveTests
         Assert.That(result, Is.True);
 
         // Execute  
-        move.Execute(gameState);
+        gameState.ExecuteMove(move);
 
         // Assert  
         Assert.That(from.Cards.Count, Is.EqualTo(0));
         Assert.That(to.Cards.Count, Is.EqualTo(4));
         Assert.That(to.TopCard, Is.EqualTo(cards.Last()));
 
-        move.Undo(gameState);
+        gameState.UndoMove(move);
 
         // Assert
         Assert.That(from.Cards.Count, Is.EqualTo(3));
@@ -102,7 +102,7 @@ public class MultiCardMoveTests
         Assert.That(result, Is.True);
 
         // Execute
-        move.Execute(gameState);
+        gameState.ExecuteMove(move);
 
         // Assert
         Assert.That(waste.Cards.Count, Is.EqualTo(0));
@@ -115,7 +115,7 @@ public class MultiCardMoveTests
             Assert.That(card.IsFaceUp, Is.False);
         }
 
-        move.Undo(gameState);
+        gameState.UndoMove(move);
 
         // Assert
         Assert.That(waste.Cards.Count, Is.EqualTo(3));
@@ -159,7 +159,7 @@ public class MultiCardMoveTests
         Assert.That(result, Is.True);
 
         // Execute
-        move.Execute(gameState);
+        gameState.ExecuteMove(move);
 
         // Assert
         Assert.That(stock.Cards.Count, Is.EqualTo(2));
@@ -179,7 +179,7 @@ public class MultiCardMoveTests
             Assert.That(card.IsFaceUp, Is.True);
         }
 
-        move.Undo(gameState);
+        gameState.UndoMove(move);
 
         // Assert
         Assert.That(stock.Cards.Count, Is.EqualTo(5));

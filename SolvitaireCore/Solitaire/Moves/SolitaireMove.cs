@@ -7,7 +7,4 @@ public abstract class SolitaireMove(int fromPileIndex, int toPileIndex)
     public int ToPileIndex { get; } = toPileIndex;
 
     public abstract bool IsValid(SolitaireGameState gameState);
-    public abstract void Execute(SolitaireGameState gameState);
-    public abstract void Undo(SolitaireGameState gameState);
-
 }

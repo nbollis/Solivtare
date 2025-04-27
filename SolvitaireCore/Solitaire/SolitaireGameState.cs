@@ -1,4 +1,6 @@
-﻿namespace SolvitaireCore;
+﻿using System;
+
+namespace SolvitaireCore;
 
 public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<SolitaireGameState>
 {
@@ -59,7 +61,8 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
         {
             // AddRange here instead of add range so we do not trigger the validity check on deal
             TableauPiles[i].Cards.AddRange(tableauCards[i]);
-            TableauPiles[i].Cards[^1].IsFaceUp = true; // flip the last card face up
+            TableauPiles[i].Cards[^1].IsFaceUp = true;
+            TableauPiles[i].Refresh();
         }
 
         while (cardIndex < 51)
@@ -96,8 +99,10 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     public SolitaireMove CycleMove => new MultiCardMove(StockIndex, WasteIndex,
         StockPile.Cards.TakeLast(Math.Min(CardsPerCycle, StockPile.Count)));
 
+    private bool _originalIsFaceUp;
+    private bool _originalPreviousIsFaceUp;
     private bool _isDirty = true; // true if the moves have changed since last call
-    private List<SolitaireMove>? _cachedMoves;
+    private List<SolitaireMove>? _cachedMoves; // cached moves to avoid recalculating them
     public IEnumerable<SolitaireMove> GetLegalMoves()
     {
         if (_cachedMoves is null || _isDirty)
@@ -113,7 +118,58 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
         if (move.IsValid(this))
         {
             _isDirty = true;
-            move.Execute(this);
+
+            if (move.ToPileIndex == StockIndex)
+                CycleCount++;
+
+            if (move is SingleCardMove single)
+            {
+                var fromPile = GetPileByIndex(move.FromPileIndex);
+                var toPile = GetPileByIndex(move.ToPileIndex);
+
+                _originalIsFaceUp = single.Card.IsFaceUp; // cache for undo
+                fromPile.RemoveCard(single.Card);
+                toPile.AddCard(single.Card);
+                if (fromPile is TableauPile && fromPile.Count > 0)
+                {
+                    _originalPreviousIsFaceUp = fromPile.TopCard!.IsFaceUp;
+                    fromPile.TopCard.IsFaceUp = true;
+                }
+            }
+            else if (move is MultiCardMove multi)
+            {
+                if (multi.ToPileIndex == WasteIndex)
+                {
+                    for (int i = multi.Cards.Count - 1; i >= 0; i--)
+                    {
+                        var card = multi.Cards[i];
+                        StockPile.RemoveCard(card);
+                        WastePile.AddCard(card);
+                        card.IsFaceUp = true;
+                    }
+                }
+                else if (multi.ToPileIndex == StockIndex)
+                {
+                    for (int i = multi.Cards.Count - 1; i >= 0; i--)
+                    {
+                        var card = multi.Cards[i];
+                        WastePile.RemoveCard(card);
+                        StockPile.AddCard(card);
+                        card.IsFaceUp = false;
+                    }
+                }
+                else if (multi.ToPileIndex <= TableauEndIndex && multi.FromPileIndex <= TableauEndIndex)
+                {
+                    var fromPile = TableauPiles[multi.FromPileIndex];
+                    var toPile = TableauPiles[multi.ToPileIndex];
+
+                    fromPile.RemoveCards(multi.Cards);
+                    toPile.AddCards(multi.Cards);
+
+                    if (fromPile.Count > 0)
+                        fromPile.TopCard!.IsFaceUp = true; // set the top card to face up
+                }
+            }
         }
         else
         {
@@ -124,10 +180,66 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     public void UndoMove(SolitaireMove move)
     {
         _isDirty = true;
-        move.Undo(this);
+        if (move.ToPileIndex == StockIndex && move.FromPileIndex == WasteIndex)
+            CycleCount--;
+        if (move is SingleCardMove single)
+        {
+            var fromPile = GetPileByIndex(move.FromPileIndex);
+            var toPile = GetPileByIndex(move.ToPileIndex);
+
+            toPile.RemoveCard(single.Card);
+            single.Card.IsFaceUp = _originalIsFaceUp; // Restore the original face-up state
+            if (fromPile is TableauPile && fromPile.Count > 0)
+            {
+                fromPile.TopCard.IsFaceUp = _originalPreviousIsFaceUp;
+            }
+            fromPile.AddCard(single.Card);
+        }
+        else if (move is MultiCardMove multi)
+        {
+            if (multi.ToPileIndex == WasteIndex)
+            {
+                foreach (var card in multi.Cards)
+                {
+                    WastePile.RemoveCard(card);
+                    StockPile.AddCard(card);
+                    card.IsFaceUp = false;
+                }
+            }
+            else if (multi.ToPileIndex == StockIndex)
+            {
+                foreach (var card in multi.Cards)
+                {
+                    StockPile.RemoveCard(card);
+                    WastePile.AddCard(card);
+                    card.IsFaceUp = true;
+                }
+            }
+            else if (multi.ToPileIndex <= TableauEndIndex && multi.FromPileIndex <= TableauEndIndex)
+            {
+                var toPile = TableauPiles[multi.ToPileIndex];
+                var fromPile = TableauPiles[multi.FromPileIndex];
+
+                if (fromPile.Count > 0 && !fromPile.CanAddCard(multi.Cards[0]))
+                    fromPile.TopCard!.IsFaceUp = false;
+
+                fromPile.Cards.AddRange(multi.Cards);
+                fromPile.Refresh();
+                toPile.RemoveCards(multi.Cards);
+            }
+        }
     }
 
     #endregion
+
+    #region Pile Indexing
+
+    public static int TableaStartIndex = 0;
+    public static int TableauEndIndex = 6;
+    public static int FoundationStartIndex = 7;
+    public static int FoundationEndIndex = 10;
+    public static int StockIndex = 11;
+    public static int WasteIndex = 12;
 
     public Pile GetPileByIndex(int index)
     {
@@ -148,15 +260,6 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
 
         throw new ArgumentOutOfRangeException(nameof(index), "Invalid pile index");
     }
-
-    #region Pile Indexing
-
-    public static int TableaStartIndex = 0;
-    public static int TableauEndIndex = 6;
-    public static int FoundationStartIndex = 7;
-    public static int FoundationEndIndex = 10;
-    public static int StockIndex = 11;
-    public static int WasteIndex = 12;
 
     public static string GetPileStringByIndex(int index)
     {
