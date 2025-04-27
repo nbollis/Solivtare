@@ -35,8 +35,11 @@ public class BindableCard : INotifyPropertyChanged
         get => _card.IsFaceUp;
         set
         {
-            if (_card is ObservableCard observable)
+            if (_card.IsFaceUp != value && _card is ObservableCard observable)
+            {
                 observable.IsFaceUp = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsFaceUp)));
+            }
         }
     }
 }

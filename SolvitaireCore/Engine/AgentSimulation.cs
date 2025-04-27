@@ -1,10 +1,18 @@
 ﻿
 namespace SolvitaireCore;
 
+public class GameStateEventArgs(SolitaireGameState result) : EventArgs()
+{
+    public SolitaireGameState Result { get; set; } = result;
+
+}
+
 public class AgentSimulation
 {
     public readonly SolitaireAgent Agent;
     public readonly StandardDeck Deck;
+
+    public static event EventHandler<GameStateEventArgs> GameWonHandler = null!; 
 
     public AgentSimulation(SolitaireAgent agent, StandardDeck deck)
     {
@@ -53,6 +61,12 @@ public class AgentSimulation
 
         return new AgentSimulationResult(movesPlayed, gamesPlayed, gamesWon);
     }
+
+    public void GameWon(SolitaireGameState gamestate)
+    {
+        GameWonHandler?.Invoke(this, new(gamestate.Clone()));
+    }
+
 
 }
 

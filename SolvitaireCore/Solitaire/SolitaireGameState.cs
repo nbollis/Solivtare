@@ -337,45 +337,46 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     {
         unchecked
         {
-            int hash = 17;
+            var hash = new HashCode();
 
-            // Hash FoundationPiles  
+            // Hash FoundationPiles
             foreach (var foundationPile in FoundationPiles)
             {
                 foreach (var card in foundationPile.Cards)
                 {
-                    hash = hash * 31 + card.GetHashCode();
+                    hash.Add(card.GetHashCode());
                 }
             }
 
-            // Hash TableauPiles  
+            // Hash TableauPiles
             foreach (var tableauPile in TableauPiles)
             {
                 foreach (var card in tableauPile.Cards)
                 {
-                    hash = hash * 31 + card.GetHashCode();
+                    hash.Add(card.GetHashCode());
                 }
             }
 
-            // Hash StockPile  
+            // Hash StockPile
             foreach (var card in StockPile.Cards)
             {
-                hash = hash * 31 + card.GetHashCode();
+                hash.Add(card.GetHashCode());
             }
 
-            // Hash WastePile  
+            // Hash WastePile
             foreach (var card in WastePile.Cards)
             {
-                hash = hash * 31 + card.GetHashCode();
+                hash.Add(card.GetHashCode());
             }
 
-            // Include CycleCount and CardsPerCycle  
-            hash = hash * 31 + CycleCount.GetHashCode();
-            hash = hash * 31 + CardsPerCycle.GetHashCode();
+            // Include CycleCount and CardsPerCycle
+            hash.Add(CycleCount);
+            hash.Add(CardsPerCycle);
 
-            return hash;
+            return hash.ToHashCode();
         }
     }
+
 
     public SolitaireGameState Clone()
     {

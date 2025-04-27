@@ -6,25 +6,58 @@ public class SecondSolitaireEvaluator : SolitaireEvaluator
     {
         double score = 0;
 
-        // Add one for every card in the foundation piles. 
-        score += 0.75 * state.FoundationPiles.Sum(pile => pile.Count);
+        // Reward foundation piles 
+        score += 3.2 * state.FoundationPiles.Sum(pile => pile.Count);
 
+        // Penalize stock and waste piles
+        score -= 0.02 * state.StockPile.Count;
+        score -= 0.01 * state.WastePile.Count;
+        score -= 0.1 * state.CycleCount;
+
+        // Reward empty Tableaus
+        score += 0.3 * state.TableauPiles.Count(pile => pile.IsEmpty);
+
+        // Add Tableau pile
         foreach (var tableau in state.TableauPiles)
         {
-            foreach (var card in tableau)
+            int faceDownCount = tableau.Cards.TakeWhile(card => !card.IsFaceUp).Count();
+            score -= 0.75 *  faceDownCount; // Penalize face-down cards
+
+            score += 0.5 * (tableau.Count - faceDownCount); // reward face-up cards
+
+            if (tableau.BottomCard == null) // reward empty pile
+                score += 0.2;
+            else if (tableau.BottomCard.IsFaceUp) // reward bottom card of pile exposed. 
             {
-                // reward face up and punish face down cards in tableau
-                if (card.IsFaceUp)
-                    score += 0.1;
-                else if (card.Rank is Rank.Ace) // Really punish a face down ace in tableau
-                    score -= 1;
-                else
-                    score -= 0.1;
+                score += 0.2; 
+                if (tableau.BottomCard.Rank == Rank.King) // extra reward that card being a king
+                    score += 0.4;
             }
+
+            int sequenceLength = 1;
+            for (int i = tableau.Cards.Count - 1; i > 0; i--)
+            {
+                if (tableau.Cards[i].Rank == Rank.Ace)
+                    score -= 1; // punish ace in tableau
+
+                // Check if the current card is a valid continuation of the sequence
+                if (tableau.Cards[i].Color != tableau.Cards[i - 1].Color &&
+                    tableau.Cards[i].Rank == tableau.Cards[i - 1].Rank - 1)
+                {
+                    sequenceLength++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            score += 0.05 * sequenceLength; // Reward longer sequences
         }
 
-        // Add a small punishment for cards in the stock pile
-        score -= 0.01 * state.StockPile.Count;
+
+        // Reward each unique move 
+        var moves = state.GetLegalMoves().ToHashSet();
+        score += 0.01 * moves.Count;
 
         return score;
     }

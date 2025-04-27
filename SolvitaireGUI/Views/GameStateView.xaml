@@ -75,6 +75,7 @@
 
         <!-- Waste Pile -->
         <ItemsControl Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2"
+                      VirtualizingStackPanel.IsVirtualizing="True"
                      ItemsSource="{Binding WastePile,  
                            Converter={StaticResource TakeLastConverter}, ConverterParameter=3}"  
                      ItemTemplate="{StaticResource CardTemplate}"

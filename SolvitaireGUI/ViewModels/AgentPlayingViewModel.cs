@@ -59,6 +59,7 @@ public class AgentPlayingViewModel : BaseViewModel
     private CancellationTokenSource? _agentCancellationTokenSource;
     private SolitaireAgent _agent;
     private double _evaluation;
+    private int _movesMade;
 
     public double Evaluation
     {
@@ -67,6 +68,16 @@ public class AgentPlayingViewModel : BaseViewModel
         {
             _evaluation = value;
             OnPropertyChanged(nameof(Evaluation));
+        }
+    }
+
+    public int MovesMade
+    {
+        get => _movesMade;
+        set
+        {
+            _movesMade = value;
+            OnPropertyChanged(nameof(MovesMade));
         }
     }
 
@@ -210,6 +221,7 @@ public class AgentPlayingViewModel : BaseViewModel
                 return;
         }
 
+        MovesMade++;
         GameStateViewModel.ApplyMove(move);
         _shadowGameState.ExecuteMove(move);
         _previousMoves.Push(move);
@@ -220,6 +232,7 @@ public class AgentPlayingViewModel : BaseViewModel
     {
         if (!_previousMoves.TryPop(out var move))
             return;
+        MovesMade--;
         GameStateViewModel.UndoMove(move);
         _shadowGameState.UndoMove(move);
         Refresh();
@@ -233,6 +246,7 @@ public class AgentPlayingViewModel : BaseViewModel
     public ICommand NewGameCommand { get; set; }
     private void ResetGame()
     {
+        MovesMade = 0;
         _previousMoves.Clear();
         _deck.FlipAllCardsDown();
         var gameState = new SolitaireGameState();
@@ -257,10 +271,10 @@ public class AgentPlayingViewModel : BaseViewModel
         LegalMoves.Clear();
         foreach (var move in GameStateViewModel.GetLegalMoves())
         {
-            //_shadowGameState.ExecuteMove(move);
-            //double eval = _evaluator.Evaluate(_shadowGameState);
-            //_shadowGameState.UndoMove(move);
-            LegalMoves.Add(new MoveViewModel(move, 0));
+            _shadowGameState.ExecuteMove(move);
+            double eval = _evaluator.Evaluate(_shadowGameState);
+            _shadowGameState.UndoMove(move);
+            LegalMoves.Add(new MoveViewModel(move, eval));
         }
 
         Evaluation = _evaluator.Evaluate(_shadowGameState);

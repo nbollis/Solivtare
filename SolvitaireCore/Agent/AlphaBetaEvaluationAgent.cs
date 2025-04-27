@@ -1,10 +1,12 @@
 ﻿
+using System;
+
 namespace SolvitaireCore;
 
 /// <summary>  
 /// A simple evaluation agent that uses a heuristic evaluation function to select the best move.  
 /// </summary>  
-public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLookahead = 5) : SolitaireAgent
+public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) : SolitaireAgent
 {
     private SolitaireMove? _previousBestMove;
 
@@ -16,30 +18,44 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
         SolitaireMove bestMove = null!;
 
         var moves = gameState.GetLegalMoves().ToList();
-        if (moves.Count == 0 || IsGameUnwinnable(gameState))
+        if (moves.Count == 0 /*|| IsGameUnwinnable(gameState)*/)
         {
             return AgentDecision.SkipGame();
         }
 
-        // Iterative Deepening: Search for best of depth 1 and use that to determine the order to search depth 2 and so on. 
-        // You would think this would make the search slower, but alpha-beta gains far outweigh. 
+        // Iterative Deepening: Search for best of depth 1 and use that to determine the order to search depth 2 and so on.  
+        // You would think this would make the search slower, but alpha-beta gains far outweigh.  
         for (int depth = 1; depth <= LookAheadSteps; depth++)
         {
             double alpha = double.NegativeInfinity;
-            double beta = double.PositiveInfinity;
+            List<SolitaireMove> bestMoves = new();
 
             foreach (var move in OrderMoves(gameState, moves))
             {
-                double score = gameState.EvaluateMove(move, evaluator);
+                gameState.ExecuteMove(move);
+                double score = EvaluateWithLookahead(gameState, depth - 1, alpha);
+                gameState.UndoMove(move);
 
                 if (score > alpha)
                 {
                     alpha = score;
-                    bestMove = move;
+                    bestMoves.Clear();
+                    bestMoves.Add(move);
+                }
+                else if (Math.Abs(score - alpha) < 0.0000001)
+                {
+                    bestMoves.Add(move);
                 }
             }
-            
-            // Cache the best move for the next depth
+
+            // Pick one move at random from the best moves  
+            if (bestMoves.Count > 0)
+            {
+                Random random = new();
+                bestMove = bestMoves[random.Next(bestMoves.Count)];
+            }
+
+            // Cache the best move for the next depth  
             _previousBestMove = bestMove;
         }
 
@@ -61,7 +77,7 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
         foreach (var move in OrderMoves(gameState, gameState.GetLegalMoves()))
         {
             gameState.ExecuteMove(move);
-            double score = EvaluateWithLookahead(gameState, LookAheadSteps - 1, alpha, beta);
+            double score = EvaluateWithLookahead(gameState, LookAheadSteps - 1, alpha);
             gameState.UndoMove(move);
 
             if (moveScores.TryGetValue(move, out var previousScore) && score > previousScore)
@@ -84,78 +100,25 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
         return noScoreImprovement &&  (allScoresIdentical || base.IsGameUnwinnable(gameState));
     }
 
-    private int GetMovePriority(SolitaireMove move, SolitaireGameState gameState)
-    {
-        // Foundation moves (high priority)
-        if (move.ToPileIndex >= SolitaireGameState.FoundationStartIndex &&
-            move.ToPileIndex <= SolitaireGameState.FoundationEndIndex)
-        {
-            return 3;
-        }
-
-        // Moves that uncover hidden cards in the tableau (high priority)
-        if (move.FromPileIndex >= SolitaireGameState.TableaStartIndex &&
-            move.FromPileIndex <= SolitaireGameState.TableauEndIndex)
-        {
-            var fromPile = gameState.GetPileByIndex(move.FromPileIndex) as TableauPile;
-            if (fromPile is { Cards.Count: > 1 } && !fromPile.Cards[^2].IsFaceUp)
-            {
-                return 2;
-            }
-        }
-
-        // Tableau-to-Tableau moves (medium priority)
-        if (move.FromPileIndex >= SolitaireGameState.TableaStartIndex &&
-            move.FromPileIndex <= SolitaireGameState.TableauEndIndex &&
-            move.ToPileIndex >= SolitaireGameState.TableaStartIndex &&
-            move.ToPileIndex <= SolitaireGameState.TableauEndIndex)
-        {
-            return 1;
-        }
-
-        // Stock-to-Waste moves (low priority)
-        if (move.FromPileIndex == SolitaireGameState.StockIndex &&
-            move.ToPileIndex == SolitaireGameState.WasteIndex)
-        {
-            return 0;
-        }
-
-        // Default priority
-        return 0;
-    }
-
     private IEnumerable<SolitaireMove> OrderMoves(SolitaireGameState gameState, IEnumerable<SolitaireMove> moves)
     {
         return moves.OrderByDescending(move =>
         {
-            // Prioritize the best move from the previous depth
             if (_previousBestMove != null && move.Equals(_previousBestMove))
             {
                 return int.MaxValue; // Highest priority
             }
 
-            // Use the static heuristic for other moves
-            return GetMovePriority(move, gameState);
+            double score = gameState.EvaluateMove(move, evaluator);
+
+            return score;
         });
     }
 
-    private double EvaluateWithLookahead(SolitaireGameState gameState, int depth, double alpha, double beta)
+    private double EvaluateWithLookahead(SolitaireGameState gameState, int depth, double alpha)
     {
         // Generate a hash for the current game state
         int stateHash = gameState.GetHashCode();
-
-        // Check if the state is already in the transposition table
-        if (TranspositionTable.TryGetValue(stateHash, out var entry))
-        {
-            // If the stored depth is greater than or equal to the current depth, use the cached score
-            if (entry.Depth >= depth)
-            {
-                if (entry.Alpha <= alpha && entry.Beta >= beta)
-                {
-                    return entry.Score;
-                }
-            }
-        }
 
         // Base case: If depth is 0 or the game is over, evaluate the current state
         if (depth == 0 || gameState.IsGameWon || gameState.IsGameLost)
@@ -165,25 +128,36 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
             {
                 Score = score,
                 Depth = depth,
-                Alpha = alpha,
-                Beta = beta
+                Alpha = alpha
             };
             return score;
+        }
+
+        // Check if the state is already in the transposition table
+        if (TranspositionTable.TryGetValue(stateHash, out var entry))
+        {
+            // If the stored depth is greater than or equal to the current depth, use the cached score
+            if (entry.Depth >= depth && entry.Alpha <= alpha)
+            {
+                return entry.Score;
+            }
         }
 
         double bestScore = double.NegativeInfinity;
         // Order moves to improve alpha-beta pruning
         foreach (var move in OrderMoves(gameState, gameState.GetLegalMoves()))
         {
-            double eval = gameState.EvaluateMove(move, evaluator);
+            gameState.ExecuteMove(move);
+            double eval = EvaluateWithLookahead(gameState, depth - 1, alpha);
+            gameState.UndoMove(move);
 
             bestScore = Math.Max(bestScore, eval);
             alpha = Math.Max(alpha, eval);
 
-            // Prune the branch if alpha is greater than or equal to beta
-            if (beta <= alpha)
+            // Prune the branch if the score cannot improve further
+            if (eval <= alpha)
             {
-                break;
+                break; // Prune the branch
             }
         }
 
@@ -192,8 +166,7 @@ public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLooka
         {
             Score = bestScore,
             Depth = depth,
-            Alpha = alpha,
-            Beta = beta
+            Alpha = alpha
         };
 
         return bestScore;

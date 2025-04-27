@@ -36,7 +36,16 @@
                     </ListView.ItemTemplate>
                 </ListView>
 
-                <TextBlock Text="{Binding Evaluation}" Margin="40"></TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Evaluation: " HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Evaluation, StringFormat={}{0:F3}}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" >
+                    <Label Content="Moves Made: " HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding MovesMade}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </StackPanel>
             </StackPanel>
 
             <Grid Grid.Column="1" Grid.Row="0">

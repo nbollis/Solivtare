@@ -25,13 +25,13 @@ public class GameStateViewModel : BaseViewModel
     public void ApplyMove(SolitaireMove move)
     {
         BaseGameState.ExecuteMove(move);
-        Sync();
+        Sync(move);
     }
 
     public void UndoMove(SolitaireMove move)
     {
         BaseGameState.UndoMove(move);
-        Sync();
+        Sync(move);
     }
 
     public IEnumerable<SolitaireMove> GetLegalMoves()
@@ -40,16 +40,73 @@ public class GameStateViewModel : BaseViewModel
         return moves;
     }
 
-    public void Sync()
+    private CancellationTokenSource? _syncDebounceToken;
+
+    public async void Sync(SolitaireMove? move = null)
     {
-        TableauPiles.Clear();
-        foreach (var pile in BaseGameState.TableauPiles)
+        _syncDebounceToken?.Cancel();
+        _syncDebounceToken = new CancellationTokenSource();
+        var token = _syncDebounceToken.Token;
+
+        try
         {
-            var bindable = new BindablePile();
-            bindable.UpdateFromPile(pile);
-            TableauPiles.Add(bindable);
+            await Task.Delay(50, token); // Debounce delay
+            if (token.IsCancellationRequested) return;
+
+            // Perform the sync logic
+            if (move is not null)
+            {
+                if (move!.ToPileIndex >= SolitaireGameState.StockIndex ||
+                    move.FromPileIndex >= SolitaireGameState.StockIndex)
+                {
+                    UpdateStockAndWaste();
+                }
+
+                if (move.ToPileIndex <= SolitaireGameState.TableauEndIndex || move.FromPileIndex <= SolitaireGameState.TableauEndIndex)
+                    UpdateTableau();
+
+                if (move.ToPileIndex >= SolitaireGameState.FoundationStartIndex && move.ToPileIndex <= SolitaireGameState.FoundationEndIndex
+                    || move.FromPileIndex >= SolitaireGameState.FoundationStartIndex && move.FromPileIndex <= SolitaireGameState.FoundationEndIndex)
+                    UpdateFoundation();
+            }
+            else
+            {
+                UpdateFoundation();
+                UpdateStockAndWaste();
+                UpdateTableau();
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // Ignore cancellation
+        }
+    }
+
+    public void UpdateStockAndWaste()
+    {
+        StockPile.UpdateFromPile(BaseGameState.StockPile);
+        WastePile.UpdateFromPile(BaseGameState.WastePile);
+
+
+        OnPropertyChanged(nameof(StockPile));
+        OnPropertyChanged(nameof(WastePile));
+    }
+
+    public void UpdateTableau()
+    {
+        while (TableauPiles.Count < BaseGameState.TableauPiles.Count)
+        {
+            TableauPiles.Add(new BindablePile());
         }
 
+        for (int i = 0; i < BaseGameState.TableauPiles.Count; i++)
+        {
+            TableauPiles[i].UpdateFromPile(BaseGameState.TableauPiles[i]);
+        }
+    }
+
+    public void UpdateFoundation()
+    {
         FoundationPiles.Clear();
         foreach (var pile in BaseGameState.FoundationPiles)
         {
@@ -57,14 +114,6 @@ public class GameStateViewModel : BaseViewModel
             bindable.UpdateFromPile(pile);
             FoundationPiles.Add(bindable);
         }
-
-        StockPile.UpdateFromPile(BaseGameState.StockPile);
-        WastePile.UpdateFromPile(BaseGameState.WastePile);
-
-        OnPropertyChanged(nameof(TableauPiles));
-        OnPropertyChanged(nameof(FoundationPiles));
-        OnPropertyChanged(nameof(StockPile));
-        OnPropertyChanged(nameof(WastePile));
     }
 }
 

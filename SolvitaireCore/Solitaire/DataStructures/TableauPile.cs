@@ -40,7 +40,7 @@ public class TableauPile : Pile
         // if the pile is empty, the top card to be added must be a king
         if (Cards.Count == 0)
         {
-            return cards[0].Rank == Rank.King;
+            return cards[0].Rank == Rank.King && IsValidCardSet(cards);
         }
 
         // if the top card is not the same color as the bottom card, do not add
