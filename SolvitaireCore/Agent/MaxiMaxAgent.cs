@@ -6,7 +6,7 @@ namespace SolvitaireCore;
 /// <summary>  
 /// A simple evaluation agent that uses a heuristic evaluation function to select the best move.  
 /// </summary>  
-public class AlphaBetaEvaluationAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) : SolitaireAgent
+public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) : SolitaireAgent
 {
     private SolitaireMove? _previousBestMove;
 

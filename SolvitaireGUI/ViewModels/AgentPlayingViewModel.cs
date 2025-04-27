@@ -36,7 +36,7 @@ public class AgentPlayingViewModel : BaseViewModel
         {
             Agent,
             new BruteForceEvaluationAgent(_evaluator),
-            new AlphaBetaEvaluationAgent(_evaluator),
+            new MaxiMaxAgent(_evaluator),
         };
 
         _shadowGameState = GameStateViewModel.BaseGameState.Clone();

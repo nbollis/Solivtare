@@ -15,7 +15,7 @@ namespace MyApp
                 {
                     int seconds = int.Parse(args[0]);
                     var gameState = new SolitaireGameState();
-                    var agent = new AlphaBetaEvaluationAgent(new SecondSolitaireEvaluator());
+                    var agent = new MaxiMaxAgent(new SecondSolitaireEvaluator());
                     var deck = new StandardDeck();
                     deck.Shuffle();
 
@@ -59,7 +59,7 @@ namespace MyApp
                     int threadId = i; // Capture loop variable  
                     workers[i] = Task.Run(() =>
                     {
-                        var agent = new AlphaBetaEvaluationAgent(new SecondSolitaireEvaluator());
+                        var agent = new MaxiMaxAgent(new SecondSolitaireEvaluator());
                         var moveGenerator = new SolitaireMoveGenerator();
 
                         var referenceDeck = new StandardDeck(threadId * 13);
