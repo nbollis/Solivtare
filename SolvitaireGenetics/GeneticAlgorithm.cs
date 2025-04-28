@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using SolvitaireCore;
+using System.Collections.Concurrent;
 
 namespace SolvitaireGenetics;
 
@@ -80,11 +80,22 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
             newPopulation.Add(child);
         }
 
+        // Evaluate fitness in parallel
+        var fitnessResults = new ConcurrentDictionary<TChromosome, double>();
+        Parallel.ForEach(newPopulation, chromosome =>
+        {
+            double fitnessValue = GetFitness(chromosome);
+            fitnessResults[chromosome] = fitnessValue;
+        });
+
         // Sort the new population by fitness (descending)
-        newPopulation = newPopulation.OrderByDescending(GetFitness).ToList();
+        newPopulation = fitnessResults
+            .OrderByDescending(kvp => kvp.Value)
+            .Select(kvp => kvp.Key)
+            .ToList();
 
         // Cache fitness values for the new population
-        fitness.AddRange(newPopulation.Select(GetFitness));
+        fitness.AddRange(fitnessResults.Values);
 
         return newPopulation;
     }
@@ -94,26 +105,36 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
     /// </summary>
     protected TChromosome TournamentSelection(List<TChromosome> population)
     {
-        TChromosome bestChromosome = null!;
+        var tournament = new ConcurrentBag<TChromosome>();
 
-        // select a random sample of size _tournamentSize from the population
-        var tournament = new List<TChromosome>();
-        for (int i = 0; i < _tournamentSize; i++)
+        Parallel.For(0, _tournamentSize, _ =>
         {
             tournament.Add(population[_random.Next(population.Count)]);
-        }
+        });
 
-        // find the best chromosome in the tournament
-        foreach (var chromosome in tournament)
-        {
-            double localFitness = GetFitness(chromosome);
-            if (localFitness > chromosome.Fitness)
-            {
-                bestChromosome = chromosome;
-            }
-        }
+        return tournament.OrderByDescending(GetFitness).First();
 
-        return bestChromosome;
+
+        //TChromosome bestChromosome = null!;
+
+        //// select a random sample of size _tournamentSize from the population
+        //var tournament = new List<TChromosome>();
+        //for (int i = 0; i < _tournamentSize; i++)
+        //{
+        //    tournament.Add(population[_random.Next(population.Count)]);
+        //}
+
+        //// find the best chromosome in the tournament
+        //foreach (var chromosome in tournament)
+        //{
+        //    double localFitness = GetFitness(chromosome);
+        //    if (localFitness > chromosome.Fitness)
+        //    {
+        //        bestChromosome = chromosome;
+        //    }
+        //}
+
+        //return bestChromosome;
     }
 
     /// <summary>
@@ -127,69 +148,3 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
             .ToList();
     }
 }
-
-public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
-{
-    private readonly int _maxMovesPerAgent;
-    private readonly int _maxGamesPerAgent;
-
-    public GeneticSolitaireAlgorithm(int populationSize, double mutationRate, int tournamentSize, int maxMovesPerAgent, int maxGamesPerAgent, ILogger<GeneticSolitaireAlgorithm> logger)
-        : base(populationSize, mutationRate, tournamentSize, logger)
-    {
-        _maxMovesPerAgent = maxMovesPerAgent;
-        _maxGamesPerAgent = maxGamesPerAgent;
-    }
-
-    protected override double EvaluateFitness(SolitaireChromosome chromosome)
-    {
-        // TODO: Make this more generic to support different agents. 
-        var evaluator = new GeneticSolitaireEvaluator(chromosome);
-        var agent = new MaxiMaxAgent(evaluator, 10);
-        var deck = new StandardDeck();
-        var gameState = new SolitaireGameState();
-
-        int movesPlayed = 0;
-        int gamesPlayed = 0;
-        int gamesWon = 0;
-
-        while (gamesPlayed < _maxGamesPerAgent && movesPlayed < _maxMovesPerAgent)
-        {
-            deck.Shuffle();
-            agent.ResetState();
-            gameState.Reset();
-            gameState.DealCards(deck);
-
-            gamesPlayed++;
-            while (!gameState.IsGameWon)
-            {
-                var decision = agent.GetNextAction(gameState);
-                if (decision.ShouldSkipGame)
-                {
-                    break;
-                }
-                else
-                {
-                    gameState.ExecuteMove(decision.Move!);
-                }
-
-                movesPlayed++;
-            }
-
-            if (gameState.IsGameWon)
-            {
-                gamesWon++;
-            }
-        }
-
-        // Calculate fitness based on the number of games won and moves played
-        double fitness = (double)gamesWon / gamesPlayed;
-        if (gamesPlayed > 0)
-        {
-            fitness -= (double)movesPlayed / (gamesPlayed * _maxMovesPerAgent);
-        }
-
-        chromosome.Fitness = fitness;
-        return fitness;
-    }
-}
-

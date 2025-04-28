@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SolvitaireGenetics": {
+      "commandName": "Project",
+      "commandLineArgs": "-o \"A:\\Projects and Original Works\\Solvitaire\\Genetics\" -p 16 -g 20 -t 4 -c 20000 -l 10"
+    }
+  }
+}

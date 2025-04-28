@@ -22,7 +22,7 @@ public class CommandLineParameters
     [Option('t', "tournament", Default = 5, HelpText = "Tournament size for selection.")]
     public int TournamentSize { get; set; }
 
-    [Option('t', "maxmoves", Default = 1000, HelpText = "Maximum number of moves per game.")]
+    [Option('c', "maxmoves", Default = 1000, HelpText = "Maximum number of moves per game.")]
     public int MaxMovesPerGeneration { get; set; }
 
     [Option('l', "limit", Default = 100, HelpText = "Maximum number of games per generation.")]
