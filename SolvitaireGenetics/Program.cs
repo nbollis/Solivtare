@@ -32,13 +32,14 @@ namespace SolvitaireGenetics
             try
             {
                 // Set up dependency injection and logging
+                var logFilePath = Path.Combine(options.OutputDirectory ?? ".", "GeneticAlgorithm.log");
                 var serviceProvider = new ServiceCollection()
-                    .AddLogging(builder =>
-                    {
-                        builder.AddConsole(); // Optional: Log to the console
-                        builder.AddFile("Logs/GeneticAlgorithm.log"); // Log to a file
-                    })
-                    .BuildServiceProvider();
+                   .AddLogging(builder =>
+                   {
+                       builder.AddConsole(); // Optional: Log to the console  
+                       builder.AddFile(logFilePath); // Log to the output directory specified in options  
+                   })
+                   .BuildServiceProvider();
 
                 // Get the logger
                 var logger = serviceProvider.GetRequiredService<ILogger<GeneticSolitaireAlgorithm>>();

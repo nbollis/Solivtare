@@ -22,34 +22,47 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
 
         foreach (var tableau in state.TableauPiles)
         {
-            int faceDownCount = tableau.Cards.TakeWhile(card => !card.IsFaceUp).Count();
-            faceUpTableauCount += faceDownCount;
+            int faceDownCount = 0;
+            int consecutiveFaceUpCount = 0;
+            bool bottomCardIsFaceUp = tableau.BottomCard?.IsFaceUp ?? false;
 
-            faceUpTableauCount += tableau.Count - faceDownCount;
-
-            if (tableau.BottomCard.IsFaceUp) // reward bottom card of pile exposed. 
+            for (int i = 0; i < tableau.Cards.Count; i++)
             {
-                faceUpBottomCardTableaCount++;
-                if (tableau.BottomCard.Rank == Rank.King) // extra reward that card being a king
-                    kingIsBottomCardTableauCount++;
-            }
-
-            for (int i = tableau.Cards.Count - 1; i > 0; i--)
-            {
-                if (tableau.Cards[i].Rank == Rank.Ace)
-                    aceInTableauCount++;
-
-                // Check if the current card is a valid continuation of the sequence
-                if (tableau.Cards[i].Color != tableau.Cards[i - 1].Color &&
-                    tableau.Cards[i].Rank == tableau.Cards[i - 1].Rank - 1)
+                var card = tableau.Cards[i];
+                if (!card.IsFaceUp)
                 {
-                    consecutiveFaceUpTableauCount++;
+                    faceDownCount++;
                 }
                 else
                 {
-                    break;
+                    if (i == tableau.Cards.Count - 1 && bottomCardIsFaceUp)
+                    {
+                        faceUpBottomCardTableaCount++;
+                        if (card.Rank == Rank.King)
+                            kingIsBottomCardTableauCount++;
+                    }
+
+                    if (card.Rank == Rank.Ace)
+                        aceInTableauCount++;
+
+                    if (i > 0)
+                    {
+                        var prevCard = tableau.Cards[i - 1];
+                        if (card.Color != prevCard.Color && card.Rank == prevCard.Rank - 1)
+                        {
+                            consecutiveFaceUpCount++;
+                        }
+                        else
+                        {
+                            consecutiveFaceUpCount = 0;
+                        }
+                    }
                 }
             }
+
+            faceUpTableauCount += tableau.Cards.Count - faceDownCount;
+            consecutiveFaceUpTableauCount += consecutiveFaceUpCount;
+            faceDownTableauCount += faceDownCount;
         }
 
 

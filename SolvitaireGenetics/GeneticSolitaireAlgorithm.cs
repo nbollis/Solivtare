@@ -27,6 +27,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
         int gamesPlayed = 0;
         int gamesWon = 0;
 
+        // multiple game loop
         while (gamesPlayed < _maxGamesPerAgent && movesPlayed < _maxMovesPerAgent)
         {
             deck.Shuffle();
@@ -35,9 +36,18 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
             gameState.DealCards(deck);
 
             gamesPlayed++;
+
+            // individual game loop
             while (!gameState.IsGameWon)
             {
+                if (movesPlayed >= _maxMovesPerAgent)
+                {
+                    break;
+                }
+
                 var decision = agent.GetNextAction(gameState);
+
+                // Handle possible actions. 
                 if (decision.ShouldSkipGame)
                 {
                     break;

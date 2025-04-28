@@ -18,8 +18,8 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     public WastePile WastePile { get; set; }
 
     // TODO: Find more lose conditions: Those that involve an infinite loop
-    public bool IsGameLost => !GetLegalMoves().Any() || CycleCount > MaximumCycles;
-    public bool IsGameWon => FoundationPiles.All(pile => pile.Count == 13);
+    public bool IsGameLost => IsUnwinnable();
+    public bool IsGameWon => GameWon();
 
 
     public SolitaireGameState(int cardsPerCycle = 3)
@@ -295,6 +295,49 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
             12 => "Waste",
             _ => string.Empty
         };
+    }
+
+    #endregion
+
+    #region Helpers
+
+    public bool GameWon()
+    {
+        return FoundationPiles.All(pile => pile.Count == 13);
+    }
+
+    public bool IsUnwinnable()
+    {
+        // Rule 1: maximum cycles reached
+        if (CycleCount >= MaximumCycles)
+        {
+            return true;
+        }
+        
+        // Rule 2: No legal moves 
+        if (!GetLegalMoves().Any())
+        {
+            return true;
+        }
+
+        // Rule 3: Check for blocked tableau
+        bool allTableauBlocked = TableauPiles.All(pile =>
+            pile.IsEmpty || !pile.Cards.Any(card => card.IsFaceUp && pile.CanRemoveCard(card)));
+        if (allTableauBlocked)
+        {
+            return true;
+        }
+
+        // Rule 4: Check for foundation deadlock
+        bool noFoundationMoves = !FoundationPiles.Any(foundation =>
+            TableauPiles.Any(tableau => tableau.TopCard != null && foundation.CanAddCard(tableau.TopCard)) ||
+            WastePile.TopCard != null && foundation.CanAddCard(WastePile.TopCard));
+        if (noFoundationMoves)
+        {
+            return true;
+        }
+
+        return false; // If no rules indicate unwinnable, assume it's still winnable
     }
 
     #endregion

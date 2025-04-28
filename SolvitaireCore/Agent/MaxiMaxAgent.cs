@@ -10,7 +10,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
 {
     private SolitaireMove? _previousBestMove;
 
-    public override string Name => "AlphaBeta Agent";
+    public override string Name => "MaxiMax Agent";
     public int LookAheadSteps { get; } = maxLookahead;
 
     public override AgentDecision GetNextAction(SolitaireGameState gameState)
@@ -18,7 +18,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
         SolitaireMove bestMove = null!;
 
         var moves = gameState.GetLegalMoves().ToList();
-        if (moves.Count == 0 /*|| IsGameUnwinnable(gameState)*/)
+        if (IsGameUnwinnable(gameState)) // TODO: Some better criteria for skipping games
         {
             return AgentDecision.SkipGame();
         }

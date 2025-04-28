@@ -106,14 +106,23 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
     protected TChromosome TournamentSelection(List<TChromosome> population)
     {
         var tournament = new ConcurrentBag<TChromosome>();
+        var fitnessResults = new ConcurrentDictionary<TChromosome, double>();
 
-        Parallel.For(0, _tournamentSize, _ =>
+        // Select random chromosomes for the tournament in parallel  
+        for (int i = 0; i < _tournamentSize; i++)
         {
             tournament.Add(population[_random.Next(population.Count)]);
+        }
+
+        // Calculate fitness for each chromosome in the tournament in parallel  
+        Parallel.ForEach(tournament, chromosome =>
+        {
+            double fitnessValue = GetFitness(chromosome);
+            fitnessResults[chromosome] = fitnessValue;
         });
 
-        return tournament.OrderByDescending(GetFitness).First();
-
+        // Return the chromosome with the highest fitness  
+        return fitnessResults.OrderByDescending(kvp => kvp.Value).First().Key;
 
         //TChromosome bestChromosome = null!;
 
