@@ -103,7 +103,7 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     private bool _originalPreviousIsFaceUp;
     private bool _isDirty = true; // true if the moves have changed since last call
     private List<SolitaireMove>? _cachedMoves; // cached moves to avoid recalculating them
-    public IEnumerable<SolitaireMove> GetLegalMoves()
+    public List<SolitaireMove> GetLegalMoves()
     {
         if (_cachedMoves is null || _isDirty)
         {

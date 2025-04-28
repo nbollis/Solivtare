@@ -9,7 +9,7 @@ public interface IGameState
 
 public interface IGameState<TMove> : IGameState where TMove : IMove
 {
-    IEnumerable<TMove> GetLegalMoves();
+    List<TMove> GetLegalMoves();
     void ExecuteMove(TMove move);
     void UndoMove(TMove move);
 }

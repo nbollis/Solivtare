@@ -17,7 +17,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
     {
         SolitaireMove bestMove = null!;
 
-        var moves = gameState.GetLegalMoves().ToList();
+        var moves = gameState.GetLegalMoves();
         if (IsGameUnwinnable(gameState)) // TODO: Some better criteria for skipping games
         {
             return AgentDecision.SkipGame();
@@ -108,8 +108,13 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
             {
                 return int.MaxValue; // Highest priority
             }
+            // Heuristic-based scoring for move ordering
+            double score = 0;
+            if (move.ToPileIndex == SolitaireGameState.FoundationStartIndex) score += 20; // Moves to foundation
+            if (move.ToPileIndex <= SolitaireGameState.TableauEndIndex && move.FromPileIndex > SolitaireGameState.TableauEndIndex) score += 10; // Moves to tableau
+            if (move.FromPileIndex == SolitaireGameState.StockIndex) score += 2; // Reduces stock pile
 
-            double score = gameState.EvaluateMove(move, evaluator);
+            score += gameState.EvaluateMove(move, evaluator);
 
             return score;
         });
@@ -119,6 +124,16 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
     {
         // Generate a hash for the current game state
         int stateHash = gameState.GetHashCode();
+
+        // Check if the state is already in the transposition table
+        if (TranspositionTable.TryGetValue(stateHash, out var entry))
+        {
+            // If the stored depth is greater than or equal to the current depth, use the cached score
+            if (entry.Depth >= depth && entry.Alpha <= alpha)
+            {
+                return entry.Score;
+            }
+        }
 
         // Base case: If depth is 0 or the game is over, evaluate the current state
         if (depth == 0 || gameState.IsGameWon || gameState.IsGameLost)
@@ -133,18 +148,8 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
             return score;
         }
 
-        // Check if the state is already in the transposition table
-        if (TranspositionTable.TryGetValue(stateHash, out var entry))
-        {
-            // If the stored depth is greater than or equal to the current depth, use the cached score
-            if (entry.Depth >= depth && entry.Alpha <= alpha)
-            {
-                return entry.Score;
-            }
-        }
-
+        // Recursive case: Evaluate moves - Order moves to improve pruning
         double bestScore = double.NegativeInfinity;
-        // Order moves to improve alpha-beta pruning
         foreach (var move in OrderMoves(gameState, gameState.GetLegalMoves()))
         {
             gameState.ExecuteMove(move);

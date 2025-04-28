@@ -8,7 +8,7 @@ public class RandomAgent : SolitaireAgent
 
     public override AgentDecision GetNextAction(SolitaireGameState gameState)
     {
-        var moves = gameState.GetLegalMoves().ToList();
+        var moves = gameState.GetLegalMoves();
         if (moves.Count == 0)
             return AgentDecision.SkipGame();
 

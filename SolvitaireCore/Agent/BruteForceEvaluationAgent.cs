@@ -14,7 +14,7 @@ public class BruteForceEvaluationAgent(SolitaireEvaluator evaluator, int maxLook
         SolitaireMove bestMove = null!;
         double bestScore = double.NegativeInfinity;
 
-        var moves = gameState.GetLegalMoves().ToList();
+        var moves = gameState.GetLegalMoves();
         if (moves.Count == 0 || IsGameUnwinnable(gameState))
         {
             return AgentDecision.SkipGame();
