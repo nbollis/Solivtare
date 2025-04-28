@@ -62,7 +62,7 @@ namespace MyApp
                         var agent = new MaxiMaxAgent(new SecondSolitaireEvaluator());
                         var moveGenerator = new SolitaireMoveGenerator();
 
-                        var referenceDeck = new StandardDeck(threadId * 13);
+                        var referenceDeck = new StandardDeck(threadId * 12);
                         while (true)
                         {
                             referenceDeck.Shuffle();
@@ -87,7 +87,7 @@ namespace MyApp
             var stopwatch = Stopwatch.StartNew();
             int moveCount = 0;
 
-            while (gameState is { IsGameWon: false, IsGameLost: false } && stopwatch.Elapsed.TotalSeconds < timeout)
+            while (gameState is { IsGameWon: false} && stopwatch.Elapsed.TotalSeconds < timeout)
             {
                 var decision = agent.GetNextAction(gameState);
 

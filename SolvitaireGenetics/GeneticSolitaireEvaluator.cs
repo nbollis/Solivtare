@@ -6,7 +6,7 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
 {
     public override double Evaluate(SolitaireGameState state)
     {
-        int legalMoveCount = state.GetLegalMoves().Count();
+        int legalMoveCount = state.GetLegalMoves().Count;
         int foundationCount = state.FoundationPiles.Sum(pile => pile.Count);
         int wasteCount = state.WastePile.Count;
         int stockCount = state.StockPile.Count;
@@ -82,5 +82,12 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
         score += chromosome.GetWeight(SolitaireChromosome.AceInTableauWeightName) * aceInTableauCount;
 
         return score;
+    }
+
+    public bool ShouldSkipGame(SolitaireGameState state)
+    {
+        // Check if the game is unwinnable based on the current state
+        // This is a placeholder implementation and should be replaced with actual logic
+        return state.IsGameLost;
     }
 }

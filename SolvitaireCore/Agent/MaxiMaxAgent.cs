@@ -136,7 +136,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
         }
 
         // Base case: If depth is 0 or the game is over, evaluate the current state
-        if (depth == 0 || gameState.IsGameWon || gameState.IsGameLost)
+        if (depth == 0 || gameState.IsGameWon /*|| gameState.IsGameLost*/)
         {
             double score = evaluator.Evaluate(gameState);
             TranspositionTable[stateHash] = new TranspositionTableEntry

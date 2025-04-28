@@ -5,20 +5,21 @@ namespace SolvitaireGenetics;
 
 public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromosome<TChromosome>
 {
-    private readonly ILogger<GeneticAlgorithm<TChromosome>> _logger;
-    private readonly int _populationSize;
-    private readonly Random _random = new();
-    private readonly double _mutationRate;
-    private readonly int _tournamentSize;
+    protected readonly ILogger<GeneticAlgorithm<TChromosome>> Logger;
+    protected readonly int PopulationSize;
+    protected readonly Random Random = new();
+    protected readonly double MutationRate;
+    protected readonly int TournamentSize;
+
     // Fitness cache
     private readonly Dictionary<int, double> _fitnessCache = new();
 
     public GeneticAlgorithm(int populationSize, double mutationRate, int tournamentSize, ILogger<GeneticAlgorithm<TChromosome>> logger)
     {
-        _populationSize = populationSize;
-        _mutationRate = mutationRate;
-        _tournamentSize = tournamentSize;
-        _logger = logger;
+        PopulationSize = populationSize;
+        MutationRate = mutationRate;
+        TournamentSize = tournamentSize;
+        Logger = logger;
     }
 
     protected abstract double EvaluateFitness(TChromosome chromosome);
@@ -45,7 +46,7 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
 
         for (int generation = 0; generation < generations; generation++)
         {
-            _logger.LogInformation($"Generation {generation}: Evaluating population...");
+            Logger.LogInformation($"Generation {generation}: Evaluating population...");
 
             population = EvolvePopulation(population, out List<double> fitness); 
 
@@ -53,8 +54,8 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
             TChromosome bestChromosome = population[0];
             TChromosome averageChromosome = Chromosome<TChromosome>.GetAverageChromosome(population);
 
-            _logger.LogInformation($"Generation {generation}: Best fitness = {bestFitness}, Average fitness = {fitness.Average()}");
-            _logger.LogInformation($"BestChromosome = {bestChromosome.SerializeWeights()}, AverageChromosome = {averageChromosome.SerializeWeights()}");
+            Logger.LogInformation($"Generation {generation}: Best fitness = {bestFitness}, Average fitness = {fitness.Average()}");
+            Logger.LogInformation($"BestChromosome = {bestChromosome.SerializeWeights()}, AverageChromosome = {averageChromosome.SerializeWeights()}");
         }
 
         return population[0]; // Best chromosome
@@ -69,13 +70,13 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
         List<TChromosome> newPopulation = [];
         fitness = new List<double>();
 
-        while (newPopulation.Count < _populationSize)
+        while (newPopulation.Count < PopulationSize)
         {
             var parent1 = TournamentSelection(currentPopulation);
             var parent2 = TournamentSelection(currentPopulation);
 
             var child = Chromosome<TChromosome>.Crossover(parent1, parent2);
-            child = Chromosome<TChromosome>.Mutate(child, _mutationRate);
+            child = Chromosome<TChromosome>.Mutate(child, MutationRate);
 
             newPopulation.Add(child);
         }
@@ -109,9 +110,9 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
         var fitnessResults = new ConcurrentDictionary<TChromosome, double>();
 
         // Select random chromosomes for the tournament in parallel  
-        for (int i = 0; i < _tournamentSize; i++)
+        for (int i = 0; i < TournamentSize; i++)
         {
-            tournament.Add(population[_random.Next(population.Count)]);
+            tournament.Add(population[Random.Next(population.Count)]);
         }
 
         // Calculate fitness for each chromosome in the tournament in parallel  
@@ -124,36 +125,16 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
         // Return the chromosome with the highest fitness  
         return fitnessResults.OrderByDescending(kvp => kvp.Value).First().Key;
 
-        //TChromosome bestChromosome = null!;
-
-        //// select a random sample of size _tournamentSize from the population
-        //var tournament = new List<TChromosome>();
-        //for (int i = 0; i < _tournamentSize; i++)
-        //{
-        //    tournament.Add(population[_random.Next(population.Count)]);
-        //}
-
-        //// find the best chromosome in the tournament
-        //foreach (var chromosome in tournament)
-        //{
-        //    double localFitness = GetFitness(chromosome);
-        //    if (localFitness > chromosome.Fitness)
-        //    {
-        //        bestChromosome = chromosome;
-        //    }
-        //}
-
-        //return bestChromosome;
     }
 
     /// <summary>
     /// Creates a random population of chromosomes with random weights.
     /// </summary>
     /// <returns></returns>
-    protected List<TChromosome> InitializePopulation()
+    protected virtual List<TChromosome> InitializePopulation()
     {
-        return Enumerable.Range(0, _populationSize)
-            .Select(_ => Chromosome<TChromosome>.CreateRandom(_random))
+        return Enumerable.Range(0, PopulationSize)
+            .Select(_ => Chromosome<TChromosome>.CreateRandom(Random))
             .ToList();
     }
 }

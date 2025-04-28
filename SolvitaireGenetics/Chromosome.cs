@@ -51,10 +51,20 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
 
         foreach (var kvp in chromosome.MutableStatsByName)
         {
-            if (chromosome.Random.NextDouble() < mutationRate)
+            // TODO: Get a better mutation system going. Maybe a gaussian distribution?
+            var mutationValue = chromosome.Random.NextDouble();
+            if (mutationValue < mutationRate)
             {
-                // TODO: Get a better mutation system going. Maybe a gaussian distribution?
                 newChromosome.MutableStatsByName[kvp.Key] = chromosome.GenerateRandomWeight();
+            }
+
+            // double the change of normal mutations is a +- 5% mutation. 
+            if (mutationValue < mutationRate * 2)
+            {
+                var oldValue = newChromosome.MutableStatsByName[kvp.Key];
+                var change = oldValue * 0.05;
+                var newValue = chromosome.Random.NextSingle() > 0.5 ? oldValue + change : oldValue - change;
+                newChromosome.MutableStatsByName[kvp.Key] = newValue;
             }
         }
         return newChromosome;
