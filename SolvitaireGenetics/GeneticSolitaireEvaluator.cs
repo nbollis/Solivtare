@@ -89,5 +89,23 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
         // Check if the game is unwinnable based on the current state
         // This is a placeholder implementation and should be replaced with actual logic
         return state.IsGameLost;
+
+
+        // Example logic to determine if the game should be skipped.
+        // I do not like using the same weight for both evaluation and skipping.
+        double score = 0.0;
+
+        // Evaluate factors using chromosome weights
+        score += chromosome.GetWeight(SolitaireChromosome.LegalMoveWeightName) * state.GetLegalMoves().Count;
+        score += chromosome.GetWeight(SolitaireChromosome.FoundationWeightName) * state.FoundationPiles.Sum(pile => pile.Count);
+        score += chromosome.GetWeight(SolitaireChromosome.StockWeightName) * state.StockPile.Count;
+        score += chromosome.GetWeight(SolitaireChromosome.WasteWeightName) * state.WastePile.Count;
+        score += chromosome.GetWeight(SolitaireChromosome.CycleWeightName) * state.CycleCount;
+        score += chromosome.GetWeight(SolitaireChromosome.EmptyTableauWeightName) * state.TableauPiles.Count(pile => pile.IsEmpty);
+        score += chromosome.GetWeight(SolitaireChromosome.FaceDownTableauWeightName) * state.TableauPiles.Sum(pile => pile.Cards.Count(card => !card.IsFaceUp));
+
+        // Define a threshold below which the game should be skipped
+        const double skipThreshold = -10.0; // Adjust based on experimentation
+        return score < skipThreshold;
     }
 }

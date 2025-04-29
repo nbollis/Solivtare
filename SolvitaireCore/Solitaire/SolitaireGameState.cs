@@ -8,6 +8,7 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     public readonly int CardsPerCycle;
     public readonly int MaximumCycles = int.MaxValue;
     public int CycleCount = 0;
+    public int MovesMade = 0;
 
     public List<TableauPile> TableauPiles { get; set; }
 
@@ -74,6 +75,7 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     public void Reset()
     {
         CycleCount = 0;
+        MovesMade = 0;
 
         foreach (var pile in FoundationPiles)
         {
@@ -181,6 +183,8 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
                     }
                 }
             }
+
+            MovesMade++;
         }
         else
         {
@@ -252,6 +256,7 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
                 toPile.RemoveCards(multi.Cards);
             }
         }
+        MovesMade--;
     }
 
     #endregion

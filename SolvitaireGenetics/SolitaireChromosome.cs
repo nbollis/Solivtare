@@ -14,6 +14,7 @@ public class SolitaireChromosome : Chromosome<SolitaireChromosome>
     public const string FaceUpBottomCardTableauWeightName = "FaceUpBottomCardTableauWeight";
     public const string KingIsBottomCardTableauWeightName = "KingIsBottomCardTableauWeight";
     public const string AceInTableauWeightName = "AceInTableauWeight";
+    public const string MoveCountWeightName = "MoveCountWeight";
 
     public SolitaireChromosome(Random random) : base(random)
     {
@@ -29,6 +30,7 @@ public class SolitaireChromosome : Chromosome<SolitaireChromosome>
         MutableStatsByName[FaceUpBottomCardTableauWeightName] = GenerateRandomWeight();
         MutableStatsByName[KingIsBottomCardTableauWeightName] = GenerateRandomWeight();
         MutableStatsByName[AceInTableauWeightName] = GenerateRandomWeight();
+        MutableStatsByName[MoveCountWeightName] = GenerateRandomWeight();
     }
 
     public override SolitaireChromosome Clone()

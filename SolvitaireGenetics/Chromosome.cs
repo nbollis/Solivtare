@@ -1,7 +1,9 @@
-﻿namespace SolvitaireGenetics;
+﻿using MathNet.Numerics;
+namespace SolvitaireGenetics;
 
 public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TChromosome>
 {
+    private const int RoundingPlace = 3;
     protected readonly Random Random;
     public double Fitness { get; set; } = double.NegativeInfinity;
     public Dictionary<string, double> MutableStatsByName { get; set; }
@@ -12,15 +14,9 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
         MutableStatsByName = new();
     }
 
-    public TChromosome CrossOver(TChromosome other, double crossoverRate = 0.5)
-    {
-        return Crossover(this, other, crossoverRate);
-    }
+    public TChromosome CrossOver(TChromosome other, double crossoverRate = 0.5) => Crossover(this, other, crossoverRate);
 
-    public TChromosome Mutate(double mutationRate)
-    {
-        return Mutate(this, mutationRate);
-    }
+    public TChromosome Mutate(double mutationRate) => Mutate(this, mutationRate);
 
     public abstract TChromosome Clone();
 
@@ -28,10 +24,7 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
     /// Creates a random weight from -2 to 2. 
     /// </summary>
     /// <returns></returns>
-    protected double GenerateRandomWeight()
-    {
-        return Random.NextDouble() * 4 - 2;
-    }
+    protected double GenerateRandomWeight() => (Random.NextDouble() * 4 - 2).Round(RoundingPlace);
 
     public static TChromosome CreateRandom(Random random)
     {
@@ -64,7 +57,7 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
                 var oldValue = newChromosome.MutableStatsByName[kvp.Key];
                 var change = oldValue * 0.05;
                 var newValue = chromosome.Random.NextSingle() > 0.5 ? oldValue + change : oldValue - change;
-                newChromosome.MutableStatsByName[kvp.Key] = newValue;
+                newChromosome.MutableStatsByName[kvp.Key] = newValue.Round(RoundingPlace);
             }
         }
         return newChromosome;
