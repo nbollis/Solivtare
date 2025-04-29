@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using SolvitaireCore;
-using SolvitaireIO;
+using SolvitaireIO.DeckManagement;
 
 namespace MyApp
 {

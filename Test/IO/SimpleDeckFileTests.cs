@@ -5,10 +5,10 @@ using SolvitaireIO;
 namespace Test.IO;
 
 [TestFixture]
-public class DeckFileTests
+public class SimpleDeckFileTests
 {
     private const string TestFilePath = "test_decks.json";
-    private DeckFile _deckFile;
+    private SimpleDeckFile _deckFile;
 
     [SetUp]
     public void SetUp()
@@ -19,7 +19,7 @@ public class DeckFileTests
             File.Delete(TestFilePath);
         }
 
-        _deckFile = new DeckFile(TestFilePath);
+        _deckFile = new SimpleDeckFile(TestFilePath);
     }
 
     [TearDown]
@@ -39,7 +39,7 @@ public class DeckFileTests
         var filePath = "new_test_decks.json";
 
         // Act  
-        var deckFile = new DeckFile(filePath);
+        var deckFile = new SimpleDeckFile(filePath);
 
         // Assert  
         Assert.That(File.Exists(filePath), Is.True);

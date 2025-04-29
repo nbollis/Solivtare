@@ -15,7 +15,7 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
     // Fitness cache
     private readonly Dictionary<int, double> _fitnessCache = new();
 
-    public GeneticAlgorithm(int populationSize, double mutationRate, int tournamentSize, string outputDirectory)
+    protected GeneticAlgorithm(int populationSize, double mutationRate, int tournamentSize, string outputDirectory)
     {
         PopulationSize = populationSize;
         MutationRate = mutationRate;
@@ -58,7 +58,7 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
             TChromosome stdChromosome = Chromosome<TChromosome>.GetStandardDeviationChromosome(population);
 
             Logger.LogGenerationInfo(generation, bestFitness, fitness.Average(), bestChromosome, averageChromosome, stdChromosome);
-            Logger.FlushAgentLogs();
+
         }
 
         return population[0]; // Best chromosome
@@ -157,5 +157,10 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
         return Enumerable.Range(0, PopulationSize)
             .Select(_ => Chromosome<TChromosome>.CreateRandom(Random))
             .ToList();
+    }
+
+    protected virtual void FlushLogs()
+    {
+        Logger.FlushAgentLogs();
     }
 }

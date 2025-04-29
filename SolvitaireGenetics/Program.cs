@@ -31,9 +31,9 @@ namespace SolvitaireGenetics
             GeneticSolitaireAlgorithm algorithm;
             try
             {
-                DeckFile decksToUse = null!;
+                IDeckFile decksToUse = null!;
                 if (options.DecksToUse is not null)
-                    decksToUse = new DeckFile(options.DecksToUse);
+                    decksToUse = new DeckStatisticsFile(options.DecksToUse);
 
                 // Run the genetic algorithm
                 algorithm = new GeneticSolitaireAlgorithm(
@@ -42,7 +42,7 @@ namespace SolvitaireGenetics
                         tournamentSize: options.TournamentSize,
                         maxMovesPerAgent: options.MaxMovesPerGeneration,
                         maxGamesPerAgent: options.MaxGamesPerGeneration,
-                        outputDirectory: options.OutputDirectory,
+                        outputDirectory: options.OutputDirectory ?? ".",
                         deckFile: decksToUse); // Pass the logger to the algorithm
             }
             catch (Exception ex)

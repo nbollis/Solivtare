@@ -161,4 +161,86 @@ public static class DeckSerializer
     }
 
     #endregion
+
+    #region Deck with Statistics
+
+    /// <summary>
+    /// Serializes a DeckStatistics object using MinimizedDeckDto for the deck.
+    /// </summary>
+    public static string SerializeDeckStatistics(DeckStatistics statistics)
+    {
+        var dto = new DeckStatisticsDto
+        {
+            Deck = new MinimizedDeckDto(statistics.Deck),
+            TimesWon = statistics.TimesWon,
+            TimesPlayed = statistics.TimesPlayed,
+            FewestMovesToWin = statistics.FewestMovesToWin,
+            MovesPerAttempt = statistics.MovesPerAttempt,
+            MovesPerWin = statistics.MovesPerWin
+        };
+
+        return JsonSerializer.Serialize(dto, MinimalisticOptions);
+    }
+
+    /// <summary>
+    /// Serializes a list of DeckStatistics objects.
+    /// </summary>
+    public static string SerializeDeckStatisticsList(List<DeckStatistics> statisticsList)
+    {
+        var dtos = statisticsList.Select(statistics => new DeckStatisticsDto
+        {
+            Deck = new MinimizedDeckDto(statistics.Deck),
+            TimesWon = statistics.TimesWon,
+            TimesPlayed = statistics.TimesPlayed,
+            FewestMovesToWin = statistics.FewestMovesToWin,
+            MovesPerAttempt = statistics.MovesPerAttempt,
+            MovesPerWin = statistics.MovesPerWin
+        }).ToList();
+
+        return JsonSerializer.Serialize(dtos, MinimalisticOptions);
+    }
+
+    /// <summary>
+    /// Deserializes a DeckStatistics object from JSON.
+    /// </summary>
+    public static DeckStatistics DeserializeDeckStatistics(string json)
+    {
+        var dto = JsonSerializer.Deserialize<DeckStatisticsDto>(json, MinimalisticOptions)!;
+
+        return new DeckStatistics
+        {
+            Deck = new StandardDeck(dto.Deck.Seed)
+            {
+                Shuffles = dto.Deck.Shuffles
+            },
+            TimesWon = dto.TimesWon,
+            TimesPlayed = dto.TimesPlayed,
+            FewestMovesToWin = dto.FewestMovesToWin,
+            MovesPerAttempt = dto.MovesPerAttempt,
+            MovesPerWin = dto.MovesPerWin
+        };
+    }
+
+    /// <summary>
+    /// Deserializes a list of DeckStatistics objects from JSON.
+    /// </summary>
+    public static List<DeckStatistics> DeserializeDeckStatisticsList(string json)
+    {
+        var dtos = JsonSerializer.Deserialize<List<DeckStatisticsDto>>(json, MinimalisticOptions)!;
+
+        return dtos.Select(dto => new DeckStatistics
+        {
+            Deck = new StandardDeck(dto.Deck.Seed)
+            {
+                Shuffles = dto.Deck.Shuffles
+            },
+            TimesWon = dto.TimesWon,
+            TimesPlayed = dto.TimesPlayed,
+            FewestMovesToWin = dto.FewestMovesToWin,
+            MovesPerAttempt = dto.MovesPerAttempt,
+            MovesPerWin = dto.MovesPerWin
+        }).ToList();
+    }
+
+    #endregion
 }

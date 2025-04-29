@@ -1,18 +1,16 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using SolvitaireCore;
+﻿using SolvitaireCore;
 
 namespace SolvitaireIO;
 
-public class DeckFile
+public class SimpleDeckFile : IDeckFile
 {
     private readonly object _fileLock = new(); // Lock object for thread safety
     private readonly string _filePath;
 
     /// <summary>
-    /// Constructs a DeckFile from a file path. If the file does not exist, it will be created.
+    /// Constructs a SimpleDeckFile from a file path. If the file does not exist, it will be created.
     /// </summary>
-    public DeckFile(string filePath)
+    public SimpleDeckFile(string filePath)
     {
         _filePath = filePath;
 

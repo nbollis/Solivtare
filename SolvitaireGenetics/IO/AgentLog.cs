@@ -1,4 +1,6 @@
-﻿namespace SolvitaireGenetics;
+﻿using SolvitaireIO;
+
+namespace SolvitaireGenetics;
 
 /// <summary>
 /// DTO for logging agent-specific information.

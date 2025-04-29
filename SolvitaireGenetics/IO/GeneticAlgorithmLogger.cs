@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using SolvitaireIO;
 
 namespace SolvitaireGenetics;
 
@@ -17,8 +18,8 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome<
 
     public GeneticAlgorithmLogger(string outputDirectory)
     {
-        _generationLogFilePath = Path.Combine(outputDirectory, "GenerationalLog.json");
-        _agentLogFilePath = Path.Combine(outputDirectory, "AgentLog.json");
+        _generationLogFilePath = Path.Combine(outputDirectory, "GenerationalLog.json").GetUniqueFilePath();
+        _agentLogFilePath = Path.Combine(outputDirectory, "AgentLog.json").GetUniqueFilePath();
 
         _jsonOptions = new JsonSerializerOptions
         {

@@ -8,13 +8,15 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
     private readonly int _maxMovesPerAgent;
     private readonly int _maxGamesPerAgent;
     private readonly List<StandardDeck> _predefinedDecks = new();
+    private readonly IDeckFile? _deckFile;
 
     public GeneticSolitaireAlgorithm(int populationSize, double mutationRate, int tournamentSize, int maxMovesPerAgent, 
-        int maxGamesPerAgent, string outputDirectory, DeckFile? deckFile = null)
+        int maxGamesPerAgent, string outputDirectory, IDeckFile? deckFile = null)
         : base(populationSize, mutationRate, tournamentSize, outputDirectory)
     {
         _maxMovesPerAgent = maxMovesPerAgent;
         _maxGamesPerAgent = maxGamesPerAgent;
+        _deckFile = deckFile;
 
         // Deserialize predefined decks if provided
         if (deckFile is not null)
@@ -84,6 +86,12 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
             {
                 gamesWon++;
                 Console.WriteLine("Game Won.");
+
+                // Only record winnable decks for right now. 
+                if (_deckFile is DeckStatisticsFile stats)
+                {
+                    stats.AddOrUpdateWinnableDeck(deck, gameState.MovesMade, gameState.IsGameWon);
+                }
             }
         }
 
@@ -133,5 +141,14 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
         best.MutableStatsByName[SolitaireChromosome.AceInTableauWeightName] = -1;
         best.MutableStatsByName[SolitaireChromosome.MoveCountWeightName] = 0;
         return best;
+    }
+
+    protected override void FlushLogs()
+    {
+        base.FlushLogs();
+        if (_deckFile is DeckStatisticsFile stats)
+        {
+            stats.Flush();
+        }
     }
 }
