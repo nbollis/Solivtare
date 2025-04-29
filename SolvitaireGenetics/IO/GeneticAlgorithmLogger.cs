@@ -18,6 +18,9 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome<
 
     public GeneticAlgorithmLogger(string outputDirectory)
     {
+        if (!Directory.Exists(outputDirectory))
+            Directory.CreateDirectory(outputDirectory);
+
         _generationLogFilePath = Path.Combine(outputDirectory, "GenerationalLog.json").GetUniqueFilePath();
         _agentLogFilePath = Path.Combine(outputDirectory, "AgentLog.json").GetUniqueFilePath();
 
@@ -72,7 +75,7 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome<
         }
 
         // Log to console  
-        Console.WriteLine($"Generation Log: {JsonSerializer.Serialize(generationLog, _jsonOptions)}");
+        Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation Log: {JsonSerializer.Serialize(generationLog, _jsonOptions)}");
     }
 
     /// <summary>  

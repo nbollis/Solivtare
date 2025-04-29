@@ -26,5 +26,10 @@
             </Style.Resources>
         </Style>
 
+        <Style x:Key="TextBoxStyle" TargetType="TextBox">
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
     </Application.Resources>
 </Application>

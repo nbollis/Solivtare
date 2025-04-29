@@ -63,7 +63,7 @@ namespace MyApp
                         var agent = new MaxiMaxAgent(new SecondSolitaireEvaluator());
                         var moveGenerator = new SolitaireMoveGenerator();
 
-                        var referenceDeck = new StandardDeck(threadId * 13);
+                        var referenceDeck = new StandardDeck(threadId * 12);
                         while (true)
                         {
                             referenceDeck.Shuffle();
@@ -123,11 +123,11 @@ namespace MyApp
             {
                 winningDealLog.AddOrUpdateWinnableDeck(deck, moveCount, true);
                 winningDealLog.Flush();
-                Console.WriteLine($"✅ Thread {threadId}: WIN after {moveCount} moves");
+                Console.WriteLine($"{DateTime.Now.ToShortTimeString()} ✅ Thread {threadId}: WIN after {moveCount} moves");
             }
             else
             {
-                Console.WriteLine($"❌ Thread {threadId}: Loss or timeout ({moveCount} moves)");
+                Console.WriteLine($"{DateTime.Now.ToShortTimeString()}❌ Thread {threadId}: Loss or timeout ({moveCount} moves)");
             }
         }
     }

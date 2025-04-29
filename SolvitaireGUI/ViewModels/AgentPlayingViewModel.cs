@@ -286,7 +286,7 @@ public class AgentPlayingModel : AgentPlayingViewModel
 {
     public static AgentPlayingModel Instance => new();
 
-    AgentPlayingModel()
+    AgentPlayingModel() : base()
     {
         Agent = new RandomAgent();
     }

@@ -48,7 +48,7 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
         for (int generation = 0; generation < generations; generation++)
         {
             CurrentGeneration = generation;
-            Console.WriteLine($"Generation {generation}: Evaluating population...");
+            Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation {generation}: Evaluating population...");
 
             population = EvolvePopulation(population, out List<double> fitness); 
 
@@ -58,7 +58,7 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
             TChromosome stdChromosome = Chromosome<TChromosome>.GetStandardDeviationChromosome(population);
 
             Logger.LogGenerationInfo(generation, bestFitness, fitness.Average(), bestChromosome, averageChromosome, stdChromosome);
-
+            FlushLogs();
         }
 
         return population[0]; // Best chromosome

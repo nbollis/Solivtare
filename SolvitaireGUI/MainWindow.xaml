@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SolvitaireGUI"
         mc:Ignorable="d"
+        d:DataContext="{x:Static local:MainWindowModel.Instance}"
         Title="MainWindow" Height="450" Width="1100">
 
     <Grid>
@@ -12,7 +13,16 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
+        <TabControl>
+            <TabItem Header="Agent Playing" DataContext="{Binding AgentPlayingViewModel}">
+                <local:AgentPlayingView Grid.Column="0" DataContext="{Binding }"/>
+            </TabItem>
 
-        <local:AgentPlayingView Grid.Column="0" DataContext="{Binding AgentPlayingViewModel}"/>
+            <TabItem Header="Game Inspection" DataContext="{Binding GameInspectionTabViewModel}" >
+                <local:GameStateInspectionView DataContext="{Binding }" />
+            </TabItem>
+        </TabControl>
+
+        
     </Grid>
 </Window>

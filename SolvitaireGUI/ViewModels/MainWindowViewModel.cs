@@ -1,4 +1,6 @@
 ﻿
+using SolvitaireCore;
+
 namespace SolvitaireGUI;
 public class MainWindowViewModel : BaseViewModel
 {
@@ -15,8 +17,21 @@ public class MainWindowViewModel : BaseViewModel
         }
     }
 
+    public GameInspectionTabViewModel GameInspectionTabViewModel { get; set; }
+
     public MainWindowViewModel()
     {
         AgentPlayingViewModel = new AgentPlayingViewModel();
+        GameInspectionTabViewModel = new();
+    }
+}
+
+public class MainWindowModel : MainWindowViewModel
+{
+    public static MainWindowModel Instance => new();
+
+    public MainWindowModel() : base()
+    {
+
     }
 }

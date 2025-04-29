@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-
-namespace SolvitaireCore;
+﻿namespace SolvitaireCore;
 
 public class StandardDeck : Deck
 {
