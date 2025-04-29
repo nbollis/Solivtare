@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Concurrent;
 using SolvitaireCore;
 
 namespace SolvitaireIO;
@@ -10,7 +10,7 @@ public class DeckStatisticsFile : IDeckFile
 {
     private readonly object _fileLock = new(); // Lock object for thread safety
     private readonly string _filePath;
-    private readonly List<DeckStatistics> _cache = new(); // In-memory cache for deck statistics
+    private readonly ConcurrentDictionary<int, DeckStatistics> _cache = new(); // Thread-safe in-memory cache
     private bool _isCacheDirty = false; // Tracks whether the cache has unsaved changes
 
     /// <summary>
@@ -43,7 +43,7 @@ public class DeckStatisticsFile : IDeckFile
     {
         lock (_fileLock)
         {
-            return _cache.Select(statistics => statistics.Deck).ToList();
+            return _cache.Values.Select(statistics => statistics.Deck).ToList();
         }
     }
 
@@ -52,10 +52,7 @@ public class DeckStatisticsFile : IDeckFile
     /// </summary>
     public List<DeckStatistics> ReadAllDeckStatistics()
     {
-        lock (_fileLock)
-        {
-            return [.._cache]; // Return a copy of the cache
-        }
+        return _cache.Values.ToList(); // Return a copy of the cache values
     }
 
     public void AddDeck(StandardDeck deck)
@@ -79,11 +76,22 @@ public class DeckStatisticsFile : IDeckFile
     /// <param name="isWin"></param>
     public void AddOrUpdateWinnableDeck(StandardDeck deck, int movesThisAttempt, bool isWin)
     {
-        lock (_fileLock)
-        {
-            var existingDeck = _cache.FirstOrDefault(d => d.Deck.Seed == deck.Seed && d.Deck.Shuffles == deck.Shuffles);
+        var key = deck.GetHashCode(); // Generate a unique key for the deck
 
-            if (existingDeck != null)
+        _cache.AddOrUpdate(
+            key,
+            // If the deck does not exist, create a new entry
+            _ => new DeckStatistics
+            {
+                Deck = deck,
+                TimesWon = isWin ? 1 : 0,
+                TimesPlayed = 1,
+                FewestMovesToWin = isWin ? movesThisAttempt : int.MaxValue,
+                MovesPerAttempt = new List<int> { movesThisAttempt },
+                MovesPerWin = isWin ? new List<int> { movesThisAttempt } : new List<int>()
+            },
+            // If the deck exists, update its statistics
+            (_, existingDeck) =>
             {
                 existingDeck.TimesWon += isWin ? 1 : 0;
                 existingDeck.TimesPlayed += 1;
@@ -95,23 +103,10 @@ public class DeckStatisticsFile : IDeckFile
                 {
                     existingDeck.MovesPerWin.Add(movesThisAttempt);
                 }
-            }
-            else
-            {
-                var newDeck = new DeckStatistics
-                {
-                    Deck = deck,
-                    TimesWon = isWin ? 1 : 0,
-                    TimesPlayed = 1,
-                    FewestMovesToWin = isWin ? movesThisAttempt : int.MaxValue,
-                    MovesPerAttempt = new List<int> { movesThisAttempt },
-                    MovesPerWin = isWin ? new List<int> { movesThisAttempt } : new List<int>()
-                };
-                _cache.Add(newDeck);
-            }
+                return existingDeck;
+            });
 
-            _isCacheDirty = true; // Mark the cache as dirty
-        }
+        _isCacheDirty = true; // Mark the cache as dirty
     }
 
     /// <summary>
@@ -119,27 +114,30 @@ public class DeckStatisticsFile : IDeckFile
     /// </summary>
     public void Flush()
     {
-        lock (_fileLock)
+        if (_isCacheDirty)
         {
-            if (_isCacheDirty)
-            {
-                var json = DeckSerializer.SerializeDeckStatisticsList(_cache);
-                File.WriteAllText(_filePath, json);
-                _isCacheDirty = false; // Reset the dirty flag
-            }
+            var json = DeckSerializer.SerializeDeckStatisticsList(_cache.Values.ToList());
+            File.WriteAllText(_filePath, json);
+            _isCacheDirty = false; // Reset the dirty flag
         }
     }
 
     /// <summary>
     /// Loads the file data into the in-memory cache.
     /// </summary>
+    /// <summary>
+    /// Loads the file data into the in-memory cache.
+    /// </summary>
     private void LoadCache()
     {
-        lock (_fileLock)
+        var json = File.ReadAllText(_filePath);
+        var statisticsList = DeckSerializer.DeserializeDeckStatisticsList(json);
+
+        _cache.Clear();
+        foreach (var stats in statisticsList)
         {
-            var json = File.ReadAllText(_filePath);
-            _cache.Clear();
-            _cache.AddRange(DeckSerializer.DeserializeDeckStatisticsList(json));
+            var key = stats.Deck.GetHashCode();
+            _cache[key] = stats;
         }
     }
 }

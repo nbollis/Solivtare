@@ -101,7 +101,7 @@ public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<D
 
     public override int GetHashCode()
     {
-        return Cards.GetHashCode();
+        return HashCode.Combine(this.GetType(), Seed, Shuffles);
     }
 
     public IEnumerator<TCard> GetEnumerator() => Cards.GetEnumerator();

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using SolvitaireCore;
-using SolvitaireIO.DeckManagement;
+using SolvitaireIO;
 
 namespace MyApp
 {
@@ -47,7 +47,7 @@ namespace MyApp
             {
                 int threads = 10;
                 string path = @"A:\Projects and Original Works\Solvitaire\WinnableDeals.json";
-                var deckFile = new DeckFile(path);
+                var deckFile = new DeckStatisticsFile(path);
                 Console.WriteLine($"Starting simulation with {threads} threads...");
 
                 if (!File.Exists(path))
@@ -78,7 +78,7 @@ namespace MyApp
         }
 
         public static void RunGameWithAgentUntilWinOrTimeout(StandardDeck deck, SolitaireAgent agent,
-            SolitaireMoveGenerator moveGenerator, DeckFile winningDealLog, int threadId, int timeout = 400)
+            SolitaireMoveGenerator moveGenerator, DeckStatisticsFile winningDealLog, int threadId, int timeout = 400)
         {
             var gameState = new SolitaireGameState();
             gameState.DealCards(deck);
@@ -120,11 +120,7 @@ namespace MyApp
 
             if (gameState.IsGameWon)
             {
-                lock (winningDealLog) // Ensure only one thread writes at a time  
-                {
-                    winningDealLog.AddDeck(deck);
-                }
-
+                winningDealLog.AddOrUpdateWinnableDeck(deck, moveCount, true);
                 Console.WriteLine($"✅ Thread {threadId}: WIN after {moveCount} moves");
             }
             else
