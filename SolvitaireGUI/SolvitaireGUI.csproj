@@ -69,6 +69,7 @@
     <ProjectReference Include="..\SolvitaireCore\SolvitaireCore.csproj" />
     <ProjectReference Include="..\SolvitaireGenetics\SolvitaireGenetics.csproj" />
     <ProjectReference Include="..\SolvitaireIO\SolvitaireIO.csproj" />
+    <ProjectReference Include="..\SolvitairePlotting\SolvitairePlotting.csproj" />
   </ItemGroup>
 
   <ItemGroup>

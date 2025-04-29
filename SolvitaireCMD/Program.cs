@@ -45,7 +45,7 @@ namespace MyApp
             }
             else
             {
-                int threads = 10;
+                int threads = 12;
                 string path = @"A:\Projects and Original Works\Solvitaire\WonDeckStats.json";
                 string allDeckPath = @"A:\Projects and Original Works\Solvitaire\AllDeckStats.json";
 
