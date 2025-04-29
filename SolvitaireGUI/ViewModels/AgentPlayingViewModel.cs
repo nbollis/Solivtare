@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using SolvitaireCore;
-using SolvitaireGuiFunctions;
 
 namespace SolvitaireGUI;
 

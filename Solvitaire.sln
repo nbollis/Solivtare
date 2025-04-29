@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolvitaireCore", "Solvitair
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{930C4C79-68DE-4CDC-B2C3-9FE680528C7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolvitaireGuiFunctions", "SolvitaireGuiFunctions\SolvitaireGuiFunctions.csproj", "{037A9081-38F1-4576-9B33-99760A9F72DD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolvitaireGUI", "SolvitaireGUI\SolvitaireGUI.csproj", "{5A0132C7-3969-4002-971B-E1CE99398BB7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolvitaireCMD", "SolvitaireCMD\SolvitaireCMD.csproj", "{AE70814A-9AB6-4E75-9318-78F751D7110D}"
@@ -31,10 +29,6 @@ Global
 		{930C4C79-68DE-4CDC-B2C3-9FE680528C7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{930C4C79-68DE-4CDC-B2C3-9FE680528C7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{930C4C79-68DE-4CDC-B2C3-9FE680528C7B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{037A9081-38F1-4576-9B33-99760A9F72DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{037A9081-38F1-4576-9B33-99760A9F72DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{037A9081-38F1-4576-9B33-99760A9F72DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{037A9081-38F1-4576-9B33-99760A9F72DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5A0132C7-3969-4002-971B-E1CE99398BB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5A0132C7-3969-4002-971B-E1CE99398BB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A0132C7-3969-4002-971B-E1CE99398BB7}.Release|Any CPU.ActiveCfg = Release|Any CPU

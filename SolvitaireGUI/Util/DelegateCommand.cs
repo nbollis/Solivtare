@@ -1,14 +1,14 @@
 ﻿using System.Windows.Input;
 
-namespace SolvitaireGuiFunctions;
-public class RelayCommand : ICommand
+namespace SolvitaireGUI;
+public class DelegateCommand : ICommand
 {
     #region Private Members
 
     /// <summary>
     /// The action to run
     /// </summary>
-    private Action mAction;
+    private Action<object> mAction;
 
     #endregion
 
@@ -26,7 +26,7 @@ public class RelayCommand : ICommand
     /// <summary>
     /// Default constructor
     /// </summary>
-    public RelayCommand(Action action)
+    public DelegateCommand(Action<object> action)
     {
         mAction = action;
     }
@@ -51,7 +51,7 @@ public class RelayCommand : ICommand
     /// <param name="parameter"></param>
     public void Execute(object parameter)
     {
-        mAction();
+        mAction(parameter);
     }
 
     #endregion

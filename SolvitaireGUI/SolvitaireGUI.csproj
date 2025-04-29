@@ -67,7 +67,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SolvitaireCore\SolvitaireCore.csproj" />
-    <ProjectReference Include="..\SolvitaireGuiFunctions\SolvitaireGuiFunctions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
