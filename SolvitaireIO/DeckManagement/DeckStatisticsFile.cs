@@ -60,6 +60,26 @@ public class DeckStatisticsFile : IDeckFile
         AddOrUpdateWinnableDeck(deck, 0, false);
     }
 
+    public void AddDeck(DeckStatistics stats)
+    {
+        var key = stats.Deck.GetHashCode();
+        _cache.AddOrUpdate(
+            key,
+            // If the deck does not exist, create a new entry
+            _ => stats,
+            // If the deck exists, update its statistics
+            (_, existingDeck) =>
+            {
+                existingDeck.TimesWon += stats.TimesWon;
+                existingDeck.TimesPlayed += stats.TimesPlayed;
+                existingDeck.FewestMovesToWin = Math.Min(existingDeck.FewestMovesToWin, stats.FewestMovesToWin);
+                existingDeck.MovesPerAttempt.AddRange(stats.MovesPerAttempt);
+                existingDeck.MovesPerWin.AddRange(stats.MovesPerWin);
+                return existingDeck;
+            });
+        _isCacheDirty = true;
+    }
+
     public void AddDecks(IEnumerable<StandardDeck> newDecks)
     {
         foreach (var deck in newDecks)

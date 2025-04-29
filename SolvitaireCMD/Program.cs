@@ -46,13 +46,13 @@ namespace MyApp
             else
             {
                 int threads = 10;
-                string path = @"A:\Projects and Original Works\Solvitaire\WinnableDeals.json";
+                string path = @"A:\Projects and Original Works\Solvitaire\WonDeckStats.json";
+                string allDeckPath = @"A:\Projects and Original Works\Solvitaire\AllDeckStats.json";
+
                 var deckFile = new DeckStatisticsFile(path);
+                var allDeckFile = new DeckStatisticsFile(allDeckPath);
+
                 Console.WriteLine($"Starting simulation with {threads} threads...");
-
-                if (!File.Exists(path))
-                    File.WriteAllText(path, ""); // create and clear  
-
                 // Start threads  
                 Task[] workers = new Task[threads];
                 for (int i = 0; i < threads; i++)
@@ -63,12 +63,13 @@ namespace MyApp
                         var agent = new MaxiMaxAgent(new SecondSolitaireEvaluator());
                         var moveGenerator = new SolitaireMoveGenerator();
 
-                        var referenceDeck = new StandardDeck(threadId * 11);
+                        var referenceDeck = new StandardDeck(threadId * 13);
                         while (true)
                         {
                             referenceDeck.Shuffle();
 
-                            RunGameWithAgentUntilWinOrTimeout(referenceDeck, agent, moveGenerator, deckFile, threadId);
+                            RunGameWithAgentUntilWinOrTimeout(referenceDeck, agent, moveGenerator, deckFile, allDeckFile, threadId);
+                            Task.Run(() => allDeckFile.Flush());
                         }
                     });
                 }
@@ -78,7 +79,7 @@ namespace MyApp
         }
 
         public static void RunGameWithAgentUntilWinOrTimeout(StandardDeck deck, SolitaireAgent agent,
-            SolitaireMoveGenerator moveGenerator, DeckStatisticsFile winningDealLog, int threadId, int timeout = 400)
+            SolitaireMoveGenerator moveGenerator, DeckStatisticsFile winningDealLog, DeckStatisticsFile allDealLog, int threadId, int timeout = 60)
         {
             var gameState = new SolitaireGameState();
             gameState.DealCards(deck);
@@ -117,10 +118,11 @@ namespace MyApp
             }
 
             stopwatch.Stop();
-
+            allDealLog.AddOrUpdateWinnableDeck(deck, moveCount, gameState.IsGameWon);
             if (gameState.IsGameWon)
             {
                 winningDealLog.AddOrUpdateWinnableDeck(deck, moveCount, true);
+                winningDealLog.Flush();
                 Console.WriteLine($"✅ Thread {threadId}: WIN after {moveCount} moves");
             }
             else

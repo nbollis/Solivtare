@@ -206,13 +206,15 @@ public static class DeckSerializer
     public static DeckStatistics DeserializeDeckStatistics(string json)
     {
         var dto = JsonSerializer.Deserialize<DeckStatisticsDto>(json, MinimalisticOptions)!;
+        var deck = new StandardDeck(dto.Deck.Seed);
+        for (int i = 0; i < dto.Deck.Shuffles; i++)
+        {
+            deck.Shuffle();
+        }
 
         return new DeckStatistics
         {
-            Deck = new StandardDeck(dto.Deck.Seed)
-            {
-                Shuffles = dto.Deck.Shuffles
-            },
+            Deck = deck,
             TimesWon = dto.TimesWon,
             TimesPlayed = dto.TimesPlayed,
             FewestMovesToWin = dto.FewestMovesToWin,
@@ -227,19 +229,28 @@ public static class DeckSerializer
     public static List<DeckStatistics> DeserializeDeckStatisticsList(string json)
     {
         var dtos = JsonSerializer.Deserialize<List<DeckStatisticsDto>>(json, MinimalisticOptions)!;
+        var decks = new List<DeckStatistics>(dtos.Count);
 
-        return dtos.Select(dto => new DeckStatistics
+        foreach (var dto in dtos)
         {
-            Deck = new StandardDeck(dto.Deck.Seed)
+            var deck = new StandardDeck(dto.Deck.Seed);
+            for (int i = 0; i < dto.Deck.Shuffles; i++)
             {
-                Shuffles = dto.Deck.Shuffles
-            },
-            TimesWon = dto.TimesWon,
-            TimesPlayed = dto.TimesPlayed,
-            FewestMovesToWin = dto.FewestMovesToWin,
-            MovesPerAttempt = dto.MovesPerAttempt,
-            MovesPerWin = dto.MovesPerWin
-        }).ToList();
+                deck.Shuffle();
+            }
+
+            decks.Add(new DeckStatistics
+            {
+                Deck = deck,
+                TimesWon = dto.TimesWon,
+                TimesPlayed = dto.TimesPlayed,
+                FewestMovesToWin = dto.FewestMovesToWin,
+                MovesPerAttempt = dto.MovesPerAttempt,
+                MovesPerWin = dto.MovesPerWin
+            });
+        }
+
+        return decks;
     }
 
     #endregion

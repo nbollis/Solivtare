@@ -176,4 +176,25 @@ public class DeckStatisticsFileTests
         // Assert  
         Assert.That(allDeckStatistics, Is.Empty);
     }
+
+    [Test]
+    [TestCase(23, 4)]
+    public void ReadAllDecks_RestoresSeedAndShuffleInformation(int seed, int shuffles)
+    {
+        var deck = new StandardDeck(seed);
+        int movesMade = seed * shuffles;
+        for (int i = 0; i < shuffles; i++)
+        {
+            deck.Shuffle();
+        }
+        Assert.That(deck.Shuffles, Is.EqualTo(shuffles));
+
+        _deckStatisticsFile.AddOrUpdateWinnableDeck(deck, movesMade, true);
+        _deckStatisticsFile.Flush();
+
+        var newDeckStatisticsFile = new DeckStatisticsFile(TestFilePath);
+        var allDeckStatistics = newDeckStatisticsFile.ReadAllDeckStatistics();
+        Assert.That(allDeckStatistics.Count, Is.EqualTo(1));
+        Assert.That(allDeckStatistics[0].Deck, Is.EqualTo(deck));
+    }
 }
