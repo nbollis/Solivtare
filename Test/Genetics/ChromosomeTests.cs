@@ -5,20 +5,6 @@ namespace Test.Genetics;
 [TestFixture]
 public class ChromosomeTests
 {
-    private class TestChromosome : Chromosome<TestChromosome>
-    {
-        public TestChromosome(Random random) : base(random) { }
-
-        public override TestChromosome Clone()
-        {
-            var clone = new TestChromosome(Random);
-            foreach (var kvp in MutableStatsByName)
-            {
-                clone.MutableStatsByName[kvp.Key] = kvp.Value;
-            }
-            return clone;
-        }
-    }
 
     [Test]
     public void Mutate_ShouldChangeWeightsBasedOnMutationRate()

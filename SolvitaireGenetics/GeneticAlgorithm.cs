@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using MathNet.Numerics.Statistics;
 
 namespace SolvitaireGenetics;
 
@@ -10,13 +11,14 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
     protected readonly double MutationRate;
     protected readonly int TournamentSize;
 
-    protected int CurrentGeneration { get; private set; }
+    protected int CurrentGeneration { get;  set; }
 
     // Fitness cache
     private readonly Dictionary<int, double> _fitnessCache = new();
 
     protected GeneticAlgorithm(int populationSize, double mutationRate, int tournamentSize, string outputDirectory)
     {
+        CurrentGeneration = 0;
         PopulationSize = populationSize;
         MutationRate = mutationRate;
         TournamentSize = tournamentSize;
@@ -45,7 +47,8 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
     {
         List<TChromosome> population = InitializePopulation();
 
-        for (int generation = 0; generation < generations; generation++)
+        int generation = CurrentGeneration;
+        for (; generation < generations; generation++)
         {
             CurrentGeneration = generation;
             Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation {generation}: Evaluating population...");
@@ -57,7 +60,7 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
             TChromosome averageChromosome = Chromosome<TChromosome>.GetAverageChromosome(population);
             TChromosome stdChromosome = Chromosome<TChromosome>.GetStandardDeviationChromosome(population);
 
-            Logger.LogGenerationInfo(generation, bestFitness, fitness.Average(), bestChromosome, averageChromosome, stdChromosome);
+            Logger.LogGenerationInfo(generation, bestFitness, fitness.Average(), fitness.StandardDeviation(), bestChromosome, averageChromosome, stdChromosome);
             FlushLogs();
         }
 

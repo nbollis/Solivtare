@@ -15,6 +15,11 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
         Random = random;
         MutableStatsByName = new();
     }
+    protected Chromosome()
+    {
+        Random = Random.Shared;
+        MutableStatsByName = new();
+    }
 
     public TChromosome CrossOver(TChromosome other, double crossoverRate = 0.5) => Crossover(this, other, crossoverRate);
 

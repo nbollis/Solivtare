@@ -113,6 +113,15 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
     /// <returns></returns>
     protected override List<SolitaireChromosome> InitializePopulation()
     {
+        // Attempt to load the last generation's data
+        var lastGeneration = Logger.LoadLastGeneration(out int generationNumber);
+        if (lastGeneration.Count == PopulationSize)
+        {
+            // If we have a last generation, use it to initialize the population
+            CurrentGeneration = generationNumber + 1;
+            return lastGeneration;
+        }
+
         int copiesOfBest = PopulationSize / 10;
         var best = Enumerable.Range(0, copiesOfBest).Select(_ => BestSoFar())
             .Select(b => b.Mutate(MutationRate));

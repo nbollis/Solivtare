@@ -1,0 +1,450 @@
+[
+  {
+    "Generation": 0,
+    "BestFitness": -1,
+    "AverageFitness": -1,
+    "BestChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -1.278,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.245,
+        "ConsecutiveFaceUpTableauWeight": 0.05,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1.441,
+        "MoveCountWeight": 0
+      }
+    },
+    "AverageChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.109875,
+        "FoundationWeight": 2.591625,
+        "WasteWeight": 0.21375000000000002,
+        "StockWeight": -0.020375,
+        "CycleWeight": -0.2056249999999999,
+        "EmptyTableauWeight": -0.46950000000000003,
+        "FaceUpTableauWeight": 0.444,
+        "FaceDownTableauWeight": -0.686875,
+        "ConsecutiveFaceUpTableauWeight": -0.22762499999999994,
+        "FaceUpBottomCardTableauWeight": -0.559125,
+        "KingIsBottomCardTableauWeight": 0.269125,
+        "AceInTableauWeight": -0.4810000000000001,
+        "MoveCountWeight": -0.03699999999999998
+      }
+    },
+    "StdChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.7736980654160713,
+        "FoundationWeight": 1.7207443520174635,
+        "WasteWeight": 1.1059183320403263,
+        "StockWeight": 0.0005175491695067663,
+        "CycleWeight": 0.851857120397211,
+        "EmptyTableauWeight": 1.057882656198557,
+        "FaceUpTableauWeight": 0.15839191898578664,
+        "FaceDownTableauWeight": 0.17854446224960324,
+        "ConsecutiveFaceUpTableauWeight": 1.4130582777891971,
+        "FaceUpBottomCardTableauWeight": 0.5112931609444541,
+        "KingIsBottomCardTableauWeight": 0.3783163594891753,
+        "AceInTableauWeight": 0.7426558518491012,
+        "MoveCountWeight": 1.2200078454080296
+      }
+    }
+  },
+  {
+    "Generation": 1,
+    "BestFitness": -1,
+    "AverageFitness": -1,
+    "BestChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.779,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.052,
+        "FaceDownTableauWeight": -0.713,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -0.323,
+        "MoveCountWeight": -1.795
+      }
+    },
+    "AverageChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.9929999999999999,
+        "FoundationWeight": 2.6116249999999996,
+        "WasteWeight": 0.7949999999999999,
+        "StockWeight": -0.020375,
+        "CycleWeight": -0.43112499999999987,
+        "EmptyTableauWeight": -0.20087500000000003,
+        "FaceUpTableauWeight": 0.447125,
+        "FaceDownTableauWeight": -0.534,
+        "ConsecutiveFaceUpTableauWeight": 1.19275,
+        "FaceUpBottomCardTableauWeight": -0.8564999999999999,
+        "KingIsBottomCardTableauWeight": 0.2815,
+        "AceInTableauWeight": -0.81625,
+        "MoveCountWeight": 0.07812500000000001
+      }
+    },
+    "StdChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.8520130783704472,
+        "FoundationWeight": 1.7297319311302055,
+        "WasteWeight": 1.1070532313953367,
+        "StockWeight": 0.0007440238091428452,
+        "CycleWeight": 0.6041096015743216,
+        "EmptyTableauWeight": 0.9277317096014343,
+        "FaceUpTableauWeight": 0.15989410558241351,
+        "FaceDownTableauWeight": 0.2932410027848863,
+        "ConsecutiveFaceUpTableauWeight": 0.4617407281148156,
+        "FaceUpBottomCardTableauWeight": 0.48343887189296525,
+        "KingIsBottomCardTableauWeight": 1.03954770384597,
+        "AceInTableauWeight": 0.6585260055609041,
+        "MoveCountWeight": 0.9715928655710536
+      }
+    }
+  },
+  {
+    "Generation": 2,
+    "BestFitness": -1,
+    "AverageFitness": -1,
+    "BestChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": -0.773,
+        "WasteWeight": 1.848,
+        "StockWeight": -0.021,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.782,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -0.889,
+        "MoveCountWeight": -0.658
+      }
+    },
+    "AverageChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.347375,
+        "FoundationWeight": 2.084625,
+        "WasteWeight": 1.5094999999999996,
+        "StockWeight": -0.02025,
+        "CycleWeight": -0.9595,
+        "EmptyTableauWeight": -0.11562499999999998,
+        "FaceUpTableauWeight": 0.332,
+        "FaceDownTableauWeight": -0.41350000000000003,
+        "ConsecutiveFaceUpTableauWeight": 1.039,
+        "FaceUpBottomCardTableauWeight": -0.79075,
+        "KingIsBottomCardTableauWeight": 0.308,
+        "AceInTableauWeight": -0.9147500000000001,
+        "MoveCountWeight": -0.30525
+      }
+    },
+    "StdChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.9588233767786134,
+        "FoundationWeight": 2.081714193193402,
+        "WasteWeight": 0.18220161517239233,
+        "StockWeight": 0.0008864052604279193,
+        "CycleWeight": 0.47810877423448317,
+        "EmptyTableauWeight": 1.1599572575253427,
+        "FaceUpTableauWeight": 0.23186202793903105,
+        "FaceDownTableauWeight": 0.32611128687699753,
+        "ConsecutiveFaceUpTableauWeight": 0.6049661147535457,
+        "FaceUpBottomCardTableauWeight": 0.45372923014250943,
+        "KingIsBottomCardTableauWeight": 1.0905826751918315,
+        "AceInTableauWeight": 0.5370700273574334,
+        "MoveCountWeight": 1.0155087043307056
+      }
+    }
+  },
+  {
+    "Generation": 3,
+    "BestFitness": -1,
+    "AverageFitness": -1,
+    "BestChromosome": {
+      "Weights": {
+        "LegalMoveWeight": -0.901,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.677,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0
+      }
+    },
+    "AverageChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.15487499999999996,
+        "FoundationWeight": 1.509625,
+        "WasteWeight": 1.5955,
+        "StockWeight": -0.0195,
+        "CycleWeight": -0.70175,
+        "EmptyTableauWeight": -0.526125,
+        "FaceUpTableauWeight": 0.388,
+        "FaceDownTableauWeight": -0.47625,
+        "ConsecutiveFaceUpTableauWeight": 0.5850000000000001,
+        "FaceUpBottomCardTableauWeight": -0.974375,
+        "KingIsBottomCardTableauWeight": -0.19625000000000004,
+        "AceInTableauWeight": -0.33625000000000005,
+        "MoveCountWeight": -0.4489999999999999
+      }
+    },
+    "StdChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.1913645762617875,
+        "FoundationWeight": 2.3478953455321276,
+        "WasteWeight": 0.19846770158247054,
+        "StockWeight": 0.000755928946018455,
+        "CycleWeight": 0.618436912130667,
+        "EmptyTableauWeight": 1.232799188548449,
+        "FaceUpTableauWeight": 0.20738370234905154,
+        "FaceDownTableauWeight": 0.3380273657560878,
+        "ConsecutiveFaceUpTableauWeight": 0.8242336700579169,
+        "FaceUpBottomCardTableauWeight": 0.24539352506302428,
+        "KingIsBottomCardTableauWeight": 1.0978900218145715,
+        "AceInTableauWeight": 0.7199420115537084,
+        "MoveCountWeight": 0.9531989748810505
+      }
+    }
+  },
+  {
+    "Generation": 4,
+    "BestFitness": -1,
+    "AverageFitness": -1,
+    "BestChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.003,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.331,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.049,
+        "AceInTableauWeight": 0.771,
+        "MoveCountWeight": 0
+      }
+    },
+    "AverageChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.3817499999999999,
+        "FoundationWeight": 2.723375,
+        "WasteWeight": 1.541,
+        "StockWeight": -0.33975,
+        "CycleWeight": -0.6845000000000001,
+        "EmptyTableauWeight": -0.5531250000000001,
+        "FaceUpTableauWeight": 0.503125,
+        "FaceDownTableauWeight": -0.32399999999999995,
+        "ConsecutiveFaceUpTableauWeight": 0.77775,
+        "FaceUpBottomCardTableauWeight": -1.062,
+        "KingIsBottomCardTableauWeight": -0.5369999999999999,
+        "AceInTableauWeight": -0.41700000000000004,
+        "MoveCountWeight": -0.298
+      }
+    },
+    "StdChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.0238568189518913,
+        "FoundationWeight": 1.4138578366097696,
+        "WasteWeight": 0.17803691431032737,
+        "StockWeight": 0.6194492369378278,
+        "CycleWeight": 0.7211371971704532,
+        "EmptyTableauWeight": 1.1234795995986244,
+        "FaceUpTableauWeight": 0.008838834764831877,
+        "FaceDownTableauWeight": 0.35276297181778343,
+        "ConsecutiveFaceUpTableauWeight": 0.7980608193794327,
+        "FaceUpBottomCardTableauWeight": 0.32906664544261716,
+        "KingIsBottomCardTableauWeight": 1.196526162331128,
+        "AceInTableauWeight": 0.8096041360707449,
+        "MoveCountWeight": 1.0197000959665963
+      }
+    }
+  },
+  {
+    "Generation": 5,
+    "BestFitness": -1,
+    "AverageFitness": -1,
+    "BestChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.36,
+        "WasteWeight": 1.844,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -1.834,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -1.6,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.632
+      }
+    },
+    "AverageChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.511625,
+        "FoundationWeight": 2.743375,
+        "WasteWeight": 1.509,
+        "StockWeight": -0.49024999999999996,
+        "CycleWeight": -1.037875,
+        "EmptyTableauWeight": -0.822125,
+        "FaceUpTableauWeight": 0.50625,
+        "FaceDownTableauWeight": -0.34875,
+        "ConsecutiveFaceUpTableauWeight": 0.88,
+        "FaceUpBottomCardTableauWeight": -0.662125,
+        "KingIsBottomCardTableauWeight": -1.373875,
+        "AceInTableauWeight": -0.8181250000000001,
+        "MoveCountWeight": -0.429375
+      }
+    },
+    "StdChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.8956413404450946,
+        "FoundationWeight": 1.4226674079247859,
+        "WasteWeight": 0.1811424064888492,
+        "StockWeight": 0.85346332250258,
+        "CycleWeight": 0.6365867548328126,
+        "EmptyTableauWeight": 1.2506531365079379,
+        "FaceUpTableauWeight": 0.011572751247156931,
+        "FaceDownTableauWeight": 0.3387467448446659,
+        "ConsecutiveFaceUpTableauWeight": 0.9023708455270167,
+        "FaceUpBottomCardTableauWeight": 0.8918101075100814,
+        "KingIsBottomCardTableauWeight": 1.08305394107852,
+        "AceInTableauWeight": 0.6746320558010015,
+        "MoveCountWeight": 1.2025539414690958
+      }
+    }
+  },
+  {
+    "Generation": 6,
+    "BestFitness": -1,
+    "AverageFitness": -1,
+    "BestChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.389,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.465,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.072,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -1.6,
+        "KingIsBottomCardTableauWeight": -2.074,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.664
+      }
+    },
+    "AverageChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.009875000000000004,
+        "FoundationWeight": 2.47175,
+        "WasteWeight": 1.5431249999999999,
+        "StockWeight": -0.4618749999999999,
+        "CycleWeight": -0.8843749999999999,
+        "EmptyTableauWeight": -0.5395,
+        "FaceUpTableauWeight": 0.399625,
+        "FaceDownTableauWeight": -0.49075,
+        "ConsecutiveFaceUpTableauWeight": 0.3135,
+        "FaceUpBottomCardTableauWeight": -0.21174999999999994,
+        "KingIsBottomCardTableauWeight": -1.3745,
+        "AceInTableauWeight": -0.11225,
+        "MoveCountWeight": -1.01725
+      }
+    },
+    "StdChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.4605966433411591,
+        "FoundationWeight": 1.5266711452419235,
+        "WasteWeight": 0.20381604976757142,
+        "StockWeight": 0.9220491833023722,
+        "CycleWeight": 0.725942724521511,
+        "EmptyTableauWeight": 1.2449985656905105,
+        "FaceUpTableauWeight": 0.4332709272828854,
+        "FaceDownTableauWeight": 0.34781224409565736,
+        "ConsecutiveFaceUpTableauWeight": 1.1393972090539806,
+        "FaceUpBottomCardTableauWeight": 1.3907764275499392,
+        "KingIsBottomCardTableauWeight": 1.0871916640067263,
+        "AceInTableauWeight": 1.0900159566328769,
+        "MoveCountWeight": 1.1121706896232892
+      }
+    }
+  },
+  {
+    "Generation": 7,
+    "BestFitness": -1,
+    "AverageFitness": -1,
+    "BestChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.8,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.389,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.442,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.072,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.743,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": 0.683,
+        "MoveCountWeight": 0.664
+      }
+    },
+    "AverageChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.199875,
+        "FoundationWeight": 2.743375,
+        "WasteWeight": 1.7108749999999997,
+        "StockWeight": -0.275875,
+        "CycleWeight": -0.34262499999999996,
+        "EmptyTableauWeight": -0.04387499999999999,
+        "FaceUpTableauWeight": 0.21087499999999998,
+        "FaceDownTableauWeight": -0.25975000000000004,
+        "ConsecutiveFaceUpTableauWeight": 0.50625,
+        "FaceUpBottomCardTableauWeight": -0.47887499999999983,
+        "KingIsBottomCardTableauWeight": -0.6101249999999999,
+        "AceInTableauWeight": 0.20725,
+        "MoveCountWeight": -0.613875
+      }
+    },
+    "StdChromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.590709122882949,
+        "FoundationWeight": 1.4226674079247856,
+        "WasteWeight": 0.23241430832520996,
+        "StockWeight": 1.0386119084761984,
+        "CycleWeight": 0.6159023432562758,
+        "EmptyTableauWeight": 0.8898258958919998,
+        "FaceUpTableauWeight": 0.5277108075722644,
+        "FaceDownTableauWeight": 0.3072461786348437,
+        "ConsecutiveFaceUpTableauWeight": 1.172766418102331,
+        "FaceUpBottomCardTableauWeight": 1.214626390235756,
+        "KingIsBottomCardTableauWeight": 1.4461911983354265,
+        "AceInTableauWeight": 0.8958151515319919,
+        "MoveCountWeight": 1.2471416963257567
+      }
+    }
+  }
+]

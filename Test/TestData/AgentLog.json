@@ -1,0 +1,1730 @@
+[
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -0.01,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -1.558,
+        "FaceUpBottomCardTableauWeight": -0.625,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.445,
+        "ConsecutiveFaceUpTableauWeight": 0.05,
+        "FaceUpBottomCardTableauWeight": 1.42,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1.441,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -0.01,
+        "StockWeight": -0.014,
+        "CycleWeight": -1.278,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 0.277,
+        "FaceUpBottomCardTableauWeight": 0.045,
+        "KingIsBottomCardTableauWeight": 1.155,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": -1.709
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -0.01,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -1.747,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -1.468,
+        "FaceUpBottomCardTableauWeight": 0.2,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": 0.564,
+        "MoveCountWeight": 1.346
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -0.01,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.82,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.052,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.782,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -0.323,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": -1.159,
+        "WasteWeight": -0.01,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 1.018,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.053,
+        "ConsecutiveFaceUpTableauWeight": -1.565,
+        "FaceUpBottomCardTableauWeight": 0.2,
+        "KingIsBottomCardTableauWeight": -1.336,
+        "AceInTableauWeight": -0.537,
+        "MoveCountWeight": -1.61
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": -1.518,
+        "WasteWeight": 0.755,
+        "StockWeight": -1.482,
+        "CycleWeight": -0.762,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -1.59,
+        "ConsecutiveFaceUpTableauWeight": 0.984,
+        "FaceUpBottomCardTableauWeight": 0.262,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": 0.359,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": -0.996,
+        "FoundationWeight": -1.667,
+        "WasteWeight": -1.67,
+        "StockWeight": 1.237,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -1.282,
+        "FaceUpBottomCardTableauWeight": 0.2,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -1.67,
+        "StockWeight": -0.021,
+        "CycleWeight": 1.466,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -1.282,
+        "FaceUpBottomCardTableauWeight": 0.2,
+        "KingIsBottomCardTableauWeight": 0.42,
+        "AceInTableauWeight": -0.323,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": -0.996,
+        "FoundationWeight": -1.667,
+        "WasteWeight": 0.674,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -1.747,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -1.541,
+        "FaceUpBottomCardTableauWeight": 0.2,
+        "KingIsBottomCardTableauWeight": -0.667,
+        "AceInTableauWeight": -0.889,
+        "MoveCountWeight": 1.346
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -0.01,
+        "StockWeight": -0.021,
+        "CycleWeight": -1.014,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -1.558,
+        "FaceUpBottomCardTableauWeight": -0.594,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -0.01,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -1.747,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -1.558,
+        "FaceUpBottomCardTableauWeight": -0.625,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": 0.564,
+        "MoveCountWeight": 1.346
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -0.524,
+        "StockWeight": -0.021,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -1.278,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.245,
+        "ConsecutiveFaceUpTableauWeight": 0.05,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1.441,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.848,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -1.747,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.782,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": 0.564,
+        "MoveCountWeight": 0.602
+      }
+    }
+  },
+  {
+    "Generation": 0,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -0.01,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.779,
+        "EmptyTableauWeight": 0.285,
+        "FaceUpTableauWeight": 0.052,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.782,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -0.323,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 1,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": -1.667,
+        "WasteWeight": 1.848,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -1.66,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -0.889,
+        "MoveCountWeight": 1.346
+      }
+    }
+  },
+  {
+    "Generation": 1,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -0.524,
+        "StockWeight": -0.021,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.245,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 1,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.095,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -0.524,
+        "StockWeight": -0.021,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": 1.827,
+        "AceInTableauWeight": 0.564,
+        "MoveCountWeight": 0.602
+      }
+    }
+  },
+  {
+    "Generation": 1,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": -0.524,
+        "StockWeight": -0.021,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.525,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": 0.2,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": -0.732
+      }
+    }
+  },
+  {
+    "Generation": 1,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.779,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.052,
+        "FaceDownTableauWeight": -0.713,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -0.323,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 1,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.36,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -1.278,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.245,
+        "ConsecutiveFaceUpTableauWeight": 0.05,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1.441,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 1,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.374,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.848,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -1.747,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.602
+      }
+    }
+  },
+  {
+    "Generation": 1,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.021,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.782,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1.441,
+        "MoveCountWeight": 0.602
+      }
+    }
+  },
+  {
+    "Generation": 2,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.021,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 1.363,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.245,
+        "ConsecutiveFaceUpTableauWeight": 0.362,
+        "FaceUpBottomCardTableauWeight": -0.782,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": -1.369,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 2,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": -1.75,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.779,
+        "EmptyTableauWeight": -2.041,
+        "FaceUpTableauWeight": 0.052,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -0.889,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 2,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": -0.773,
+        "WasteWeight": 1.848,
+        "StockWeight": -0.021,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.782,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -0.889,
+        "MoveCountWeight": -0.658
+      }
+    }
+  },
+  {
+    "Generation": 2,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": -0.901,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -1.747,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.072,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.602
+      }
+    }
+  },
+  {
+    "Generation": 2,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.021,
+        "CycleWeight": -0.74,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.052,
+        "FaceDownTableauWeight": -0.677,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -0.323,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 2,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.779,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.713,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": 0.034,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 2,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.021,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": 0.2,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": -1.441,
+        "MoveCountWeight": 0.602
+      }
+    }
+  },
+  {
+    "Generation": 2,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.052,
+        "FaceDownTableauWeight": -0.713,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.782,
+        "KingIsBottomCardTableauWeight": 2.059,
+        "AceInTableauWeight": -1.441,
+        "MoveCountWeight": 0.602
+      }
+    }
+  },
+  {
+    "Generation": 3,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": -0.901,
+        "FoundationWeight": -1.4,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.779,
+        "EmptyTableauWeight": 0.609,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.713,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": 0.034,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 3,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": -0.901,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.677,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 3,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": -0.901,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.285,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.713,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.602
+      }
+    }
+  },
+  {
+    "Generation": 3,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.019,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 0.315,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": 0.771,
+        "MoveCountWeight": -0.578
+      }
+    }
+  },
+  {
+    "Generation": 3,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 2.097,
+        "FoundationWeight": -0.773,
+        "WasteWeight": 1.848,
+        "StockWeight": -0.021,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.782,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -0.889,
+        "MoveCountWeight": -0.658
+      }
+    }
+  },
+  {
+    "Generation": 3,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": -1.75,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.779,
+        "EmptyTableauWeight": -2.143,
+        "FaceUpTableauWeight": 0.052,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": 0.383,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 3,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -1.834,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.743,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.632
+      }
+    }
+  },
+  {
+    "Generation": 3,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": -2.041,
+        "FaceUpTableauWeight": 0.052,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": 0.011,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 4,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": -0.901,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -1.834,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": -0.112
+      }
+    }
+  },
+  {
+    "Generation": 4,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.003,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.331,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": 0.049,
+        "AceInTableauWeight": 0.771,
+        "MoveCountWeight": 0
+      }
+    }
+  },
+  {
+    "Generation": 4,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.36,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.02,
+        "CycleWeight": -0.011,
+        "EmptyTableauWeight": -1.834,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -1.6,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.632
+      }
+    }
+  },
+  {
+    "Generation": 4,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 2.097,
+        "FoundationWeight": -0.773,
+        "WasteWeight": 1.412,
+        "StockWeight": -1.637,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": -0.889,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 4,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.038,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.743,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.632
+      }
+    }
+  },
+  {
+    "Generation": 4,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.021,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.782,
+        "KingIsBottomCardTableauWeight": 0.4,
+        "AceInTableauWeight": 0.011,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 4,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": -2.041,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.066,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.743,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.632
+      }
+    }
+  },
+  {
+    "Generation": 4,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.963,
+        "CycleWeight": -1.409,
+        "EmptyTableauWeight": 0.315,
+        "FaceUpTableauWeight": 0.525,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": 0.771,
+        "MoveCountWeight": -0.578
+      }
+    }
+  },
+  {
+    "Generation": 5,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": 0.763,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": -2.041,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -0.91,
+        "FaceUpBottomCardTableauWeight": 1.402,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 5,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.36,
+        "WasteWeight": 1.844,
+        "StockWeight": -0.019,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -1.834,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -1.6,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.632
+      }
+    }
+  },
+  {
+    "Generation": 5,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.389,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.465,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.072,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.743,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.632
+      }
+    }
+  },
+  {
+    "Generation": 5,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.131,
+        "FoundationWeight": -0.773,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.963,
+        "CycleWeight": -1.479,
+        "EmptyTableauWeight": 0.315,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": -0.889,
+        "MoveCountWeight": -0.578
+      }
+    }
+  },
+  {
+    "Generation": 5,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -1.439,
+        "EmptyTableauWeight": -2.041,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.066,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.743,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.632
+      }
+    }
+  },
+  {
+    "Generation": 5,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.36,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.02,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": -2.041,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.743,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": -1.538,
+        "MoveCountWeight": 0.632
+      }
+    }
+  },
+  {
+    "Generation": 5,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 1.815,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -1.637,
+        "CycleWeight": -1.339,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.525,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": -1.269,
+        "KingIsBottomCardTableauWeight": -1.876,
+        "AceInTableauWeight": 0.771,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 5,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 2.097,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -1.637,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.525,
+        "FaceDownTableauWeight": -0.264,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.78,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": -0.889,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 6,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": -0.773,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.963,
+        "CycleWeight": -1.479,
+        "EmptyTableauWeight": -2.041,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -0.91,
+        "FaceUpBottomCardTableauWeight": 1.402,
+        "KingIsBottomCardTableauWeight": -2.074,
+        "AceInTableauWeight": -0.889,
+        "MoveCountWeight": -1.705
+      }
+    }
+  },
+  {
+    "Generation": 6,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.844,
+        "StockWeight": 0.801,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -2.041,
+        "FaceUpTableauWeight": -0.644,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": -0.91,
+        "FaceUpBottomCardTableauWeight": -1.6,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 6,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 1.027,
+        "WasteWeight": 1.341,
+        "StockWeight": 0.763,
+        "CycleWeight": -1.339,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.525,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -0.91,
+        "FaceUpBottomCardTableauWeight": 1.402,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": 0.771,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 6,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -1.555,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.525,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -0.186,
+        "FaceUpBottomCardTableauWeight": 1.472,
+        "KingIsBottomCardTableauWeight": -1.876,
+        "AceInTableauWeight": 0.771,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 6,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": -0.909,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.412,
+        "StockWeight": -1.637,
+        "CycleWeight": -1.406,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": 0.791,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -1.206,
+        "KingIsBottomCardTableauWeight": -1.782,
+        "AceInTableauWeight": 0.771,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 6,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.389,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.465,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.072,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -1.6,
+        "KingIsBottomCardTableauWeight": -2.074,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": 0.664
+      }
+    }
+  },
+  {
+    "Generation": 6,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.138,
+        "FoundationWeight": 3.36,
+        "WasteWeight": 1.412,
+        "StockWeight": -0.326,
+        "CycleWeight": -1.479,
+        "EmptyTableauWeight": -2.041,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.713,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.821,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": -1.538,
+        "MoveCountWeight": -0.549
+      }
+    }
+  },
+  {
+    "Generation": 6,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.8,
+        "FoundationWeight": 3.36,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.389,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.442,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.072,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.743,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": 1.216,
+        "MoveCountWeight": 0.632
+      }
+    }
+  },
+  {
+    "Generation": 7,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": -0.881,
+        "FoundationWeight": -0.773,
+        "WasteWeight": 1.412,
+        "StockWeight": -1.555,
+        "CycleWeight": -1.342,
+        "EmptyTableauWeight": -2.041,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -0.91,
+        "FaceUpBottomCardTableauWeight": 1.402,
+        "KingIsBottomCardTableauWeight": -1.876,
+        "AceInTableauWeight": -0.889,
+        "MoveCountWeight": -1.705
+      }
+    }
+  },
+  {
+    "Generation": 7,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.341,
+        "StockWeight": 0.801,
+        "CycleWeight": -1.339,
+        "EmptyTableauWeight": 0.285,
+        "FaceUpTableauWeight": -0.644,
+        "FaceDownTableauWeight": -0.225,
+        "ConsecutiveFaceUpTableauWeight": -0.91,
+        "FaceUpBottomCardTableauWeight": -1.6,
+        "KingIsBottomCardTableauWeight": -1.975,
+        "AceInTableauWeight": 0.771,
+        "MoveCountWeight": 0.219
+      }
+    }
+  },
+  {
+    "Generation": 7,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.844,
+        "StockWeight": 0.801,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.3,
+        "FaceUpTableauWeight": -0.644,
+        "FaceDownTableauWeight": -0.75,
+        "ConsecutiveFaceUpTableauWeight": -0.91,
+        "FaceUpBottomCardTableauWeight": -1.206,
+        "KingIsBottomCardTableauWeight": -1.693,
+        "AceInTableauWeight": 0.771,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 7,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.389,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": -0.663,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.069,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -1.6,
+        "KingIsBottomCardTableauWeight": -2.074,
+        "AceInTableauWeight": -1,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 7,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.8,
+        "FoundationWeight": 3.36,
+        "WasteWeight": 2.066,
+        "StockWeight": 0.763,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.442,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.072,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": 1.402,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": 0.771,
+        "MoveCountWeight": -1.795
+      }
+    }
+  },
+  {
+    "Generation": 7,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.8,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.389,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.442,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.072,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.743,
+        "KingIsBottomCardTableauWeight": 0.38,
+        "AceInTableauWeight": 0.683,
+        "MoveCountWeight": 0.664
+      }
+    }
+  },
+  {
+    "Generation": 7,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.84,
+        "FoundationWeight": 3.36,
+        "WasteWeight": 1.756,
+        "StockWeight": -0.389,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.442,
+        "FaceUpTableauWeight": 0.475,
+        "FaceDownTableauWeight": -0.072,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.743,
+        "KingIsBottomCardTableauWeight": 1.616,
+        "AceInTableauWeight": 1.216,
+        "MoveCountWeight": 0.632
+      }
+    }
+  },
+  {
+    "Generation": 7,
+    "Fitness": -1,
+    "GamesWon": 0,
+    "MovesMade": 500,
+    "GamesPlayed": 1,
+    "Chromosome": {
+      "Weights": {
+        "LegalMoveWeight": 0.01,
+        "FoundationWeight": 3.2,
+        "WasteWeight": 1.756,
+        "StockWeight": -1.85,
+        "CycleWeight": -0.01,
+        "EmptyTableauWeight": 0.442,
+        "FaceUpTableauWeight": 0.5,
+        "FaceDownTableauWeight": -0.068,
+        "ConsecutiveFaceUpTableauWeight": 1.356,
+        "FaceUpBottomCardTableauWeight": -0.743,
+        "KingIsBottomCardTableauWeight": 0.361,
+        "AceInTableauWeight": -0.665,
+        "MoveCountWeight": 0.664
+      }
+    }
+  }
+]

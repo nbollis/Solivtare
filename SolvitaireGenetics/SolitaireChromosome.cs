@@ -33,6 +33,8 @@ public class SolitaireChromosome : Chromosome<SolitaireChromosome>
         MutableStatsByName[MoveCountWeightName] = GenerateRandomWeight();
     }
 
+    public SolitaireChromosome() : this(Random.Shared) { }
+
     public override SolitaireChromosome Clone()
     {
         var clone = new SolitaireChromosome(Random);

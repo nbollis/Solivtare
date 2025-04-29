@@ -16,13 +16,18 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome<
     private readonly object _agentLogLock = new();
     private readonly List<AgentLog> _agentLogBatch = new(); // In-memory batch for AgentLogs
 
-    public GeneticAlgorithmLogger(string outputDirectory)
+    public GeneticAlgorithmLogger(string outputDirectory, bool ensureUniquePath = false)
     {
         if (!Directory.Exists(outputDirectory))
             Directory.CreateDirectory(outputDirectory);
 
-        _generationLogFilePath = Path.Combine(outputDirectory, "GenerationalLog.json").GetUniqueFilePath();
-        _agentLogFilePath = Path.Combine(outputDirectory, "AgentLog.json").GetUniqueFilePath();
+        _generationLogFilePath = Path.Combine(outputDirectory, "GenerationalLog.json");
+        _agentLogFilePath = Path.Combine(outputDirectory, "AgentLog.json");
+        if (ensureUniquePath)
+        {
+            _generationLogFilePath = _generationLogFilePath.GetUniqueFilePath();
+            _agentLogFilePath = _agentLogFilePath.GetUniqueFilePath();
+        }
 
         _jsonOptions = new JsonSerializerOptions
         {
@@ -50,13 +55,14 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome<
     /// <summary>  
     /// Logs generational information, including best and average fitness and chromosomes.  
     /// </summary>  
-    public void LogGenerationInfo(int generation, double bestFitness, double averageFitness, TChromosome bestChromosome, TChromosome averageChromosome, TChromosome stdChromosome)
+    public void LogGenerationInfo(int generation, double bestFitness, double averageFitness, double stdFitness, TChromosome bestChromosome, TChromosome averageChromosome, TChromosome stdChromosome)
     {
         var generationLog = new GenerationLogDto
         {
             Generation = generation,
             BestFitness = bestFitness,
             AverageFitness = averageFitness,
+            StdFitness = stdFitness,
             BestChromosome = new ChromosomeDto { Weights = bestChromosome.MutableStatsByName },
             AverageChromosome = new ChromosomeDto { Weights = averageChromosome.MutableStatsByName },
             StdChromosome = new ChromosomeDto { Weights = stdChromosome.MutableStatsByName }
@@ -146,5 +152,63 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome<
             // Clear the in-memory batch
             _agentLogBatch.Clear();
         }
+    }
+
+    public List<AgentLog> GetAllAgentLogs()
+    {
+        lock (_agentLogLock)
+        {
+            lock (_agentLogLock)
+            {
+                if (!File.Exists(_agentLogFilePath))
+                    return new List<AgentLog>();
+                return JsonSerializer.Deserialize<List<AgentLog>>(File.ReadAllText(_agentLogFilePath), _jsonOptions) ?? new List<AgentLog>();
+            }
+        }
+    }
+
+    public List<GenerationLogDto> GetAllGenerationalLogDtos()
+    {
+        lock (_generationLogLock)
+        {
+            if (!File.Exists(_generationLogFilePath))
+                return new List<GenerationLogDto>();
+            return JsonSerializer.Deserialize<List<GenerationLogDto>>(File.ReadAllText(_generationLogFilePath), _jsonOptions) ?? new List<GenerationLogDto>(); ;
+        }
+    }
+
+    public List<TChromosome> LoadLastGeneration(out int generationNumber)
+    {
+        generationNumber = 0;
+        GenerationLogDto? lastGeneration = null;
+        lock (_generationLogLock)
+        {
+            if (!File.Exists(_generationLogFilePath))
+                return new List<TChromosome>();
+            var generations = JsonSerializer.Deserialize<List<GenerationLogDto>>(File.ReadAllText(_generationLogFilePath), _jsonOptions);
+            lastGeneration = generations?.LastOrDefault();
+            generationNumber = lastGeneration?.Generation ?? 0;
+        }
+
+        if (lastGeneration == null)
+            return new List<TChromosome>();
+
+        List<AgentLog> lastGenerationAgents = new();
+        lock (_agentLogLock)
+        {
+            if (!File.Exists(_agentLogFilePath))
+                return new List<TChromosome>();
+            lastGenerationAgents = JsonSerializer.Deserialize<List<AgentLog>>(File.ReadAllText(_agentLogFilePath), _jsonOptions) ?? new List<AgentLog>();
+        }
+
+        var lastGenerationChromosomes = new List<TChromosome>();
+        foreach (var agentLog in lastGenerationAgents.Where(p => p.Generation == lastGeneration.Generation))
+        {
+            var chromosome = Activator.CreateInstance<TChromosome>();
+            chromosome.MutableStatsByName = agentLog.Chromosome.Weights;
+            lastGenerationChromosomes.Add(chromosome);
+        }
+
+        return lastGenerationChromosomes;
     }
 }
