@@ -83,10 +83,19 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
 
         // Evaluate fitness in parallel
         var fitnessResults = new ConcurrentDictionary<TChromosome, double>();
-        Parallel.ForEach(newPopulation, chromosome =>
+        // Split the population into ranges for parallel processing
+        int rangeSize = (int)Math.Ceiling((double)newPopulation.Count / Environment.ProcessorCount);
+        Parallel.For(0, Environment.ProcessorCount, rangeIndex =>
         {
-            double fitnessValue = GetFitness(chromosome);
-            fitnessResults[chromosome] = fitnessValue;
+            int start = rangeIndex * rangeSize;
+            int end = Math.Min(start + rangeSize, newPopulation.Count);
+
+            for (int i = start; i < end; i++)
+            {
+                var chromosome = newPopulation[i];
+                double fitnessValue = GetFitness(chromosome);
+                fitnessResults[chromosome] = fitnessValue;
+            }
         });
 
         // Sort the new population by fitness (descending)
@@ -106,20 +115,29 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
     /// </summary>
     protected TChromosome TournamentSelection(List<TChromosome> population)
     {
-        var tournament = new ConcurrentBag<TChromosome>();
+        var tournamentList = new List<TChromosome>();
         var fitnessResults = new ConcurrentDictionary<TChromosome, double>();
 
-        // Select random chromosomes for the tournament in parallel  
+        // Select random chromosomes for the tournament  
         for (int i = 0; i < TournamentSize; i++)
         {
-            tournament.Add(population[Random.Next(population.Count)]);
+            tournamentList.Add(population[Random.Next(population.Count)]);
         }
 
-        // Calculate fitness for each chromosome in the tournament in parallel  
-        Parallel.ForEach(tournament, chromosome =>
+        // Calculate fitness for each chromosome in the tournament using range-based parallelization  
+        
+        int rangeSize = (int)Math.Ceiling((double)tournamentList.Count / Environment.ProcessorCount);
+        Parallel.For(0, Environment.ProcessorCount, rangeIndex =>
         {
-            double fitnessValue = GetFitness(chromosome);
-            fitnessResults[chromosome] = fitnessValue;
+            int start = rangeIndex * rangeSize;
+            int end = Math.Min(start + rangeSize, tournamentList.Count);
+
+            for (int i = start; i < end; i++)
+            {
+                var chromosome = tournamentList[i];
+                double fitnessValue = GetFitness(chromosome);
+                fitnessResults[chromosome] = fitnessValue;
+            }
         });
 
         // Return the chromosome with the highest fitness  

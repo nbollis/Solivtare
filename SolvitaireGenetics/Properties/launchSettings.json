@@ -2,7 +2,7 @@
   "profiles": {
     "SolvitaireGenetics": {
       "commandName": "Project",
-      "commandLineArgs": "-o \"A:\\Projects and Original Works\\Solvitaire\\Genetics\" -d \"A:\\Projects and Original Works\\Solvitaire\\WinnableDeals.json\" -p 64 -g 20 -t 4 -c 20000 -l 20 -m 0.1 "
+      "commandLineArgs": "-o \"A:\\Projects and Original Works\\Solvitaire\\Genetics\" -d \"A:\\Projects and Original Works\\Solvitaire\\WinnableDeals.json\" -p 64 -g 20 -t 8 -c 20000 -l 20 -m 0.1 "
     }
   }
 }
