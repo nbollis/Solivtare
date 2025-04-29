@@ -1,7 +1,5 @@
 ﻿using CommandLine;
 using CommandLine.Text;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using SolvitaireCore;
 using SolvitaireIO;
 
@@ -33,22 +31,6 @@ namespace SolvitaireGenetics
             GeneticSolitaireAlgorithm algorithm;
             try
             {
-                // Set up dependency injection and logging
-                var logFilePath = Path.Combine(options.OutputDirectory ?? ".", "GeneticAlgorithm.log");
-                var serviceProvider = new ServiceCollection()
-                   .AddLogging(builder =>
-                   {
-                       builder.AddConsole(); // Optional: Log to the console  
-                       builder.AddFile(logFilePath); // Log to the output directory specified in options  
-                   })
-                   .BuildServiceProvider();
-
-                // Get the logger
-                var logger = serviceProvider.GetRequiredService<ILogger<GeneticSolitaireAlgorithm>>();
-
-                if (logger is null)
-                    throw new ArgumentNullException(nameof(logger));
-
                 DeckFile decksToUse = null!;
                 if (options.DecksToUse is not null)
                     decksToUse = new DeckFile(options.DecksToUse);
@@ -60,7 +42,7 @@ namespace SolvitaireGenetics
                         tournamentSize: options.TournamentSize,
                         maxMovesPerAgent: options.MaxMovesPerGeneration,
                         maxGamesPerAgent: options.MaxGamesPerGeneration,
-                        logger: logger,
+                        outputDirectory: options.OutputDirectory,
                         deckFile: decksToUse); // Pass the logger to the algorithm
             }
             catch (Exception ex)

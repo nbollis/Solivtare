@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using SolvitaireCore;
-using System.Text.Json;
+﻿using SolvitaireCore;
 using SolvitaireIO;
 
 namespace SolvitaireGenetics;
@@ -12,8 +10,8 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
     private readonly List<StandardDeck> _predefinedDecks = new();
 
     public GeneticSolitaireAlgorithm(int populationSize, double mutationRate, int tournamentSize, int maxMovesPerAgent, 
-        int maxGamesPerAgent, ILogger<GeneticSolitaireAlgorithm> logger, DeckFile? deckFile = null)
-        : base(populationSize, mutationRate, tournamentSize, logger)
+        int maxGamesPerAgent, string outputDirectory, DeckFile? deckFile = null)
+        : base(populationSize, mutationRate, tournamentSize, outputDirectory)
     {
         _maxMovesPerAgent = maxMovesPerAgent;
         _maxGamesPerAgent = maxGamesPerAgent;
@@ -96,6 +94,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
             fitness -= (double)movesPlayed / (gamesPlayed * _maxMovesPerAgent);
         }
 
+        Logger.AccumulateAgentLog(CurrentGeneration, chromosome, fitness, gamesWon, movesPlayed, gamesPlayed);
         chromosome.Fitness = fitness;
         return fitness;
     }

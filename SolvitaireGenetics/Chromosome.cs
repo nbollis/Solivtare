@@ -1,4 +1,6 @@
 ﻿using MathNet.Numerics;
+using MathNet.Numerics.Statistics;
+
 namespace SolvitaireGenetics;
 
 public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TChromosome>
@@ -92,6 +94,22 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
         {
             double averageValue = chromosomes.Average(chromosome => chromosome.MutableStatsByName[key]);
             firstChromosome.MutableStatsByName[key] = averageValue;
+        }
+
+        return firstChromosome;
+    }
+
+    public static TChromosome GetStandardDeviationChromosome(List<TChromosome> chromosomes)
+    {
+        if (chromosomes == null || chromosomes.Count == 0)
+            throw new ArgumentException("The list of chromosomes cannot be null or empty.", nameof(chromosomes));
+
+        var firstChromosome = chromosomes[0].Clone();
+        foreach (var key in firstChromosome.MutableStatsByName.Keys.ToList())
+        {
+            double stdValue = chromosomes.Select(chromosome => chromosome.MutableStatsByName[key])
+                .StandardDeviation();
+            firstChromosome.MutableStatsByName[key] = stdValue;
         }
 
         return firstChromosome;

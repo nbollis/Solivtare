@@ -1,25 +1,26 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
 namespace SolvitaireGenetics;
 
 public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromosome<TChromosome>
 {
-    protected readonly ILogger<GeneticAlgorithm<TChromosome>> Logger;
+    protected readonly GeneticAlgorithmLogger<TChromosome> Logger;
     protected readonly int PopulationSize;
     protected readonly Random Random = new();
     protected readonly double MutationRate;
     protected readonly int TournamentSize;
 
+    protected int CurrentGeneration { get; private set; }
+
     // Fitness cache
     private readonly Dictionary<int, double> _fitnessCache = new();
 
-    public GeneticAlgorithm(int populationSize, double mutationRate, int tournamentSize, ILogger<GeneticAlgorithm<TChromosome>> logger)
+    public GeneticAlgorithm(int populationSize, double mutationRate, int tournamentSize, string outputDirectory)
     {
         PopulationSize = populationSize;
         MutationRate = mutationRate;
         TournamentSize = tournamentSize;
-        Logger = logger;
+        Logger = new GeneticAlgorithmLogger<TChromosome>(outputDirectory);
     }
 
     protected abstract double EvaluateFitness(TChromosome chromosome);
@@ -46,16 +47,18 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
 
         for (int generation = 0; generation < generations; generation++)
         {
-            Logger.LogInformation($"Generation {generation}: Evaluating population...");
+            CurrentGeneration = generation;
+            Console.WriteLine($"Generation {generation}: Evaluating population...");
 
             population = EvolvePopulation(population, out List<double> fitness); 
 
             double bestFitness = fitness[0];
             TChromosome bestChromosome = population[0];
             TChromosome averageChromosome = Chromosome<TChromosome>.GetAverageChromosome(population);
+            TChromosome stdChromosome = Chromosome<TChromosome>.GetStandardDeviationChromosome(population);
 
-            Logger.LogInformation($"Generation {generation}: Best fitness = {bestFitness}, Average fitness = {fitness.Average()}");
-            Logger.LogInformation($"BestChromosome = {bestChromosome.SerializeWeights()}, AverageChromosome = {averageChromosome.SerializeWeights()}");
+            Logger.LogGenerationInfo(generation, bestFitness, fitness.Average(), bestChromosome, averageChromosome, stdChromosome);
+            Logger.FlushAgentLogs();
         }
 
         return population[0]; // Best chromosome
