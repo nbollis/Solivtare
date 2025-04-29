@@ -54,8 +54,9 @@ public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<D
 
     public object Clone()
     {
-        var clonedDeck = (Deck<TCard>)Activator.CreateInstance(GetType())!;
+        var clonedDeck = (Deck<TCard>)Activator.CreateInstance(GetType(), Seed)!;
         clonedDeck.Cards = [..Cards];
+        clonedDeck.Shuffles = Shuffles;
         return clonedDeck;
     }
 

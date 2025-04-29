@@ -6,11 +6,18 @@ namespace SolvitaireIO;
 
 public static class DeckSerializer
 {
-    private static readonly JsonSerializerOptions Options = new()
+    private static readonly JsonSerializerOptions VerboseOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.Never, // Ensure all properties are serialized
         WriteIndented = true,
     };
+    private static readonly JsonSerializerOptions MinimalisticOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.Never, // Ensure all properties are serialized
+        WriteIndented = true,
+    };
+
+    #region Verbose Card Serialization
 
     /// <summary>
     /// Serializes a deck into a JSON string.
@@ -24,10 +31,10 @@ public static class DeckSerializer
             Cards = deck.Cards.Cast<Card>().ToList()
         };
 
-        return JsonSerializer.Serialize(dto, Options);
+        return JsonSerializer.Serialize(dto, VerboseOptions);
     }
 
-    public static string SerializeStandardDecks(List<StandardDeck> decks) 
+    public static string SerializeStandardDecks(List<StandardDeck> decks)
     {
         var dtos = decks.Select(deck => new DeckDto
         {
@@ -35,7 +42,7 @@ public static class DeckSerializer
             Shuffles = deck.Shuffles,
             Cards = deck.Cards
         }).ToList();
-        return JsonSerializer.Serialize(dtos, Options);
+        return JsonSerializer.Serialize(dtos, VerboseOptions);
     }
 
     /// <summary>
@@ -43,7 +50,7 @@ public static class DeckSerializer
     /// </summary>
     public static StandardDeck DeserializeStandardDeck(string json)
     {
-        var dto = JsonSerializer.Deserialize<DeckDto>(json, Options)!;
+        var dto = JsonSerializer.Deserialize<DeckDto>(json, VerboseOptions)!;
 
         var deck = new StandardDeck(dto.Seed)
         {
@@ -100,11 +107,58 @@ public static class DeckSerializer
         return decks;
     }
 
+    #endregion
 
-    private class DeckDto
+    #region Minimalistic Card Serialization
+
+    public static string SerializeMinimalDeck(StandardDeck deck)
     {
-        public int Seed { get; set; }
-        public int Shuffles { get; set; }
-        public List<Card> Cards { get; set; }
+        var dto = new MinimizedDeckDto()
+        {
+            Seed = deck.Seed,
+            Shuffles = deck.Shuffles
+        };
+        return JsonSerializer.Serialize(dto, MinimalisticOptions);
     }
+
+    public static string SerializeMinimalDecks(List<StandardDeck> decks)
+    {
+        var dtos = decks.Select(deck => new MinimizedDeckDto
+        {
+            Seed = deck.Seed,
+            Shuffles = deck.Shuffles
+        }).ToList();
+        return JsonSerializer.Serialize(dtos, MinimalisticOptions);
+    }
+
+    public static StandardDeck DeserializeMinimalDeck(string json)
+    {
+        var dto = JsonSerializer.Deserialize<MinimizedDeckDto>(json, MinimalisticOptions)!;
+
+        var deck = new StandardDeck(dto.Seed);
+        for (int i = 0; i < dto.Shuffles; i++)
+        {
+            deck.Shuffle();
+        }
+
+        return deck;
+    }
+
+    public static List<StandardDeck> DeserializeMinimalDecks(string json)
+    {
+        var dtos = JsonSerializer.Deserialize<List<MinimizedDeckDto>>(json, MinimalisticOptions)!;
+        var decks = new List<StandardDeck>();
+        foreach (var dto in dtos)
+        {
+            var deck = new StandardDeck(dto.Seed);
+            for (int i = 0; i < dto.Shuffles; i++)
+            {
+                deck.Shuffle();
+            }
+            decks.Add(deck);
+        }
+        return decks;
+    }
+
+    #endregion
 }
