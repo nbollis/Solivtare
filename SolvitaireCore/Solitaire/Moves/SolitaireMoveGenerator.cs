@@ -22,24 +22,17 @@ public class SolitaireMoveGenerator
             if (!wastePile.IsEmpty)
             {
                 var topCard = wastePile.TopCard!;
-
                 // Waste → Foundation
-                foreach (var foundation in foundationPiles)
+                var targetFoundation = foundationPiles.FirstOrDefault(f => f.Suit == topCard.Suit && f.CanAddCard(topCard));
+                if (targetFoundation != null)
                 {
-                    if (foundation.CanAddCard(topCard))
-                    {
-                        validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, foundation.Index, topCard));
-                        break; // Only one foundation move is possible
-                    }
+                    validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, targetFoundation.Index, topCard));
                 }
 
                 // Waste → Tableau
-                foreach (var tableau in tableauPiles)
+                foreach (var tableau in tableauPiles.Where(t => t.CanAddCard(topCard)))
                 {
-                    if (tableau.CanAddCard(topCard))
-                    {
-                        validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, tableau.Index, topCard));
-                    }
+                    validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, tableau.Index, topCard));
                 }
             }
 
@@ -49,13 +42,10 @@ public class SolitaireMoveGenerator
                 if (tableau.IsEmpty) continue;
 
                 var topCard = tableau.TopCard!;
-                foreach (var foundation in foundationPiles)
+                var targetFoundation = foundationPiles.FirstOrDefault(f => f.Suit == topCard.Suit && f.CanAddCard(topCard));
+                if (targetFoundation != null)
                 {
-                    if (topCard.Suit == foundation.Suit && foundation.CanAddCard(topCard))
-                    {
-                        validMoves.Add(new SingleCardMove(tableau.Index, foundation.Index, topCard));
-                        break; // Only one foundation move is possible
-                    }
+                    validMoves.Add(new SingleCardMove(tableau.Index, targetFoundation.Index, topCard));
                 }
             }
 
@@ -77,29 +67,11 @@ public class SolitaireMoveGenerator
                         if (targetTableau.Index == tableau.Index)
                             continue;
 
-                        var topCard = cards[0];
-                        if (cards.Count == 1)
-                        {
-                            if (targetTableau.CanAddCard(topCard))
-                                validMoves.Add(new SingleCardMove(tableau.Index, targetTableau.Index, topCard));
-                            continue;
-                        }
-
-                        if (targetTableau.Count > 0)
-                        {
-                            if (targetTableau.CurrentColor == topCard.Color)
-                                continue; // Cannot move to a tableau of the same color
-                            if (targetTableau.CurrentRank != topCard.Rank + 1)
-                                continue; // Cannot move to a tableau of the same rank
-                        }
-                        else if (topCard.Rank != Rank.King)
-                            continue;
-
+                        // Use CanAddCards to validate the entire set of cards
                         if (targetTableau.CanAddCards(cards))
                         {
                             validMoves.Add(new MultiCardMove(tableau.Index, targetTableau.Index, cards));
                         }
-
                     }
                 }
             }
