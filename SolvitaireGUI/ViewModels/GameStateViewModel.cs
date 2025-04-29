@@ -1,5 +1,10 @@
 ﻿using SolvitaireCore;
 using System.Collections.ObjectModel;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Input;
+using SolvitaireIO;
+
 namespace SolvitaireGUI;
 
 public class GameStateViewModel : BaseViewModel
@@ -15,11 +20,14 @@ public class GameStateViewModel : BaseViewModel
     public BindablePile StockPile { get; } = new();
     public BindablePile WastePile { get; } = new();
 
+    public ICommand CopyGameStateAsJsonCommand { get; }
 
     public GameStateViewModel(SolitaireGameState gameState)
     {
         BaseGameState = gameState;
         Sync();
+
+        CopyGameStateAsJsonCommand = new RelayCommand(CopyGameStateAsJson);
     }
 
     public void ApplyMove(SolitaireMove move)
@@ -113,6 +121,22 @@ public class GameStateViewModel : BaseViewModel
             var bindable = new BindablePile();
             bindable.UpdateFromPile(pile);
             FoundationPiles.Add(bindable);
+        }
+    }
+
+    private void CopyGameStateAsJson()
+    {
+        try
+        {
+            // Assuming GameState is a property in your ViewModel
+            var gameStateJson = GameStateSerializer.Serialize(BaseGameState);
+
+            Clipboard.SetText(gameStateJson);
+            MessageBox.Show("GameState JSON copied to clipboard!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to copy GameState JSON: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

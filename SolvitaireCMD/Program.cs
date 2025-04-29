@@ -63,7 +63,7 @@ namespace MyApp
                         var agent = new MaxiMaxAgent(new SecondSolitaireEvaluator());
                         var moveGenerator = new SolitaireMoveGenerator();
 
-                        var referenceDeck = new StandardDeck(threadId * 12);
+                        var referenceDeck = new StandardDeck(threadId * 14);
                         while (true)
                         {
                             referenceDeck.Shuffle();
