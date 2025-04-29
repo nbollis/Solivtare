@@ -1,9 +1,7 @@
-using System.Text.Json;
-using NUnit.Framework;
 using SolvitaireCore;
 using SolvitaireIO;
 
-namespace Test.SolvitaireIO;
+namespace Test.IO;
 
 [TestFixture]
 public class DeckStatisticsFileTests

@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace SolvitaireCore;
 
 public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<SolitaireGameState>
@@ -355,9 +354,12 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
         {
             var foundationPile = FoundationPiles[index];
             var otherFoundationPile = other.FoundationPiles[index];
+
             if (foundationPile.Count != otherFoundationPile.Count)
                 return false;
-            if (foundationPile.TopCard != otherFoundationPile.TopCard)
+            if (foundationPile.Suit != otherFoundationPile.Suit)
+                return false;
+            if (foundationPile.Count > 0 && !foundationPile.TopCard!.Equals(otherFoundationPile.TopCard))
                 return false;
         }
 
@@ -365,11 +367,12 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
         {
             var tableauPile = TableauPiles[index];
             var otherTableauPile = other.TableauPiles[index];
+
             if (tableauPile.Count != otherTableauPile.Count)
                 return false;
             for (int i = 0; i < tableauPile.Count; i++)
             {
-                if (tableauPile[i] != otherTableauPile[i])
+                if (!tableauPile[i].Equals(otherTableauPile[i]))
                     return false;
             }
         }
@@ -424,7 +427,6 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
             return hash.ToHashCode();
         }
     }
-
 
     public SolitaireGameState Clone()
     {
