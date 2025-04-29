@@ -60,24 +60,11 @@ public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<D
         }
     }
 
-    public static string SerializeDeck(Deck<Card> deck)
+    public static string SerializeDeck(Deck<TCard> deck)
     {
-        var serializableCards = deck.Cards.Select(c => new SerializableCard(c.Suit, c.Rank, c.IsFaceUp)).ToList();
-        return JsonSerializer.Serialize(serializableCards, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(deck);
     }
 
-    public static StandardDeck DeserializeDeck(string json)
-    {
-        var cards = JsonSerializer.Deserialize<List<SerializableCard>>(json)!;
-        var deck = new StandardDeck(); // TODO: Make this work on non-standard decks. 
-        deck.Cards.Clear(); // Clear default ordering
-
-        foreach (var c in cards)
-        {
-            deck.Cards.Add(new Card(c.Suit, c.Rank, c.IsFaceUp));
-        }
-        return deck;
-    }
 
     public bool Equals(Deck<TCard>? other)
     {

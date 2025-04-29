@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SolvitaireCore;
+using System.Text.Json;
 
 namespace SolvitaireGenetics;
 
@@ -8,6 +9,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
     private readonly int _maxMovesPerAgent;
     private readonly int _maxGamesPerAgent;
     private readonly string? _serializedDecks;
+    private readonly List<StandardDeck> _predefinedDecks = new();
 
     public GeneticSolitaireAlgorithm(int populationSize, double mutationRate, int tournamentSize, int maxMovesPerAgent, int maxGamesPerAgent, ILogger<GeneticSolitaireAlgorithm> logger, string? serializedDecks = null)
         : base(populationSize, mutationRate, tournamentSize, logger)
@@ -15,6 +17,13 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
         _maxMovesPerAgent = maxMovesPerAgent;
         _maxGamesPerAgent = maxGamesPerAgent;
         _serializedDecks = serializedDecks;
+
+        // Deserialize predefined decks if provided
+        if (!string.IsNullOrEmpty(_serializedDecks))
+        {
+            _predefinedDecks = StandardDeck.DeserializeDecks(_serializedDecks);
+            _predefinedDecks.ForEach(p => p.FlipAllCardsDown());
+        }
     }
 
     protected override double EvaluateFitness(SolitaireChromosome chromosome)
@@ -22,7 +31,6 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
         // TODO: Make this more generic to support different agents. 
         var evaluator = new GeneticSolitaireEvaluator(chromosome);
         var agent = new MaxiMaxAgent(evaluator, 8);
-        var deck = new StandardDeck();
         var gameState = new SolitaireGameState();
 
         int movesPlayed = 0;
@@ -32,7 +40,18 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
         // multiple game loop
         while (gamesPlayed < _maxGamesPerAgent && movesPlayed < _maxMovesPerAgent)
         {
-            deck.Shuffle();
+            StandardDeck deck = null!;
+            // If we have predefined decks, use them in order. Otherwise create a new deck and shuffle it. 
+            if (_predefinedDecks.Count == 0 || gamesPlayed >= _predefinedDecks.Count)
+            {
+                deck ??= new StandardDeck();
+                deck.Shuffle();
+            }
+            else
+            {
+                deck = _predefinedDecks[gamesPlayed];
+            }
+
             agent.ResetState();
             gameState.Reset();
             gameState.DealCards(deck);
@@ -91,20 +110,11 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
         var best = Enumerable.Range(0, copiesOfBest).Select(_ => BestSoFar())
             .Select(b => b.Mutate(MutationRate));
 
-
         return Enumerable.Range(0, PopulationSize - copiesOfBest)
-            .Select(_ => Chromosome<SolitaireChromosome>.CreateRandom(Random)).Concat(best)
+            .Select(_ => Chromosome<SolitaireChromosome>.CreateRandom(Random)
+                .CrossOver(BestSoFar()) // Temporary? Cross over with best.
+            ).Concat(best)
             .ToList();
-    }
-
-    private Deck GetNextDeck(Deck previousDeck)
-    {
-        if (_serializedDecks is null)
-        {
-            previousDeck.Shuffle();
-            return previousDeck;
-        }
-
     }
 
     public static SolitaireChromosome BestSoFar()

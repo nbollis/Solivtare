@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace SolvitaireCore;
 
@@ -9,10 +10,14 @@ public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard
 {
     public virtual Suit Suit { get; } = suit;
     public virtual Rank Rank { get; } = rank;
-    public Color Color { get; } = suit.ToSuitColor();
+    [JsonIgnore] public Color Color { get; } = suit.ToSuitColor();
     public virtual bool IsFaceUp { get; set; } = isFaceUp;
 
     public override string ToString() => $"{Rank}{Suit.ToSuitCharacter()}";
+
+    public override int GetHashCode() => HashCode.Combine((int)Suit, (int)Rank);
+
+    public Card Clone() => new(Suit, Rank, IsFaceUp);
 
     public bool Equals(ICard? other)
     {
@@ -27,10 +32,6 @@ public class Card(Suit suit, Rank rank, bool isFaceUp = false) : ICard
         if (ReferenceEquals(this, obj)) return true;
         return obj is ICard card && Equals(card);
     }
-
-    public override int GetHashCode() => HashCode.Combine((int)Suit, (int)Rank);
-
-    public Card Clone() => new(Suit, Rank, IsFaceUp);
 }
 
 public class ObservableCard(Suit suit, Rank rank, bool isFaceUp = false)

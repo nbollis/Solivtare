@@ -4,11 +4,13 @@ namespace SolvitaireGenetics;
 
 public class CommandLineParameters
 {
-    [Option('i', "input", Required = false, HelpText = "Path to the input file.")]
-    public string? InputFile { get; set; } // TODO: add optional input file to allow algorithm to load a previous state
-
+    // TODO: add optional input file to allow algorithm to load a previous state
+    
     [Option('o', "output", Required = true, HelpText = "Directory for output files.")]
     public string? OutputDirectory { get; set; }
+
+    [Option('d', "deckjson", Required = false, HelpText = "Path to a json file of serialized decks to use.")]
+    public string? DecksToUse { get; set; }
 
     [Option('p', "population", Default = 100, HelpText = "Size of the population.")]
     public int PopulationSize { get; set; }

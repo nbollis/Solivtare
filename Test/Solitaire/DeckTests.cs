@@ -1,3 +1,4 @@
+using System.Text.Json;
 using SolvitaireCore;
 
 namespace Test.Solitaire;
@@ -75,7 +76,7 @@ public class DeckTests
     }
 
     [Test]
-    public void Deck_SerializeDeserialize_IsSame()
+    public void StandardDeck_SerializeDeserialize_IsSame()
     {
         var deck = new StandardDeck();
 
@@ -83,8 +84,37 @@ public class DeckTests
         {
             deck.Shuffle();
             var json = Deck.SerializeDeck(deck);
-            var deserialized = Deck.DeserializeDeck(json);
+            var deserialized = StandardDeck.DeserializeDeck(json);
             Assert.That(deck.Equals(deserialized));
+        }
+    }
+
+    [Test]
+    public void StandardDecks_SerializeDeserialize_GoofyWayOfAdding()
+    {
+        var deck = new StandardDeck();
+        List<StandardDeck> decsk = new();
+        for (int i = 0; i < 10; i++)
+        {
+            deck.Shuffle();
+            decsk.Add(deck.Clone() as StandardDeck);
+        }
+
+        var file = Path.Combine(Path.GetTempPath(), "decks.json");
+        File.WriteAllText(file, string.Empty);
+
+        foreach (var toSer in decsk)
+        {
+            File.AppendAllText(file, Deck.SerializeDeck(toSer));
+        }
+
+        var json = File.ReadAllText(file);
+        var decks = StandardDeck.DeserializeDecks(json);
+
+        Assert.That(decks.Count, Is.EqualTo(decsk.Count));
+        for (int i = 0; i < decsk.Count; i++)
+        {
+            Assert.That(decks[i].Equals(decsk[i]));
         }
     }
 }
