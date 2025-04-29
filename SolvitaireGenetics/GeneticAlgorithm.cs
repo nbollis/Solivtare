@@ -105,7 +105,7 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
             .ToList();
 
         // Cache fitness values for the new population
-        fitness.AddRange(fitnessResults.Values);
+        fitness.AddRange(fitnessResults.Values.OrderByDescending(kvp => kvp));
 
         return newPopulation;
     }

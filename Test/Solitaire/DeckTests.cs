@@ -1,5 +1,6 @@
 using System.Text.Json;
 using SolvitaireCore;
+using SolvitaireIO;
 
 namespace Test.Solitaire;
 
@@ -83,14 +84,14 @@ public class DeckTests
         for (int i = 0; i < 10; i++)
         {
             deck.Shuffle();
-            var json = Deck.SerializeDeck(deck);
-            var deserialized = StandardDeck.DeserializeDeck(json);
+            var json = DeckSerializer.SerializeDeck(deck);
+            var deserialized = DeckSerializer.DeserializeStandardDeck(json);
             Assert.That(deck.Equals(deserialized));
         }
     }
 
     [Test]
-    public void StandardDecks_SerializeDeserialize_GoofyWayOfAdding()
+    public void StandardDecks_SerializeDeserialize()
     {
         var deck = new StandardDeck();
         List<StandardDeck> decsk = new();
@@ -103,18 +104,30 @@ public class DeckTests
         var file = Path.Combine(Path.GetTempPath(), "decks.json");
         File.WriteAllText(file, string.Empty);
 
-        foreach (var toSer in decsk)
-        {
-            File.AppendAllText(file, Deck.SerializeDeck(toSer));
-        }
+        File.AppendAllText(file, DeckSerializer.SerializeStandardDecks(decsk));
+        
 
         var json = File.ReadAllText(file);
-        var decks = StandardDeck.DeserializeDecks(json);
+        var decks = DeckSerializer.DeserializeStandardDecks(json);
 
         Assert.That(decks.Count, Is.EqualTo(decsk.Count));
         for (int i = 0; i < decsk.Count; i++)
         {
             Assert.That(decks[i].Equals(decsk[i]));
         }
+    }
+
+    [Test]
+    public void SerializeDeck_ShouldIncludeSeedAndShuffles()
+    {
+        // Arrange
+        var deck = new StandardDeck(42);
+
+        // Act
+        var json = DeckSerializer.SerializeDeck(deck);
+
+        // Assert
+        Assert.That(json, Does.Contain("\"Seed\": 42"));
+        Assert.That(json, Does.Contain("\"Shuffles\": 0"));
     }
 }

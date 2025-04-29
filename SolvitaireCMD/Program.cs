@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using SolvitaireCore;
+using SolvitaireIO;
 
 namespace MyApp
 {
@@ -45,8 +46,9 @@ namespace MyApp
             }
             else
             {
-                int threads = 4;
+                int threads = 10;
                 string path = @"A:\Projects and Original Works\Solvitaire\WinnableDeals.json";
+                var deckFile = new DeckFile(path);
                 Console.WriteLine($"Starting simulation with {threads} threads...");
 
                 if (!File.Exists(path))
@@ -67,22 +69,20 @@ namespace MyApp
                         {
                             referenceDeck.Shuffle();
 
-                            RunGameWithAgentUntilWinOrTimeout(referenceDeck, agent, moveGenerator, path, threadId);
+                            RunGameWithAgentUntilWinOrTimeout(referenceDeck, agent, moveGenerator, deckFile, threadId);
                         }
                     });
                 }
 
                 Task.WaitAll(workers); // This blocks forever unless you later add cancellation  
             }
-
-            
         }
 
-        public static void RunGameWithAgentUntilWinOrTimeout(Deck deck, SolitaireAgent agent,
-            SolitaireMoveGenerator moveGenerator, string logFilePath, int threadId, int timeout = 500)
+        public static void RunGameWithAgentUntilWinOrTimeout(StandardDeck deck, SolitaireAgent agent,
+            SolitaireMoveGenerator moveGenerator, DeckFile winningDealLog, int threadId, int timeout = 400)
         {
             var gameState = new SolitaireGameState();
-            gameState.DealCards(deck as StandardDeck);
+            gameState.DealCards(deck);
 
             var stopwatch = Stopwatch.StartNew();
             int moveCount = 0;
@@ -121,11 +121,9 @@ namespace MyApp
 
             if (gameState.IsGameWon)
             {
-                var json = Deck.SerializeDeck(deck);
-
-                lock (logFilePath) // Ensure only one thread writes at a time  
+                lock (winningDealLog) // Ensure only one thread writes at a time  
                 {
-                    File.AppendAllText(logFilePath, json + Environment.NewLine);
+                    winningDealLog.AddDeck(deck);
                 }
 
                 Console.WriteLine($"✅ Thread {threadId}: WIN after {moveCount} moves");

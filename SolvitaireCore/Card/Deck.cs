@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SolvitaireCore;
 
@@ -8,12 +9,22 @@ public abstract class Deck(int seed = 42) : Deck<Card>(seed) { }
 public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<Deck<TCard>> where TCard : class, ICard
 {
     protected Random Random { get; }
+
+    [JsonPropertyName("seed")]
+    public int Seed { get; set; }
+
+    [JsonPropertyName("shuffles")]
+    public int Shuffles { get; set; }
+
+    [JsonPropertyName("cards")]
     public List<TCard> Cards { get; private set; }
 
     protected Deck(int seed = 42)
     {
         Random = new Random(seed);
         Cards = new List<TCard>();
+        Seed = seed;
+        Shuffles = 0;
     }
 
     public TCard DrawCard(int toDraw = 1)
@@ -37,6 +48,8 @@ public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<D
             int k = Random.Next(n--);
             (Cards[k], Cards[n]) = (Cards[n], Cards[k]);
         }
+
+        Shuffles++;
     }
 
     public object Clone()
@@ -60,17 +73,13 @@ public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<D
         }
     }
 
-    public static string SerializeDeck(Deck<TCard> deck)
-    {
-        return JsonSerializer.Serialize(deck);
-    }
-
-
     public bool Equals(Deck<TCard>? other)
     {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
         if (Cards.Count != other.Cards.Count) return false;
+        if (Seed != other.Seed) return false;
+        if (Shuffles != other.Shuffles) return false;
         for (int i = 0; i < Cards.Count; i++)
         {
             ICard thisCard = Cards[i];
@@ -98,3 +107,4 @@ public abstract class Deck<TCard> : ICloneable, IEnumerable<TCard>, IEquatable<D
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
+

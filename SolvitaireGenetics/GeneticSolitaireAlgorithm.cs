@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SolvitaireCore;
 using System.Text.Json;
+using SolvitaireIO;
 
 namespace SolvitaireGenetics;
 
@@ -8,20 +9,19 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
 {
     private readonly int _maxMovesPerAgent;
     private readonly int _maxGamesPerAgent;
-    private readonly string? _serializedDecks;
     private readonly List<StandardDeck> _predefinedDecks = new();
 
-    public GeneticSolitaireAlgorithm(int populationSize, double mutationRate, int tournamentSize, int maxMovesPerAgent, int maxGamesPerAgent, ILogger<GeneticSolitaireAlgorithm> logger, string? serializedDecks = null)
+    public GeneticSolitaireAlgorithm(int populationSize, double mutationRate, int tournamentSize, int maxMovesPerAgent, 
+        int maxGamesPerAgent, ILogger<GeneticSolitaireAlgorithm> logger, DeckFile? deckFile = null)
         : base(populationSize, mutationRate, tournamentSize, logger)
     {
         _maxMovesPerAgent = maxMovesPerAgent;
         _maxGamesPerAgent = maxGamesPerAgent;
-        _serializedDecks = serializedDecks;
 
         // Deserialize predefined decks if provided
-        if (!string.IsNullOrEmpty(_serializedDecks))
+        if (deckFile is not null)
         {
-            _predefinedDecks = StandardDeck.DeserializeDecks(_serializedDecks);
+            _predefinedDecks = deckFile.ReadAllDecks();
             _predefinedDecks.ForEach(p => p.FlipAllCardsDown());
         }
     }

@@ -3,6 +3,7 @@ using CommandLine.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SolvitaireCore;
+using SolvitaireIO;
 
 namespace SolvitaireGenetics
 {
@@ -48,9 +49,9 @@ namespace SolvitaireGenetics
                 if (logger is null)
                     throw new ArgumentNullException(nameof(logger));
 
-                string? decksJson = null!;
+                DeckFile decksToUse = null!;
                 if (options.DecksToUse is not null)
-                    decksJson = File.ReadAllText(options.DecksToUse);
+                    decksToUse = new DeckFile(options.DecksToUse);
 
                 // Run the genetic algorithm
                 algorithm = new GeneticSolitaireAlgorithm(
@@ -60,7 +61,7 @@ namespace SolvitaireGenetics
                         maxMovesPerAgent: options.MaxMovesPerGeneration,
                         maxGamesPerAgent: options.MaxGamesPerGeneration,
                         logger: logger,
-                        serializedDecks: decksJson); // Pass the logger to the algorithm
+                        deckFile: decksToUse); // Pass the logger to the algorithm
             }
             catch (Exception ex)
             {

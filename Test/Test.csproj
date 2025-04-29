@@ -20,10 +20,15 @@
   <ItemGroup>
     <ProjectReference Include="..\SolvitaireCore\SolvitaireCore.csproj" />
     <ProjectReference Include="..\SolvitaireGenetics\SolvitaireGenetics.csproj" />
+    <ProjectReference Include="..\SolvitaireIO\SolvitaireIO.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="IO\" />
   </ItemGroup>
 
 </Project>
