@@ -33,7 +33,7 @@ public class SolitaireChromosomeTests
         var chromosome = new SolitaireChromosome(_random);
 
         // Act  
-        var clone = chromosome.Clone();
+        var clone = chromosome.Clone<SolitaireChromosome>();
 
         // Assert  
         Assert.That(clone, Is.Not.SameAs(chromosome));

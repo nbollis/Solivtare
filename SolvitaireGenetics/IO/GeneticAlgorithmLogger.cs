@@ -7,7 +7,7 @@ namespace SolvitaireGenetics;
 /// Logs Generational and Agent specific data throughout a genetic algorithm run.   
 /// </summary>  
 /// <typeparam name="TChromosome"></typeparam>  
-public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome<TChromosome>
+public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
 {
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly string _generationLogFilePath;

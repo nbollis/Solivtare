@@ -1,9 +1,10 @@
 ﻿using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
+using System;
 
 namespace SolvitaireGenetics;
 
-public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TChromosome>
+public abstract class Chromosome
 {
     private const int RoundingPlace = 3;
     protected readonly Random Random;
@@ -21,11 +22,28 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
         MutableStatsByName = new();
     }
 
-    public TChromosome CrossOver(TChromosome other, double crossoverRate = 0.5) => Crossover(this, other, crossoverRate);
+    public virtual TChromosome Clone<TChromosome>()
+        where TChromosome : Chromosome
+    {
+        var clone = (TChromosome)Activator.CreateInstance(typeof(TChromosome), Random);
+        foreach (var kvp in MutableStatsByName)
+        {
+            clone.MutableStatsByName[kvp.Key] = kvp.Value;
+        }
+        return clone;
+    }
 
-    public TChromosome Mutate(double mutationRate) => Mutate(this, mutationRate);
+    public TChromosome CrossOver<TChromosome>(TChromosome other) 
+        where TChromosome : Chromosome
+    {
+        return Crossover((TChromosome)this, other);
+    }
 
-    public abstract TChromosome Clone();
+    public TChromosome Mutate<TChromosome>(double mutationRate)
+        where TChromosome : Chromosome
+    {
+        return Mutate((TChromosome)this, mutationRate);
+    }
 
     /// <summary>
     /// Creates a random weight from -2 to 2. 
@@ -33,7 +51,7 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
     /// <returns></returns>
     protected double GenerateRandomWeight() => (Random.NextDouble() * 4 - 2).Round(RoundingPlace);
 
-    public static TChromosome CreateRandom(Random random)
+    public static TChromosome CreateRandom<TChromosome>(Random random)
     {
         return (TChromosome)Activator.CreateInstance(typeof(TChromosome), random)!;
     }
@@ -45,9 +63,10 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
     /// <param name="chromosome"></param>
     /// <param name="mutationRate"></param>
     /// <returns></returns>
-    public static TChromosome Mutate(Chromosome<TChromosome> chromosome, double mutationRate)
+    public static TChromosome Mutate<TChromosome>(TChromosome chromosome, double mutationRate) 
+        where TChromosome : Chromosome
     {
-        var newChromosome = chromosome.Clone();
+        var newChromosome = chromosome.Clone<TChromosome>();
 
         foreach (var kvp in chromosome.MutableStatsByName)
         {
@@ -76,9 +95,10 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
     /// <param name="parent1"></param>
     /// <param name="parent2"></param>
     /// <returns></returns>
-    public static TChromosome Crossover(Chromosome<TChromosome> parent1, Chromosome<TChromosome> parent2, double crossoverRate = 0.5)
+    public static TChromosome Crossover<TChromosome>(TChromosome parent1, TChromosome parent2, double crossoverRate = 0.5)
+        where TChromosome : Chromosome
     {
-        var child = parent1.Clone();
+        var child = parent1.Clone<TChromosome>();
         foreach (var kvp in parent1.MutableStatsByName)
         {
             if (parent1.Random.NextDouble() < crossoverRate)
@@ -89,12 +109,13 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
         return child;
     }
 
-    public static TChromosome GetAverageChromosome(List<TChromosome> chromosomes)
+    public static TChromosome GetAverageChromosome<TChromosome>(List<TChromosome> chromosomes) 
+        where TChromosome : Chromosome
     {
         if (chromosomes == null || chromosomes.Count == 0)
             throw new ArgumentException("The list of chromosomes cannot be null or empty.", nameof(chromosomes));
 
-        var firstChromosome = chromosomes[0].Clone();
+        var firstChromosome = chromosomes[0].Clone<TChromosome>();
         foreach (var key in firstChromosome.MutableStatsByName.Keys.ToList())
         {
             double averageValue = chromosomes.Average(chromosome => chromosome.MutableStatsByName[key]);
@@ -104,12 +125,13 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
         return firstChromosome;
     }
 
-    public static TChromosome GetStandardDeviationChromosome(List<TChromosome> chromosomes)
+    public static TChromosome GetStandardDeviationChromosome<TChromosome>(List<TChromosome> chromosomes) 
+        where TChromosome : Chromosome
     {
         if (chromosomes == null || chromosomes.Count == 0)
             throw new ArgumentException("The list of chromosomes cannot be null or empty.", nameof(chromosomes));
 
-        var firstChromosome = chromosomes[0].Clone();
+        var firstChromosome = chromosomes[0].Clone<TChromosome>();
         foreach (var key in firstChromosome.MutableStatsByName.Keys.ToList())
         {
             double stdValue = chromosomes.Select(chromosome => chromosome.MutableStatsByName[key])
@@ -120,24 +142,24 @@ public abstract class Chromosome<TChromosome> where TChromosome : Chromosome<TCh
         return firstChromosome;
     }
 
-    /// <summary>
-    /// Serializes the weights to a JSON string.
-    /// </summary>
-    /// <returns>A JSON string representing the weights.</returns>
-    public string SerializeWeights()
-    {
-        return System.Text.Json.JsonSerializer.Serialize(MutableStatsByName);
-    }
+    ///// <summary>
+    ///// Serializes the weights to a JSON string.
+    ///// </summary>
+    ///// <returns>A JSON string representing the weights.</returns>
+    //public string SerializeWeights()
+    //{
+    //    return System.Text.Json.JsonSerializer.Serialize(MutableStatsByName);
+    //}
 
-    /// <summary>
-    /// Deserializes the weights from a JSON string.
-    /// </summary>
-    /// <param name="json">The JSON string representing the weights.</param>
-    public void DeserializeWeights(string json)
-    {
-        MutableStatsByName = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, double>>(json)
-                             ?? new Dictionary<string, double>();
-    }
+    ///// <summary>
+    ///// Deserializes the weights from a JSON string.
+    ///// </summary>
+    ///// <param name="json">The JSON string representing the weights.</param>
+    //public void DeserializeWeights(string json)
+    //{
+    //    MutableStatsByName = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, double>>(json)
+    //                         ?? new Dictionary<string, double>();
+    //}
 
     public override int GetHashCode()
     {

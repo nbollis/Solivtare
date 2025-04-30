@@ -3,7 +3,7 @@ using SolvitaireIO;
 
 namespace SolvitaireGenetics;
 
-public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
+public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, SolitaireGeneticAlgorithmParameters>
 {
     private readonly int _maxMovesPerAgent;
     private readonly int _maxGamesPerAgent;
@@ -12,7 +12,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
     private readonly SolitaireGeneticAlgorithmParameters _parameters;
 
     public GeneticSolitaireAlgorithm(SolitaireGeneticAlgorithmParameters parameters)
-        : base(parameters.PopulationSize, parameters.MutationRate, parameters.TournamentSize, parameters.OutputDirectory)
+        : base(parameters)
     {
         _parameters = parameters;
         _maxMovesPerAgent = parameters.MaxMovesPerGeneration;
@@ -125,10 +125,10 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
 
         int copiesOfBest = PopulationSize / 10;
         var best = Enumerable.Range(0, copiesOfBest).Select(_ => BestSoFar())
-            .Select(b => b.Mutate(MutationRate));
+            .Select(b => Chromosome.Mutate(b, MutationRate));
 
         return Enumerable.Range(0, PopulationSize - copiesOfBest)
-            .Select(_ => Chromosome<SolitaireChromosome>.CreateRandom(Random)
+            .Select(_ => Chromosome.CreateRandom<SolitaireChromosome>(Random)
                 .CrossOver(BestSoFar()) // Temporary? Cross over with best.
             ).Concat(best)
             .ToList();

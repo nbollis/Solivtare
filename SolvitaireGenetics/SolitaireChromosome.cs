@@ -1,6 +1,6 @@
 ﻿namespace SolvitaireGenetics;
 
-public class SolitaireChromosome : Chromosome<SolitaireChromosome>
+public class SolitaireChromosome : Chromosome
 {
     public const string LegalMoveWeightName = "LegalMoveWeight";
     public const string FoundationWeightName = "FoundationWeight";
@@ -34,16 +34,6 @@ public class SolitaireChromosome : Chromosome<SolitaireChromosome>
     }
 
     public SolitaireChromosome() : this(Random.Shared) { }
-
-    public override SolitaireChromosome Clone()
-    {
-        var clone = new SolitaireChromosome(Random);
-        foreach (var kvp in MutableStatsByName)
-        {
-            clone.MutableStatsByName[kvp.Key] = kvp.Value;
-        }
-        return clone;
-    }
 
     public double GetWeight(string weightName) => MutableStatsByName.TryGetValue(weightName, out var value) ? value : 0;
     public void SetWeight(string weightName, double value) => MutableStatsByName[weightName] = value;

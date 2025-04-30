@@ -1,5 +1,6 @@
 ﻿
 using SolvitaireCore;
+using SolvitaireGenetics;
 
 namespace SolvitaireGUI;
 public class MainWindowViewModel : BaseViewModel
@@ -24,7 +25,7 @@ public class MainWindowViewModel : BaseViewModel
     {
         AgentPlayingViewModel = new AgentPlayingViewModel();
         GameInspectionTabViewModel = new();
-        GeneticAlgorithmTabViewModel = new();
+        GeneticAlgorithmTabViewModel = new(new SolitaireGeneticAlgorithmParameters());
     }
 }
 

@@ -7,7 +7,7 @@ namespace SolvitaireGUI;
 
 public class GeneticAlgorithmViewModel : BaseViewModel
 {
-    public SolitaireGeneticAlgorithmParametersViewModel Parameters { get; set; }
+    public GeneticAlgorithmParameters Parameters { get; set; }
     private bool _isAlgorithmRunning;
     public bool IsAlgorithmRunning
     {
@@ -21,11 +21,10 @@ public class GeneticAlgorithmViewModel : BaseViewModel
 
     public ICommand RunAlgorithmCommand { get; }
 
-    public GeneticAlgorithmViewModel()
+    public GeneticAlgorithmViewModel(GeneticAlgorithmParameters parameters)
     {
-        Parameters = new SolitaireGeneticAlgorithmParametersViewModel();
-        RunAlgorithmCommand = new RelayCommand(RunAlgorithm); 
-
+        Parameters = parameters;
+        RunAlgorithmCommand = new RelayCommand(RunAlgorithm);
     }
 
     private async void RunAlgorithm()
@@ -37,11 +36,20 @@ public class GeneticAlgorithmViewModel : BaseViewModel
             // Collapse the ParametersExpander
             OnPropertyChanged(nameof(IsAlgorithmRunning));
 
-            // Create and run the genetic algorithm
-            var parameters = Parameters; // Access the parameters from the view model
-            var algorithm = new GeneticSolitaireAlgorithm(Parameters.GetParameters());
+            // Create and run the genetic algorithm using the factory
+            GeneticSolitaireAlgorithm? algorithm = null;
 
-            await Task.Run(() => algorithm.RunEvolution(parameters.Generations));
+            if (Parameters is SolitaireGeneticAlgorithmParameters solitaireParams)
+            {
+                algorithm = new GeneticSolitaireAlgorithm(solitaireParams);
+            }
+            else
+            {
+                MessageBox.Show("Invalid parameters provided for the Genetic Algorithm.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            await Task.Run(() => algorithm.RunEvolution(Parameters.Generations));
 
             MessageBox.Show("Genetic Algorithm completed successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -64,9 +72,8 @@ public class GeneticAlgorithmViewModel : BaseViewModel
             {
                 try
                 {
-                    Parameters =
-                        new SolitaireGeneticAlgorithmParametersViewModel(
-                            SolitaireGeneticAlgorithmParameters.LoadFromFile(filePath));
+                    // Dynamically load the correct parameter type, Update the Parameters property
+                    Parameters = GeneticAlgorithmParameters.LoadFromFile(filePath);
                     OnPropertyChanged(nameof(Parameters));
                 }
                 catch (Exception ex)
@@ -86,7 +93,7 @@ public class GeneticAlgorithmModel : GeneticAlgorithmViewModel
 {
     public static GeneticAlgorithmModel Instance => new();
 
-    public GeneticAlgorithmModel() : base()
+    public GeneticAlgorithmModel() : base(new SolitaireGeneticAlgorithmParameters())
     {
 
     }

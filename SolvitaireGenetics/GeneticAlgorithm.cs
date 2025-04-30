@@ -3,8 +3,11 @@ using MathNet.Numerics.Statistics;
 
 namespace SolvitaireGenetics;
 
-public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromosome<TChromosome>
+public abstract class GeneticAlgorithm<TChromosome, TParameters> 
+    where TChromosome : Chromosome 
+    where TParameters : GeneticAlgorithmParameters
 {
+    protected readonly TParameters Parameters;
     protected readonly GeneticAlgorithmLogger<TChromosome> Logger;
     protected readonly int PopulationSize;
     protected readonly Random Random = new();
@@ -16,13 +19,14 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
     // Fitness cache
     private readonly Dictionary<int, double> _fitnessCache = new();
 
-    protected GeneticAlgorithm(int populationSize, double mutationRate, int tournamentSize, string outputDirectory)
+    protected GeneticAlgorithm(TParameters parameters)
     {
         CurrentGeneration = 0;
-        PopulationSize = populationSize;
-        MutationRate = mutationRate;
-        TournamentSize = tournamentSize;
-        Logger = new GeneticAlgorithmLogger<TChromosome>(outputDirectory);
+        Parameters = parameters;
+        PopulationSize = parameters.PopulationSize;
+        MutationRate = parameters.MutationRate;
+        TournamentSize = parameters.TournamentSize;
+        Logger = new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory!);
     }
 
     protected abstract double EvaluateFitness(TChromosome chromosome);
@@ -62,8 +66,8 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
 
             double bestFitness = fitness[0];
             TChromosome bestChromosome = population[0];
-            TChromosome averageChromosome = Chromosome<TChromosome>.GetAverageChromosome(population);
-            TChromosome stdChromosome = Chromosome<TChromosome>.GetStandardDeviationChromosome(population);
+            TChromosome averageChromosome = Chromosome.GetAverageChromosome(population);
+            TChromosome stdChromosome = Chromosome.GetStandardDeviationChromosome(population);
 
             Logger.LogGenerationInfo(generation, bestFitness, fitness.Average(), fitness.StandardDeviation(), bestChromosome, averageChromosome, stdChromosome);
             FlushLogs();
@@ -86,8 +90,8 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
             var parent1 = TournamentSelection(currentPopulation);
             var parent2 = TournamentSelection(currentPopulation);
 
-            var child = Chromosome<TChromosome>.Crossover(parent1, parent2);
-            child = Chromosome<TChromosome>.Mutate(child, MutationRate);
+            var child = Chromosome.Crossover(parent1, parent2);
+            child = Chromosome.Mutate(child, MutationRate);
 
             newPopulation.Add(child);
         }
@@ -163,7 +167,7 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
     protected virtual List<TChromosome> InitializePopulation()
     {
         return Enumerable.Range(0, PopulationSize)
-            .Select(_ => Chromosome<TChromosome>.CreateRandom(Random))
+            .Select(_ => Chromosome.CreateRandom<TChromosome>(Random))
             .ToList();
     }
 
