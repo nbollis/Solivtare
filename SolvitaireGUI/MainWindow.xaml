@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SolvitaireGUI"
         mc:Ignorable="d"
         d:DataContext="{x:Static local:MainWindowModel.Instance}"
-        Title="MainWindow" Height="450" Width="1100">
+        Title="MainWindow" Height="500" Width="1100">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -21,8 +21,10 @@
             <TabItem Header="Game Inspection" DataContext="{Binding GameInspectionTabViewModel}" >
                 <local:GameStateInspectionView DataContext="{Binding }" />
             </TabItem>
-        </TabControl>
 
-        
+            <TabItem Header="Genetic Algorithm" DataContext="{Binding GeneticAlgorithmTabViewModel}">
+                <local:GeneticAlgorithmTabView DataContext="{Binding }"/>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

@@ -1,0 +1,106 @@
+﻿<UserControl x:Class="SolvitaireGUI.GeneticAlgorithmTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SolvitaireGUI"
+             d:DataContext="{x:Static local:GeneticAlgorithmModel.Instance}"
+             mc:Ignorable="d" 
+             Name="GeneticsTab"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Expander Name="ParametersExpander" Grid.Column="0" Margin="10" Header="Parameters" ExpandDirection="Right"
+                  IsExpanded="{Binding IsAlgorithmRunning, Converter={StaticResource InverseBooleanConverter}}" 
+                  AllowDrop="True"
+                  Drop="ParametersExpander_OnDrop"
+                  DragOver="ParametersExpander_DragOver">
+            <Grid DataContext="{Binding Parameters}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200" />
+                    <!-- Label column -->
+                    <ColumnDefinition Width="*" />
+                    <!-- Input column -->
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <!-- Spacer -->
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <!-- Buttons -->
+                </Grid.RowDefinitions>
+
+                <!-- Output Directory -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Output Directory:" VerticalAlignment="Center" Margin="5" />
+                <TextBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" 
+                         Text="{Binding OutputDirectory}" Margin="5"
+                         Style="{StaticResource TextBoxStyle}" Width="140"/>
+
+                <!-- Decks to Use -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Decks to Use:" VerticalAlignment="Center" Margin="5" />
+                <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right"
+                         Text="{Binding DecksToUse}" Margin="5"
+                         Style="{StaticResource TextBoxStyle}" Width="140" />
+
+                <!-- Population Size -->
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Population Size:" VerticalAlignment="Center" Margin="5" />
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding PopulationSize}" Margin="5"
+                         Style="{StaticResource TextBoxStyle}" />
+
+                <!-- Generations -->
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Generations:" VerticalAlignment="Center" Margin="5" />
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Generations}" Margin="5"
+                         Style="{StaticResource TextBoxStyle}" />
+
+                <!-- Mutation Rate -->
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Mutation Rate:" VerticalAlignment="Center" Margin="5" />
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding MutationRate}" Margin="5"
+                         Style="{StaticResource TextBoxStyle}" />
+
+                <!-- Tournament Size -->
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Tournament Size:" VerticalAlignment="Center" Margin="5" />
+                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding TournamentSize}" Margin="5"
+                         Style="{StaticResource TextBoxStyle}" />
+
+                <!-- Max Moves Per Generation -->
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="Max Moves Per Generation:" VerticalAlignment="Center" Margin="5" />
+                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding MaxMovesPerGeneration}" Margin="5"
+                         Style="{StaticResource TextBoxStyle}" />
+
+                <!-- Max Games Per Generation -->
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="Max Games Per Generation:" VerticalAlignment="Center" Margin="5" />
+                <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding MaxGamesPerGeneration}" Margin="5"
+                         Style="{StaticResource TextBoxStyle}" />
+
+                <!-- Buttons -->
+                <Button Grid.Column="0" Grid.Row="10" Grid.ColumnSpan="2" Content="Run Algorithm" Style="{StaticResource RoundedButtonStyle}"
+                        Background="{StaticResource GreenAccentColor}" Width="120"
+                        Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.RunAlgorithmCommand}" 
+                        Margin="5" />
+
+                <StackPanel Grid.Column="0" Grid.Row="11" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                    <Button Content="Save Params" Command="{Binding SaveParametersCommand}" 
+                            Style="{StaticResource RoundedButtonStyle}" Margin="5" />
+                    <Button Content="Load Params" Command="{Binding LoadParametersCommand}"
+                            Style="{StaticResource RoundedButtonStyle}" Margin="5" />
+                </StackPanel>
+            </Grid>
+        </Expander>
+
+    </Grid>
+</UserControl>

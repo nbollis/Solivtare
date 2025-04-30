@@ -10,7 +10,11 @@
 
         <!-- Colors -->
         <SolidColorBrush x:Key="ButtonColor" Color="#78C2D9" />
+        <SolidColorBrush x:Key="GreenAccentColor" Color="#7be063" />
 
+        <!-- Converters -->
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
 
         <!-- Styles -->
         <Style x:Key="ButtonStyle" TargetType="Button">

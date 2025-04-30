@@ -47,15 +47,16 @@ public abstract class GeneticAlgorithm<TChromosome> where TChromosome : Chromoso
     {
         List<TChromosome> population = InitializePopulation();
 
+        Console.WriteLine($"Starting Evolution with {population.Count} chromosomes.");
+        Console.WriteLine($"Population Size: {PopulationSize}");
+        Console.WriteLine($"Mutation Rate: {MutationRate}");
+        Console.WriteLine($"Tournament Size: {TournamentSize}");
+        Console.WriteLine($"Output Directory: {Logger.OutputDirectory}");
         int generation = CurrentGeneration;
         for (; generation < generations; generation++)
         {
             CurrentGeneration = generation;
             Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation {generation}: Evaluating population...");
-            Console.WriteLine($"Population Size: {PopulationSize}");
-            Console.WriteLine($"Mutation Rate: {MutationRate}");
-            Console.WriteLine($"Tournament Size: {TournamentSize}");
-            Console.WriteLine($"Output Directory: {Logger.OutputDirectory}");
 
             population = EvolvePopulation(population, out List<double> fitness); 
 

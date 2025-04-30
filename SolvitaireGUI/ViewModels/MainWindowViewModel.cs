@@ -18,11 +18,13 @@ public class MainWindowViewModel : BaseViewModel
     }
 
     public GameInspectionTabViewModel GameInspectionTabViewModel { get; set; }
+    public GeneticAlgorithmViewModel GeneticAlgorithmTabViewModel { get; set; }
 
     public MainWindowViewModel()
     {
         AgentPlayingViewModel = new AgentPlayingViewModel();
         GameInspectionTabViewModel = new();
+        GeneticAlgorithmTabViewModel = new();
     }
 }
 
