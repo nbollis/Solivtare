@@ -27,7 +27,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     protected int CurrentGeneration { get;  set; }
 
     // Fitness cache
-    private readonly Dictionary<int, double> _fitnessCache = new();
+    private readonly ConcurrentDictionary<int, double> _fitnessCache = new();
 
     protected GeneticAlgorithm(TParameters parameters)
     {
@@ -46,16 +46,8 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         // Serialize the chromosome to use as a cache key
         int chromosomeKey = chromosome.GetHashCode();
 
-        // Check if the fitness is already cached
-        if (_fitnessCache.TryGetValue(chromosomeKey, out double cachedFitness))
-        {
-            return cachedFitness;
-        }
-
-        // If not cached, evaluate and store the fitness
-        double fitness = EvaluateFitness(chromosome);
-        _fitnessCache[chromosomeKey] = fitness;
-        return fitness;
+        // Use GetOrAdd to ensure thread-safe access to the cache
+        return _fitnessCache.GetOrAdd(chromosomeKey, _ => EvaluateFitness(chromosome));
     }
 
     public void RunEvolution(int generations)
