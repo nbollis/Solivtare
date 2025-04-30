@@ -21,10 +21,20 @@
     <ProjectReference Include="..\SolvitaireCore\SolvitaireCore.csproj" />
     <ProjectReference Include="..\SolvitaireGenetics\SolvitaireGenetics.csproj" />
     <ProjectReference Include="..\SolvitaireIO\SolvitaireIO.csproj" />
+    <ProjectReference Include="..\SolvitairePlotting\SolvitairePlotting.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestData\AgentLog.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestData\GenerationalLog.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

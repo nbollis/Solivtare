@@ -66,6 +66,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ScottPlot" Version="5.0.55" />
+    <PackageReference Include="ScottPlot.WPF" Version="5.0.55" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SolvitaireCore\SolvitaireCore.csproj" />
     <ProjectReference Include="..\SolvitaireGenetics\SolvitaireGenetics.csproj" />
     <ProjectReference Include="..\SolvitaireIO\SolvitaireIO.csproj" />
