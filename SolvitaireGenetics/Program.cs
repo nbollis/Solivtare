@@ -16,34 +16,23 @@ namespace SolvitaireGenetics
             int errorCode = 0;
 
             var parser = new Parser(with => with.HelpWriter = null);
-            var parserResult = parser.ParseArguments<CommandLineParameters>(args);
+            var parserResult = parser.ParseArguments<SolitaireGeneticAlgorithmParameters>(args);
 
             parserResult
-                .WithParsed<CommandLineParameters>(options => errorCode = Run(options))
+                .WithParsed<SolitaireGeneticAlgorithmParameters>(options => errorCode = Run(options))
                 .WithNotParsed(errs => errorCode = DisplayHelp(parserResult, errs));
 
             return errorCode;
         }
 
-        private static int Run(CommandLineParameters options)
+        private static int Run(SolitaireGeneticAlgorithmParameters options)
         {
             // Set it all up
             GeneticSolitaireAlgorithm algorithm;
             try
             {
-                IDeckFile decksToUse = null!;
-                if (options.DecksToUse is not null)
-                    decksToUse = new DeckStatisticsFile(options.DecksToUse);
-
-                // Run the genetic algorithm
-                algorithm = new GeneticSolitaireAlgorithm(
-                        populationSize: options.PopulationSize,
-                        mutationRate: options.MutationRate,
-                        tournamentSize: options.TournamentSize,
-                        maxMovesPerAgent: options.MaxMovesPerGeneration,
-                        maxGamesPerAgent: options.MaxGamesPerGeneration,
-                        outputDirectory: options.OutputDirectory ?? ".",
-                        deckFile: decksToUse); // Pass the logger to the algorithm
+                // Build the Genetic Algorithm
+                algorithm = new GeneticSolitaireAlgorithm(options); 
             }
             catch (Exception ex)
             {
@@ -54,6 +43,7 @@ namespace SolvitaireGenetics
             // Run the genetic algorithm
             try
             {
+                algorithm.WriteParameters();
                 algorithm.RunEvolution(options.Generations);
             }
             catch (Exception ex)

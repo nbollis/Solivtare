@@ -1,8 +1,9 @@
 ﻿using CommandLine;
+using System.Text.Json;
 
 namespace SolvitaireGenetics;
 
-public class CommandLineParameters
+public class SolitaireGeneticAlgorithmParameters
 {
     // TODO: add optional input file to allow algorithm to load a previous state
     
@@ -30,9 +31,20 @@ public class CommandLineParameters
     [Option('l', "limit", Default = 100, HelpText = "Maximum number of games per generation.")]
     public int MaxGamesPerGeneration { get; set; }
 
-    //[Option('c', "crossover", Default = 0.5, HelpText = "Crossover rate.")]
-    //public double CrossoverRate { get; set; }
+    public static SolitaireGeneticAlgorithmParameters LoadFromFile(string filePath)
+    {
+        if (!File.Exists(filePath))
+        {
+            throw new FileNotFoundException($"Configuration file not found: {filePath}");
+        }
 
-    //[Option('a', "agent", Default = "MaxiMaxAgent", HelpText = "Name of the agent to use.")]
-    //public string? AgentName { get; set; }
+        var json = File.ReadAllText(filePath);
+        return JsonSerializer.Deserialize<SolitaireGeneticAlgorithmParameters>(json) ?? throw new InvalidOperationException("Failed to deserialize configuration.");
+    }
+
+    public void SaveToFile(string filePath)
+    {
+        var json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(filePath, json);
+    }
 }

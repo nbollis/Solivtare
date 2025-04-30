@@ -15,9 +15,11 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome<
     private readonly object _generationLogLock = new();
     private readonly object _agentLogLock = new();
     private readonly List<AgentLog> _agentLogBatch = new(); // In-memory batch for AgentLogs
+    internal readonly string OutputDirectory;
 
     public GeneticAlgorithmLogger(string outputDirectory, bool ensureUniquePath = false)
     {
+        OutputDirectory = outputDirectory ?? throw new ArgumentNullException(nameof(outputDirectory), "Output directory cannot be null.");
         if (!Directory.Exists(outputDirectory))
             Directory.CreateDirectory(outputDirectory);
 

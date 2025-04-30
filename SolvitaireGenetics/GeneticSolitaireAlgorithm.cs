@@ -9,19 +9,20 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
     private readonly int _maxGamesPerAgent;
     private readonly List<StandardDeck> _predefinedDecks = new();
     private readonly IDeckFile? _deckFile;
+    private readonly SolitaireGeneticAlgorithmParameters _parameters;
 
-    public GeneticSolitaireAlgorithm(int populationSize, double mutationRate, int tournamentSize, int maxMovesPerAgent, 
-        int maxGamesPerAgent, string outputDirectory, IDeckFile? deckFile = null)
-        : base(populationSize, mutationRate, tournamentSize, outputDirectory)
+    public GeneticSolitaireAlgorithm(SolitaireGeneticAlgorithmParameters parameters)
+        : base(parameters.PopulationSize, parameters.MutationRate, parameters.TournamentSize, parameters.OutputDirectory)
     {
-        _maxMovesPerAgent = maxMovesPerAgent;
-        _maxGamesPerAgent = maxGamesPerAgent;
-        _deckFile = deckFile;
+        _parameters = parameters;
+        _maxMovesPerAgent = parameters.MaxMovesPerGeneration;
+        _maxGamesPerAgent = parameters.MaxGamesPerGeneration;
 
         // Deserialize predefined decks if provided
-        if (deckFile is not null)
+        if (parameters.DecksToUse is not null)
         {
-            _predefinedDecks = deckFile.ReadAllDecks();
+            _deckFile = new DeckStatisticsFile(parameters.DecksToUse); 
+            _predefinedDecks = _deckFile.ReadAllDecks();
             _predefinedDecks.ForEach(p => p.FlipAllCardsDown());
         }
     }
@@ -159,5 +160,16 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome>
         {
             stats.Flush();
         }
+    }
+
+    public void WriteParameters()
+    {
+        var configFilePath = Path.Combine(Logger.OutputDirectory, "RunParameters.json");
+        if (File.Exists(configFilePath))
+        {
+            File.Delete(configFilePath);
+        }   
+
+        _parameters.SaveToFile(configFilePath);
     }
 }
