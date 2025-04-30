@@ -9,6 +9,7 @@ namespace SolvitaireGenetics;
 /// <typeparam name="TChromosome"></typeparam>  
 public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
 {
+    
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly string _generationLogFilePath;
     private readonly string _agentLogFilePath;
@@ -54,6 +55,14 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
         }
     }
 
+    public void SubscribeToAlgorithm(IGeneticAlgorithm algorithm)
+    {
+        algorithm.GenerationCompleted += (generation, generationLog) =>
+        {
+            LogGenerationInfo(generationLog);
+        };
+    }
+
     /// <summary>  
     /// Logs generational information, including best and average fitness and chromosomes.  
     /// </summary>  
@@ -70,6 +79,11 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
             StdChromosome = new ChromosomeDto { Weights = stdChromosome.MutableStatsByName }
         };
 
+        LogGenerationInfo(generationLog);
+    }
+
+    public void LogGenerationInfo(GenerationLogDto generationLog)
+    {
         lock (_generationLogLock)
         {
             // Read existing generations from the file  
@@ -160,12 +174,10 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
     {
         lock (_agentLogLock)
         {
-            lock (_agentLogLock)
-            {
-                if (!File.Exists(_agentLogFilePath))
-                    return new List<AgentLog>();
-                return JsonSerializer.Deserialize<List<AgentLog>>(File.ReadAllText(_agentLogFilePath), _jsonOptions) ?? new List<AgentLog>();
-            }
+            if (!File.Exists(_agentLogFilePath))
+                return new List<AgentLog>();
+            return JsonSerializer.Deserialize<List<AgentLog>>(File.ReadAllText(_agentLogFilePath), _jsonOptions) ?? new List<AgentLog>();
+        
         }
     }
 

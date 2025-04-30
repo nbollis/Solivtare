@@ -3,10 +3,20 @@ using MathNet.Numerics.Statistics;
 
 namespace SolvitaireGenetics;
 
-public abstract class GeneticAlgorithm<TChromosome, TParameters> 
-    where TChromosome : Chromosome 
-    where TParameters : GeneticAlgorithmParameters
+// stupid interface here only so that i can do the gui part without 8 million different controls and converters. 
+public interface IGeneticAlgorithm
 {
+    public event Action<int, GenerationLogDto>? GenerationCompleted;
+    public void RunEvolution(int generations);
+    public void WriteParameters();
+}
+
+public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgorithm
+    where TChromosome : Chromosome 
+    where TParameters : GeneticAlgorithmParameters 
+
+{
+    public event Action<int, GenerationLogDto>? GenerationCompleted;
     protected readonly TParameters Parameters;
     protected readonly GeneticAlgorithmLogger<TChromosome> Logger;
     protected readonly int PopulationSize;
@@ -27,6 +37,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters>
         MutationRate = parameters.MutationRate;
         TournamentSize = parameters.TournamentSize;
         Logger = new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory!);
+        Logger.SubscribeToAlgorithm(this);
     }
 
     protected abstract double EvaluateFitness(TChromosome chromosome);
@@ -47,7 +58,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters>
         return fitness;
     }
 
-    public TChromosome RunEvolution(int generations)
+    public void RunEvolution(int generations)
     {
         List<TChromosome> population = InitializePopulation();
 
@@ -64,16 +75,22 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters>
 
             population = EvolvePopulation(population, out List<double> fitness); 
 
-            double bestFitness = fitness[0];
-            TChromosome bestChromosome = population[0];
-            TChromosome averageChromosome = Chromosome.GetAverageChromosome(population);
-            TChromosome stdChromosome = Chromosome.GetStandardDeviationChromosome(population);
+            var generationLog = new GenerationLogDto
+            {
+                Generation = generation,
+                BestFitness = fitness[0],
+                AverageFitness = fitness.Average(),
+                StdFitness = fitness.StandardDeviation(),
+                BestChromosome = new ChromosomeDto { Weights = population[0].MutableStatsByName },
+                AverageChromosome = new ChromosomeDto { Weights = Chromosome.GetAverageChromosome(population).MutableStatsByName },
+                StdChromosome = new ChromosomeDto { Weights = Chromosome.GetStandardDeviationChromosome(population).MutableStatsByName }
+            };
 
-            Logger.LogGenerationInfo(generation, bestFitness, fitness.Average(), fitness.StandardDeviation(), bestChromosome, averageChromosome, stdChromosome);
+            // Fire the GenerationCompleted event
+            GenerationCompleted?.Invoke(generation, generationLog);
+
             FlushLogs();
         }
-
-        return population[0]; // Best chromosome
     }
 
     /// <summary>
@@ -174,5 +191,16 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters>
     protected virtual void FlushLogs()
     {
         Logger.FlushAgentLogs();
+    }
+
+    public void WriteParameters()
+    {
+        var configFilePath = Path.Combine(Logger.OutputDirectory, "RunParameters.json");
+        if (File.Exists(configFilePath))
+        {
+            File.Delete(configFilePath);
+        }
+
+        Parameters.SaveToFile(configFilePath);
     }
 }

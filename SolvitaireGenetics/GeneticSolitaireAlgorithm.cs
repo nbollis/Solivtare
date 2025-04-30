@@ -161,15 +161,4 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
             stats.Flush();
         }
     }
-
-    public void WriteParameters()
-    {
-        var configFilePath = Path.Combine(Logger.OutputDirectory, "RunParameters.json");
-        if (File.Exists(configFilePath))
-        {
-            File.Delete(configFilePath);
-        }   
-
-        _parameters.SaveToFile(configFilePath);
-    }
 }

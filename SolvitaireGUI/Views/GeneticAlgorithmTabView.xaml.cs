@@ -26,7 +26,7 @@ namespace SolvitaireGUI
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                (DataContext as GeneticAlgorithmViewModel)?.HandleFileDrop(e.Data.GetData(DataFormats.FileDrop) as string[]);
+                (DataContext as GeneticAlgorithmTabViewModel)?.HandleFileDrop(e.Data.GetData(DataFormats.FileDrop) as string[]);
 
             }
         }
