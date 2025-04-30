@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "SolvitaireGenetics": {
-      "commandName": "Project",
-      "commandLineArgs": "-o \"A:\\Projects and Original Works\\Solvitaire\\Genetics\\TestOutput\" -d \"A:\\Projects and Original Works\\Solvitaire\\WinnableDeals.json\" -p 8 -g 8 -t 2 -c 500 -l 20 -m 0.1 "
-    }
-  }
-}
