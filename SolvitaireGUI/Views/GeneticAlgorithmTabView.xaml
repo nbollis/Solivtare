@@ -47,13 +47,13 @@
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Output Directory:" VerticalAlignment="Center" Margin="5" />
             <TextBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right"  TextAlignment="Right"
                          Text="{Binding OutputDirectory}" Margin="5"
-                         Style="{StaticResource TextBoxStyle}" Width="240"/>
+                         Style="{StaticResource TextBoxStyle}" MinWidth="240"/>
 
             <!-- Decks to Use -->
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Decks to Use:" VerticalAlignment="Center" Margin="5"/>
             <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right"  TextAlignment="Right"
                          Text="{Binding DecksToUse}" Margin="5"
-                         Style="{StaticResource TextBoxStyle}" Width="240" />
+                         Style="{StaticResource TextBoxStyle}" MinWidth="240" />
 
             <!-- Population Size -->
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Population Size:" VerticalAlignment="Center" Margin="5" />

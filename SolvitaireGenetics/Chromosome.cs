@@ -6,7 +6,7 @@ namespace SolvitaireGenetics;
 
 public abstract class Chromosome
 {
-    private const int RoundingPlace = 3;
+    private const int RoundingPlace = 2;
     protected readonly Random Random;
     public double Fitness { get; set; } = double.NegativeInfinity;
     public Dictionary<string, double> MutableStatsByName { get; set; }
@@ -142,25 +142,6 @@ public abstract class Chromosome
         return firstChromosome;
     }
 
-    ///// <summary>
-    ///// Serializes the weights to a JSON string.
-    ///// </summary>
-    ///// <returns>A JSON string representing the weights.</returns>
-    //public string SerializeWeights()
-    //{
-    //    return System.Text.Json.JsonSerializer.Serialize(MutableStatsByName);
-    //}
-
-    ///// <summary>
-    ///// Deserializes the weights from a JSON string.
-    ///// </summary>
-    ///// <param name="json">The JSON string representing the weights.</param>
-    //public void DeserializeWeights(string json)
-    //{
-    //    MutableStatsByName = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, double>>(json)
-    //                         ?? new Dictionary<string, double>();
-    //}
-
     public override int GetHashCode()
     {
         unchecked
@@ -168,8 +149,8 @@ public abstract class Chromosome
             int hash = 17;
             foreach (var kvp in MutableStatsByName)
             {
-                hash = hash * 23 + kvp.Key.GetHashCode();
-                hash = hash * 23 + kvp.Value.GetHashCode();
+                hash = (hash * 23) ^ kvp.Key.GetHashCode();
+                hash = (hash * 23) ^ kvp.Value.GetHashCode();
             }
             return hash;
         }

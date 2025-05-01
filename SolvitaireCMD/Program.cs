@@ -45,7 +45,7 @@ namespace MyApp
             }
             else
             {
-                int threads = 12;
+                int threads = 4;
                 string path = @"A:\Projects and Original Works\Solvitaire\WonDeckStats.json";
                 string allDeckPath = @"A:\Projects and Original Works\Solvitaire\AllDeckStats.json";
 
@@ -63,7 +63,7 @@ namespace MyApp
                         var agent = new MaxiMaxAgent(new SecondSolitaireEvaluator());
                         var moveGenerator = new SolitaireMoveGenerator();
 
-                        var referenceDeck = new StandardDeck(threadId * 14);
+                        var referenceDeck = new StandardDeck(threadId+1 * 7);
                         while (true)
                         {
                             referenceDeck.Shuffle();

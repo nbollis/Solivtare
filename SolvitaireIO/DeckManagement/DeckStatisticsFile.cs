@@ -136,9 +136,12 @@ public class DeckStatisticsFile : IDeckFile
     {
         if (_isCacheDirty)
         {
-            var json = DeckSerializer.SerializeDeckStatisticsList(_cache.Values.ToList());
-            File.WriteAllText(_filePath, json);
-            _isCacheDirty = false; // Reset the dirty flag
+            lock (_fileLock)
+            {
+                var json = DeckSerializer.SerializeDeckStatisticsList(_cache.Values.ToList());
+                File.WriteAllText(_filePath, json);
+                _isCacheDirty = false; // Reset the dirty flag
+            }
         }
     }
 
@@ -150,14 +153,17 @@ public class DeckStatisticsFile : IDeckFile
     /// </summary>
     private void LoadCache()
     {
-        var json = File.ReadAllText(_filePath);
-        var statisticsList = DeckSerializer.DeserializeDeckStatisticsList(json);
-
-        _cache.Clear();
-        foreach (var stats in statisticsList)
+        lock (_fileLock)
         {
-            var key = stats.Deck.GetHashCode();
-            _cache[key] = stats;
+            var json = File.ReadAllText(_filePath);
+            var statisticsList = DeckSerializer.DeserializeDeckStatisticsList(json);
+
+            _cache.Clear();
+            foreach (var stats in statisticsList)
+            {
+                var key = stats.Deck.GetHashCode();
+                _cache[key] = stats;
+            }
         }
     }
 }

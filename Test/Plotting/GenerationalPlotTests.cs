@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SolvitaireIO;
 
 namespace Test.Plotting;
 
@@ -33,7 +34,11 @@ public class GenerationalPlotTests
     [Test]
     public void FitnessByGeneration()
     {
-        
+        string path = @"A:\Projects and Original Works\Solvitaire\WonDeckStats.json";
+        var deckStats = File.ReadAllText(path);
+        var temp = DeckSerializer.DeserializeDeckStatisticsList(deckStats);
+        var temp2 = new DeckStatisticsFile(path);
+        var temp3 = temp2.ReadAllDecks();
     }
 }
 
