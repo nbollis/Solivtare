@@ -122,6 +122,7 @@ public abstract class Chromosome : IComparable<Chromosome>
             firstChromosome.MutableStatsByName[key] = averageValue;
         }
 
+        firstChromosome.Fitness = chromosomes.Select(p => p.Fitness).Average();
         return firstChromosome;
     }
 
@@ -139,6 +140,7 @@ public abstract class Chromosome : IComparable<Chromosome>
             firstChromosome.MutableStatsByName[key] = stdValue;
         }
 
+        firstChromosome.Fitness = chromosomes.Select(p => p.Fitness).StandardDeviation();
         return firstChromosome;
     }
 

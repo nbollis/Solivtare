@@ -98,7 +98,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     private void SetUpPlots()
     {
         FitnessByGeneration.Plot.Clear();
-        FitnessByGeneration.Plot.Axes.SetLimits(0, Parameters.Generations-1, 0, 1);
+        FitnessByGeneration.Plot.Axes.SetLimits(0, Parameters.Generations-1, -1, 1);
         FitnessByGeneration.Plot.XLabel("Generation");
         FitnessByGeneration.Plot.YLabel("Fitness");
         FitnessByGeneration.Refresh();
@@ -119,7 +119,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         AverageStatByGeneration.Plot.Clear();
 
         AverageStatByGeneration.Plot.Axes.SetLimits(0, generationLog.Generation + 1, -3, 3);
-        FitnessByGeneration.Plot.Axes.SetLimits(0, generationLog.Generation + 1, 0, 1);
+        FitnessByGeneration.Plot.Axes.SetLimits(0, generationLog.Generation + 1, -1, 1);
 
         // Sort generationalLogs once to avoid repeated sorting
         var sortedLogs = _generationalLogs.OrderBy(p => p.Generation).ToList();

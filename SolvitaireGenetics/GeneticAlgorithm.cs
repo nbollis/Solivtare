@@ -120,11 +120,11 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             }
         });
 
-        newPopulation.Sort();
-        //// Sort the new population by fitness (descending)
-        //newPopulation = newPopulation
-        //    .OrderByDescending(chromosome => chromosome.Fitness)
-        //    .ToList();
+        //newPopulation.Sort();
+        // Sort the new population by fitness (descending)
+        newPopulation = newPopulation
+            .OrderByDescending(chromosome => chromosome.Fitness)
+            .ToList();
 
         return newPopulation;
     }
