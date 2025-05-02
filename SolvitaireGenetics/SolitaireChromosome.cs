@@ -38,3 +38,16 @@ public class SolitaireChromosome : Chromosome
     public double GetWeight(string weightName) => MutableStatsByName.TryGetValue(weightName, out var value) ? value : 0;
     public void SetWeight(string weightName, double value) => MutableStatsByName[weightName] = value;
 }
+
+public class QuadraticChromosome : Chromosome
+{
+    public QuadraticChromosome(Random random) : base(random)
+    {
+        MutableStatsByName["a"] = GenerateRandomWeight();
+        MutableStatsByName["b"] = GenerateRandomWeight();
+        MutableStatsByName["c"] = GenerateRandomWeight();
+    }
+    public QuadraticChromosome() : this(Random.Shared) { }
+    public double GetCoefficient(string coefficientName) => MutableStatsByName.TryGetValue(coefficientName, out var value) ? value : 0;
+    public void SetCoefficient(string coefficientName, double value) => MutableStatsByName[coefficientName] = value;
+}

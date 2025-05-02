@@ -39,6 +39,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     
     public WpfPlot AverageStatByGeneration { get; set; } = new WpfPlot();
+    private FitnessByGenerationPlot _fitnessByGeneration;
     public WpfPlot FitnessByGeneration { get; set; } = new WpfPlot();
 
     public ICommand RunAlgorithmCommand { get; }

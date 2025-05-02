@@ -65,8 +65,9 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             CurrentGeneration = generation;
             Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation {generation}: Evaluating population...");
 
-            population = EvolvePopulation(population, out List<double> fitness); 
+            population = EvolvePopulation(population);
 
+            var fitness = population.Select(chr => chr.Fitness).ToList();
             var generationLog = new GenerationLogDto
             {
                 Generation = generation,
@@ -89,10 +90,9 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     /// Evolves the population by selecting parents,
     /// performing crossover and mutation to create a new population.
     /// </summary>
-    protected List<TChromosome> EvolvePopulation(List<TChromosome> currentPopulation, out List<double> fitness)
+    protected List<TChromosome> EvolvePopulation(List<TChromosome> currentPopulation)
     {
         List<TChromosome> newPopulation = [];
-        fitness = new List<double>();
 
         while (newPopulation.Count < PopulationSize)
         {
@@ -105,8 +105,6 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             newPopulation.Add(child);
         }
 
-        // Evaluate fitness in parallel
-        var fitnessResults = new ConcurrentDictionary<TChromosome, double>();
         // Split the population into ranges for parallel processing
         int rangeSize = (int)Math.Ceiling((double)newPopulation.Count / Environment.ProcessorCount);
         Parallel.For(0, Environment.ProcessorCount, rangeIndex =>
@@ -118,18 +116,15 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             {
                 var chromosome = newPopulation[i];
                 double fitnessValue = GetFitness(chromosome);
-                fitnessResults[chromosome] = fitnessValue;
+                chromosome.Fitness = fitnessValue;
             }
         });
 
-        // Sort the new population by fitness (descending)
-        newPopulation = fitnessResults
-            .OrderByDescending(kvp => kvp.Value)
-            .Select(kvp => kvp.Key)
-            .ToList();
-
-        // Cache fitness values for the new population
-        fitness.AddRange(fitnessResults.Values.OrderByDescending(kvp => kvp));
+        newPopulation.Sort();
+        //// Sort the new population by fitness (descending)
+        //newPopulation = newPopulation
+        //    .OrderByDescending(chromosome => chromosome.Fitness)
+        //    .ToList();
 
         return newPopulation;
     }
@@ -194,5 +189,29 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         }
 
         Parameters.SaveToFile(configFilePath);
+    }
+}
+
+public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChromosome, QuadraticGeneticAlgorithmParameters>
+{
+    public QuadraticRegressionGeneticAlgorithm(QuadraticGeneticAlgorithmParameters parameters) : base(parameters)
+    {
+    }
+    protected override double EvaluateFitness(QuadraticChromosome chromosome)
+    {
+        // Implement your fitness evaluation logic here
+        return 0.0;
+    }
+}
+
+public class QuadraticGeneticAlgorithmParameters : GeneticAlgorithmParameters
+{
+    public double MutationRate { get; set; }
+    public int TournamentSize { get; set; }
+    public int PopulationSize { get; set; }
+    public string? OutputDirectory { get; set; }
+    public override void SaveToFile(string filePath)
+    {
+        // Implement your save logic here
     }
 }

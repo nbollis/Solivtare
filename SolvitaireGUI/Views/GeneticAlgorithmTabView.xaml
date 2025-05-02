@@ -100,15 +100,21 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Column="1" Grid.ColumnSpan="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+        <TabControl Grid.Column="1" Grid.ColumnSpan="2">
 
-            <ContentControl Grid.Row="0" Content="{Binding FitnessByGeneration}"/>
-            <ContentControl Grid.Row="1" Content="{Binding AverageStatByGeneration}"/>
-        </Grid>
+            <TabItem Header="Run Algorithm">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <ContentControl Grid.Row="0" Content="{Binding FitnessByGeneration}"/>
+                    <ContentControl Grid.Row="1" Content="{Binding AverageStatByGeneration}"/>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
         
 
     </Grid>

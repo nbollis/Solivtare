@@ -100,7 +100,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         double fitness = (double)gamesWon / gamesPlayed;
         if (gamesPlayed > 0)
         {
-            fitness -= (double)movesPlayed / (gamesPlayed * _maxMovesPerAgent);
+            fitness -= 0.5 * movesPlayed / (gamesPlayed * _maxMovesPerAgent);
         }
 
         Logger.AccumulateAgentLog(CurrentGeneration, chromosome, fitness, gamesWon, movesPlayed, gamesPlayed);

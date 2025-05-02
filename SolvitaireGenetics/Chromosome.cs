@@ -4,7 +4,7 @@ using System;
 
 namespace SolvitaireGenetics;
 
-public abstract class Chromosome
+public abstract class Chromosome : IComparable<Chromosome>
 {
     private const int RoundingPlace = 2;
     protected readonly Random Random;
@@ -154,5 +154,12 @@ public abstract class Chromosome
             }
             return hash;
         }
+    }
+
+    public int CompareTo(Chromosome? other)
+    {
+        if (ReferenceEquals(this, other)) return 0;
+        if (other is null) return 1;
+        return Fitness.CompareTo(other.Fitness);
     }
 }
