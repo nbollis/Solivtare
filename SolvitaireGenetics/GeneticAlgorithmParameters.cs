@@ -5,8 +5,8 @@ namespace SolvitaireGenetics;
 public abstract class GeneticAlgorithmParameters
 {
     public virtual string? OutputDirectory { get; set; } = null;
-    public virtual int PopulationSize { get; set; } = 100;
-    public virtual int Generations { get; set; } = 1000;
+    public virtual int PopulationSize { get; set; } = 1000;
+    public virtual int Generations { get; set; } = 100;
     public virtual double MutationRate { get; set; } = 0.01;
     public virtual int TournamentSize { get; set; } = 5;
 

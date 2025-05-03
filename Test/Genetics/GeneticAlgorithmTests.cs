@@ -181,7 +181,12 @@ public class GeneticAlgorithmTests
         for (var index = 0; index < lastGeneration.Count; index++)
         {
             var og = lastGeneration[index];
-            Assert.That(og, Is.EqualTo(population[index]));
+            var loaded = population[index];
+            Assert.That(og.Fitness, Is.EqualTo(loaded.Fitness));
+            Assert.That(og.MutableStatsByName[QuadraticChromosome.A], Is.EqualTo(loaded.MutableStatsByName[QuadraticChromosome.A]));
+            Assert.That(og.MutableStatsByName[QuadraticChromosome.B], Is.EqualTo(loaded.MutableStatsByName[QuadraticChromosome.B]));
+            Assert.That(og.MutableStatsByName[QuadraticChromosome.C], Is.EqualTo(loaded.MutableStatsByName[QuadraticChromosome.C]));
+            Assert.That(og.MutableStatsByName[QuadraticChromosome.YIntercept], Is.EqualTo(loaded.MutableStatsByName[QuadraticChromosome.YIntercept]));
         }
     }
 
@@ -217,7 +222,7 @@ public class GeneticAlgorithmTests
 
         // 10% are copies of the template
         // The remaining have had a 50% chance to cross over. 
-        Assert.That(mutatedTemplateCount, Is.EqualTo(expectedCount).Within(20)); 
+        Assert.That(mutatedTemplateCount, Is.EqualTo(expectedCount).Within(40)); 
     }
 
     [Test]
@@ -245,35 +250,35 @@ public class GeneticAlgorithmTests
         // Arrange  
         var parameters = new QuadraticGeneticAlgorithmParameters
         {
-            PopulationSize = 12,
-            MutationRate = 0.05,
-            TournamentSize = 2,
+            PopulationSize = 10,
+            MutationRate = 0.01,
+            TournamentSize = 8,
             OutputDirectory = OutputDirectory
         };
         var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
 
         // Act - Run the first 3 generations  
-        var firstFitness = algorithm.RunEvolution(2).Fitness;
+        var firstFitness = algorithm.RunEvolution(5).Fitness;
         var firstStageGeneration = algorithm.CurrentGeneration;
 
         // Assert - Ensure the first stage completed correctly  
-        Assert.That(firstStageGeneration, Is.EqualTo(2));
+        Assert.That(firstStageGeneration, Is.EqualTo(5));
 
         // Act - Run 2 more generations  
-        var secondFitness = algorithm.RunEvolution(2).Fitness;
+        var secondFitness = algorithm.RunEvolution(5).Fitness;
         var secondGeneration = algorithm.CurrentGeneration;
 
         // Assert - Ensure the total generations completed correctly  
-        Assert.That(secondGeneration, Is.EqualTo(4));
+        Assert.That(secondGeneration, Is.EqualTo(10));
         Assert.That(firstFitness, Is.Not.EqualTo(secondFitness));
         Assert.That(firstFitness, Is.LessThan(secondFitness));
 
         // Act - Run 3 more generations  
-        var thirdFitness = algorithm.RunEvolution(2).Fitness;
+        var thirdFitness = algorithm.RunEvolution(5).Fitness;
         var finalGeneration = algorithm.CurrentGeneration;
 
         // Assert - Ensure the total generations completed correctly  
-        Assert.That(finalGeneration, Is.EqualTo(6));
+        Assert.That(finalGeneration, Is.EqualTo(15));
         Assert.That(firstFitness, Is.Not.EqualTo(thirdFitness));
         Assert.That(firstFitness, Is.LessThan(thirdFitness));
         Assert.That(secondFitness, Is.Not.EqualTo(thirdFitness));

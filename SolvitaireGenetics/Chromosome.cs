@@ -146,7 +146,25 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
 
     public bool Equals(Chromosome? other)
     {
-        
+        if (other is null)
+            return false;
+
+        if (ReferenceEquals(this, other))
+            return true;
+
+        if (!Fitness.Equals(other.Fitness))
+            return false;
+
+        if (MutableStatsByName.Count != other.MutableStatsByName.Count)
+            return false;
+
+        foreach (var kvp in MutableStatsByName)
+        {
+            if (!other.MutableStatsByName.TryGetValue(kvp.Key, out var otherValue) || !kvp.Value.Equals(otherValue))
+                return false;
+        }
+
+        return true;
     }
 
     public override int GetHashCode()

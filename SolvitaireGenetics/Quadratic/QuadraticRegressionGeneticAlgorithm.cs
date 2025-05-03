@@ -2,19 +2,16 @@
 
 public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChromosome, QuadraticGeneticAlgorithmParameters>
 {
-    public List<(double X, double Y)> CorrectLine { get; }
-    private double MaxError { get; }
+    public double[] CorrectLine { get; }
 
     public QuadraticRegressionGeneticAlgorithm(QuadraticGeneticAlgorithmParameters parameters, QuadraticChromosome? chromosomeTemplate = null) : base(parameters, chromosomeTemplate)
     {
-        CorrectLine = new List<(double X, double Y)>();
-        MaxError = 0.0;
+        CorrectLine = new double[200];
 
-        for (int x = -1000; x < 1000; x++)
+        for (int x = -100; x < 100; x++)
         {
-            double y = parameters.CorrectA * x * x + parameters.CorrectB * x + parameters.CorrectC + parameters.CorrectIntercept;
-            CorrectLine.Add((x, y));
-            MaxError += Math.Pow(y, 2); // Precompute maximum possible error
+            double y = parameters.CorrectA * x * x * x + parameters.CorrectB * x * x + parameters.CorrectC * x + parameters.CorrectIntercept;
+            CorrectLine[x + 100] = y;
         }
     }
 
@@ -25,16 +22,18 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
         double c = chromosome.Get(QuadraticChromosome.C);
         double yInt = chromosome.Get(QuadraticChromosome.YIntercept);
 
-        double error = 0.0;
+        double sumSquaredDifferences = 0.0;
+        double sumCorrectSquared = 0.0;
 
-        for (int x = -1000; x < 1000; x++)
+        for (int x = -100; x < 100; x++)
         {
-            double y = a * x * x + b * x + c + yInt;
-            double correctY = CorrectLine[x + 1000].Y;
-            error += Math.Pow(y - correctY, 2); // Squared error
+            double y = a * x * x * x + b * x * x + c * x + yInt;
+            double correctY = CorrectLine[x + 100];
+            sumSquaredDifferences += Math.Pow(y - correctY, 2);
+            sumCorrectSquared += Math.Pow(correctY, 2);
         }
 
-        double normalizedError = error / MaxError;
-        return 1 - normalizedError; // Fitness ranges from -1 to 1
+        double l2Norm = Math.Sqrt(sumSquaredDifferences) / Math.Sqrt(sumCorrectSquared);
+        return 1 - l2Norm; // Fitness ranges from 0 to 1  
     }
 }
