@@ -119,7 +119,8 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
             if (WriteOutput)
             {
-
+                var filePath = Path.Combine(Parameters.OutputDirectory, "RunParameters.json");
+                Parameters.SaveToFile(filePath);
             }
             
             await Task.Run(() => RunEvolutionWithControl(algorithm, Parameters.Generations, _cancellationTokenSource.Token));
