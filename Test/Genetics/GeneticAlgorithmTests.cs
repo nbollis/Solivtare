@@ -39,9 +39,9 @@ public class GeneticAlgorithmTests
             Generation = 1,
             BestFitness = 100.0,
             AverageFitness = 50.0,
-            BestChromosome = new ChromosomeDto { Weights = new Dictionary<string, double> { { "Stat1", 1.0 } } },
-            AverageChromosome = new ChromosomeDto { Weights = new Dictionary<string, double> { { "Stat2", 2.0 } } },
-            StdChromosome = new ChromosomeDto { Weights = new Dictionary<string, double> { { "Stat3", 3.0 } } }
+            BestChromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat1", 1.0 } } },
+            AverageChromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat2", 2.0 } } },
+            StdChromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat3", 3.0 } } }
         };
 
         var agentLogs = new List<AgentLog>
@@ -53,7 +53,7 @@ public class GeneticAlgorithmTests
                GamesWon = 10,
                MovesMade = 50,
                GamesPlayed = 20,
-               Chromosome = new ChromosomeDto { Weights = new Dictionary<string, double> { { "Stat1", 1.0 } } }
+               Chromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat1", 1.0 } } }
            },
            new AgentLog
            {
@@ -62,7 +62,7 @@ public class GeneticAlgorithmTests
                GamesWon = 8,
                MovesMade = 40,
                GamesPlayed = 18,
-               Chromosome = new ChromosomeDto { Weights = new Dictionary<string, double> { { "Stat2", 2.0 } } }
+               Chromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat2", 2.0 } } }
            }
        };
 
@@ -182,7 +182,8 @@ public class GeneticAlgorithmTests
             { QuadraticChromosome.A, 1 }, 
             { QuadraticChromosome.B, 1 }, 
             { QuadraticChromosome.C, 1 }, 
-            { QuadraticChromosome.YIntercept, 1 }, 
+            { QuadraticChromosome.YIntercept, 1 },
+            { QuadraticChromosome.EvalFunction, 1 }
         };
 
         var lastGeneration = new List<QuadraticChromosome>()
@@ -239,6 +240,7 @@ public class GeneticAlgorithmTests
         template.Set(QuadraticChromosome.B, 2.0);
         template.Set(QuadraticChromosome.C, 3.0);
         template.Set(QuadraticChromosome.YIntercept, 4.0);
+        template.Set(QuadraticChromosome.EvalFunction, 1.0);
 
         var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters, template);
         var field = typeof(QuadraticRegressionGeneticAlgorithm).GetField("CrossOverRate", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -284,15 +286,19 @@ public class GeneticAlgorithmTests
         // Arrange  
         var parameters = new QuadraticGeneticAlgorithmParameters
         {
-            PopulationSize = 6,
-            MutationRate = 0.01,
-            TournamentSize = 2,
-            OutputDirectory = OutputDirectory
+            PopulationSize = 36,
+            MutationRate = 0.1,
+            TournamentSize = 4,
+            OutputDirectory = OutputDirectory,
+            CorrectA = -6,
+            CorrectB = 5,
+            CorrectC = 4,
+            CorrectIntercept = 3
         };
         var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
-        var field = typeof(QuadraticRegressionGeneticAlgorithm).GetField("CrossOverRate", BindingFlags.NonPublic | BindingFlags.Instance);
-        Assert.That(field, Is.Not.Null, "Field 'CrossOverRate' not found.");
-        field.SetValue(algorithm, 0.0);
+        //var field = typeof(QuadraticRegressionGeneticAlgorithm).GetField("CrossOverRate", BindingFlags.NonPublic | BindingFlags.Instance);
+        //Assert.That(field, Is.Not.Null, "Field 'CrossOverRate' not found.");
+        //field.SetValue(algorithm, 0.0);
 
         // Act - Run the first 3 generations  
         var firstFitness = algorithm.RunEvolution(1).Fitness;

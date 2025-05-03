@@ -15,7 +15,7 @@ public class GenerationLogDto
     public double BestFitness { get; set; }
     public double AverageFitness { get; set; }
     public double StdFitness { get; set; }
-    public ChromosomeDto BestChromosome { get; set; } = null!;
-    public ChromosomeDto AverageChromosome { get; set; } = null!;
-    public ChromosomeDto StdChromosome { get; set; } = null!;
+    public Chromosome BestChromosome { get; set; } = null!;
+    public Chromosome AverageChromosome { get; set; } = null!;
+    public Chromosome StdChromosome { get; set; } = null!;
 }

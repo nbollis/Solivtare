@@ -214,7 +214,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         var bestFitness = new double[sortedLogs.Count];
         var averageFitness = new double[sortedLogs.Count];
         var stdFitness = new double[sortedLogs.Count];
-        var statNames = generationLog.AverageChromosome.Weights.Keys.ToArray();
+        var statNames = generationLog.AverageChromosome.MutableStatsByName.Keys.ToArray();
         var averageStatValues = new Dictionary<string, double[]>();
         var bestStatValues = new Dictionary<string, double[]>();
 
@@ -232,8 +232,8 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         // Extract values for each stat  
         foreach (var statName in statNames)
         {
-            var averageValues = sortedLogs.Select(log => log.AverageChromosome.Weights[statName]).ToArray();
-            var bestValues = sortedLogs.Select(log => log.BestChromosome.Weights[statName]).ToArray();
+            var averageValues = sortedLogs.Select(log => log.AverageChromosome.MutableStatsByName[statName]).ToArray();
+            var bestValues = sortedLogs.Select(log => log.BestChromosome.MutableStatsByName[statName]).ToArray();
 
             // Apply moving average of 5  
             //averageStatValues[statName] = CalculateMovingAverage(averageValues, movingAverageAmount);

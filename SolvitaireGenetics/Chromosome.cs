@@ -1,6 +1,7 @@
 ﻿using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
 using System;
+using System.Text.Json.Serialization;
 
 namespace SolvitaireGenetics;
 
@@ -12,7 +13,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     protected int WeightMinStartValue = -2;
     protected int WeightMaxStartValue = 2;
 
-    public double Fitness { get; set; } = double.NegativeInfinity;
+    public double Fitness { get; set; } = double.MinValue;
     public Dictionary<string, double> MutableStatsByName { get; set; }
 
     protected Chromosome(Random random)
@@ -20,6 +21,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         Random = random;
         MutableStatsByName = new();
     }
+
     protected Chromosome()
     {
         Random = Random.Shared;

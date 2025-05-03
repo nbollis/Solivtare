@@ -12,5 +12,5 @@ public class AgentLog
     public int GamesWon { get; set; }
     public int MovesMade { get; set; }
     public int GamesPlayed { get; set; }
-    public ChromosomeDto Chromosome { get; set; } = null!;
+    public Chromosome Chromosome { get; set; } = null!;
 }

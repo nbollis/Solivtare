@@ -4,7 +4,7 @@ using MathNet.Numerics.Statistics;
 namespace SolvitaireGenetics;
 
 public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgorithm
-    where TChromosome : Chromosome 
+    where TChromosome : Chromosome, new() 
     where TParameters : GeneticAlgorithmParameters 
 
 {
@@ -35,9 +35,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         ChromosomeTemplate = chromosomeTemplate;
 
 
-        Logger = string.IsNullOrEmpty(parameters.OutputDirectory) 
-            ? new InMemoryGeneticAlgorithmLogger<TChromosome>() 
-            : new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory!);
+        Logger = new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory);
         Logger.SubscribeToAlgorithm(this);
     }
 
@@ -207,9 +205,9 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             BestFitness = fitness[0],
             AverageFitness = fitness.Average(),
             StdFitness = fitness.StandardDeviation(),
-            BestChromosome = new ChromosomeDto { Weights = population[0].MutableStatsByName },
-            AverageChromosome = new ChromosomeDto { Weights = Chromosome.GetAverageChromosome(population).MutableStatsByName },
-            StdChromosome = new ChromosomeDto { Weights = Chromosome.GetStandardDeviationChromosome(population).MutableStatsByName }
+            BestChromosome = population[0],
+            AverageChromosome =  Chromosome.GetAverageChromosome(population),
+            StdChromosome = Chromosome.GetStandardDeviationChromosome(population)
         };
 
         foreach (var chromosome in population)

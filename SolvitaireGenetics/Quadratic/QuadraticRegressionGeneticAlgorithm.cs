@@ -32,9 +32,9 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
             chromosomeValues[i] = y;
         }
 
-        var fitness = chromosome.Get(QuadraticChromosome.EvalFunction) > 0
-            ? NormalizedRMSE(CorrectLine, chromosomeValues)
-            : CubicCurveSimilarityScore(CorrectLine, chromosomeValues);
+        var fitness = /*chromosome.Get(QuadraticChromosome.EvalFunction) > 0*/
+             (NormalizedRMSE(CorrectLine, chromosomeValues) + CubicCurveSimilarityScore(CorrectLine, chromosomeValues))
+            / 2;
 
         Logger?.AccumulateAgentLog(CurrentGeneration, chromosome, fitness, 0, 0, 0);
         return fitness;

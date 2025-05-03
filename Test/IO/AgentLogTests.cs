@@ -25,7 +25,7 @@ public class AgentLogTests
     public void AgentLog_SetProperties_ShouldReflectCorrectValues()
     {
         // Arrange  
-        var chromosome = new ChromosomeDto { Weights = new Dictionary<string, double> { { "Stat1", 1.0 }, { "Stat2", 2.0 } } };
+        var chromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat1", 1.0 }, { "Stat2", 2.0 } } };
         var agentLog = new AgentLog
         {
             Generation = 1,
@@ -49,11 +49,11 @@ public class AgentLogTests
     public void AgentLog_ChromosomeWeights_ShouldBeSetCorrectly()
     {
         // Arrange  
-        var chromosome = new ChromosomeDto { Weights = new Dictionary<string, double> { { "Speed", 1.5 }, { "Strength", 3.0 } } };
+        var chromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Speed", 1.5 }, { "Strength", 3.0 } } };
         var agentLog = new AgentLog { Chromosome = chromosome };
 
         // Act & Assert  
-        Assert.That(agentLog.Chromosome.Weights["Speed"], Is.EqualTo(1.5));
-        Assert.That(agentLog.Chromosome.Weights["Strength"], Is.EqualTo(3.0));
+        Assert.That(agentLog.Chromosome.MutableStatsByName["Speed"], Is.EqualTo(1.5));
+        Assert.That(agentLog.Chromosome.MutableStatsByName["Strength"], Is.EqualTo(3.0));
     }
 }

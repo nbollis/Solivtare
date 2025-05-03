@@ -1,4 +1,6 @@
-﻿namespace SolvitaireGenetics;
+﻿using System.Text.Json.Serialization;
+
+namespace SolvitaireGenetics;
 
 public class SolitaireChromosome : Chromosome
 {
@@ -32,7 +34,7 @@ public class SolitaireChromosome : Chromosome
         MutableStatsByName[AceInTableauWeightName] = GenerateRandomWeight();
         MutableStatsByName[MoveCountWeightName] = GenerateRandomWeight();
     }
-
+    [JsonConstructor]
     public SolitaireChromosome() : this(Random.Shared) { }
 
     public double GetWeight(string weightName) => MutableStatsByName.TryGetValue(weightName, out var value) ? value : 0;
