@@ -3,22 +3,17 @@ using MathNet.Numerics.Statistics;
 
 namespace SolvitaireGenetics;
 
-// stupid interface here only so that i can do the gui part without 8 million different controls and converters. 
-public interface IGeneticAlgorithm
-{
-    public event Action<int, GenerationLogDto>? GenerationCompleted;
-    public void RunEvolution(int generations);
-    public void WriteParameters();
-}
-
 public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgorithm
     where TChromosome : Chromosome 
     where TParameters : GeneticAlgorithmParameters 
 
 {
     public event Action<int, GenerationLogDto>? GenerationCompleted;
+    public virtual event Action<AgentLog>? AgentCompleted;
     protected readonly TParameters Parameters;
+
     protected readonly GeneticAlgorithmLogger<TChromosome> Logger;
+
     protected readonly int PopulationSize;
     protected readonly Random Random = new();
     protected readonly double MutationRate;
@@ -54,23 +49,18 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     {
         List<TChromosome> population = InitializePopulation();
 
-        Console.WriteLine($"Starting Evolution with {population.Count} chromosomes.");
-        Console.WriteLine($"Population Size: {PopulationSize}");
-        Console.WriteLine($"Mutation Rate: {MutationRate}");
-        Console.WriteLine($"Tournament Size: {TournamentSize}");
-        Console.WriteLine($"Output Directory: {Logger.OutputDirectory}");
-        int generation = CurrentGeneration;
-        for (; generation < generations; generation++)
+        int currentGeneration = CurrentGeneration;
+        for (; currentGeneration < generations + currentGeneration; currentGeneration++)
         {
-            CurrentGeneration = generation;
-            Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation {generation}: Evaluating population...");
+            CurrentGeneration = currentGeneration;
+            Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation {currentGeneration}: Evaluating population...");
 
             population = EvolvePopulation(population);
 
             var fitness = population.Select(chr => chr.Fitness).ToList();
             var generationLog = new GenerationLogDto
             {
-                Generation = generation,
+                Generation = currentGeneration,
                 BestFitness = fitness[0],
                 AverageFitness = fitness.Average(),
                 StdFitness = fitness.StandardDeviation(),
@@ -80,7 +70,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             };
 
             // Fire the GenerationCompleted event
-            GenerationCompleted?.Invoke(generation, generationLog);
+            GenerationCompleted?.Invoke(currentGeneration, generationLog);
 
             FlushLogs();
         }
@@ -161,7 +151,6 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
         // Return the chromosome with the highest fitness  
         return fitnessResults.OrderByDescending(kvp => kvp.Value).First().Key;
-
     }
 
     /// <summary>

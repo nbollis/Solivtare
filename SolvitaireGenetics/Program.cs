@@ -43,7 +43,14 @@ namespace SolvitaireGenetics
             // Run the genetic algorithm
             try
             {
-                algorithm.WriteParameters();
+                var configFilePath = Path.Combine(options.OutputDirectory, "RunParameters.json");
+                if (File.Exists(configFilePath))
+                {
+                    File.Delete(configFilePath);
+                }
+                options.SaveToFile(configFilePath);
+
+
                 algorithm.RunEvolution(options.Generations);
             }
             catch (Exception ex)

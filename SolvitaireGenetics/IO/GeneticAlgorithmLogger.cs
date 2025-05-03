@@ -9,7 +9,6 @@ namespace SolvitaireGenetics;
 /// <typeparam name="TChromosome"></typeparam>  
 public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
 {
-    
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly string _generationLogFilePath;
     private readonly string _agentLogFilePath;
@@ -61,6 +60,8 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
         {
             LogGenerationInfo(generationLog);
         };
+
+        algorithm.AgentCompleted += AccumulateAgentLog;
     }
 
     /// <summary>  
@@ -115,21 +116,27 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
             Chromosome = new ChromosomeDto { Weights = chromosome.MutableStatsByName }
         };
 
+        LogAgentDetail(agentLog);
+    }
+
+    /// <summary>  
+    /// Logs detailed information for a single agent in the generation.  
+    /// </summary>  
+    public void LogAgentDetail(AgentLog agentLog)
+    {
         lock (_agentLogLock)
         {
             // Read existing agent logs from the file  
             var existingAgentLogs = JsonSerializer.Deserialize<List<AgentLog>>(File.ReadAllText(_agentLogFilePath), _jsonOptions) ?? new List<AgentLog>();
-
             // Add the new agent log  
             existingAgentLogs.Add(agentLog);
-
             // Write back to the file  
             File.WriteAllText(_agentLogFilePath, JsonSerializer.Serialize(existingAgentLogs, _jsonOptions));
         }
     }
 
     /// <summary>
-    /// Accumulates detailed information for a single agent in the generation.
+    /// Accumulates detailed information for a single agent in the generation. Write the batch with FlushAgentLogs.
     /// </summary>
     public void AccumulateAgentLog(int generation, TChromosome chromosome, double fitness, int gamesWon, int movesMade, int gamesPlayed)
     {
@@ -143,6 +150,17 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
             Chromosome = new ChromosomeDto { Weights = chromosome.MutableStatsByName }
         };
 
+        lock (_agentLogLock)
+        {
+            _agentLogBatch.Add(agentLog);
+        }
+    }
+
+    /// <summary>
+    /// Accumulates detailed information for a single agent in the generation. Write the batch with FlushAgentLogs.
+    /// </summary>
+    public void AccumulateAgentLog(AgentLog agentLog)
+    {
         lock (_agentLogLock)
         {
             _agentLogBatch.Add(agentLog);

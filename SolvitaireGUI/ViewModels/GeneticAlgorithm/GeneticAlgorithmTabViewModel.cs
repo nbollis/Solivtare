@@ -1,10 +1,12 @@
-﻿using System.IO;
+﻿using System.Collections.Concurrent;
+using System.IO;
 using SolvitaireGenetics;
 using System.Windows;
 using System.Windows.Input;
 using ScottPlot.WPF;
 using SolvitairePlotting;
 using ScottPlot;
+using System.Threading;
 
 namespace SolvitaireGUI;
 
@@ -30,7 +32,10 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     private int _currentGeneration;
     private bool _isAlgorithmRunning;
-    private readonly List<GenerationLogDto> _generationalLogs = new();
+    private bool _isPaused;
+    private CancellationTokenSource _cancellationTokenSource;
+    private ManualResetEventSlim _pauseEvent = new(true); // Initially not paused
+    private readonly ConcurrentQueue<GenerationLogDto> _generationalLogs = new();
 
     public bool IsAlgorithmRunning
     {
@@ -39,6 +44,15 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         {
             _isAlgorithmRunning = value;
             OnPropertyChanged(nameof(IsAlgorithmRunning));
+        }
+    }
+    public bool IsPaused
+    {
+        get => _isPaused;
+        set
+        {
+            _isPaused = value;
+            OnPropertyChanged(nameof(IsPaused));
         }
     }
 
@@ -53,10 +67,16 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     }
 
     public ICommand RunAlgorithmCommand { get; }
+    public ICommand PauseCommand { get; }
+    public ICommand ResumeCommand { get; }
+    public ICommand StopCommand { get; }
 
     private async void RunAlgorithm()
     {
+        _cancellationTokenSource = new CancellationTokenSource();
+        _pauseEvent.Set(); // Ensure the algorithm is not paused
         IsAlgorithmRunning = true;
+        IsPaused = false;
 
         try
         {
@@ -64,30 +84,29 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             OnPropertyChanged(nameof(IsAlgorithmRunning));
 
             // Set up the plots
+            _generationalLogs.Clear();
             SetUpPlots();
 
             // Create and run the genetic algorithm using the factory
             IGeneticAlgorithm? algorithm = null;
-
-            if (Parameters is SolitaireGeneticAlgorithmParameters solitaireParams)
+            switch (Parameters)
             {
-                algorithm = new GeneticSolitaireAlgorithm(solitaireParams);
-            }
-            else if (Parameters is QuadraticGeneticAlgorithmParameters quad)
-            {
-                algorithm = new QuadraticRegressionGeneticAlgorithm(quad);
-            }
-            else
-            {
-                MessageBox.Show("Invalid parameters provided for the Genetic Algorithm.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                case SolitaireGeneticAlgorithmParameters solitaireParams:
+                    algorithm = new GeneticSolitaireAlgorithm(solitaireParams);
+                    break;
+                case QuadraticGeneticAlgorithmParameters quad:
+                    algorithm = new QuadraticRegressionGeneticAlgorithm(quad);
+                    break;
+                default:
+                    MessageBox.Show("Invalid parameters provided for the Genetic Algorithm.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
             }
 
             // Subscribe to events
             algorithm.GenerationCompleted += OnGenerationCompleted;
 
             algorithm.WriteParameters();
-            await Task.Run(() => algorithm.RunEvolution(Parameters.Generations));
+            await Task.Run(() => RunEvolutionWithControl(algorithm, Parameters.Generations, _cancellationTokenSource.Token));
 
             MessageBox.Show("Genetic Algorithm completed successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -101,9 +120,46 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         }
     }
 
+    private void RunEvolutionWithControl(IGeneticAlgorithm algorithm, int generations, CancellationToken cancellationToken)
+    {
+        for (int generation = 0; generation < generations; generation++)
+        {
+            // Check for cancellation
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Wait if paused
+            _pauseEvent.Wait(cancellationToken);
+
+            // Run one generation
+            algorithm.RunEvolution(1);
+        }
+    }
+
+    private void PauseAlgorithm()
+    {
+        _pauseEvent.Reset(); // Pause the algorithm
+        IsPaused = true;
+    }
+
+    private void ResumeAlgorithm()
+    {
+        _pauseEvent.Set(); // Resume the algorithm
+        IsPaused = false;
+    }
+
+    private void StopAlgorithm()
+    {
+        _cancellationTokenSource?.Cancel(); // Stop the algorithm
+        IsAlgorithmRunning = false;
+        IsPaused = false;
+    }
+
     #endregion
 
     #region Plotting
+
+    private readonly TimeSpan _plotUpdateInterval = TimeSpan.FromMilliseconds(1000); // Adjust as needed
+    private DateTime _lastPlotUpdateTime = DateTime.MinValue;
 
     public WpfPlot AverageStatByGeneration { get; set; } = new WpfPlot();
     public WpfPlot FitnessByGeneration { get; set; } = new WpfPlot();
@@ -125,18 +181,25 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     private void OnGenerationCompleted(int generation, GenerationLogDto generationLog)
     {
+        // Throttle updates to avoid overwhelming the UI
+        if (DateTime.Now - _lastPlotUpdateTime < _plotUpdateInterval)
+        {
+            return;
+        }
+
+        _lastPlotUpdateTime = DateTime.Now;
+
         CurrentGeneration = generation;
-        _generationalLogs.Add(generationLog);
+        _generationalLogs.Enqueue(generationLog); 
+        var sortedLogs = _generationalLogs.ToList();
+        int[] generations = sortedLogs.Select(p => p.Generation).ToArray();
 
         FitnessByGeneration.Plot.Clear();
         AverageStatByGeneration.Plot.Clear();
 
-        AverageStatByGeneration.Plot.Axes.SetLimits(0, generationLog.Generation + 1, -3, 3);
-        FitnessByGeneration.Plot.Axes.SetLimits(0, generationLog.Generation + 1, -1, 1);
-
-        // Sort generationalLogs once to avoid repeated sorting
-        var sortedLogs = _generationalLogs.OrderBy(p => p.Generation).ToList();
-        int[] generations = sortedLogs.Select(p => p.Generation).ToArray();
+        //AverageStatByGeneration.Plot.Axes.SetLimits(0, generationLog.Generation + 1, -3, 3);
+        //FitnessByGeneration.Plot.Axes.SetLimits(0, generationLog.Generation + 1, -1, 1);
+        
 
         // Extract fitness data in a single pass
         var bestFitness = new double[sortedLogs.Count];

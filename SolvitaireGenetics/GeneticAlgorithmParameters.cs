@@ -4,8 +4,6 @@ namespace SolvitaireGenetics;
 
 public abstract class GeneticAlgorithmParameters
 {
-    public abstract void SaveToFile(string filePath);
-
     public virtual string OutputDirectory { get; set; } = ".";
     public virtual int PopulationSize { get; set; } = 100;
     public virtual int Generations { get; set; } = 1000;
@@ -34,5 +32,11 @@ public abstract class GeneticAlgorithmParameters
         }
 
         throw new NotSupportedException("Unknown parameter type in the configuration file.");
+    }
+
+    public virtual void SaveToFile(string filePath)
+    {
+        var json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(filePath, json);
     }
 }
