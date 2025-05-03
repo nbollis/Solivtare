@@ -13,7 +13,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TabControl>
+        <TabControl SelectedIndex="2">
             <TabItem Header="Agent Playing" DataContext="{Binding AgentPlayingViewModel}">
                 <local:AgentPlayingView Grid.Column="0" DataContext="{Binding }"/>
             </TabItem>

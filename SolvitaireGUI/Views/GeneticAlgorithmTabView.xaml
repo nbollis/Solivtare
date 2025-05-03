@@ -22,7 +22,7 @@
 
         <!-- Algorithm Type Selection -->
         
-        <Expander Header="Parameters" ExpandDirection="Left" >
+        <Expander Header="Parameters" ExpandDirection="Left" IsExpanded="True">
             <DockPanel>
 
                 <GroupBox Header="Algorithm Parameters" DockPanel.Dock="Top" BorderBrush="{StaticResource BorderColor}">

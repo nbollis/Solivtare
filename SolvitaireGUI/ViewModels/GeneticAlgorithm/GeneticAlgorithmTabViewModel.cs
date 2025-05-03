@@ -7,6 +7,7 @@ using ScottPlot.WPF;
 using SolvitairePlotting;
 using ScottPlot;
 using System.Threading;
+using ScottPlot.Finance;
 
 namespace SolvitaireGUI;
 
@@ -114,7 +115,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             }
 
             // Subscribe to events
-            algorithm.GenerationCompleted += RefreshGenerationalPlots;
+            algorithm.GenerationCompleted += OnGenerationFinished;
 
             if (WriteOutput)
             {
@@ -173,7 +174,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     #region Plotting
 
-    private readonly TimeSpan _plotUpdateInterval = TimeSpan.FromMilliseconds(1000); // Adjust as needed
+    private readonly TimeSpan _plotUpdateInterval = TimeSpan.FromMilliseconds(500); // Adjust as needed
     private DateTime _lastPlotUpdateTime = DateTime.MinValue;
 
     public WpfPlot AverageStatByGeneration { get; set; } = new WpfPlot();
@@ -194,82 +195,100 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         AverageStatByGeneration.Refresh();
     }
 
-    private void RefreshGenerationalPlots(int generation, GenerationLogDto generationLog)
+    private void OnGenerationFinished(int generation, GenerationLogDto generationLog)
     {
+        int movingAverageAmount = 1;
+        CurrentGeneration = generation;
+        _generationalLogs.Enqueue(generationLog);
+
         // Throttle updates to avoid overwhelming the UI
         if (DateTime.Now - _lastPlotUpdateTime < _plotUpdateInterval)
         {
             return;
         }
-
         _lastPlotUpdateTime = DateTime.Now;
 
-        CurrentGeneration = generation;
-        _generationalLogs.Enqueue(generationLog); 
         var sortedLogs = _generationalLogs.ToList();
-        int[] generations = sortedLogs.Select(p => p.Generation).ToArray();
-
-        FitnessByGeneration.Plot.Clear();
-        AverageStatByGeneration.Plot.Clear();
-
-        //AverageStatByGeneration.Plot.Axes.SetLimits(0, generationLog.Generation + 1, -3, 3);
-        //FitnessByGeneration.Plot.Axes.SetLimits(0, generationLog.Generation + 1, -1, 1);
-        
 
         // Extract fitness data in a single pass
         var bestFitness = new double[sortedLogs.Count];
         var averageFitness = new double[sortedLogs.Count];
         var stdFitness = new double[sortedLogs.Count];
-        var avgChromosomes = new ChromosomeDto[sortedLogs.Count];
-        var bestChromosomes = new ChromosomeDto[sortedLogs.Count];
+        var statNames = generationLog.AverageChromosome.Weights.Keys.ToArray();
+        var averageStatValues = new Dictionary<string, double[]>();
+        var bestStatValues = new Dictionary<string, double[]>();
 
         for (int i = 0; i < sortedLogs.Count; i++)
         {
             bestFitness[i] = sortedLogs[i].BestFitness;
             averageFitness[i] = sortedLogs[i].AverageFitness;
             stdFitness[i] = sortedLogs[i].StdFitness;
-            avgChromosomes[i] = sortedLogs[i].AverageChromosome;
-            bestChromosomes[i] = sortedLogs[i].BestChromosome;
         }
 
-        // Average Stat Plot  
-        var statNames = generationLog.AverageChromosome.Weights.Keys.ToArray();
-        for (int i = 0; i < statNames.Length; i++)
+        //bestFitness = CalculateMovingAverage(bestFitness, movingAverageAmount);
+        //averageFitness = CalculateMovingAverage(averageFitness, movingAverageAmount);
+        //stdFitness = CalculateMovingAverage(stdFitness, movingAverageAmount);
+
+        // Extract values for each stat  
+        foreach (var statName in statNames)
         {
-            var statName = statNames[i];
+            var averageValues = sortedLogs.Select(log => log.AverageChromosome.Weights[statName]).ToArray();
+            var bestValues = sortedLogs.Select(log => log.BestChromosome.Weights[statName]).ToArray();
 
-            // Generate a consistent color for both average and best plots  
-            var color = PlottingConstants.AllColors[i];
-
-            // Add Average scatter plot for each stat  
-            var scatter = AverageStatByGeneration.Plot.Add.Scatter(
-                generations.Select(g => (double)g).ToArray(),
-                sortedLogs.Select(log => log.AverageChromosome.Weights[statName]).ToArray());
-            scatter.LegendText = statName;
-            scatter.LinePattern = LinePattern.Solid;
-            scatter.Color = color;
-
-            // Add Best scatter plot for each stat  
-            var bestScatter = AverageStatByGeneration.Plot.Add.Scatter(
-                generations.Select(g => (double)g).ToArray(),
-                sortedLogs.Select(log => log.BestChromosome.Weights[statName]).ToArray());
-            bestScatter.LinePattern = LinePattern.Dashed;
-            bestScatter.Color = color;
+            // Apply moving average of 5  
+            //averageStatValues[statName] = CalculateMovingAverage(averageValues, movingAverageAmount);
+            //bestStatValues[statName] = CalculateMovingAverage(bestValues, movingAverageAmount);
+            averageStatValues[statName] = averageValues;
+            bestStatValues[statName] = bestValues;
         }
-        AverageStatByGeneration.Plot.ShowLegend(Alignment.UpperLeft, Orientation.Horizontal);
 
+        lock (AverageStatByGeneration.Plot.Sync)
+        {
+            AverageStatByGeneration.Plot.Clear();
+            
+            // Add extracted values to the plots  
+            for (int i = 0; i < statNames.Length; i++)
+            {
+                var statName = statNames[i];
 
-        // Fitness Plot
-        var bestSig = FitnessByGeneration.Plot.Add.Scatter(generations, bestFitness);
-        bestSig.LegendText = "Best Fitness";
+                // Generate a consistent color for both average and best plots  
+                var color = PlottingConstants.AllColors[i];
 
-        var avgSig = FitnessByGeneration.Plot.Add.Scatter(generations, averageFitness);
-        avgSig.LegendText = "Average Fitness";
+                // Add Average scatter plot for each stat  
+                var scatter = AverageStatByGeneration.Plot.Add.Signal(averageStatValues[statName]);
+                scatter.LegendText = statName;
+                scatter.LinePattern = LinePattern.Solid;
+                scatter.Color = color;
+                scatter.LineWidth = 2;
 
-        var stdSig = FitnessByGeneration.Plot.Add.Scatter(generations, stdFitness);
-        stdSig.LegendText = "Std Fitness";
+                // Add Best scatter plot for each stat  
+                var bestScatter = AverageStatByGeneration.Plot.Add.Signal(bestStatValues[statName]);
+                bestScatter.LinePattern = LinePattern.Dashed;
+                bestScatter.Color = color;
+            }
 
-        FitnessByGeneration.Plot.ShowLegend(Alignment.UpperLeft, Orientation.Vertical);
+            AverageStatByGeneration.Plot.ShowLegend(Alignment.UpperLeft, Orientation.Horizontal);
+        }
+        
+        lock (FitnessByGeneration.Plot.Sync)
+        {
+            FitnessByGeneration.Plot.Clear();
+
+            // Fitness Plot
+            var bestSig = FitnessByGeneration.Plot.Add.Signal(bestFitness);
+            bestSig.LegendText = "Best Fitness";
+            bestSig.LineWidth = 2;
+
+            var avgSig = FitnessByGeneration.Plot.Add.Signal(averageFitness);
+            avgSig.LegendText = "Average Fitness";
+            avgSig.LineWidth = 2;
+
+            var stdSig = FitnessByGeneration.Plot.Add.Signal(stdFitness);
+            stdSig.LegendText = "Std Fitness";
+            stdSig.LineWidth = 2;
+
+            FitnessByGeneration.Plot.ShowLegend(Alignment.UpperLeft, Orientation.Vertical);
+        }
 
         // Refresh the plots
         FitnessByGeneration.Refresh();
@@ -347,6 +366,21 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
                 MessageBox.Show("Please drop a valid JSON file.", "Invalid File", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
+    }
+
+    private double[] CalculateMovingAverage(double[] values, int windowSize)
+    {
+        if (values.Length < windowSize)
+            return values;
+
+        var movingAverage = new double[values.Length];
+        for (int i = 0; i < values.Length; i++)
+        {
+            int start = Math.Max(0, i - windowSize + 1);
+            int count = i - start + 1;
+            movingAverage[i] = values.Skip(start).Take(count).Average();
+        }
+        return movingAverage;
     }
 }
 

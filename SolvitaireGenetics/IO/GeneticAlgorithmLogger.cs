@@ -14,11 +14,13 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
     private readonly string _agentLogFilePath;
     private readonly object _generationLogLock = new();
     private readonly object _agentLogLock = new();
-    private readonly List<AgentLog> _agentLogBatch = new(); // In-memory batch for AgentLogs
+    protected readonly List<AgentLog> AgentLogBatch = new(); // In-memory batch for AgentLogs
     internal readonly string OutputDirectory;
 
     public GeneticAlgorithmLogger(string outputDirectory, bool ensureUniquePath = false)
     {
+        if (string.IsNullOrEmpty(outputDirectory))
+            return;
         OutputDirectory = outputDirectory ?? throw new ArgumentNullException(nameof(outputDirectory), "Output directory cannot be null.");
         if (!Directory.Exists(outputDirectory))
             Directory.CreateDirectory(outputDirectory);
@@ -83,7 +85,7 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
         LogGenerationInfo(generationLog);
     }
 
-    public void LogGenerationInfo(GenerationLogDto generationLog)
+    public virtual void LogGenerationInfo(GenerationLogDto generationLog)
     {
         lock (_generationLogLock)
         {
@@ -98,7 +100,7 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
         }
 
         // Log to console  
-        Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation Log: {JsonSerializer.Serialize(generationLog, _jsonOptions)}");
+        Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation: {generationLog.Generation}. Best Fitness: {generationLog.BestFitness}. Average Fitness: {generationLog.AverageFitness}");
     }
 
     /// <summary>  
@@ -122,7 +124,7 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
     /// <summary>  
     /// Logs detailed information for a single agent in the generation.  
     /// </summary>  
-    public void LogAgentDetail(AgentLog agentLog)
+    public virtual void LogAgentDetail(AgentLog agentLog)
     {
         lock (_agentLogLock)
         {
@@ -152,25 +154,25 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
 
         lock (_agentLogLock)
         {
-            _agentLogBatch.Add(agentLog);
+            AgentLogBatch.Add(agentLog);
         }
     }
 
     /// <summary>
     /// Accumulates detailed information for a single agent in the generation. Write the batch with FlushAgentLogs.
     /// </summary>
-    public void AccumulateAgentLog(AgentLog agentLog)
+    public virtual void AccumulateAgentLog(AgentLog agentLog)
     {
         lock (_agentLogLock)
         {
-            _agentLogBatch.Add(agentLog);
+            AgentLogBatch.Add(agentLog);
         }
     }
 
     /// <summary>
     /// Writes out the accumulated AgentLogs to the file and clears the in-memory batch.
     /// </summary>
-    public void FlushAgentLogs()
+    public virtual void FlushAgentLogs()
     {
         lock (_agentLogLock)
         {
@@ -178,38 +180,17 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
             var existingAgentLogs = JsonSerializer.Deserialize<List<AgentLog>>(File.ReadAllText(_agentLogFilePath), _jsonOptions) ?? new List<AgentLog>();
 
             // Add the accumulated logs
-            existingAgentLogs.AddRange(_agentLogBatch);
+            existingAgentLogs.AddRange(AgentLogBatch);
 
             // Write back to the file
             File.WriteAllText(_agentLogFilePath, JsonSerializer.Serialize(existingAgentLogs, _jsonOptions));
 
             // Clear the in-memory batch
-            _agentLogBatch.Clear();
+            AgentLogBatch.Clear();
         }
     }
 
-    public List<AgentLog> GetAllAgentLogs()
-    {
-        lock (_agentLogLock)
-        {
-            if (!File.Exists(_agentLogFilePath))
-                return new List<AgentLog>();
-            return JsonSerializer.Deserialize<List<AgentLog>>(File.ReadAllText(_agentLogFilePath), _jsonOptions) ?? new List<AgentLog>();
-        
-        }
-    }
-
-    public List<GenerationLogDto> GetAllGenerationalLogDtos()
-    {
-        lock (_generationLogLock)
-        {
-            if (!File.Exists(_generationLogFilePath))
-                return new List<GenerationLogDto>();
-            return JsonSerializer.Deserialize<List<GenerationLogDto>>(File.ReadAllText(_generationLogFilePath), _jsonOptions) ?? new List<GenerationLogDto>(); ;
-        }
-    }
-
-    public List<TChromosome> LoadLastGeneration(out int generationNumber)
+    public virtual List<TChromosome> LoadLastGeneration(out int generationNumber)
     {
         generationNumber = 0;
         GenerationLogDto? lastGeneration = null;
@@ -217,7 +198,8 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
         {
             if (!File.Exists(_generationLogFilePath))
                 return new List<TChromosome>();
-            var generations = JsonSerializer.Deserialize<List<GenerationLogDto>>(File.ReadAllText(_generationLogFilePath), _jsonOptions);
+            var text = File.ReadAllText(_generationLogFilePath);
+            var generations = JsonSerializer.Deserialize<List<GenerationLogDto>>(text, _jsonOptions);
             lastGeneration = generations?.LastOrDefault();
             generationNumber = lastGeneration?.Generation ?? 0;
         }
@@ -244,3 +226,82 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome
         return lastGenerationChromosomes;
     }
 }
+
+
+/// <summary>
+/// A lightweight logger that only keeps the last generation of chromosomes in memory.
+/// </summary>
+/// <typeparam name="TChromosome"></typeparam>
+public class InMemoryGeneticAlgorithmLogger<TChromosome> : GeneticAlgorithmLogger<TChromosome>
+  where TChromosome : Chromosome
+{
+    private readonly Dictionary<int, List<TChromosome>> _allChromosomesByGeneration = new();
+    private readonly List<GenerationLogDto> _generationLog = new();
+    private int _lastGenerationNumber;
+
+    public InMemoryGeneticAlgorithmLogger() : base(outputDirectory: string.Empty, ensureUniquePath: false)
+    {
+        // Disable file-based logging by passing an empty string for the output directory  
+    }
+
+    /// <summary>  
+    /// Overrides the method to store only the last generation in memory.  
+    /// </summary>  
+    public override void LogGenerationInfo(GenerationLogDto generationLog)
+    {
+        // Store the generational log in memory  
+        _generationLog.Add(generationLog);
+        _lastGenerationNumber = generationLog.Generation;
+    }
+
+    /// <summary>  
+    /// Accumulates the last generation of chromosomes in memory.  
+    /// </summary>  
+    public override void AccumulateAgentLog(AgentLog agentLog)
+    {
+        AgentLogBatch.Add(agentLog);
+    }
+
+    public override void LogAgentDetail(AgentLog agentLog)
+    {
+        _allChromosomesByGeneration[agentLog.Generation] = _allChromosomesByGeneration.TryGetValue(agentLog.Generation, out var value)
+            ? value
+            : [];
+
+        TChromosome chromosome = Activator.CreateInstance<TChromosome>();
+        chromosome.MutableStatsByName = agentLog.Chromosome.Weights;
+        chromosome.Fitness = agentLog.Fitness;
+        _allChromosomesByGeneration[agentLog.Generation].Add(chromosome);
+    }
+
+    public override void FlushAgentLogs()
+    {
+        foreach (var agentLog in AgentLogBatch)
+        {
+            TChromosome chromosome = Activator.CreateInstance<TChromosome>();
+            chromosome.MutableStatsByName = agentLog.Chromosome.Weights;
+            chromosome.Fitness = agentLog.Fitness;
+
+            if (_allChromosomesByGeneration.TryGetValue(agentLog.Generation, out var value))
+            {
+                value.Add(chromosome);
+            }
+            else
+            {
+                _allChromosomesByGeneration[agentLog.Generation] = [chromosome];
+            }
+        }
+        AgentLogBatch.Clear();
+    }
+
+    public override List<TChromosome> LoadLastGeneration(out int generationNumber)
+    {
+        generationNumber = _lastGenerationNumber;
+        if (_allChromosomesByGeneration.TryGetValue(generationNumber, out var agentLogs))
+        {
+            return agentLogs;
+        }
+        return new List<TChromosome>();
+    }
+}
+

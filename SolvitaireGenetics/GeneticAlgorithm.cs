@@ -20,6 +20,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     protected readonly int TournamentSize;
 
     public int CurrentGeneration { get; protected set; }
+    public List<TChromosome> Population { get; protected set; } = [];
 
     // Fitness cache
     private readonly ConcurrentDictionary<int, double> _fitnessCache = new();
@@ -34,8 +35,9 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         ChromosomeTemplate = chromosomeTemplate;
 
 
-        if (string.IsNullOrEmpty(parameters.OutputDirectory)) return;
-        Logger = new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory!);
+        Logger = string.IsNullOrEmpty(parameters.OutputDirectory) 
+            ? new InMemoryGeneticAlgorithmLogger<TChromosome>() 
+            : new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory!);
         Logger.SubscribeToAlgorithm(this);
     }
 
@@ -51,114 +53,94 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
     public Chromosome RunEvolution(int generations)
     {
-        List<TChromosome> population = InitializePopulation();
+        if (Population.Count == 0)
+            Population = InitializePopulation();
 
         int endGeneration = CurrentGeneration + generations;
-        for (; CurrentGeneration < endGeneration; CurrentGeneration++)
+        for (; CurrentGeneration < endGeneration;)
         {
             Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation {CurrentGeneration}: Evaluating population...");
 
-            // population is ordered by fitness, so the first chromosome is the best one
-            population = EvolvePopulation(population);
+            // Step 1: Select parents for the entire population
+            int numberOfParents = PopulationSize * 2; // Each child needs 2 parents
+            var parents = TournamentSelection(Population, numberOfParents);
 
-            var fitness = population.Select(chr => chr.Fitness).ToList();
-            var generationLog = new GenerationLogDto
+            // Step 2: Create the new population
+            for (int i = 0; i < PopulationSize; i++)
             {
-                Generation = CurrentGeneration,
-                BestFitness = fitness[0],
-                AverageFitness = fitness.Average(),
-                StdFitness = fitness.StandardDeviation(),
-                BestChromosome = new ChromosomeDto { Weights = population[0].MutableStatsByName },
-                AverageChromosome = new ChromosomeDto { Weights = Chromosome.GetAverageChromosome(population).MutableStatsByName },
-                StdChromosome = new ChromosomeDto { Weights = Chromosome.GetStandardDeviationChromosome(population).MutableStatsByName }
-            };
+                var parent1 = parents[i * 2];
+                var parent2 = parents[i * 2 + 1];
 
-            // Fire the GenerationCompleted event  
-            GenerationCompleted?.Invoke(CurrentGeneration, generationLog);
-            Logger?.FlushAgentLogs();
+                // Perform crossover and mutation
+                var child = Chromosome.Crossover(parent1, parent2);
+                child = Chromosome.Mutate(child, MutationRate);
+
+                Population[i] = child;
+            }
+
+            CurrentGeneration++;
+
+            // Step 3: Evaluate fitness for the new population
+            Parallel.ForEach(Population, chromosome =>
+            {
+                chromosome.Fitness = GetFitness(chromosome);
+            });
+
+            // Step 4: Sort the new population by fitness (descending)
+            Population = Population.OrderByDescending(chromosome => chromosome.Fitness).ToList();
+
+            // Step 5: Log the generation information
+            LogPopulation(Population);
         }
 
         // Return the best chromosome from the last generation
-        var bestChromosome = population[0];
+        var bestChromosome = Population[0];
         bestChromosome.Fitness = GetFitness(bestChromosome);
         return bestChromosome;
     }
 
     /// <summary>
-    /// Evolves the population by selecting parents,
-    /// performing crossover and mutation to create a new population.
+    /// Grab a random sample of size _tournamentSize from the population and return the best one
     /// </summary>
-    public List<TChromosome> EvolvePopulation(List<TChromosome> currentPopulation)
-    {
-        List<TChromosome> newPopulation = [];
-
-        while (newPopulation.Count < PopulationSize)
-        {
-            var parent1 = TournamentSelection(currentPopulation);
-            var parent2 = TournamentSelection(currentPopulation);
-
-            var child = Chromosome.Crossover(parent1, parent2);
-            child = Chromosome.Mutate(child, MutationRate);
-
-            newPopulation.Add(child);
-        }
-
-        // Split the population into ranges for parallel processing
-        int rangeSize = (int)Math.Ceiling((double)newPopulation.Count / Environment.ProcessorCount);
-        Parallel.For(0, Environment.ProcessorCount, rangeIndex =>
-        {
-            int start = rangeIndex * rangeSize;
-            int end = Math.Min(start + rangeSize, newPopulation.Count);
-
-            for (int i = start; i < end; i++)
-            {
-                var chromosome = newPopulation[i];
-                double fitnessValue = GetFitness(chromosome);
-                chromosome.Fitness = fitnessValue;
-            }
-        });
-
-        //newPopulation.Sort();
-        // Sort the new population by fitness (descending)
-        newPopulation = newPopulation
-            .OrderByDescending(chromosome => chromosome.Fitness)
-            .ToList();
-
-        return newPopulation;
-    }
-
     /// <summary>
-    /// Grab a random sample of size _tournamentSize from the population and return the best one.
+    /// Selects parents for the entire evolution process using tournament selection.
     /// </summary>
-    public TChromosome TournamentSelection(List<TChromosome> population)
+    protected List<TChromosome> TournamentSelection(List<TChromosome> population, int numberOfParents)
     {
-        var tournamentList = new List<TChromosome>();
-        var fitnessResults = new ConcurrentDictionary<TChromosome, double>();
+        var selectedParents = new List<TChromosome>(numberOfParents);
 
-        // Select random chromosomes for the tournament  
-        for (int i = 0; i < TournamentSize; i++)
+        // Shuffle the population to ensure fairness
+        var shuffledPopulation = population.OrderBy(_ => Random.Next()).ToList();
+        int currentIndex = 0;
+
+        // Create tournaments
+        for (int i = 0; i < numberOfParents; i++)
         {
-            tournamentList.Add(population[Random.Next(population.Count)]);
+            var tournament = new List<TChromosome>(TournamentSize);
+
+            // Select TournamentSize chromosomes from the shuffled population
+            for (int j = 0; j < TournamentSize; j++)
+            {
+                // If we reach the end of the shuffled population, reshuffle and reset the index
+                if (currentIndex >= shuffledPopulation.Count)
+                {
+                    shuffledPopulation = population.OrderBy(_ => Random.Next()).ToList();
+                    currentIndex = 0;
+                }
+
+                tournament.Add(shuffledPopulation[currentIndex]);
+                currentIndex++;
+            }
+
+            // Select the winner based on fitness
+            var winner = tournament
+                .OrderByDescending(chromosome => chromosome.Fitness)
+                .First();
+
+            selectedParents.Add(winner);
         }
 
-        // Calculate fitness for each chromosome in the tournament using range-based parallelization  
-        
-        int rangeSize = (int)Math.Ceiling((double)tournamentList.Count / Environment.ProcessorCount);
-        Parallel.For(0, Environment.ProcessorCount, rangeIndex =>
-        {
-            int start = rangeIndex * rangeSize;
-            int end = Math.Min(start + rangeSize, tournamentList.Count);
-
-            for (int i = start; i < end; i++)
-            {
-                var chromosome = tournamentList[i];
-                double fitnessValue = GetFitness(chromosome);
-                fitnessResults[chromosome] = fitnessValue;
-            }
-        });
-
-        // Return the chromosome with the highest fitness  
-        return fitnessResults.OrderByDescending(kvp => kvp.Value).First().Key;
+        return selectedParents;
     }
 
     /// <summary>
@@ -172,12 +154,15 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         {
             var lastGeneration = Logger.LoadLastGeneration(out int generationNumber);
 
-            if (lastGeneration.Count == PopulationSize && generationNumber == CurrentGeneration - 1)
+            if (lastGeneration.Count == PopulationSize)
             {
                 // If we have a last generation, use it to initialize the population
+                CurrentGeneration = generationNumber;
                 return lastGeneration;
             }
         }
+
+        List<TChromosome> population;
 
         // If we have a chromosome template, use it to create 10% of the population and mutate them
         // The other 90% will be random chromosomes crossed over with the template. 
@@ -187,18 +172,53 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             var best = Enumerable.Range(0, copiesOfBest).Select(_ => ChromosomeTemplate)
                 .Select(b => Chromosome.Mutate(b, MutationRate));
 
-            return Enumerable.Range(0, PopulationSize - copiesOfBest)
+            population =  Enumerable.Range(0, PopulationSize - copiesOfBest)
                 .Select(_ => Chromosome.CreateRandom<TChromosome>(Random)
                         .CrossOver(ChromosomeTemplate) // Temporary? Cross over with best.
                 ).Concat(best)
                 .ToList();
         }
-
-
         // If we don't have a last generation or a template, create a new random population
-        return Enumerable.Range(0, PopulationSize)
-            .Select(_ => Chromosome.CreateRandom<TChromosome>(Random))
-            .ToList();
+        else
+        {
+            population = Enumerable.Range(0, PopulationSize)
+                .Select(_ => Chromosome.CreateRandom<TChromosome>(Random))
+                .ToList();
+        }
+
+        Parallel.ForEach(population, chromosome =>
+        {
+            chromosome.Fitness = GetFitness(chromosome);
+        });
+
+        // Sort the population by fitness (descending)
+        population = population.OrderByDescending(chromosome => chromosome.Fitness).ToList();
+
+        LogPopulation(population);
+        return population;
+    }
+
+    private void LogPopulation(List<TChromosome> population)
+    {
+        var fitness = population.Select(chr => chr.Fitness).ToList();
+        var generationLog = new GenerationLogDto
+        {
+            Generation = CurrentGeneration,
+            BestFitness = fitness[0],
+            AverageFitness = fitness.Average(),
+            StdFitness = fitness.StandardDeviation(),
+            BestChromosome = new ChromosomeDto { Weights = population[0].MutableStatsByName },
+            AverageChromosome = new ChromosomeDto { Weights = Chromosome.GetAverageChromosome(population).MutableStatsByName },
+            StdChromosome = new ChromosomeDto { Weights = Chromosome.GetStandardDeviationChromosome(population).MutableStatsByName }
+        };
+
+        foreach (var chromosome in population)
+        {
+            Logger?.AccumulateAgentLog(CurrentGeneration, chromosome, chromosome.Fitness, 0, 0, 0);
+        }
+
+        GenerationCompleted?.Invoke(CurrentGeneration, generationLog); // Fire the GenerationCompleted event  
+        Logger?.FlushAgentLogs();
     }
 }
 

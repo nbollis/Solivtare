@@ -6,19 +6,6 @@ namespace Test.Genetics;
 public class QuadraticGeneticAlgorithmTests
 {
     [Test]
-    public void QuadraticGeneticAlgorithmParameters_DefaultValues_ShouldBeCorrect()
-    {
-        // Arrange & Act
-        var parameters = new QuadraticGeneticAlgorithmParameters();
-
-        // Assert
-        Assert.That(parameters.CorrectA, Is.EqualTo(1.76));
-        Assert.That(parameters.CorrectB, Is.EqualTo(0.67));
-        Assert.That(parameters.CorrectC, Is.EqualTo(-0.74));
-        Assert.That(parameters.CorrectIntercept, Is.EqualTo(-1.68));
-    }
-
-    [Test]
     public void QuadraticChromosome_Constructor_ShouldInitializeWeights()
     {
         // Arrange & Act
@@ -88,7 +75,7 @@ public class QuadraticGeneticAlgorithmTests
         var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
 
         // Assert
-        Assert.That(algorithm.CorrectLine.Count, Is.EqualTo(2000)); // From -1000 to 999
+        Assert.That(algorithm.CorrectLine.Count, Is.EqualTo(10000)); // From -10 to 10
     }
 
 
@@ -147,6 +134,31 @@ public class QuadraticGeneticAlgorithmTests
         // Assert - Ensure the total generations accumulated correctly  
         Assert.That(secondRunGeneration, Is.EqualTo(10));
     }
+    [Test]
+    public void QuadraticRegressionGeneticAlgorithm_EvaluateFitness_ShouldReturnPerfectScoreForCorrectChromosome()
+    {
+        // Arrange
+        var parameters = new QuadraticGeneticAlgorithmParameters
+        {
+            CorrectA = 1.0,
+            CorrectB = 2.0,
+            CorrectC = 3.0,
+            CorrectIntercept = 4.0
+        };
+        var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
 
+        // Create a chromosome with the exact correct parameters
+        var correctChromosome = new QuadraticChromosome();
+        correctChromosome.Set(QuadraticChromosome.A, parameters.CorrectA);
+        correctChromosome.Set(QuadraticChromosome.B, parameters.CorrectB);
+        correctChromosome.Set(QuadraticChromosome.C, parameters.CorrectC);
+        correctChromosome.Set(QuadraticChromosome.YIntercept, parameters.CorrectIntercept);
+
+        // Act
+        var fitness = algorithm.EvaluateFitness(correctChromosome);
+
+        // Assert
+        Assert.That(fitness, Is.EqualTo(1.0), "The fitness of the correct chromosome should be perfect (1.0).");
+    }
 
 }

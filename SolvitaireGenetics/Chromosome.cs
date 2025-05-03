@@ -8,6 +8,10 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
 {
     private const int RoundingPlace = 2;
     protected readonly Random Random;
+    protected bool CanFullRandomMutate = true;
+    protected int WeightMinStartValue = -2;
+    protected int WeightMaxStartValue = 2;
+
     public double Fitness { get; set; } = double.NegativeInfinity;
     public Dictionary<string, double> MutableStatsByName { get; set; }
 
@@ -49,7 +53,12 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     /// Creates a random weight from -2 to 2. 
     /// </summary>
     /// <returns></returns>
-    protected double GenerateRandomWeight() => (Random.NextDouble() * 4 - 2).Round(RoundingPlace);
+    protected double GenerateRandomWeight()
+    {
+        var range = Math.Abs(WeightMaxStartValue - WeightMinStartValue);
+        var min = Math.Min(WeightMinStartValue, WeightMaxStartValue);
+        return (Random.NextDouble() * range + min).Round(RoundingPlace);
+    }
 
     public static TChromosome CreateRandom<TChromosome>(Random random)
     {
@@ -72,17 +81,17 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         {
             // TODO: Get a better mutation system going. Maybe a gaussian distribution?
             var mutationValue = chromosome.Random.NextDouble();
-            if (mutationValue < mutationRate)
+            if (mutationValue < mutationRate && chromosome.CanFullRandomMutate)
             {
                 newChromosome.MutableStatsByName[kvp.Key] = chromosome.GenerateRandomWeight();
             }
 
-            // double the change of normal mutations is a +- 5% mutation. 
+            // double the change of normal mutations is a +- 10% mutation. 
             if (mutationValue < mutationRate * 2)
             {
                 var oldValue = newChromosome.MutableStatsByName[kvp.Key];
-                var change = oldValue * 0.05;
-                var newValue = chromosome.Random.NextSingle() > 0.5 ? oldValue + change : oldValue - change;
+                var change = oldValue * (chromosome.Random.NextDouble() * 0.2 - 0.1); // Random value between -10% and +10%  
+                var newValue = oldValue + change;
                 newChromosome.MutableStatsByName[kvp.Key] = newValue.Round(RoundingPlace);
             }
         }
