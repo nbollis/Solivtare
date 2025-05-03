@@ -10,11 +10,28 @@ namespace SolvitaireGUI;
 
 public class GeneticAlgorithmTabViewModel : BaseViewModel
 {
+    
+    public GeneticAlgorithmTabViewModel()
+    {
+        CurrentGeneration = 0;
+        SelectedAlgorithmType = GeneticAlgorithmType.Solitaire; // Default selection
+        UpdateParameters();
+
+        RunAlgorithmCommand = new RelayCommand(RunAlgorithm);
+    }
+
+    public GeneticAlgorithmTabViewModel(GeneticAlgorithmParameters parameters) : this()
+    {
+        Parameters = parameters;
+        SetUpPlots();
+    }
+
+    #region Algorithm Running
+
     private int _currentGeneration;
     private bool _isAlgorithmRunning;
-    private List<GenerationLogDto> _generationalLogs = new();
+    private readonly List<GenerationLogDto> _generationalLogs = new();
 
-    public GeneticAlgorithmParameters Parameters { get; set; }
     public bool IsAlgorithmRunning
     {
         get => _isAlgorithmRunning;
@@ -36,14 +53,6 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     }
 
     public ICommand RunAlgorithmCommand { get; }
-
-    public GeneticAlgorithmTabViewModel(GeneticAlgorithmParameters parameters)
-    {
-        CurrentGeneration = 0;
-        Parameters = parameters;
-        RunAlgorithmCommand = new RelayCommand(RunAlgorithm); 
-        SetUpPlots();
-    }
 
     private async void RunAlgorithm()
     {
@@ -92,6 +101,8 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         }
     }
 
+    #endregion
+
     #region Plotting
 
     public WpfPlot AverageStatByGeneration { get; set; } = new WpfPlot();
@@ -100,13 +111,13 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     private void SetUpPlots()
     {
         FitnessByGeneration.Plot.Clear();
-        FitnessByGeneration.Plot.Axes.SetLimits(0, Parameters.Generations-1, -1, 1);
+        FitnessByGeneration.Plot.Axes.SetLimits(0, Parameters.Generations - 1, -1, 1);
         FitnessByGeneration.Plot.XLabel("Generation");
         FitnessByGeneration.Plot.YLabel("Fitness");
         FitnessByGeneration.Refresh();
 
         AverageStatByGeneration.Plot.Clear();
-        AverageStatByGeneration.Plot.Axes.SetLimits(0, Parameters.Generations-1, -3, 3);
+        AverageStatByGeneration.Plot.Axes.SetLimits(0, Parameters.Generations - 1, -3, 3);
         AverageStatByGeneration.Plot.XLabel("Generation");
         AverageStatByGeneration.Plot.YLabel("Weight");
         AverageStatByGeneration.Refresh();
@@ -117,7 +128,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         CurrentGeneration = generation;
         _generationalLogs.Add(generationLog);
 
-        FitnessByGeneration.Plot.Clear(); 
+        FitnessByGeneration.Plot.Clear();
         AverageStatByGeneration.Plot.Clear();
 
         AverageStatByGeneration.Plot.Axes.SetLimits(0, generationLog.Generation + 1, -3, 3);
@@ -189,6 +200,48 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         OnPropertyChanged(nameof(FitnessByGeneration));
     }
 
+    #endregion
+
+    #region Algorithm Type and Parameter Selection
+
+    private GeneticAlgorithmType _selectedAlgorithmType;
+    private GeneticAlgorithmParameters _parameters;
+
+    public GeneticAlgorithmType SelectedAlgorithmType
+    {
+        get => _selectedAlgorithmType;
+        set
+        {
+            if (_selectedAlgorithmType != value)
+            {
+                _selectedAlgorithmType = value;
+                OnPropertyChanged(nameof(SelectedAlgorithmType));
+                UpdateParameters();
+            }
+        }
+    }
+
+    public GeneticAlgorithmParameters Parameters
+    {
+        get => _parameters;
+        set
+        {
+            _parameters = value;
+            OnPropertyChanged(nameof(Parameters));
+        }
+    }
+
+    public List<GeneticAlgorithmType> AlgorithmTypes { get; } = Enum.GetValues(typeof(GeneticAlgorithmType)).Cast<GeneticAlgorithmType>().ToList();
+
+    private void UpdateParameters()
+    {
+        Parameters = SelectedAlgorithmType switch
+        {
+            GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParameters(),
+            GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParameters(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
 
     #endregion
 
@@ -203,7 +256,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
                 {
                     // Dynamically load the correct parameter type, Update the Parameters property
                     Parameters = GeneticAlgorithmParameters.LoadFromFile(filePath);
-                    OnPropertyChanged(nameof(Parameters)); 
+                    OnPropertyChanged(nameof(Parameters));
                     SetUpPlots();
                 }
                 catch (Exception ex)

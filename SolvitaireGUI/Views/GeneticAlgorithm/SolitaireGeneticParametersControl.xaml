@@ -1,0 +1,59 @@
+﻿<UserControl x:Class="SolvitaireGUI.SolitaireGeneticParametersControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SolvitaireGUI"
+             mc:Ignorable="d" 
+             d:DataContext="{x:Static local:SolitaireGeneticAlgorithmParametersModel.Instance}"
+             d:DesignHeight="450" d:DesignWidth="300">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" />
+            <!-- Label column -->
+            <ColumnDefinition Width="*" />
+            <!-- Input column -->
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <!-- Spacer -->
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <!-- Buttons -->
+        </Grid.RowDefinitions>
+
+        <!-- Decks to Use -->
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Decks to Use:" VerticalAlignment="Center" Margin="5"/>
+        <TextBox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right"  TextAlignment="Right"
+             Text="{Binding DecksToUse}" Margin="5"
+             Style="{StaticResource TextBoxStyle}" MinWidth="240" />
+
+        <!-- Max Moves Per Generation -->
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="Max Moves Per Generation:" VerticalAlignment="Center" Margin="5" />
+        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding MaxMovesPerGeneration}" Margin="5"
+             Style="{StaticResource TextBoxStyle}" />
+
+        <!-- Max Games Per Generation -->
+        <TextBlock Grid.Row="7" Grid.Column="0" Text="Max Games Per Generation:" VerticalAlignment="Center" Margin="5" />
+        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding MaxGamesPerGeneration}" Margin="5"
+             Style="{StaticResource TextBoxStyle}" />
+
+        <!-- Buttons -->
+        <!--<StackPanel Grid.Column="0" Grid.Row="11" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Button Content="Save Params" Command="{Binding SaveParametersCommand}" 
+                Style="{StaticResource RoundedButtonStyle}" Margin="5" />
+            <Button Content="Load Params" Command="{Binding LoadParametersCommand}"
+                Style="{StaticResource RoundedButtonStyle}" Margin="5" />
+        </StackPanel>-->
+    </Grid>
+</UserControl>

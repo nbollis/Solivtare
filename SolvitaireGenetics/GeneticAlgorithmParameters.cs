@@ -27,6 +27,11 @@ public abstract class GeneticAlgorithmParameters
             return JsonSerializer.Deserialize<SolitaireGeneticAlgorithmParameters>(json)
                    ?? throw new InvalidOperationException("Failed to deserialize SolitaireGeneticAlgorithmParameters.");
         }
+        if (json.Contains("\"CorrectA\"")) // Example heuristic
+        {
+            return JsonSerializer.Deserialize<QuadraticGeneticAlgorithmParameters>(json)
+                   ?? throw new InvalidOperationException("Failed to deserialize SolitaireGeneticAlgorithmParameters.");
+        }
 
         throw new NotSupportedException("Unknown parameter type in the configuration file.");
     }

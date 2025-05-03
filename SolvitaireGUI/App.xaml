@@ -11,6 +11,11 @@
         <!-- Colors -->
         <SolidColorBrush x:Key="ButtonColor" Color="#78C2D9" />
         <SolidColorBrush x:Key="GreenAccentColor" Color="#7be063" />
+        <SolidColorBrush x:Key="BackgroundLightColor" Color="#f5ebe0" />
+        <SolidColorBrush x:Key="BackgroundColor" Color="#edede9" />
+        <SolidColorBrush x:Key="BackgroundDarkColor" Color="#e3d5ca" />
+        <SolidColorBrush x:Key="BorderColor" Color="#8d99ae" />
+        <SolidColorBrush x:Key="ForegroundColor" Color="#adc178" />
 
         <!-- Converters -->
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -28,6 +33,7 @@
                     <Setter Property="CornerRadius" Value="5"/>
                 </Style>
             </Style.Resources>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}" />
         </Style>
 
         <Style x:Key="TextBoxStyle" TargetType="TextBox">

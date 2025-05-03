@@ -1,6 +1,4 @@
-﻿
-using SolvitaireCore;
-using SolvitaireGenetics;
+﻿using SolvitaireGenetics;
 
 namespace SolvitaireGUI;
 public class MainWindowViewModel : BaseViewModel

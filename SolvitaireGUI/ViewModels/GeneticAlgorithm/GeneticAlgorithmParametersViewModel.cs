@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Text.Json;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using SolvitaireGenetics;
 
@@ -60,8 +58,8 @@ public abstract class GeneticAlgorithmParametersViewModel : BaseViewModel
         }
     }
 
-    public ICommand SaveParametersCommand { get; }
-    public ICommand LoadParametersCommand { get; }
+    public virtual ICommand SaveParametersCommand { get; }
+    public virtual ICommand LoadParametersCommand { get; }
 
     public GeneticAlgorithmParametersViewModel(GeneticAlgorithmParameters parameters)
     {
@@ -92,16 +90,26 @@ public abstract class GeneticAlgorithmParametersViewModel : BaseViewModel
         }
     }
 
-    protected abstract void LoadParameters();
-
-    public static GeneticAlgorithmParametersViewModel LoadFromFile(string filePath)
+    protected virtual void LoadParameters()
     {
-        var paramseters = GeneticAlgorithmParameters.LoadFromFile(filePath);
-
-        return paramseters switch
+        try
         {
-            SolitaireGeneticAlgorithmParameters solitaireParams => new SolitaireGeneticAlgorithmParametersViewModel(solitaireParams),
-            _ => throw new NotSupportedException("Unknown parameter type in the configuration file.")
-        };
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "JSON Files (*.json)|*.json",
+                DefaultExt = ".json"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                _parameters = GeneticAlgorithmParameters.LoadFromFile(openFileDialog.FileName);
+                OnPropertyChanged(null); // Notify all properties have changed
+                MessageBox.Show("Parameters loaded successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to load parameters: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }

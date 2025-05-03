@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using SolvitaireCore;
 using SolvitaireGenetics;
 
 namespace SolvitaireGUI;
@@ -38,7 +39,7 @@ public class SolitaireGeneticAlgorithmParametersViewModel(SolitaireGeneticAlgori
 
     public SolitaireGeneticAlgorithmParameters GetParameters()
     {
-        return ((SolitaireGeneticAlgorithmParameters)_parameters);
+        return (SolitaireGeneticAlgorithmParameters)_parameters;
     }
 
     protected override void LoadParameters()
@@ -62,5 +63,15 @@ public class SolitaireGeneticAlgorithmParametersViewModel(SolitaireGeneticAlgori
         {
             MessageBox.Show($"Failed to load parameters: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+}
+
+public class SolitaireGeneticAlgorithmParametersModel : SolitaireGeneticAlgorithmParametersViewModel
+{
+    public static SolitaireGeneticAlgorithmParametersModel Instance => new();
+
+    SolitaireGeneticAlgorithmParametersModel() : base(new SolitaireGeneticAlgorithmParameters())
+    {
+
     }
 }
