@@ -1,9 +1,12 @@
-﻿namespace SolvitaireGenetics;
+﻿using MathNet.Numerics;
+
+namespace SolvitaireGenetics;
 
 public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChromosome, QuadraticGeneticAlgorithmParameters>
 {
     private int _samplingSize = 10000;
     public double[] CorrectLine { get; }
+    public override event Action<AgentLog>? AgentCompleted;
 
     public QuadraticRegressionGeneticAlgorithm(QuadraticGeneticAlgorithmParameters parameters, QuadraticChromosome? chromosomeTemplate = null) : base(parameters, chromosomeTemplate)
     {
@@ -33,10 +36,12 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
         }
 
         var fitness = 
-             (NormalizedRMSE(CorrectLine, chromosomeValues) + CubicCurveSimilarityScore(CorrectLine, chromosomeValues))
-            / 2;
+             ((NormalizedRMSE(CorrectLine, chromosomeValues) + CubicCurveSimilarityScore(CorrectLine, chromosomeValues))
+            / 2).Round(4);
 
-        Logger?.AccumulateAgentLog(CurrentGeneration, chromosome, fitness, 0, 0, 0);
+        var agentLog = new AgentLog() { Chromosome = chromosome, Fitness = fitness, Generation = CurrentGeneration };
+        
+        AgentCompleted?.Invoke(agentLog);
         return fitness;
     }
 

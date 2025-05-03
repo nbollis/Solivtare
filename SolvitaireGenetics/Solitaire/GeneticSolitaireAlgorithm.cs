@@ -10,6 +10,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
     private readonly List<StandardDeck> _predefinedDecks = new();
     private readonly IDeckFile? _deckFile;
     private readonly SolitaireGeneticAlgorithmParameters _parameters;
+    public override event Action<AgentLog>? AgentCompleted;
 
     public GeneticSolitaireAlgorithm(SolitaireGeneticAlgorithmParameters parameters)
         : base(parameters, BestSoFar())
@@ -112,8 +113,14 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
             fitness -= 0.5 * movesPlayed / (gamesPlayed * _maxMovesPerAgent);
         }
 
-        Logger?.AccumulateAgentLog(CurrentGeneration, chromosome, fitness, gamesWon, movesPlayed, gamesPlayed);
+        var agentLog = new AgentLog
+        {
+            Chromosome = chromosome, Fitness = fitness, Generation = CurrentGeneration,
+            GamesPlayed = gamesPlayed, MovesMade = movesPlayed, GamesWon = gamesWon
+        };
+
         chromosome.Fitness = fitness;
+        AgentCompleted?.Invoke(agentLog);
         return fitness;
     }
 

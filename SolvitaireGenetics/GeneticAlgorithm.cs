@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
 
 namespace SolvitaireGenetics;
@@ -81,7 +82,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             // Step 3: Evaluate fitness for the new population
             Parallel.ForEach(Population, chromosome =>
             {
-                chromosome.Fitness = GetFitness(chromosome);
+                chromosome.Fitness = GetFitness(chromosome).Round(4);
             });
 
             // Step 4: Sort the new population by fitness (descending)
@@ -186,14 +187,14 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
         Parallel.ForEach(population, chromosome =>
         {
-            chromosome.Fitness = GetFitness(chromosome);
+            chromosome.Fitness = GetFitness(chromosome).Round(4);
         });
 
         // Sort the population by fitness (descending)
         population = population.OrderByDescending(chromosome => chromosome.Fitness).ToList();
 
         LogPopulation(population);
-        return population;
+        return Population = population;
     }
 
     private void LogPopulation(List<TChromosome> population)
@@ -211,7 +212,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         };
 
         GenerationCompleted?.Invoke(CurrentGeneration, generationLog); // Fire the GenerationCompleted event  
-        Logger?.FlushAgentLogs(CurrentGeneration, Population);
+        Logger?.FlushAgentLogs(CurrentGeneration, population);
     }
 }
 
