@@ -14,7 +14,6 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     private bool _isAlgorithmRunning;
     private List<GenerationLogDto> _generationalLogs = new();
 
-
     public GeneticAlgorithmParameters Parameters { get; set; }
     public bool IsAlgorithmRunning
     {
@@ -34,13 +33,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             _currentGeneration = value;
             OnPropertyChanged(nameof(CurrentGeneration));
         }
-
     }
-
-    
-    public WpfPlot AverageStatByGeneration { get; set; } = new WpfPlot();
-    private FitnessByGenerationPlot _fitnessByGeneration;
-    public WpfPlot FitnessByGeneration { get; set; } = new WpfPlot();
 
     public ICommand RunAlgorithmCommand { get; }
 
@@ -71,6 +64,10 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             {
                 algorithm = new GeneticSolitaireAlgorithm(solitaireParams);
             }
+            else if (Parameters is QuadraticGeneticAlgorithmParameters quad)
+            {
+                algorithm = new QuadraticRegressionGeneticAlgorithm(quad);
+            }
             else
             {
                 MessageBox.Show("Invalid parameters provided for the Genetic Algorithm.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -94,6 +91,11 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             IsAlgorithmRunning = false;
         }
     }
+
+    #region Plotting
+
+    public WpfPlot AverageStatByGeneration { get; set; } = new WpfPlot();
+    public WpfPlot FitnessByGeneration { get; set; } = new WpfPlot();
 
     private void SetUpPlots()
     {
@@ -186,6 +188,9 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
         OnPropertyChanged(nameof(FitnessByGeneration));
     }
+
+
+    #endregion
 
     public void HandleFileDrop(object paths)
     {
