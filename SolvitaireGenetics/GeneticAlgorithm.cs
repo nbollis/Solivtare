@@ -192,26 +192,3 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     }
 }
 
-public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChromosome, QuadraticGeneticAlgorithmParameters>
-{
-    public QuadraticRegressionGeneticAlgorithm(QuadraticGeneticAlgorithmParameters parameters) : base(parameters)
-    {
-    }
-    protected override double EvaluateFitness(QuadraticChromosome chromosome)
-    {
-        // Implement your fitness evaluation logic here
-        return 0.0;
-    }
-}
-
-public class QuadraticGeneticAlgorithmParameters : GeneticAlgorithmParameters
-{
-    public double MutationRate { get; set; }
-    public int TournamentSize { get; set; }
-    public int PopulationSize { get; set; }
-    public string? OutputDirectory { get; set; }
-    public override void SaveToFile(string filePath)
-    {
-        // Implement your save logic here
-    }
-}

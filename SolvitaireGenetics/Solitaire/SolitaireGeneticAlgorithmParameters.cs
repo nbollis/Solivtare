@@ -6,7 +6,7 @@ namespace SolvitaireGenetics;
 public class SolitaireGeneticAlgorithmParameters : GeneticAlgorithmParameters
 {
     // TODO: add optional input file to allow algorithm to load a previous state
-    
+
     [Option('o', "output", Required = true, HelpText = "Directory for output files.")]
     public override string OutputDirectory { get; set; } = ".";
 

@@ -21,7 +21,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         // Deserialize predefined decks if provided
         if (parameters.DecksToUse is not null)
         {
-            _deckFile = new DeckStatisticsFile(parameters.DecksToUse); 
+            _deckFile = new DeckStatisticsFile(parameters.DecksToUse);
             _predefinedDecks = _deckFile.ReadAllDecks();
             _predefinedDecks.ForEach(p => p.FlipAllCardsDown());
         }
