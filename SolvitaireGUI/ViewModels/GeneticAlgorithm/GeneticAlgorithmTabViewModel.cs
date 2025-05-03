@@ -174,16 +174,13 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     #region Plotting
 
-    private readonly TimeSpan _plotUpdateInterval = TimeSpan.FromMilliseconds(500); // Adjust as needed
-    private DateTime _lastPlotUpdateTime = DateTime.MinValue;
-
     public WpfPlot AverageStatByGeneration { get; set; } = new WpfPlot();
     public WpfPlot FitnessByGeneration { get; set; } = new WpfPlot();
 
     private void SetUpPlots()
     {
         FitnessByGeneration.Plot.Clear();
-        FitnessByGeneration.Plot.Axes.SetLimits(0, Parameters.Generations - 1, -1, 1);
+        FitnessByGeneration.Plot.Axes.SetLimits(0, Parameters.Generations - 1, -1, 1.5);
         FitnessByGeneration.Plot.XLabel("Generation");
         FitnessByGeneration.Plot.YLabel("Fitness");
         FitnessByGeneration.Refresh();
@@ -200,13 +197,6 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         int movingAverageAmount = 1;
         CurrentGeneration = generation;
         _generationalLogs.Enqueue(generationLog);
-
-        // Throttle updates to avoid overwhelming the UI
-        if (DateTime.Now - _lastPlotUpdateTime < _plotUpdateInterval)
-        {
-            return;
-        }
-        _lastPlotUpdateTime = DateTime.Now;
 
         var sortedLogs = _generationalLogs.ToList();
 
@@ -225,19 +215,11 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             stdFitness[i] = sortedLogs[i].StdFitness;
         }
 
-        //bestFitness = CalculateMovingAverage(bestFitness, movingAverageAmount);
-        //averageFitness = CalculateMovingAverage(averageFitness, movingAverageAmount);
-        //stdFitness = CalculateMovingAverage(stdFitness, movingAverageAmount);
-
         // Extract values for each stat  
         foreach (var statName in statNames)
         {
             var averageValues = sortedLogs.Select(log => log.AverageChromosome.MutableStatsByName[statName]).ToArray();
             var bestValues = sortedLogs.Select(log => log.BestChromosome.MutableStatsByName[statName]).ToArray();
-
-            // Apply moving average of 5  
-            //averageStatValues[statName] = CalculateMovingAverage(averageValues, movingAverageAmount);
-            //bestStatValues[statName] = CalculateMovingAverage(bestValues, movingAverageAmount);
             averageStatValues[statName] = averageValues;
             bestStatValues[statName] = bestValues;
         }
@@ -263,8 +245,54 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
                 // Add Best scatter plot for each stat  
                 var bestScatter = AverageStatByGeneration.Plot.Add.Signal(bestStatValues[statName]);
-                bestScatter.LinePattern = LinePattern.Dashed;
+                bestScatter.LinePattern = LinePattern.DenselyDashed;
                 bestScatter.Color = color;
+            }
+
+            // Add Target lines to quadratic. 
+            if (Parameters is QuadraticGeneticAlgorithmParameters quad)
+            {
+                int colorIndex = -1;
+                var aLine = new ScottPlot.Plottables.LinePlot()
+                {
+                    Start = new Coordinates(0, quad.CorrectA),
+                    End = new Coordinates(quad.Generations, quad.CorrectA),
+                    LineColor = PlottingConstants.AllColors[++colorIndex],
+                    LinePattern = LinePattern.Dotted,
+                    LineWidth = 1.5f,
+                };
+
+                var bLine = new ScottPlot.Plottables.LinePlot()
+                {
+                    Start = new Coordinates(0, quad.CorrectB),
+                    End = new Coordinates(quad.Generations, quad.CorrectB),
+                    LineColor = PlottingConstants.AllColors[++colorIndex],
+                    LinePattern = LinePattern.Dotted,
+                    LineWidth = 1.5f,
+                };
+
+                var cLine = new ScottPlot.Plottables.LinePlot()
+                {
+                    Start = new Coordinates(0, quad.CorrectC),
+                    End = new Coordinates(quad.Generations, quad.CorrectC),
+                    LineColor = PlottingConstants.AllColors[++colorIndex],
+                    LinePattern = LinePattern.Dotted,
+                    LineWidth = 1.5f,
+                };
+
+                var yIntLine = new ScottPlot.Plottables.LinePlot()
+                {
+                    Start = new Coordinates(0, quad.CorrectIntercept),
+                    End = new Coordinates(quad.Generations, quad.CorrectIntercept),
+                    LineColor = PlottingConstants.AllColors[++colorIndex],
+                    LinePattern = LinePattern.Dotted,
+                    LineWidth = 1.5f,
+                };
+
+                AverageStatByGeneration.Plot.Add.Plottable(aLine);
+                AverageStatByGeneration.Plot.Add.Plottable(bLine);
+                AverageStatByGeneration.Plot.Add.Plottable(cLine);
+                AverageStatByGeneration.Plot.Add.Plottable(yIntLine);
             }
 
             AverageStatByGeneration.Plot.ShowLegend(Alignment.UpperLeft, Orientation.Horizontal);

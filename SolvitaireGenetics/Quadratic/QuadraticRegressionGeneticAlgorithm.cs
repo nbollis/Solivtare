@@ -8,14 +8,29 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
     public double[] CorrectLine { get; }
     public override event Action<AgentLog>? AgentCompleted;
 
-    public QuadraticRegressionGeneticAlgorithm(QuadraticGeneticAlgorithmParameters parameters, QuadraticChromosome? chromosomeTemplate = null) : base(parameters, chromosomeTemplate)
+    public QuadraticRegressionGeneticAlgorithm(QuadraticGeneticAlgorithmParameters parameters,
+        QuadraticChromosome? chromosomeTemplate = null) : base(parameters, chromosomeTemplate)
     {
         CorrectLine = new double[_samplingSize];
-
         for (int i = 0; i < _samplingSize; i++)
         {
-            double x = -3 + i * 6.0 / _samplingSize-1; // Generate 10000 points from -3 to 3
-            double y = parameters.CorrectA * x * x * x + parameters.CorrectB * x * x + parameters.CorrectC * x + parameters.CorrectIntercept;
+            double x;
+            if (i < _samplingSize / 2)
+            {
+                // First half of points from -1 to 1  
+                x = -1 + i * 2.0 / (_samplingSize / 2 - 1);
+            }
+            else
+            {
+                // Second half of points from -5 to -1 and 1 to 5  
+                int adjustedIndex = i - _samplingSize / 2;
+                x = adjustedIndex < (_samplingSize / 4)
+                    ? -5 + adjustedIndex * 4.0 / (_samplingSize / 4 - 1)
+                    : 1 + (adjustedIndex - _samplingSize / 4) * 4.0 / (_samplingSize / 4 - 1);
+            }
+
+            double y = parameters.CorrectA * x * x * x + parameters.CorrectB * x * x + parameters.CorrectC * x +
+                       parameters.CorrectIntercept;
             CorrectLine[i] = y;
         }
     }
@@ -28,9 +43,24 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
         double yInt = chromosome.Get(QuadraticChromosome.YIntercept);
 
         double[] chromosomeValues = new double[_samplingSize];
+
         for (int i = 0; i < _samplingSize; i++)
         {
-            double x = -3 + i * 6.0 / _samplingSize-1; // Generate 10000 points from -3 to 3  
+            double x;
+            if (i < _samplingSize / 2)
+            {
+                // First half of points from -1 to 1  
+                x = -1 + i * 2.0 / (_samplingSize / 2 - 1);
+            }
+            else
+            {
+                // Second half of points from -5 to -1 and 1 to 5  
+                int adjustedIndex = i - _samplingSize / 2;
+                x = adjustedIndex < (_samplingSize / 4)
+                    ? -5 + adjustedIndex * 4.0 / (_samplingSize / 4 - 1)
+                    : 1 + (adjustedIndex - _samplingSize / 4) * 4.0 / (_samplingSize / 4 - 1);
+            }
+
             double y = a * x * x * x + b * x * x + c * x + yInt;
             chromosomeValues[i] = y;
         }
@@ -38,6 +68,8 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
         var fitness = 
              ((NormalizedRMSE(CorrectLine, chromosomeValues) + CubicCurveSimilarityScore(CorrectLine, chromosomeValues))
             / 2).Round(4);
+
+        fitness = Math.Pow(fitness, 2); // Square the fitness score
 
         var agentLog = new AgentLog() { Chromosome = chromosome, Fitness = fitness, Generation = CurrentGeneration };
         
