@@ -12,7 +12,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
     private readonly SolitaireGeneticAlgorithmParameters _parameters;
 
     public GeneticSolitaireAlgorithm(SolitaireGeneticAlgorithmParameters parameters)
-        : base(parameters)
+        : base(parameters, BestSoFar())
     {
         _parameters = parameters;
         _maxMovesPerAgent = parameters.MaxMovesPerGeneration;
@@ -25,9 +25,18 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
             _predefinedDecks = _deckFile.ReadAllDecks();
             _predefinedDecks.ForEach(p => p.FlipAllCardsDown());
         }
+
+        // Be sure to flush the deck file at the end of the generation.
+        GenerationCompleted += (a, b) =>
+        {
+            if (_deckFile is DeckStatisticsFile stats)
+            {
+                stats.Flush();
+            }
+        };
     }
 
-    protected override double EvaluateFitness(SolitaireChromosome chromosome)
+    public override double EvaluateFitness(SolitaireChromosome chromosome)
     {
         // TODO: Make this more generic to support different agents. 
         var evaluator = new GeneticSolitaireEvaluator(chromosome);
@@ -103,35 +112,9 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
             fitness -= 0.5 * movesPlayed / (gamesPlayed * _maxMovesPerAgent);
         }
 
-        Logger.AccumulateAgentLog(CurrentGeneration, chromosome, fitness, gamesWon, movesPlayed, gamesPlayed);
+        Logger?.AccumulateAgentLog(CurrentGeneration, chromosome, fitness, gamesWon, movesPlayed, gamesPlayed);
         chromosome.Fitness = fitness;
         return fitness;
-    }
-
-    /// <summary>
-    /// Creates a random population of chromosomes with random weights.
-    /// </summary>
-    /// <returns></returns>
-    protected override List<SolitaireChromosome> InitializePopulation()
-    {
-        // Attempt to load the last generation's data
-        var lastGeneration = Logger.LoadLastGeneration(out int generationNumber);
-        if (lastGeneration.Count == PopulationSize)
-        {
-            // If we have a last generation, use it to initialize the population
-            CurrentGeneration = generationNumber + 1;
-            return lastGeneration;
-        }
-
-        int copiesOfBest = PopulationSize / 10;
-        var best = Enumerable.Range(0, copiesOfBest).Select(_ => BestSoFar())
-            .Select(b => Chromosome.Mutate(b, MutationRate));
-
-        return Enumerable.Range(0, PopulationSize - copiesOfBest)
-            .Select(_ => Chromosome.CreateRandom<SolitaireChromosome>(Random)
-                .CrossOver(BestSoFar()) // Temporary? Cross over with best.
-            ).Concat(best)
-            .ToList();
     }
 
     public static SolitaireChromosome BestSoFar()
@@ -151,14 +134,5 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         best.MutableStatsByName[SolitaireChromosome.AceInTableauWeightName] = -1;
         best.MutableStatsByName[SolitaireChromosome.MoveCountWeightName] = 0;
         return best;
-    }
-
-    protected override void FlushLogs()
-    {
-        base.FlushLogs();
-        if (_deckFile is DeckStatisticsFile stats)
-        {
-            stats.Flush();
-        }
     }
 }

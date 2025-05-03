@@ -4,7 +4,7 @@ namespace SolvitaireGenetics;
 
 public abstract class GeneticAlgorithmParameters
 {
-    public virtual string OutputDirectory { get; set; } = ".";
+    public virtual string? OutputDirectory { get; set; } = null;
     public virtual int PopulationSize { get; set; } = 100;
     public virtual int Generations { get; set; } = 1000;
     public virtual double MutationRate { get; set; } = 0.01;
@@ -20,12 +20,12 @@ public abstract class GeneticAlgorithmParameters
         var json = File.ReadAllText(filePath);
 
         // Use a discriminator or heuristic to determine the parameter type
-        if (json.Contains("\"DecksToUse\"")) // Example heuristic
+        if (json.Contains("\"DecksToUse\"")) 
         {
             return JsonSerializer.Deserialize<SolitaireGeneticAlgorithmParameters>(json)
                    ?? throw new InvalidOperationException("Failed to deserialize SolitaireGeneticAlgorithmParameters.");
         }
-        if (json.Contains("\"CorrectA\"")) // Example heuristic
+        if (json.Contains("\"CorrectA\"")) 
         {
             return JsonSerializer.Deserialize<QuadraticGeneticAlgorithmParameters>(json)
                    ?? throw new InvalidOperationException("Failed to deserialize SolitaireGeneticAlgorithmParameters.");

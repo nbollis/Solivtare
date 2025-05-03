@@ -2,10 +2,10 @@
 
 public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChromosome, QuadraticGeneticAlgorithmParameters>
 {
-    private List<(double X, double Y)> CorrectLine { get; }
+    public List<(double X, double Y)> CorrectLine { get; }
     private double MaxError { get; }
 
-    public QuadraticRegressionGeneticAlgorithm(QuadraticGeneticAlgorithmParameters parameters) : base(parameters)
+    public QuadraticRegressionGeneticAlgorithm(QuadraticGeneticAlgorithmParameters parameters, QuadraticChromosome? chromosomeTemplate = null) : base(parameters, chromosomeTemplate)
     {
         CorrectLine = new List<(double X, double Y)>();
         MaxError = 0.0;
@@ -18,7 +18,7 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
         }
     }
 
-    protected override double EvaluateFitness(QuadraticChromosome chromosome)
+    public override double EvaluateFitness(QuadraticChromosome chromosome)
     {
         double a = chromosome.Get(QuadraticChromosome.A);
         double b = chromosome.Get(QuadraticChromosome.B);

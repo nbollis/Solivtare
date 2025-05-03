@@ -1,0 +1,152 @@
+using SolvitaireGenetics;
+
+namespace Test.Genetics;
+
+[TestFixture]
+public class QuadraticGeneticAlgorithmTests
+{
+    [Test]
+    public void QuadraticGeneticAlgorithmParameters_DefaultValues_ShouldBeCorrect()
+    {
+        // Arrange & Act
+        var parameters = new QuadraticGeneticAlgorithmParameters();
+
+        // Assert
+        Assert.That(parameters.CorrectA, Is.EqualTo(1.76));
+        Assert.That(parameters.CorrectB, Is.EqualTo(0.67));
+        Assert.That(parameters.CorrectC, Is.EqualTo(-0.74));
+        Assert.That(parameters.CorrectIntercept, Is.EqualTo(-1.68));
+    }
+
+    [Test]
+    public void QuadraticChromosome_Constructor_ShouldInitializeWeights()
+    {
+        // Arrange & Act
+        var chromosome = new QuadraticChromosome();
+
+        // Assert
+        Assert.That(chromosome.MutableStatsByName.ContainsKey(QuadraticChromosome.A));
+        Assert.That(chromosome.MutableStatsByName.ContainsKey(QuadraticChromosome.B));
+        Assert.That(chromosome.MutableStatsByName.ContainsKey(QuadraticChromosome.C));
+        Assert.That(chromosome.MutableStatsByName.ContainsKey(QuadraticChromosome.YIntercept));
+    }
+
+    [Test]
+    public void QuadraticChromosome_GetAndSet_ShouldWorkCorrectly()
+    {
+        // Arrange
+        var chromosome = new QuadraticChromosome();
+        var newValue = 2.5;
+
+        // Act
+        chromosome.Set(QuadraticChromosome.A, newValue);
+        var result = chromosome.Get(QuadraticChromosome.A);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(newValue));
+    }
+    [Test]
+    public void QuadraticRegressionGeneticAlgorithm_EvaluateFitness_ShouldReturnCorrectRange()
+    {
+        // Arrange
+        var parameters = new QuadraticGeneticAlgorithmParameters
+        {
+            CorrectA = 1.0,
+            CorrectB = 2.0,
+            CorrectC = 3.0,
+            CorrectIntercept = 4.0
+        };
+        var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
+        var chromosome = new QuadraticChromosome();
+        chromosome.Set(QuadraticChromosome.A, 1.0);
+        chromosome.Set(QuadraticChromosome.B, 2.0);
+        chromosome.Set(QuadraticChromosome.C, 3.0);
+        chromosome.Set(QuadraticChromosome.YIntercept, 4.0);
+
+        // Act
+        var fitness = algorithm.EvaluateFitness(chromosome);
+
+        // Assert
+        Assert.That(fitness, Is.GreaterThanOrEqualTo(-1.0));
+        Assert.That(fitness, Is.LessThanOrEqualTo(1.0));
+    }
+
+    [Test]
+    public void QuadraticRegressionGeneticAlgorithm_Constructor_ShouldInitializeCorrectLine()
+    {
+        // Arrange
+        var parameters = new QuadraticGeneticAlgorithmParameters
+        {
+            CorrectA = 1.0,
+            CorrectB = 2.0,
+            CorrectC = 3.0,
+            CorrectIntercept = 4.0,
+            OutputDirectory = null
+        };
+
+        // Act
+        var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
+
+        // Assert
+        Assert.That(algorithm.CorrectLine.Count, Is.EqualTo(2000)); // From -1000 to 999
+    }
+
+
+    [Test]
+    public void GeneticAlgorithm_RunEvolutionInStages_ShouldCompleteAllGenerations()
+    {
+        // Arrange  
+        var parameters = new QuadraticGeneticAlgorithmParameters
+        {
+            PopulationSize = 16,
+            MutationRate = 0.2,
+            TournamentSize = 2
+        };
+        var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
+
+        // Act - Run the first 3 generations  
+        var firstFitness = algorithm.RunEvolution(3).Fitness;
+        var firstStageGeneration = algorithm.CurrentGeneration;
+
+        // Assert - Ensure the first stage completed correctly  
+        Assert.That(firstStageGeneration, Is.EqualTo(3));
+
+        // Act - Run 2 more generations  
+        var secondFitness = algorithm.RunEvolution(3).Fitness;
+        var finalGeneration = algorithm.CurrentGeneration;
+
+        // Assert - Ensure the total generations completed correctly  
+        Assert.That(finalGeneration, Is.EqualTo(6));
+        Assert.That(firstFitness, Is.Not.EqualTo(secondFitness));
+    }
+
+    [Test]
+    public void GeneticAlgorithm_RunEvolutionMultipleTimes_ShouldAccumulateGenerations()
+    {
+        // Arrange  
+        var parameters = new QuadraticGeneticAlgorithmParameters
+        {
+            PopulationSize = 15,
+            MutationRate = 0.2,
+            TournamentSize = 4,
+            OutputDirectory = null
+        };
+        var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
+
+        // Act - Run the first 5 generations  
+        algorithm.RunEvolution(5);
+        var firstRunGeneration = algorithm.CurrentGeneration;
+
+        // Assert - Ensure the first run completed correctly  
+        Assert.That(firstRunGeneration, Is.EqualTo(5));
+
+        // Act - Run another 5 generations  
+        algorithm.RunEvolution(5);
+        var secondRunGeneration = algorithm.CurrentGeneration;
+
+        // Assert - Ensure the total generations accumulated correctly  
+        Assert.That(secondRunGeneration, Is.EqualTo(10));
+    }
+
+
+}

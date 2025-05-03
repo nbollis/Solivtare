@@ -33,6 +33,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     private int _currentGeneration;
     private bool _isAlgorithmRunning;
     private bool _isPaused;
+    private bool _writeOutput;
     private CancellationTokenSource _cancellationTokenSource;
     private ManualResetEventSlim _pauseEvent = new(true); // Initially not paused
     private readonly ConcurrentQueue<GenerationLogDto> _generationalLogs = new();
@@ -63,6 +64,16 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         {
             _currentGeneration = value;
             OnPropertyChanged(nameof(CurrentGeneration));
+        }
+    }
+
+    public bool WriteOutput
+    {
+        get => _writeOutput;
+        set
+        {
+            _writeOutput = value;
+            OnPropertyChanged(nameof(WriteOutput));
         }
     }
 
@@ -103,9 +114,13 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             }
 
             // Subscribe to events
-            algorithm.GenerationCompleted += OnGenerationCompleted;
+            algorithm.GenerationCompleted += RefreshGenerationalPlots;
 
-            algorithm.WriteParameters();
+            if (WriteOutput)
+            {
+
+            }
+            
             await Task.Run(() => RunEvolutionWithControl(algorithm, Parameters.Generations, _cancellationTokenSource.Token));
 
             MessageBox.Show("Genetic Algorithm completed successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -179,7 +194,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         AverageStatByGeneration.Refresh();
     }
 
-    private void OnGenerationCompleted(int generation, GenerationLogDto generationLog)
+    private void RefreshGenerationalPlots(int generation, GenerationLogDto generationLog)
     {
         // Throttle updates to avoid overwhelming the UI
         if (DateTime.Now - _lastPlotUpdateTime < _plotUpdateInterval)

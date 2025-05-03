@@ -4,7 +4,7 @@ using System;
 
 namespace SolvitaireGenetics;
 
-public abstract class Chromosome : IComparable<Chromosome>
+public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosome>
 {
     private const int RoundingPlace = 2;
     protected readonly Random Random;
@@ -33,10 +33,10 @@ public abstract class Chromosome : IComparable<Chromosome>
         return clone;
     }
 
-    public TChromosome CrossOver<TChromosome>(TChromosome other) 
+    public TChromosome CrossOver<TChromosome>(TChromosome other, double crossoverRate = 0.5) 
         where TChromosome : Chromosome
     {
-        return Crossover((TChromosome)this, other);
+        return Crossover((TChromosome)this, other, crossoverRate);
     }
 
     public TChromosome Mutate<TChromosome>(double mutationRate)
@@ -142,6 +142,11 @@ public abstract class Chromosome : IComparable<Chromosome>
 
         firstChromosome.Fitness = chromosomes.Select(p => p.Fitness).StandardDeviation();
         return firstChromosome;
+    }
+
+    public bool Equals(Chromosome? other)
+    {
+        
     }
 
     public override int GetHashCode()
