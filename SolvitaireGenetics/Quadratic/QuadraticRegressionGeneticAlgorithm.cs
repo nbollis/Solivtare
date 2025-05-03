@@ -32,7 +32,7 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
             chromosomeValues[i] = y;
         }
 
-        var fitness = /*chromosome.Get(QuadraticChromosome.EvalFunction) > 0*/
+        var fitness = 
              (NormalizedRMSE(CorrectLine, chromosomeValues) + CubicCurveSimilarityScore(CorrectLine, chromosomeValues))
             / 2;
 

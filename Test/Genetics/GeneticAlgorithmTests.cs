@@ -198,7 +198,7 @@ public class GeneticAlgorithmTests
         {
             logger.AccumulateAgentLog(0, chromosome, chromosome.Fitness, 1, 1, 1);
         }
-        logger.FlushAgentLogs();
+        logger.FlushAgentLogs(0, lastGeneration);
 
 
         var parameters = new QuadraticGeneticAlgorithmParameters

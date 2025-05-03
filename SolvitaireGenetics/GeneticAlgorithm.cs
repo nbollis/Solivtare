@@ -210,13 +210,8 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             StdChromosome = Chromosome.GetStandardDeviationChromosome(population)
         };
 
-        foreach (var chromosome in population)
-        {
-            Logger?.AccumulateAgentLog(CurrentGeneration, chromosome, chromosome.Fitness, 0, 0, 0);
-        }
-
         GenerationCompleted?.Invoke(CurrentGeneration, generationLog); // Fire the GenerationCompleted event  
-        Logger?.FlushAgentLogs();
+        Logger?.FlushAgentLogs(CurrentGeneration, Population);
     }
 }
 

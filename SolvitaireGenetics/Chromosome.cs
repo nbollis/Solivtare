@@ -163,7 +163,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         if (ReferenceEquals(this, other))
             return true;
 
-        if (!Fitness.Equals(other.Fitness))
+        if (Math.Abs(Fitness - other.Fitness) > 1e-9) // Use a small epsilon for floating-point comparison
             return false;
 
         if (MutableStatsByName.Count != other.MutableStatsByName.Count)
@@ -171,7 +171,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
 
         foreach (var kvp in MutableStatsByName)
         {
-            if (!other.MutableStatsByName.TryGetValue(kvp.Key, out var otherValue) || !kvp.Value.Equals(otherValue))
+            if (!other.MutableStatsByName.TryGetValue(kvp.Key, out var otherValue) || Math.Abs(kvp.Value - otherValue) > 1e-9) // Use epsilon for dictionary values
                 return false;
         }
 
