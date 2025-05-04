@@ -3,56 +3,29 @@
 namespace SolvitaireGUI;
 public class DelegateCommand : ICommand
 {
-    #region Private Members
+    readonly Action<object> _execute;
+    private readonly Func<object, bool>? _canExecute;
 
-    /// <summary>
-    /// The action to run
-    /// </summary>
-    private Action<object> mAction;
+    public event EventHandler? CanExecuteChanged;
 
-    #endregion
-
-    #region Public Events
-
-    /// <summary>
-    /// The event thats fired when the <see cref="CanExecute(object)"/> value has changed
-    /// </summary>
-    public event EventHandler CanExecuteChanged = (sender, e) => { };
-
-    #endregion
-
-    #region Constructor
-
-    /// <summary>
-    /// Default constructor
-    /// </summary>
-    public DelegateCommand(Action<object> action)
+    public DelegateCommand(Action<object> execute, Func<object, bool>? canExecute = null)
     {
-        mAction = action;
+        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+        _canExecute = canExecute;
     }
 
-    #endregion
-
-    #region Command Methods
-
-    /// <summary>
-    /// A relay command can always execute
-    /// </summary>
-    /// <param name="parameter"></param>
-    /// <returns></returns>
-    public bool CanExecute(object parameter)
+    public bool CanExecute(object? parameter)
     {
-        return true;
+        return _canExecute?.Invoke(parameter) ?? true;
     }
 
-    /// <summary>
-    /// Executes the commands Action
-    /// </summary>
-    /// <param name="parameter"></param>
-    public void Execute(object parameter)
+    public void Execute(object? parameter)
     {
-        mAction(parameter);
+        _execute(parameter!);
     }
 
-    #endregion
+    public void RaiseCanExecuteChanged()
+    {
+        CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    }
 }

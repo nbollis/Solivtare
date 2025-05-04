@@ -9,11 +9,27 @@
              mc:Ignorable="d" 
              Name="GeneticsTab"
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <Style x:Key="AlgorithmControlButtonStyle" TargetType="Button">
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="5"/>
+                    <Setter Property="Padding" Value="10,5" />
+                </Style>
+            </Style.Resources>
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+    </UserControl.Resources>
+
+
     <Grid AllowDrop="True"
           Drop="ParametersExpander_OnDrop"
           DragOver="ParametersExpander_DragOver"
           Background="{StaticResource BackgroundColor}"
-          >
+    >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
@@ -21,8 +37,39 @@
         </Grid.ColumnDefinitions>
 
         <!-- Algorithm Type Selection -->
-        
-        <Expander Header="Parameters" ExpandDirection="Left" IsExpanded="True">
+
+        <Expander  ExpandDirection="Left" IsExpanded="True">
+            <Expander.Header>
+                <DockPanel>
+                    <!-- Expander Header Text -->
+                    <TextBlock Text="Parameters" VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Margin="5" FontWeight="Bold"  DockPanel.Dock="Top" />
+
+                    <!-- Buttons -->
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Right" DockPanel.Dock="Top">
+                        <!-- Play Button -->
+                        <Button Content="{Binding StartButtonText}" 
+                                Command="{Binding StartAlgorithmCommand}" 
+                                Style="{StaticResource AlgorithmControlButtonStyle}" 
+                                Background="{StaticResource GreenAccentColor}" 
+                                Width="80" Margin="5"  />
+
+                        <!-- Pause Button -->
+                        <Button Content="Pause" 
+                                Command="{Binding PauseCommand}" 
+                                Style="{StaticResource AlgorithmControlButtonStyle}" 
+                                Background="{StaticResource YellowAccentColor}" 
+                                Width="80" Margin="5" />
+
+                        <!-- Resume Button -->
+                        <Button Content="Resume" 
+                                Command="{Binding ResumeCommand}" 
+                                Style="{StaticResource AlgorithmControlButtonStyle}" 
+                                Background="{StaticResource BlueAccentColor}" 
+                                Width="80" Margin="5"  />
+                    </StackPanel>
+                </DockPanel>
+            </Expander.Header>
             <DockPanel>
 
                 <GroupBox Header="Algorithm Parameters" DockPanel.Dock="Top" BorderBrush="{StaticResource BorderColor}">
@@ -83,11 +130,10 @@
 
                     </StackPanel>
 
-                    
 
                 </GroupBox>
 
-                <GroupBox Header="Specific Parameters" DockPanel.Dock="Top" BorderBrush="{StaticResource BorderColor}">
+            <GroupBox Header="Specific Parameters" DockPanel.Dock="Top" BorderBrush="{StaticResource BorderColor}">
                     <!-- Dynamically load the relevant control -->
                     <ContentControl Content="{Binding Parameters}">
                         <ContentControl.Resources>
@@ -100,13 +146,6 @@
                         </ContentControl.Resources>
                     </ContentControl>
                 </GroupBox>
-
-                <!-- Run Button -->
-                <Button DockPanel.Dock="Bottom" Content="Run Algorithm" Style="{StaticResource RoundedButtonStyle}"
-                        Background="{StaticResource GreenAccentColor}" Width="120" MaxHeight="50"
-                        IsEnabled="{Binding IsAlgorithmRunning, Converter={StaticResource InverseBooleanConverter}}"
-                        Command="{Binding RunAlgorithmCommand }" 
-                        Margin="5" />
             </DockPanel>
         </Expander>
         

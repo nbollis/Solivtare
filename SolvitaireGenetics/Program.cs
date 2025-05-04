@@ -7,7 +7,7 @@ namespace SolvitaireGenetics
 {
     internal class Program
     {
-        internal static string VersionNumber = "1.0.2"; // Update this as necessary
+        internal static string VersionNumber = "1.0.3"; // Update this as necessary
         static int Main(string[] args)
         {
             // an error code of 0 is returned if the program ran successfully.

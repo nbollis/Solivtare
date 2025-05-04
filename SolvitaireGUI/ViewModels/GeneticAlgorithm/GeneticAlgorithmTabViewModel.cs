@@ -6,8 +6,6 @@ using System.Windows.Input;
 using ScottPlot.WPF;
 using SolvitairePlotting;
 using ScottPlot;
-using System.Threading;
-using ScottPlot.Finance;
 
 namespace SolvitaireGUI;
 
@@ -16,12 +14,18 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     
     public GeneticAlgorithmTabViewModel()
     {
-        _writeOutput = true;
         CurrentGeneration = 0;
         SelectedAlgorithmType = GeneticAlgorithmType.Solitaire; // Default selection
         UpdateParameters();
 
-        RunAlgorithmCommand = new RelayCommand(RunAlgorithm);
+        StartAlgorithmCommand = new RelayCommand(() => _ = RunAlgorithm());
+        //PauseCommand = new RelayCommand(PauseAlgorithm/*, (p) => IsAlgorithmRunning && !IsPaused*/);
+        //ResumeCommand = new RelayCommand(ResumeAlgorithm/*, (p) => IsAlgorithmRunning && IsPaused*/);
+        //StopCommand = new RelayCommand(StopAlgorithm/*, (p) => IsAlgorithmRunning*/);
+        PauseCommand = new DelegateCommand(_ => PauseAlgorithm(), _ => IsAlgorithmRunning && !IsPaused);
+        ResumeCommand = new DelegateCommand(_ => ResumeAlgorithm(), _ => IsAlgorithmRunning && IsPaused);
+
+        IsAlgorithmRunning = false;
     }
 
     public GeneticAlgorithmTabViewModel(GeneticAlgorithmParameters parameters) : this()
@@ -35,7 +39,6 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     private int _currentGeneration;
     private bool _isAlgorithmRunning;
     private bool _isPaused;
-    private bool _writeOutput;
     private CancellationTokenSource _cancellationTokenSource;
     private ManualResetEventSlim _pauseEvent = new(true); // Initially not paused
     private readonly ConcurrentQueue<GenerationLogDto> _generationalLogs = new();
@@ -47,8 +50,16 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         {
             _isAlgorithmRunning = value;
             OnPropertyChanged(nameof(IsAlgorithmRunning));
+            OnPropertyChanged(nameof(StartButtonText));
+
+            // Explicitly notify the commands to re-evaluate CanExecute
+            (PauseCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+            (ResumeCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         }
     }
+
+    public string StartButtonText => IsAlgorithmRunning ? "Restart" : "Play";
+
     public bool IsPaused
     {
         get => _isPaused;
@@ -56,6 +67,10 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         {
             _isPaused = value;
             OnPropertyChanged(nameof(IsPaused));
+
+            // Explicitly notify the commands to re-evaluate CanExecute
+            (PauseCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+            (ResumeCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         }
     }
 
@@ -69,25 +84,21 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         }
     }
 
-    public bool WriteOutput
-    {
-        get => _writeOutput;
-        set
-        {
-            _writeOutput = value;
-            OnPropertyChanged(nameof(WriteOutput));
-        }
-    }
-
-    public ICommand RunAlgorithmCommand { get; }
+    public ICommand StartAlgorithmCommand { get; }
     public ICommand PauseCommand { get; }
     public ICommand ResumeCommand { get; }
-    public ICommand StopCommand { get; }
 
-    private async void RunAlgorithm()
+    private async Task RunAlgorithm()
     {
+        // Cancel any currently running algorithm
+        if (IsAlgorithmRunning)
+        {
+            await _cancellationTokenSource!.CancelAsync();
+        }
+
         _cancellationTokenSource = new CancellationTokenSource();
         _pauseEvent.Set(); // Ensure the algorithm is not paused
+
         IsAlgorithmRunning = true;
         IsPaused = false;
 
@@ -103,18 +114,18 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             // Create and run the genetic algorithm using the factory
             IGeneticAlgorithm? algorithm = null;
             string? filePath = null;
-            if (WriteOutput)
+            if (Parameters.OutputDirectory != null)
                 filePath = Path.Combine(Parameters.OutputDirectory!, "RunParameters.json");
             switch (Parameters)
             {
                 case SolitaireGeneticAlgorithmParameters solitaireParams:
                     algorithm = new GeneticSolitaireAlgorithm(solitaireParams);
-                    if (WriteOutput)
+                    if (Parameters.OutputDirectory != null)
                         solitaireParams.SaveToFile(filePath!);
                     break;
                 case QuadraticGeneticAlgorithmParameters quad:
                     algorithm = new QuadraticRegressionGeneticAlgorithm(quad);
-                    if (WriteOutput)
+                    if (Parameters.OutputDirectory != null)
                         quad.SaveToFile(filePath!);
                     break;
                 default:
@@ -124,16 +135,15 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
             // Subscribe to events
             algorithm.GenerationCompleted += OnGenerationFinished;
-
-            if (WriteOutput)
-            {
-                
-                Parameters.SaveToFile(filePath);
-            }
             
             await Task.Run(() => RunEvolutionWithControl(algorithm, Parameters.Generations, _cancellationTokenSource.Token));
 
             MessageBox.Show("Genetic Algorithm completed successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (OperationCanceledException)
+        {
+            // Handle cancellation, Usually occurs when algorithm is restarted mid run. 
+            // TODO: Handle any cleanup or state reset if necessary
         }
         catch (Exception ex)
         {
@@ -169,13 +179,6 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     private void ResumeAlgorithm()
     {
         _pauseEvent.Set(); // Resume the algorithm
-        IsPaused = false;
-    }
-
-    private void StopAlgorithm()
-    {
-        _cancellationTokenSource?.Cancel(); // Stop the algorithm
-        IsAlgorithmRunning = false;
         IsPaused = false;
     }
 
@@ -403,21 +406,6 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
                 MessageBox.Show("Please drop a valid JSON file.", "Invalid File", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
-    }
-
-    private double[] CalculateMovingAverage(double[] values, int windowSize)
-    {
-        if (values.Length < windowSize)
-            return values;
-
-        var movingAverage = new double[values.Length];
-        for (int i = 0; i < values.Length; i++)
-        {
-            int start = Math.Max(0, i - windowSize + 1);
-            int count = i - start + 1;
-            movingAverage[i] = values.Skip(start).Take(count).Average();
-        }
-        return movingAverage;
     }
 }
 

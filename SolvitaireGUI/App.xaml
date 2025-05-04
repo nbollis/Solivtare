@@ -10,12 +10,16 @@
 
         <!-- Colors -->
         <SolidColorBrush x:Key="ButtonColor" Color="#78C2D9" />
-        <SolidColorBrush x:Key="GreenAccentColor" Color="#7be063" />
         <SolidColorBrush x:Key="BackgroundLightColor" Color="#f5ebe0" />
         <SolidColorBrush x:Key="BackgroundColor" Color="#edede9" />
         <SolidColorBrush x:Key="BackgroundDarkColor" Color="#e3d5ca" />
         <SolidColorBrush x:Key="BorderColor" Color="#8d99ae" />
         <SolidColorBrush x:Key="ForegroundColor" Color="#adc178" />
+
+        <SolidColorBrush x:Key="GreenAccentColor" Color="#aaf683" />
+        <SolidColorBrush x:Key="BlueAccentColor" Color="#4ba3c3" />
+        <SolidColorBrush x:Key="RedAccentColor" Color="#ff9b85" />
+        <SolidColorBrush x:Key="YellowAccentColor" Color="#ffd97d" />
 
         <!-- Converters -->
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
