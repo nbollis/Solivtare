@@ -146,7 +146,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         best.MutableStatsByName[SolitaireChromosome.FaceUpBottomCardTableauWeightName] = 0.2;
         best.MutableStatsByName[SolitaireChromosome.KingIsBottomCardTableauWeightName] = 0.4;
         best.MutableStatsByName[SolitaireChromosome.AceInTableauWeightName] = -1;
-        best.MutableStatsByName[SolitaireChromosome.MoveCountWeightName] = 0;
+        best.MutableStatsByName[SolitaireChromosome.MoveCountScalarName] = 0;
         return best;
     }
 }

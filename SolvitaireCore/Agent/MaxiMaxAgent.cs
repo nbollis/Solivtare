@@ -65,39 +65,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
 
     public override bool IsGameUnwinnable(SolitaireGameState gameState)
     {
-        // Advanced unwinnability logic: Check if the evaluation score is below a threshold  
-        double evaluationScore = evaluator.Evaluate(gameState);
-        double bestScore = double.NegativeInfinity;
-
-        double alpha = double.NegativeInfinity;
-        double beta = double.PositiveInfinity;
-
-        Dictionary<SolitaireMove, double> moveScores = new();
-
-        foreach (var move in OrderMoves(gameState, gameState.GetLegalMoves()))
-        {
-            gameState.ExecuteMove(move);
-            double score = EvaluateWithLookahead(gameState, LookAheadSteps - 1, alpha);
-            gameState.UndoMove(move);
-
-            if (moveScores.TryGetValue(move, out var previousScore) && score > previousScore)
-                moveScores[move] = score;
-            else
-                moveScores.Add(move, score);
-
-            if (score > alpha)
-            {
-                alpha = score;
-                bestScore = score;
-            }
-        }
-
-        // Check if all moves lead to a score below the unwinnable threshold  
-        var firstScore = moveScores.First().Value;
-        bool allScoresIdentical = moveScores.Values.All(score => Math.Abs(score - firstScore) <= 0.000000000001);
-        bool noScoreImprovement = Math.Abs(bestScore - evaluationScore) <= 0.000001;
-
-        return noScoreImprovement &&  (allScoresIdentical || base.IsGameUnwinnable(gameState));
+        return evaluator.ShouldSkipGame(gameState);
     }
 
     private IEnumerable<SolitaireMove> OrderMoves(SolitaireGameState gameState, IEnumerable<SolitaireMove> moves)

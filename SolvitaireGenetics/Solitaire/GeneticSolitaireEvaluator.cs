@@ -16,7 +16,7 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
         int faceUpTableauCount = 0;
         int faceDownTableauCount = 0;
         int consecutiveFaceUpTableauCount = 0;
-        int faceUpBottomCardTableaCount = 0;
+        int faceUpBottomCardTableauCount = 0;
         int kingIsBottomCardTableauCount = 0;
         int aceInTableauCount = 0;
 
@@ -37,7 +37,7 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
                 {
                     if (i == tableau.Cards.Count - 1 && bottomCardIsFaceUp)
                     {
-                        faceUpBottomCardTableaCount++;
+                        faceUpBottomCardTableauCount++;
                         if (card.Rank == Rank.King)
                             kingIsBottomCardTableauCount++;
                     }
@@ -77,35 +77,22 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
         score += chromosome.GetWeight(SolitaireChromosome.FaceUpTableauWeightName) * faceUpTableauCount;
         score += chromosome.GetWeight(SolitaireChromosome.FaceDownTableauWeightName) * faceDownTableauCount;
         score += chromosome.GetWeight(SolitaireChromosome.ConsecutiveFaceUpTableauWeightName) * consecutiveFaceUpTableauCount;
-        score += chromosome.GetWeight(SolitaireChromosome.FaceUpBottomCardTableauWeightName) * faceUpBottomCardTableaCount;
+        score += chromosome.GetWeight(SolitaireChromosome.FaceUpBottomCardTableauWeightName) * faceUpBottomCardTableauCount;
         score += chromosome.GetWeight(SolitaireChromosome.KingIsBottomCardTableauWeightName) * kingIsBottomCardTableauCount;
         score += chromosome.GetWeight(SolitaireChromosome.AceInTableauWeightName) * aceInTableauCount;
 
         return score;
     }
 
-    public bool ShouldSkipGame(SolitaireGameState state)
+    public override bool ShouldSkipGame(SolitaireGameState state)
     {
-        // Check if the game is unwinnable based on the current state
-        // This is a placeholder implementation and should be replaced with actual logic
-        return state.IsGameLost;
-
-
-        // Example logic to determine if the game should be skipped.
-        // I do not like using the same weight for both evaluation and skipping.
         double score = 0.0;
 
-        // Evaluate factors using chromosome weights
-        score += chromosome.GetWeight(SolitaireChromosome.LegalMoveWeightName) * state.GetLegalMoves().Count;
-        score += chromosome.GetWeight(SolitaireChromosome.FoundationWeightName) * state.FoundationPiles.Sum(pile => pile.Count);
-        score += chromosome.GetWeight(SolitaireChromosome.StockWeightName) * state.StockPile.Count;
-        score += chromosome.GetWeight(SolitaireChromosome.WasteWeightName) * state.WastePile.Count;
-        score += chromosome.GetWeight(SolitaireChromosome.CycleWeightName) * state.CycleCount;
-        score += chromosome.GetWeight(SolitaireChromosome.EmptyTableauWeightName) * state.TableauPiles.Count(pile => pile.IsEmpty);
-        score += chromosome.GetWeight(SolitaireChromosome.FaceDownTableauWeightName) * state.TableauPiles.Sum(pile => pile.Cards.Count(card => !card.IsFaceUp));
+        score += chromosome.GetWeight(SolitaireChromosome.SkipLegalMoveWeightName) * state.GetLegalMoves().Count;
+        score += chromosome.GetWeight(SolitaireChromosome.SkipFoundationWeightName) * state.FoundationPiles.Sum(p => p.Count);
+        score *= chromosome.GetWeight(SolitaireChromosome.MoveCountScalarName) * state.MovesMade;
 
-        // Define a threshold below which the game should be skipped
-        const double skipThreshold = -10.0; // Adjust based on experimentation
-        return score < skipThreshold;
+        double threshold = chromosome.GetWeight(SolitaireChromosome.SkipThresholdWeightName);
+        return score < threshold;
     }
 }

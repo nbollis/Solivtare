@@ -16,7 +16,10 @@ public class SolitaireChromosome : Chromosome
     public const string FaceUpBottomCardTableauWeightName = "FaceUpBottomCardTableauWeight";
     public const string KingIsBottomCardTableauWeightName = "KingIsBottomCardTableauWeight";
     public const string AceInTableauWeightName = "AceInTableauWeight";
-    public const string MoveCountWeightName = "MoveCountWeight";
+    public const string MoveCountScalarName = "MoveCountWeight";
+    public const string SkipThresholdWeightName = "SkipThresholdWeight";
+    public const string SkipFoundationWeightName = "SkipFoundationWeight";
+    public const string SkipLegalMoveWeightName = "SkipLegalMoveWeight";
 
     public SolitaireChromosome(Random random) : base(random)
     {
@@ -32,8 +35,12 @@ public class SolitaireChromosome : Chromosome
         MutableStatsByName[FaceUpBottomCardTableauWeightName] = GenerateRandomWeight();
         MutableStatsByName[KingIsBottomCardTableauWeightName] = GenerateRandomWeight();
         MutableStatsByName[AceInTableauWeightName] = GenerateRandomWeight();
-        MutableStatsByName[MoveCountWeightName] = GenerateRandomWeight();
+        MutableStatsByName[MoveCountScalarName] = GenerateRandomWeight();
+        MutableStatsByName[SkipThresholdWeightName] = GenerateRandomWeight();
+        MutableStatsByName[SkipFoundationWeightName] = GenerateRandomWeight();
+        MutableStatsByName[SkipLegalMoveWeightName] = GenerateRandomWeight();
     }
+
     [JsonConstructor]
     public SolitaireChromosome() : this(Random.Shared) { }
 
