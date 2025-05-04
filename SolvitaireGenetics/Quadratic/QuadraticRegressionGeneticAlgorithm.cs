@@ -67,7 +67,7 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
 
         var fitness = 
              ((NormalizedRMSE(CorrectLine, chromosomeValues) + CubicCurveSimilarityScore(CorrectLine, chromosomeValues))
-            / 2).Round(4);
+            / 2);
 
         fitness = Math.Pow(fitness, 2); // Square the fitness score
 

@@ -82,7 +82,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             // Step 3: Evaluate fitness for the new population
             Parallel.ForEach(Population, chromosome =>
             {
-                chromosome.Fitness = GetFitness(chromosome).Round(4);
+                chromosome.Fitness = GetFitness(chromosome);
             });
 
             // Step 4: Sort the new population by fitness (descending)
@@ -187,7 +187,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
         Parallel.ForEach(population, chromosome =>
         {
-            chromosome.Fitness = GetFitness(chromosome).Round(4);
+            chromosome.Fitness = GetFitness(chromosome);
         });
 
         // Sort the population by fitness (descending)

@@ -48,7 +48,7 @@ public class GeneticAlgorithmLoggerTests
         }
 
         // Act  
-        var result = logger.GetAllGenerationalLogs();
+        var result = logger.ReadGenerationLogs();
 
         // Assert  
         Assert.That(result.Count, Is.EqualTo(expectedLogs.Count));
@@ -68,7 +68,9 @@ public class GeneticAlgorithmLoggerTests
         logger.LogAgentDetail(1, chromosome2, 0.9, 8, 18, 4);
 
         // Act  
-        var result = logger.GetAllChromosomesByGeneration();
+        var result = logger.ReadAllAgentLogs()
+            .GroupBy(p => p.Generation)
+            .ToDictionary(p => p.Key, p => p.ToList());
 
         // Assert  
         Assert.That(result.ContainsKey(0));
@@ -112,15 +114,18 @@ public class GeneticAlgorithmLoggerTests
             Assert.That(populationDictionary[i].Count, Is.EqualTo(parameters.PopulationSize));
 
             // Generation was logged
-            var generationLog = logger.GetAllGenerationalLogs();
+            var generationLog = logger.ReadGenerationLogs();
             Assert.That(generationLog.Count, Is.EqualTo(i + 1)); // +1 because we start from 0
             Assert.That(generationLog.Last().Generation, Is.EqualTo(i));
-            Assert.That(generationLog.Last().BestFitness, Is.EqualTo(populationDictionary[i][0].Fitness));
+            Assert.That(generationLog.Last().BestFitness, Is.EqualTo(populationDictionary[i][0].Fitness).Within(0.000000001));
             Assert.That(generationLog.Last().AverageFitness, Is.EqualTo(populationDictionary[i].Average(c => c.Fitness)));
             Assert.That(generationLog.Last().StdFitness, Is.EqualTo(populationDictionary[i].Select(c => c.Fitness).StandardDeviation()));
 
             // Agents were logged
-            var agents = logger.GetAllChromosomesByGeneration();
+            var agents = logger.ReadAllAgentLogs()
+                .GroupBy(p => p.Generation)
+                .ToDictionary(p => p.Key, p => p.ToList());
+
             Assert.That(agents.Count, Is.EqualTo(i + 1)); // +1 because we start from 0
             Assert.That(agents[i].Count, Is.EqualTo(parameters.PopulationSize));
             Assert.That(agents[i].All(a => a.Generation == i));

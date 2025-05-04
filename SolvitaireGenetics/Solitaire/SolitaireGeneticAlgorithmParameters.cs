@@ -28,6 +28,6 @@ public class SolitaireGeneticAlgorithmParameters : GeneticAlgorithmParameters
     [Option('c', "maxmoves", Default = 1000, HelpText = "Maximum number of moves per game.")]
     public int MaxMovesPerGeneration { get; set; } = 1000;
 
-    [Option('l', "limit", Default = 100, HelpText = "Maximum number of games per generation.")]
-    public int MaxGamesPerGeneration { get; set; } = 100;
+    [Option('l', "limit", Default = 10, HelpText = "Maximum number of games per generation.")]
+    public int MaxGamesPerGeneration { get; set; } = 10;
 }

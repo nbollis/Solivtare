@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text.Json;
 using SolvitaireIO;
 
@@ -15,7 +16,6 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
     private readonly string? _agentLogFilePath;
     private readonly object _generationLogLock = new();
     private readonly object _agentLogLock = new();
-    private readonly Dictionary<int, ConcurrentBag<AgentLog>> _allChromosomesByGeneration = new();
     private readonly List<GenerationLogDto> _generationLog = new();
     private int _lastGenerationNumber;
     private readonly ConcurrentBag<AgentLog> _agentLogBatch = new(); // In-memory batch for AgentLogs
@@ -95,8 +95,6 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
 
     public void LogGenerationInfo(GenerationLogDto generationLog)
     {
-        // Store the generational log in memory  
-        _generationLog.Add(generationLog);
         _lastGenerationNumber = generationLog.Generation;
 
         if (_generationLogFilePath is null)
@@ -141,13 +139,6 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
     /// </summary>  
     public void LogAgentDetail(AgentLog agentLog)
     {
-        if (!_allChromosomesByGeneration.TryGetValue(agentLog.Generation, out var chromosomes))
-        {
-            chromosomes = new ConcurrentBag<AgentLog>();
-            _allChromosomesByGeneration[agentLog.Generation] = chromosomes;
-        }
-        chromosomes.Add(agentLog);
-
         if (_agentLogFilePath is null)
             return;
 
@@ -201,74 +192,6 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
     /// </summary>
     public void FlushAgentLogs(int currentGeneration, List<TChromosome> population)
     {
-        // Add all accumulated logs to the generation cache
-        foreach (var agentLog in _agentLogBatch)
-        {
-            if (!_allChromosomesByGeneration.TryGetValue(agentLog.Generation, out var chromosomes))
-            {
-                chromosomes = new ConcurrentBag<AgentLog>();
-                _allChromosomesByGeneration[agentLog.Generation] = chromosomes;
-            }
-            chromosomes!.Add(agentLog);
-        }
-
-        var grouped = population.GroupBy(p => p.GetHashCode(), p => p);
-        foreach (var chromosomeGroup in grouped)
-        {
-            int populationCount = chromosomeGroup.Count();
-            TChromosome chromosome = chromosomeGroup.First();
-
-            if (!_allChromosomesByGeneration.TryGetValue(currentGeneration, out var generationLogs))
-            {
-                generationLogs = new ConcurrentBag<AgentLog>();
-                _allChromosomesByGeneration[currentGeneration] = generationLogs;
-            }
-
-            // Check if the chromosome is already logged for the current generation
-            var existingLog = generationLogs.FirstOrDefault(log => log.Chromosome.Equals(chromosome));
-            var loggedCount = generationLogs.Count(log => log.Chromosome.Equals(chromosome));
-            
-            if (loggedCount == populationCount) continue;
-
-            // We found the match
-            if (existingLog is not null)
-            {
-                for (int i = 0; i < populationCount - loggedCount; i++)
-                {
-                    _agentLogBatch.Add(existingLog);
-                    generationLogs.Add(existingLog);
-                }
-            }
-            // Did not find it in this generation. 
-            else
-            {
-                for (int i = currentGeneration - 1; i > -1; i--)
-                {
-                    var innerMatch = _allChromosomesByGeneration[i].FirstOrDefault(p => p.Chromosome.Equals(chromosome));
-
-                    if (innerMatch is null)
-                        continue;
-
-                    var log = new AgentLog()
-                    {
-                        Chromosome = innerMatch.Chromosome,
-                        Generation = currentGeneration,
-                        Fitness = innerMatch.Fitness,
-                        GamesPlayed = innerMatch.GamesPlayed,
-                        GamesWon = innerMatch.GamesWon,
-                        MovesMade = innerMatch.MovesMade
-                    };
-
-                    for (int j = 0; j < populationCount; j++)
-                    {
-                        _agentLogBatch.Add(log);
-                        _allChromosomesByGeneration[currentGeneration].Add(log);
-                    }
-                    break;
-                }
-            }
-        }
-
         if (_agentLogFilePath is not null)
         {
             lock (_agentLogLock)
@@ -278,6 +201,36 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
                     JsonSerializer.Deserialize<List<AgentLog>>(File.ReadAllText(_agentLogFilePath), _jsonOptions) ??
                     new List<AgentLog>();
 
+                // reverse for easier lookup
+                existingAgentLogs.Reverse();
+
+                // Populate count information and ensure all chromosomes are represented in the log, even if they were not in the batch. 
+                // This happens when Genetic algorithm uses a cached fitness instead of using the EvaluateFitness method.
+                foreach (var chromosomeGroup in population.GroupBy(p => p))
+                {
+                    int populationCount = chromosomeGroup.Count();
+                    TChromosome chromosome = chromosomeGroup.Key;
+
+                    AgentLog? match = _agentLogBatch.FirstOrDefault(p => p.Chromosome.Equals(chromosome));
+
+                    // Chromosome was previously evaluated, finds its log and create a new one for this generation. 
+                    if (match is null)
+                    {
+                        var old = existingAgentLogs.FirstOrDefault(p => p.Chromosome.Equals(chromosome));
+
+                        match = new AgentLog() // create a new log for output with the replaced generation number
+                        {
+                            Chromosome = chromosome, Fitness = chromosome.Fitness, Generation = currentGeneration,
+                            GamesPlayed = old!.GamesPlayed, GamesWon = old!.GamesWon, MovesMade = old!.MovesMade
+                        };
+                        _agentLogBatch.Add(match);
+                    }
+
+                    match!.Count = populationCount;
+                }
+
+                existingAgentLogs.Reverse();
+
                 // Add the accumulated logs
                 existingAgentLogs.AddRange(_agentLogBatch);
 
@@ -285,6 +238,8 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
                 File.WriteAllText(_agentLogFilePath, JsonSerializer.Serialize(existingAgentLogs, _jsonOptions));
             }
         }
+
+        Console.WriteLine($"Chromosome Logged Count: {_agentLogBatch.Sum(p => p.Count)} Unique: {_agentLogBatch.Count}");
 
         // Clear the in-memory batch
         _agentLogBatch.Clear();
@@ -296,66 +251,28 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
 
     public List<TChromosome> LoadLastGeneration(out int generationNumber)
     {
-        generationNumber = _lastGenerationNumber;
-        if (_allChromosomesByGeneration.TryGetValue(generationNumber, out var agentLogs))
-        {
-            return agentLogs.Select(p => p.Chromosome as TChromosome).ToList()!;
-        }
-
         generationNumber = 0;
-        GenerationLogDto? lastGeneration = LoadGenerationLogs().LastOrDefault();
+        GenerationLogDto? lastGeneration = ReadGenerationLogs().LastOrDefault();
         generationNumber = lastGeneration?.Generation ?? 0;
 
         if (lastGeneration == null)
             return new List<TChromosome>();
 
-        List<AgentLog> lastGenerationAgents = LoadAllAgentLogs();
+        List<AgentLog> lastGenerationAgents = ReadAllAgentLogs();
 
         var lastGenerationChromosomes = new List<TChromosome>();
         foreach (var agentLog in lastGenerationAgents.Where(p => p.Generation == lastGeneration.Generation))
         {
-            lastGenerationChromosomes.Add((TChromosome)agentLog.Chromosome);
+            for (int i = 0; i < agentLog.Count; i++)
+            {
+                lastGenerationChromosomes.Add((TChromosome)agentLog.Chromosome);
+            }
         }
 
         return lastGenerationChromosomes;
     }
 
-    public List<GenerationLogDto> GetAllGenerationalLogs()
-    {
-        var toReturn =  new List<GenerationLogDto>(_generationLog);
-        var expectedGenerations = Enumerable.Range(0, _lastGenerationNumber);
-        if (toReturn.Select(p => p.Generation).SequenceEqual(expectedGenerations))
-            return toReturn;
-
-        // If the cache is empty, load from the file  
-        return LoadGenerationLogs();
-    }
-
-    public Dictionary<int, List<AgentLog>> GetAllChromosomesByGeneration()
-    {
-        // Check if all generations up to the last generation number are present in the dictionary  
-        if (_allChromosomesByGeneration.Count == _lastGenerationNumber + 1 &&
-            Enumerable.Range(0, _lastGenerationNumber + 1).All(i => _allChromosomesByGeneration.ContainsKey(i)))
-        {
-            return _allChromosomesByGeneration.ToDictionary(p => p.Key, p => p.Value.ToList());
-        }
-
-        // If not, load from file  
-        var allAgentLogs = LoadAllAgentLogs();
-        foreach (var agentLog in allAgentLogs)
-        {
-            if (!_allChromosomesByGeneration.TryGetValue(agentLog.Generation, out var chromosomes))
-            {
-                chromosomes = new ConcurrentBag<AgentLog>();
-                _allChromosomesByGeneration[agentLog.Generation] = chromosomes;
-            }
-            chromosomes.Add(agentLog);
-        }
-
-        return _allChromosomesByGeneration.ToDictionary(p => p.Key, p => p.Value.ToList());
-    }
-
-    internal List<GenerationLogDto> LoadGenerationLogs()
+    public List<GenerationLogDto> ReadGenerationLogs()
     {
         lock (_generationLogLock)
         {
@@ -367,7 +284,7 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
         }
     }
 
-    internal List<AgentLog> LoadAllAgentLogs()
+    public List<AgentLog> ReadAllAgentLogs()
     {
         lock (_agentLogLock)
         {

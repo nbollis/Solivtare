@@ -1,4 +1,5 @@
-﻿using SolvitaireCore;
+﻿using System.Diagnostics;
+using SolvitaireCore;
 using SolvitaireIO;
 
 namespace SolvitaireGenetics;
@@ -39,6 +40,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
 
     public override double EvaluateFitness(SolitaireChromosome chromosome)
     {
+        var sw = Stopwatch.StartNew();
         // TODO: Make this more generic to support different agents. 
         var evaluator = new GeneticSolitaireEvaluator(chromosome);
         var agent = new MaxiMaxAgent(evaluator, 10);
@@ -47,6 +49,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         int movesPlayed = 0;
         int gamesPlayed = 0;
         int gamesWon = 0;
+        int tableauCards = 0;
 
         // multiple game loop
         while (gamesPlayed < _maxGamesPerAgent && movesPlayed < _maxMovesPerAgent)
@@ -104,6 +107,8 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
                     stats.AddOrUpdateWinnableDeck(deck, gameState.MovesMade, gameState.IsGameWon);
                 }
             }
+
+            tableauCards += gameState.TableauPiles.Sum(p => p.Count);
         }
 
         // Calculate fitness based on the number of games won and moves played
@@ -111,6 +116,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         if (gamesPlayed > 0)
         {
             fitness -= 0.5 * movesPlayed / (gamesPlayed * _maxMovesPerAgent);
+            fitness += 0.1 * tableauCards / (gamesPlayed * 52);
         }
 
         var agentLog = new AgentLog
@@ -121,6 +127,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
 
         chromosome.Fitness = fitness;
         AgentCompleted?.Invoke(agentLog);
+        Console.WriteLine(sw.Elapsed + "Elapsed");
         return fitness;
     }
 
