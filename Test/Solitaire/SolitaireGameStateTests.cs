@@ -89,7 +89,7 @@ public class SolitaireGameStateTests
     public void GameState_CycleMove_StockToWaste_ShouldMoveCorrectNumberOfCards()
     {
         // Arrange  
-        var gameState = new SolitaireGameState(); // Set CardsPerCycle to 3  
+        var gameState = new SolitaireGameState(); // SetWeight CardsPerCycle to 3  
         var stockCards = new List<Card>
         {
            new Card(Suit.Hearts, Rank.Ace),
@@ -113,7 +113,7 @@ public class SolitaireGameStateTests
     public void GameState_CycleMove_StockToWaste_LessThanCardsPerCycle_ShouldMoveAllRemainingCards()
     {
         // Arrange  
-        var gameState = new SolitaireGameState(5); // Set CardsPerCycle to 5  
+        var gameState = new SolitaireGameState(5); // SetWeight CardsPerCycle to 5  
         var stockCards = new List<Card>
        {
            new Card(Suit.Hearts, Rank.Ace),

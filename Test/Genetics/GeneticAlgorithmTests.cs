@@ -236,11 +236,11 @@ public class GeneticAlgorithmTests
             OutputDirectory = OutputDirectory
         };
         var template = new QuadraticChromosome();
-        template.Set(QuadraticChromosome.A, 1.0);
-        template.Set(QuadraticChromosome.B, 2.0);
-        template.Set(QuadraticChromosome.C, 3.0);
-        template.Set(QuadraticChromosome.YIntercept, 4.0);
-        template.Set(QuadraticChromosome.EvalFunction, 1.0);
+        template.SetWeight(QuadraticChromosome.A, 1.0);
+        template.SetWeight(QuadraticChromosome.B, 2.0);
+        template.SetWeight(QuadraticChromosome.C, 3.0);
+        template.SetWeight(QuadraticChromosome.YIntercept, 4.0);
+        template.SetWeight(QuadraticChromosome.EvalFunction, 1.0);
 
         var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters, template);
         var field = typeof(QuadraticRegressionGeneticAlgorithm).GetField("CrossOverRate", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -252,7 +252,7 @@ public class GeneticAlgorithmTests
 
         // Assert
         Assert.That(population.Count, Is.EqualTo(parameters.PopulationSize));
-        var mutatedTemplateCount = population.Count(c => Math.Abs(c.Get(QuadraticChromosome.A) - 1.0) < 0.000001);
+        var mutatedTemplateCount = population.Count(c => Math.Abs(c.GetWeight(QuadraticChromosome.A) - 1.0) < 0.000001);
 
         int expectedCount = (parameters.PopulationSize / 10) + (int)(parameters.PopulationSize * 0.9 / 2);
 

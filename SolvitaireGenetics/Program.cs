@@ -27,7 +27,7 @@ namespace SolvitaireGenetics
 
         private static int Run(SolitaireGeneticAlgorithmParameters options)
         {
-            // Set it all up
+            // SetWeight it all up
             GeneticSolitaireAlgorithm algorithm;
             try
             {

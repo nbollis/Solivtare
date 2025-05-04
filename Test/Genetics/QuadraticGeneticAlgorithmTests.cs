@@ -26,8 +26,8 @@ public class QuadraticGeneticAlgorithmTests
         var newValue = 2.5;
 
         // Act
-        chromosome.Set(QuadraticChromosome.A, newValue);
-        var result = chromosome.Get(QuadraticChromosome.A);
+        chromosome.SetWeight(QuadraticChromosome.A, newValue);
+        var result = chromosome.GetWeight(QuadraticChromosome.A);
 
         // Assert
         Assert.That(result, Is.EqualTo(newValue));
@@ -45,10 +45,10 @@ public class QuadraticGeneticAlgorithmTests
         };
         var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
         var chromosome = new QuadraticChromosome();
-        chromosome.Set(QuadraticChromosome.A, 1.0);
-        chromosome.Set(QuadraticChromosome.B, 2.0);
-        chromosome.Set(QuadraticChromosome.C, 3.0);
-        chromosome.Set(QuadraticChromosome.YIntercept, 4.0);
+        chromosome.SetWeight(QuadraticChromosome.A, 1.0);
+        chromosome.SetWeight(QuadraticChromosome.B, 2.0);
+        chromosome.SetWeight(QuadraticChromosome.C, 3.0);
+        chromosome.SetWeight(QuadraticChromosome.YIntercept, 4.0);
 
         // Act
         var fitness = algorithm.EvaluateFitness(chromosome);
@@ -149,10 +149,10 @@ public class QuadraticGeneticAlgorithmTests
 
         // Create a chromosome with the exact correct parameters
         var correctChromosome = new QuadraticChromosome();
-        correctChromosome.Set(QuadraticChromosome.A, parameters.CorrectA);
-        correctChromosome.Set(QuadraticChromosome.B, parameters.CorrectB);
-        correctChromosome.Set(QuadraticChromosome.C, parameters.CorrectC);
-        correctChromosome.Set(QuadraticChromosome.YIntercept, parameters.CorrectIntercept);
+        correctChromosome.SetWeight(QuadraticChromosome.A, parameters.CorrectA);
+        correctChromosome.SetWeight(QuadraticChromosome.B, parameters.CorrectB);
+        correctChromosome.SetWeight(QuadraticChromosome.C, parameters.CorrectC);
+        correctChromosome.SetWeight(QuadraticChromosome.YIntercept, parameters.CorrectIntercept);
 
         // Act
         var fitness = algorithm.EvaluateFitness(correctChromosome);

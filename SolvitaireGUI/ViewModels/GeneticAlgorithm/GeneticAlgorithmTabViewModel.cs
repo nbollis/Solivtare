@@ -107,7 +107,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             // Collapse the ParametersExpander
             OnPropertyChanged(nameof(IsAlgorithmRunning));
 
-            // Set up the plots
+            // SetWeight up the plots
             _generationalLogs.Clear();
             SetUpPlots();
 

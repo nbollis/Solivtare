@@ -21,9 +21,5 @@ public class QuadraticChromosome : Chromosome
         WeightMaxStartValue = 4;
     }
 
-    [JsonConstructor]
     public QuadraticChromosome() : this(Random.Shared) { }
-
-    public double Get(string name) => MutableStatsByName.TryGetValue(name, out var v) ? v : 0;
-    public void Set(string name, double value) => MutableStatsByName[name] = value;
 }

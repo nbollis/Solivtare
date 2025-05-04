@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace SolvitaireGenetics;
+﻿namespace SolvitaireGenetics;
 
 public class SolitaireChromosome : Chromosome
 {
@@ -41,11 +39,5 @@ public class SolitaireChromosome : Chromosome
         MutableStatsByName[SkipLegalMoveWeightName] = GenerateRandomWeight();
     }
 
-    [JsonConstructor]
     public SolitaireChromosome() : this(Random.Shared) { }
-
-    public double GetWeight(string weightName) => MutableStatsByName.TryGetValue(weightName, out var value) ? value : 0;
-    public void SetWeight(string weightName, double value) => MutableStatsByName[weightName] = value;
 }
-
-

@@ -6,9 +6,9 @@ namespace SolvitaireGUI;
 /// <summary>
 /// ViewModel for the SolitaireChromosome class, allowing dynamic interaction with its weights.
 /// </summary>
-public class SolitaireChromosomeViewModel : BaseViewModel
+public class ChromosomeViewModel : BaseViewModel
 {
-    public SolitaireChromosome BaseChromosome { get; }
+    public Chromosome BaseChromosome { get; }
 
     /// <summary>
     /// Observable collection of weight names and their values.
@@ -16,17 +16,17 @@ public class SolitaireChromosomeViewModel : BaseViewModel
     public ObservableCollection<ChromosomeWeight> Weights { get; } = new();
 
     /// <summary>
-    /// Initializes a new instance of the SolitaireChromosomeViewModel.
+    /// Initializes a new instance of the ChromosomeViewModel.
     /// </summary>
-    /// <param name="chromosome">The SolitaireChromosome instance to wrap.</param>
-    public SolitaireChromosomeViewModel(SolitaireChromosome chromosome)
+    /// <param name="chromosome">The Chromosome instance to wrap.</param>
+    public ChromosomeViewModel(Chromosome chromosome)
     {
         BaseChromosome = chromosome;
         Sync();
     }
 
     /// <summary>
-    /// Synchronizes the ViewModel with the underlying SolitaireChromosome.
+    /// Synchronizes the ViewModel with the underlying Chromosome.
     /// </summary>
     public void Sync()
     {
@@ -40,7 +40,7 @@ public class SolitaireChromosomeViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Updates the weight in the underlying SolitaireChromosome and synchronizes the ViewModel.
+    /// Updates the weight in the underlying Chromosome and synchronizes the ViewModel.
     /// </summary>
     /// <param name="weightName">The name of the weight to update.</param>
     /// <param name="value">The new value for the weight.</param>
@@ -51,7 +51,7 @@ public class SolitaireChromosomeViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Updates multiple weights in the underlying SolitaireChromosome and synchronizes the ViewModel.
+    /// Updates multiple weights in the underlying Chromosome and synchronizes the ViewModel.
     /// </summary>
     /// <param name="weights">A dictionary of weight names and their values.</param>
     public void UpdateWeights(Dictionary<string, double> weights)
@@ -66,7 +66,7 @@ public class SolitaireChromosomeViewModel : BaseViewModel
 }
 
 /// <summary>
-/// Represents a single weight in the SolitaireChromosome.
+/// Represents a single weight in the Chromosome.
 /// </summary>
 public class ChromosomeWeight : BaseViewModel
 {

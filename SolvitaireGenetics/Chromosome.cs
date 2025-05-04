@@ -1,9 +1,7 @@
 ﻿using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
-using System;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json.Serialization;
 
 namespace SolvitaireGenetics;
 
@@ -16,7 +14,10 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     protected int WeightMaxStartValue = 2;
 
     public double Fitness { get; set; } = double.MinValue;
+
     public Dictionary<string, double> MutableStatsByName { get; set; }
+    public double GetWeight(string name) => MutableStatsByName.TryGetValue(name, out var v) ? v : 0;
+    public void SetWeight(string name, double value) => MutableStatsByName[name] = value;
 
     protected Chromosome(Random random)
     {
@@ -54,7 +55,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     }
 
     /// <summary>
-    /// Creates a random weight from -2 to 2. 
+    /// Creates a random weight from Min to Max Value
     /// </summary>
     /// <returns></returns>
     protected double GenerateRandomWeight()
@@ -83,7 +84,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
 
         foreach (var kvp in chromosome.MutableStatsByName)
         {
-            // TODO: Get a better mutation system going. Maybe a gaussian distribution?
+            // TODO: GetWeight a better mutation system going. Maybe a gaussian distribution?
             var mutationValue = chromosome.Random.NextDouble();
             if (mutationValue < mutationRate && chromosome.CanFullRandomMutate)
             {
