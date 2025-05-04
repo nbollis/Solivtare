@@ -263,7 +263,7 @@ public class GeneticAlgorithmLogger<TChromosome> : IGeneticAlgorithmLogger
 
         List<AgentLog> lastGenerationAgents = ReadAllAgentLogs()
             .Where(p => p.Generation == lastGeneration.Generation)
-            .SelectMany(p => Enumerable.Repeat(p, p.Count))
+            .SelectMany(p => Enumerable.Repeat(p, (int)p.Count))
             .ToList();
 
         return lastGenerationAgents;

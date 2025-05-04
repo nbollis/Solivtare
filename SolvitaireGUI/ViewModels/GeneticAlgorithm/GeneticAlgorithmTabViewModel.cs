@@ -98,35 +98,17 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
         IsAlgorithmRunning = true;
         IsPaused = false;
+        // SetWeight up the plots
+        _generationalLogs.Clear();
+        SetUpPlots();
+
+        // Create algorithm and subscribe to events. 
+        IGeneticAlgorithm? algorithm = GetAlgorithm();
+        algorithm.GenerationCompleted += OnGenerationFinished;
 
         try
         {
-            // Collapse the ParametersExpander
-            OnPropertyChanged(nameof(IsAlgorithmRunning));
-
-            // SetWeight up the plots
-            _generationalLogs.Clear();
-            SetUpPlots();
-
-            // Create algorithm and subscribe to events. 
-            IGeneticAlgorithm? algorithm = GetAlgorithm();
-            algorithm.GenerationCompleted += OnGenerationFinished;
-
-            var loadTask = Task.Run(() =>
-            {
-                var previousLogs = algorithm.Logger.ReadGenerationLogs();
-                if (previousLogs.Count == 0)
-                    return;
-
-                foreach (var log in previousLogs)
-                {
-                    _generationalLogs.Enqueue(log);
-                }
-                OnGenerationFinished(previousLogs[^1].Generation, previousLogs[^1]);
-            });
-
             await Task.Run(() => RunEvolutionWithControl(algorithm, Parameters.Generations, _cancellationTokenSource.Token));
-            await loadTask; // Ensure the loading task is completed before proceeding
 
             MessageBox.Show("Genetic Algorithm completed successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -142,6 +124,11 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         finally
         {
             IsAlgorithmRunning = false;
+
+            if (algorithm is not null)
+            {
+                algorithm.Logger.CreateTsvSummaries(Parameters.OutputDirectory!);
+            }
         }
     }
 

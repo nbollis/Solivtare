@@ -19,6 +19,7 @@ public class GeneticAlgorithmLoggerTests
         {
             Directory.Delete(OutputDirectory, true);
         }
+
         Directory.CreateDirectory(OutputDirectory);
     }
 
@@ -37,10 +38,10 @@ public class GeneticAlgorithmLoggerTests
         // Arrange  
         var logger = new GeneticAlgorithmLogger<TestChromosome>("TestOutput");
         var expectedLogs = new List<GenerationLogDto>
-       {
-           new GenerationLogDto { Generation = 0, BestFitness = 1.0, AverageFitness = 0.8, StdFitness = 0.1 },
-           new GenerationLogDto { Generation = 1, BestFitness = 0.9, AverageFitness = 0.7, StdFitness = 0.2 }
-       };
+        {
+            new GenerationLogDto { Generation = 0, BestFitness = 1.0, AverageFitness = 0.8, StdFitness = 0.1 },
+            new GenerationLogDto { Generation = 1, BestFitness = 0.9, AverageFitness = 0.7, StdFitness = 0.2 }
+        };
 
         foreach (var log in expectedLogs)
         {
@@ -111,9 +112,12 @@ public class GeneticAlgorithmLoggerTests
             var generationLog = logger.ReadGenerationLogs();
             Assert.That(generationLog.Count, Is.EqualTo(i + 1)); // +1 because we start from 0
             Assert.That(generationLog.Last().Generation, Is.EqualTo(i));
-            Assert.That(generationLog.Last().BestFitness, Is.EqualTo(populationDictionary[i][0].Fitness).Within(0.000000001));
-            Assert.That(generationLog.Last().AverageFitness, Is.EqualTo(populationDictionary[i].Average(c => c.Fitness)));
-            Assert.That(generationLog.Last().StdFitness, Is.EqualTo(populationDictionary[i].Select(c => c.Fitness).StandardDeviation()));
+            Assert.That(generationLog.Last().BestFitness,
+                Is.EqualTo(populationDictionary[i][0].Fitness).Within(0.000000001));
+            Assert.That(generationLog.Last().AverageFitness,
+                Is.EqualTo(populationDictionary[i].Average(c => c.Fitness)));
+            Assert.That(generationLog.Last().StdFitness,
+                Is.EqualTo(populationDictionary[i].Select(c => c.Fitness).StandardDeviation()));
 
             // Agents were logged
             var agents = logger.ReadAllAgentLogs()
@@ -135,10 +139,58 @@ public class GeneticAlgorithmLoggerTests
                 {
                     Console.WriteLine($"Mismatch found for Chromosome: {agent.Chromosome}");
                     Console.WriteLine($"Agent Chromosome Fitness: {agent.Chromosome.Fitness}");
-                    Console.WriteLine($"Population Chromosomes: {string.Join(", ", populationFromThisGen.Select(c => c.Fitness))}");
+                    Console.WriteLine(
+                        $"Population Chromosomes: {string.Join(", ", populationFromThisGen.Select(c => c.Fitness))}");
                 }
+
                 Assert.That(matchingChromosome, Is.Not.Null, $"Chromosome not found: {agent.Chromosome}");
             }
         }
+    }
+
+    [Test]
+    public void GeneticAlgorithmLogger_CreateTsvSummariesHasCorrectChromosomes()
+    {
+        // Arrange  
+        var parameters = new QuadraticGeneticAlgorithmParameters
+        {
+            PopulationSize = 4,
+            MutationRate = 0.25,
+            TournamentSize = 4,
+            Generations = 100,
+            OutputDirectory = OutputDirectory
+        };
+
+        var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
+        var logger = algorithm.Logger;
+
+        List<GenerationLogDto> generations = new();
+        algorithm.GenerationCompleted += (a, l) =>
+        {
+            // Log the generation info
+            generations.Add(l);
+        };
+
+        // Run the evolution
+        algorithm.RunEvolution(100);
+        logger.CreateTsvSummaries(OutputDirectory);
+
+        // Act
+        var averageTsv = AgentLogTabFile.ReadFromFile(Path.Combine(OutputDirectory, "AverageChromosome.tsv"));
+        var bestTsv = AgentLogTabFile.ReadFromFile(Path.Combine(OutputDirectory, "BestChromosome.tsv"));
+
+        // Assert
+        Assert.That(averageTsv.Count, Is.EqualTo(generations.Count));
+        Assert.That(bestTsv.Count, Is.EqualTo(generations.Count));
+
+        for (int i = 0; i < generations.Count; i++)
+        {
+            var averageChromosome = averageTsv[i].Chromosome;
+            var bestChromosome = bestTsv[i].Chromosome;
+
+            Assert.That(averageChromosome, Is.EqualTo(generations[i].AverageChromosome));
+            Assert.That(bestChromosome, Is.EqualTo(generations[i].BestChromosome));
+        }
+
     }
 }
