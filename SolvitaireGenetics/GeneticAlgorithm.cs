@@ -13,7 +13,6 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     protected readonly TParameters Parameters;
     protected readonly TChromosome? ChromosomeTemplate;
     protected readonly double TemplateInitialRatio;
-    protected readonly GeneticAlgorithmLogger<TChromosome>? Logger;
     protected readonly int PopulationSize;
     protected readonly Random Random = new();
     protected readonly double MutationRate;
@@ -22,6 +21,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
     public int CurrentGeneration { get; protected set; }
     public List<TChromosome> Population { get; protected set; } = [];
+    public IGeneticAlgorithmLogger Logger { get; }
 
     // Fitness cache
     private readonly ConcurrentDictionary<string, double> _fitnessCache = new();
@@ -153,7 +153,9 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         // Check if we have a last generation to load
         if (Logger is not null)
         {
-            var lastGeneration = Logger.LoadLastGeneration(out int generationNumber);
+            var lastGeneration = Logger.LoadLastGeneration(out int generationNumber)
+                .Select(p => p.Chromosome as TChromosome)
+                .ToList();
 
             if (lastGeneration.Count == PopulationSize)
             {

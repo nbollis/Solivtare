@@ -93,13 +93,7 @@ public class GeneticAlgorithmLoggerTests
             OutputDirectory = OutputDirectory
         };
         var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
-
-        var loggerField = typeof(QuadraticRegressionGeneticAlgorithm)
-            .GetField("Logger", BindingFlags.NonPublic | BindingFlags.Instance);
-        Assert.NotNull(loggerField, "Logger field not found in QuadraticRegressionGeneticAlgorithm.");
-
-        var logger = (GeneticAlgorithmLogger<QuadraticChromosome>?)loggerField.GetValue(algorithm);
-        Assert.NotNull(logger, "Logger instance is null.");
+        var logger = algorithm.Logger;
 
         // Run a single round of evolution at a time
         Dictionary<int, List<QuadraticChromosome>> populationDictionary = new();

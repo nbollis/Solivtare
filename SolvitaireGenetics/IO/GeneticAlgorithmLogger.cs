@@ -9,7 +9,8 @@ namespace SolvitaireGenetics;
 /// Logs Generational and Agent specific data throughout a genetic algorithm run.   
 /// </summary>  
 /// <typeparam name="TChromosome"></typeparam>  
-public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome, new()
+public class GeneticAlgorithmLogger<TChromosome> : IGeneticAlgorithmLogger 
+    where TChromosome : Chromosome, new()
 {
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly string? _generationLogFilePath;
@@ -62,15 +63,7 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
         }
     }
 
-    public void SubscribeToAlgorithm(IGeneticAlgorithm algorithm)
-    {
-        algorithm.GenerationCompleted += (generation, generationLog) =>
-        {
-            LogGenerationInfo(generationLog);
-        };
-
-        algorithm.AgentCompleted += AccumulateAgentLog;
-    }
+    
 
     #region Log Directly to File/Memory
 
@@ -190,7 +183,7 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
     /// <summary>
     /// Writes out the accumulated AgentLogs to the file and clears the in-memory batch.
     /// </summary>
-    public void FlushAgentLogs(int currentGeneration, List<TChromosome> population)
+    public void FlushAgentLogs<TChromosomeAlt>(int currentGeneration, List<TChromosomeAlt> population) where TChromosomeAlt : Chromosome, new()
     {
         List<AgentLog> agentLogsInBatch = new(population.Count);
         List<AgentLog> agentLogsToWrite = new(population.Count);
@@ -221,7 +214,7 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
         foreach (var chromosomeGroup in grouped)
         {
             int populationCount = chromosomeGroup.Count();
-            TChromosome chromosome = chromosomeGroup.First();
+            TChromosomeAlt chromosome = chromosomeGroup.First();
 
             AgentLog? match = agentLogsInBatch.FirstOrDefault(p => p.Chromosome.Equals(chromosome));
 
@@ -259,27 +252,21 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
 
     #region Data Access
 
-    public List<TChromosome> LoadLastGeneration(out int generationNumber)
+    public List<AgentLog> LoadLastGeneration(out int generationNumber)
     {
         generationNumber = 0;
         GenerationLogDto? lastGeneration = ReadGenerationLogs().LastOrDefault();
         generationNumber = lastGeneration?.Generation ?? 0;
 
         if (lastGeneration == null)
-            return new List<TChromosome>();
+            return new List<AgentLog>();
 
-        List<AgentLog> lastGenerationAgents = ReadAllAgentLogs();
+        List<AgentLog> lastGenerationAgents = ReadAllAgentLogs()
+            .Where(p => p.Generation == lastGeneration.Generation)
+            .SelectMany(p => Enumerable.Repeat(p, p.Count))
+            .ToList();
 
-        var lastGenerationChromosomes = new List<TChromosome>();
-        foreach (var agentLog in lastGenerationAgents.Where(p => p.Generation == lastGeneration.Generation))
-        {
-            for (int i = 0; i < agentLog.Count; i++)
-            {
-                lastGenerationChromosomes.Add((TChromosome)agentLog.Chromosome);
-            }
-        }
-
-        return lastGenerationChromosomes;
+        return lastGenerationAgents;
     }
 
     public List<GenerationLogDto> ReadGenerationLogs()

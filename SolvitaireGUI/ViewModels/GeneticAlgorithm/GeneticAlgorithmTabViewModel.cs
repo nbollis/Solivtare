@@ -6,6 +6,7 @@ using System.Windows.Input;
 using ScottPlot.WPF;
 using SolvitairePlotting;
 using ScottPlot;
+using System.Security.Cryptography;
 
 namespace SolvitaireGUI;
 
@@ -107,33 +108,25 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             _generationalLogs.Clear();
             SetUpPlots();
 
-            // Create and run the genetic algorithm using the factory
-            IGeneticAlgorithm? algorithm = null;
-            string? filePath = null;
-            if (Parameters.OutputDirectory != null)
-                filePath = Path.Combine(Parameters.OutputDirectory!, "RunParameters.json");
-
-            switch (Parameters)
-            {
-                case SolitaireGeneticAlgorithmParameters solitaireParams:
-                    algorithm = new GeneticSolitaireAlgorithm(solitaireParams);
-                    if (Parameters.OutputDirectory != null)
-                        solitaireParams.SaveToFile(filePath!);
-                    break;
-                case QuadraticGeneticAlgorithmParameters quad:
-                    algorithm = new QuadraticRegressionGeneticAlgorithm(quad);
-                    if (Parameters.OutputDirectory != null)
-                        quad.SaveToFile(filePath!);
-                    break;
-                default:
-                    MessageBox.Show("Invalid parameters provided for the Genetic Algorithm.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-            }
-
-            // Subscribe to events
+            // Create algorithm and subscribe to events. 
+            IGeneticAlgorithm? algorithm = GetAlgorithm();
             algorithm.GenerationCompleted += OnGenerationFinished;
-            
+
+            var loadTask = Task.Run(() =>
+            {
+                var previousLogs = algorithm.Logger.ReadGenerationLogs();
+                if (previousLogs.Count == 0)
+                    return;
+
+                foreach (var log in previousLogs)
+                {
+                    _generationalLogs.Enqueue(log);
+                }
+                OnGenerationFinished(previousLogs[^1].Generation, previousLogs[^1]);
+            });
+
             await Task.Run(() => RunEvolutionWithControl(algorithm, Parameters.Generations, _cancellationTokenSource.Token));
+            await loadTask; // Ensure the loading task is completed before proceeding
 
             MessageBox.Show("Genetic Algorithm completed successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -179,14 +172,39 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         IsPaused = false;
     }
 
+    private IGeneticAlgorithm GetAlgorithm()
+    {
+        string? filePath = null;
+        if (Parameters.OutputDirectory != null)
+            filePath = Path.Combine(Parameters.OutputDirectory!, "RunParameters.json");
+
+        IGeneticAlgorithm algorithm = null!;
+        switch (Parameters)
+        {
+            case SolitaireGeneticAlgorithmParameters solitaireParams:
+                algorithm = new GeneticSolitaireAlgorithm(solitaireParams);
+                if (Parameters.OutputDirectory != null)
+                    solitaireParams.SaveToFile(filePath!);
+                break;
+            case QuadraticGeneticAlgorithmParameters quad:
+                algorithm = new QuadraticRegressionGeneticAlgorithm(quad);
+                if (Parameters.OutputDirectory != null)
+                    quad.SaveToFile(filePath!);
+                break;
+        }
+
+        return algorithm;
+    }
+
     #endregion
 
     #region Algorithm Type and Parameter Selection
 
     private bool _useChromosomeTemplate;
     private GeneticAlgorithmType _selectedAlgorithmType = GeneticAlgorithmType.Quadratic;
-    private GeneticAlgorithmParameters _parameters; 
-    public ChromosomeViewModel ChromosomeTemplate { get; private set; }
+    private GeneticAlgorithmParameters _parameters;
+    private ChromosomeViewModel _chromosomeViewModel;
+
     public List<GeneticAlgorithmType> AlgorithmTypes { get; } = Enum.GetValues(typeof(GeneticAlgorithmType)).Cast<GeneticAlgorithmType>().ToList();
     public GeneticAlgorithmType SelectedAlgorithmType
     {
@@ -199,22 +217,10 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
                 OnPropertyChanged(nameof(SelectedAlgorithmType));
 
                 // Update the parameters based on the selected algorithm type
-                Parameters = SelectedAlgorithmType switch
-                {
-                    GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParameters(),
-                    GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParameters(),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                Parameters = SelectedAlgorithmType.ToNewParams();
 
                 // Update the Chromosome Template to be the correct type
-                ChromosomeTemplate = (SelectedAlgorithmType switch
-                {
-                    GeneticAlgorithmType.Solitaire => new ChromosomeViewModel(new SolitaireChromosome(Random.Shared)),
-                    GeneticAlgorithmType.Quadratic => new ChromosomeViewModel(new QuadraticChromosome(Random.Shared)),
-                    _ => throw new ArgumentOutOfRangeException()
-                });
-
-                OnPropertyChanged(nameof(ChromosomeTemplate));
+                ChromosomeTemplate = SelectedAlgorithmType.ToNewChromosomeViewModel();
             }
         }
     }
@@ -226,6 +232,23 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         {
             _parameters = value;
             OnPropertyChanged(nameof(Parameters));
+
+            _selectedAlgorithmType = Parameters.FromParams();
+            SelectedAlgorithmType = _selectedAlgorithmType;
+            OnPropertyChanged(nameof(SelectedAlgorithmType));
+
+            // Update the Chromosome Template to be the correct type
+            ChromosomeTemplate = SelectedAlgorithmType.ToNewChromosomeViewModel();
+        }
+    }
+
+    public ChromosomeViewModel ChromosomeTemplate
+    {
+        get => _chromosomeViewModel;
+        set
+        {
+            _chromosomeViewModel = value;
+            OnPropertyChanged(nameof(ChromosomeTemplate));
         }
     }
 
@@ -431,6 +454,16 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
                     Parameters = GeneticAlgorithmParameters.LoadFromFile(filePath);
                     OnPropertyChanged(nameof(Parameters));
                     SetUpPlots();
+
+                    var previousGenerationLogs = GetAlgorithm().Logger.ReadGenerationLogs();
+                    if (previousGenerationLogs.Count == 0)
+                        return;
+
+                    for (int i = 0; i < previousGenerationLogs.Count -1; i++)
+                    {
+                        _generationalLogs.Enqueue(previousGenerationLogs[i]);   
+                    }
+                    OnGenerationFinished(previousGenerationLogs[^1].Generation, previousGenerationLogs[^1]);
                 }
                 catch (Exception ex)
                 {

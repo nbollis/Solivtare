@@ -70,7 +70,7 @@ public class GeneticAlgorithmTests
         File.WriteAllText(Path.Combine(OutputDirectory, "AgentLog.json"), JsonSerializer.Serialize(agentLogs));
 
         // Act  
-        var lastGenerationChromosomes = logger.LoadLastGeneration(out _);
+        var lastGenerationChromosomes = logger.LoadLastGeneration(out _).Select(p => p.Chromosome).ToList();
 
         // Assert  
         Assert.That(lastGenerationChromosomes.Count, Is.EqualTo(2));
