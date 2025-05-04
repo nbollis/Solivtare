@@ -15,17 +15,13 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     public GeneticAlgorithmTabViewModel()
     {
         CurrentGeneration = 0;
-        SelectedAlgorithmType = GeneticAlgorithmType.Solitaire; // Default selection
-        UpdateParameters();
 
         StartAlgorithmCommand = new RelayCommand(() => _ = RunAlgorithm());
-        //PauseCommand = new RelayCommand(PauseAlgorithm/*, (p) => IsAlgorithmRunning && !IsPaused*/);
-        //ResumeCommand = new RelayCommand(ResumeAlgorithm/*, (p) => IsAlgorithmRunning && IsPaused*/);
-        //StopCommand = new RelayCommand(StopAlgorithm/*, (p) => IsAlgorithmRunning*/);
         PauseCommand = new DelegateCommand(_ => PauseAlgorithm(), _ => IsAlgorithmRunning && !IsPaused);
         ResumeCommand = new DelegateCommand(_ => ResumeAlgorithm(), _ => IsAlgorithmRunning && IsPaused);
 
         IsAlgorithmRunning = false;
+        SelectedAlgorithmType = GeneticAlgorithmType.Solitaire; // Default selection
     }
 
     public GeneticAlgorithmTabViewModel(GeneticAlgorithmParameters parameters) : this()
@@ -116,6 +112,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             string? filePath = null;
             if (Parameters.OutputDirectory != null)
                 filePath = Path.Combine(Parameters.OutputDirectory!, "RunParameters.json");
+
             switch (Parameters)
             {
                 case SolitaireGeneticAlgorithmParameters solitaireParams:
@@ -184,6 +181,88 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     #endregion
 
+    #region Algorithm Type and Parameter Selection
+
+    private bool _useChromosomeTemplate;
+    private GeneticAlgorithmType _selectedAlgorithmType = GeneticAlgorithmType.Quadratic;
+    private GeneticAlgorithmParameters _parameters; 
+    public ChromosomeViewModel ChromosomeTemplate { get; private set; }
+    public List<GeneticAlgorithmType> AlgorithmTypes { get; } = Enum.GetValues(typeof(GeneticAlgorithmType)).Cast<GeneticAlgorithmType>().ToList();
+    public GeneticAlgorithmType SelectedAlgorithmType
+    {
+        get => _selectedAlgorithmType;
+        set
+        {
+            if (_selectedAlgorithmType != value)
+            {
+                _selectedAlgorithmType = value;
+                OnPropertyChanged(nameof(SelectedAlgorithmType));
+
+                // Update the parameters based on the selected algorithm type
+                Parameters = SelectedAlgorithmType switch
+                {
+                    GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParameters(),
+                    GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParameters(),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                // Update the Chromosome Template to be the correct type
+                ChromosomeTemplate = (SelectedAlgorithmType switch
+                {
+                    GeneticAlgorithmType.Solitaire => new ChromosomeViewModel(new SolitaireChromosome(Random.Shared)),
+                    GeneticAlgorithmType.Quadratic => new ChromosomeViewModel(new QuadraticChromosome(Random.Shared)),
+                    _ => throw new ArgumentOutOfRangeException()
+                });
+
+                OnPropertyChanged(nameof(ChromosomeTemplate));
+            }
+        }
+    }
+
+    public GeneticAlgorithmParameters Parameters
+    {
+        get => _parameters;
+        set
+        {
+            _parameters = value;
+            OnPropertyChanged(nameof(Parameters));
+        }
+    }
+
+    public bool UseChromosomeTemplate
+    {
+        get => _useChromosomeTemplate;
+        set
+        {
+            _useChromosomeTemplate = value;
+            OnPropertyChanged(nameof(UseChromosomeTemplate));
+
+            if (value)
+            {
+                Parameters.TemplateChromosome = ChromosomeTemplate.BaseChromosome;
+            }
+            else
+            {
+                Parameters.TemplateChromosome = null;
+            }
+        }
+    }
+
+    public double TemplateChromosomeRatio
+    {
+        get => _parameters.TemplateInitialRatio;
+        set
+        {
+            if (value is > 1 or < 0)
+                return;
+
+            _parameters.TemplateInitialRatio = value;
+            OnPropertyChanged(nameof(TemplateChromosomeRatio));
+        }
+    }
+
+    #endregion
+
     #region Plotting
 
     public WpfPlot AverageStatByGeneration { get; set; } = new WpfPlot();
@@ -239,7 +318,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         lock (AverageStatByGeneration.Plot.Sync)
         {
             AverageStatByGeneration.Plot.Clear();
-            
+
             // Add extracted values to the plots  
             for (int i = 0; i < statNames.Length; i++)
             {
@@ -309,7 +388,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
             AverageStatByGeneration.Plot.ShowLegend(Alignment.UpperLeft, Orientation.Horizontal);
         }
-        
+
         lock (FitnessByGeneration.Plot.Sync)
         {
             FitnessByGeneration.Plot.Clear();
@@ -335,49 +414,6 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         AverageStatByGeneration.Refresh();
 
         OnPropertyChanged(nameof(FitnessByGeneration));
-    }
-
-    #endregion
-
-    #region Algorithm Type and Parameter Selection
-
-    private GeneticAlgorithmType _selectedAlgorithmType;
-    private GeneticAlgorithmParameters _parameters;
-
-    public GeneticAlgorithmType SelectedAlgorithmType
-    {
-        get => _selectedAlgorithmType;
-        set
-        {
-            if (_selectedAlgorithmType != value)
-            {
-                _selectedAlgorithmType = value;
-                OnPropertyChanged(nameof(SelectedAlgorithmType));
-                UpdateParameters();
-            }
-        }
-    }
-
-    public GeneticAlgorithmParameters Parameters
-    {
-        get => _parameters;
-        set
-        {
-            _parameters = value;
-            OnPropertyChanged(nameof(Parameters));
-        }
-    }
-
-    public List<GeneticAlgorithmType> AlgorithmTypes { get; } = Enum.GetValues(typeof(GeneticAlgorithmType)).Cast<GeneticAlgorithmType>().ToList();
-
-    private void UpdateParameters()
-    {
-        Parameters = SelectedAlgorithmType switch
-        {
-            GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParameters(),
-            GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParameters(),
-            _ => throw new ArgumentOutOfRangeException()
-        };
     }
 
     #endregion

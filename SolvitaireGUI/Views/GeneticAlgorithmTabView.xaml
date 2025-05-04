@@ -11,6 +11,9 @@
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
+        <local:BooleanToAngleConverter x:Key="BooleanToAngleConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
         <Style x:Key="AlgorithmControlButtonStyle" TargetType="Button">
             <Style.Resources>
                 <Style TargetType="Border">
@@ -21,6 +24,56 @@
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="FontSize" Value="14" />
+        </Style>
+
+        <Style x:Key="CollapsibleGroupBoxStyle" TargetType="GroupBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <DockPanel>
+                            <!-- Header with ToggleButton -->
+                            <ToggleButton DockPanel.Dock="Top"
+                                          IsChecked="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(local:CollapsibleGroupBoxHelper.IsExpanded), Mode=TwoWay}" 
+                                          FontWeight="Bold"
+                                          Background="{StaticResource BorderColor}" 
+                                          Foreground="White"
+                                          Padding="5"
+                                          HorizontalAlignment="Left"
+                                          HorizontalContentAlignment="Left"
+                                          VerticalContentAlignment="Center"
+                                          BorderBrush="{StaticResource BorderColor}" 
+                                          BorderThickness="1"
+                                          Style="{StaticResource {x:Static ToolBar.ToggleButtonStyleKey}}" >
+                                <ToggleButton.Content>
+                                    <DockPanel>
+                                        <!-- Visual Indicator -->
+                                        <Path Data="M 0 0 L 8 4 L 0 8 Z" 
+                                              Fill="White" 
+                                              Width="10" 
+                                              Height="10" 
+                                              Margin="0,0,5,0"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"
+                                              RenderTransformOrigin="0.5,0.5">
+                                            <Path.RenderTransform>
+                                                <RotateTransform Angle="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=ToggleButton}, Converter={StaticResource BooleanToAngleConverter}}" />
+                                            </Path.RenderTransform>
+                                        </Path>
+                                        <!-- Header Text -->
+                                        <TextBlock Text="{TemplateBinding Header}" VerticalAlignment="Center" />
+                                    </DockPanel>
+                                </ToggleButton.Content>
+
+                            </ToggleButton>
+
+                            <!-- Collapsible Content -->
+                            <ContentPresenter Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(local:CollapsibleGroupBoxHelper.IsExpanded), Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}" />
+            <Setter Property="Background" Value="{StaticResource BackgroundLightColor}" />
         </Style>
     </UserControl.Resources>
 
@@ -37,7 +90,6 @@
         </Grid.ColumnDefinitions>
 
         <!-- Algorithm Type Selection -->
-
         <Expander  ExpandDirection="Left" IsExpanded="True">
             <Expander.Header>
                 <DockPanel>
@@ -70,83 +122,127 @@
                     </StackPanel>
                 </DockPanel>
             </Expander.Header>
-            <DockPanel>
 
-                <GroupBox Header="Algorithm Parameters" DockPanel.Dock="Top" BorderBrush="{StaticResource BorderColor}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="10" DockPanel.Dock="Top" >
-                            <TextBlock Text="Algorithm Type:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                            <ComboBox ItemsSource="{Binding AlgorithmTypes}" 
-                                      SelectedItem="{Binding SelectedAlgorithmType}" 
-                                      Width="150"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <DockPanel>
+                    <GroupBox Header="Algorithm Parameters" DockPanel.Dock="Top"
+                              local:CollapsibleGroupBoxHelper.IsExpanded="True"
+                              BorderThickness="2"
+                              Style="{StaticResource CollapsibleGroupBoxStyle}">
+                        <StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="10" DockPanel.Dock="Top">
+                                <TextBlock Text="Algorithm Type:" VerticalAlignment="Center" Margin="0,0,5,0" />
+                                <ComboBox ItemsSource="{Binding AlgorithmTypes}"
+                                          SelectedItem="{Binding SelectedAlgorithmType}"
+                                          Width="150" />
+                            </StackPanel>
+
+                            <Grid DataContext="{Binding Parameters}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200" />
+                                    <!-- Label column -->
+                                    <ColumnDefinition Width="*" />
+                                    <!-- Input column -->
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Output Directory -->
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Output Directory:"
+                                           VerticalAlignment="Center" Margin="5" />
+                                <TextBox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right"
+                                         TextAlignment="Right"
+                                         Text="{Binding OutputDirectory}" Margin="5"
+                                         Style="{StaticResource TextBoxStyle}" MinWidth="240" />
+
+                                <!-- Population Size -->
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Population Size:"
+                                           VerticalAlignment="Center" Margin="5" />
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding PopulationSize}" Margin="5"
+                                         Style="{StaticResource TextBoxStyle}" />
+
+                                <!-- Generations -->
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Generations:" VerticalAlignment="Center"
+                                           Margin="5" />
+                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Generations}" Margin="5"
+                                         Style="{StaticResource TextBoxStyle}" />
+
+                                <!-- Mutation Rate -->
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Mutation Rate:"
+                                           VerticalAlignment="Center" Margin="5" />
+                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding MutationRate}" Margin="5"
+                                         Style="{StaticResource TextBoxStyle}" />
+
+                                <!-- Tournament Size -->
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="Tournament Size:"
+                                           VerticalAlignment="Center" Margin="5" />
+                                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding TournamentSize}" Margin="5"
+                                         Style="{StaticResource TextBoxStyle}" />
+                            </Grid>
+                            <!-- Dynamically load the relevant control -->
+
+                            <ContentControl Content="{Binding Parameters}">
+                                <ContentControl.Resources>
+                                    <DataTemplate
+                                        DataType="{x:Type solvitaireGenetics:SolitaireGeneticAlgorithmParameters}">
+                                        <local:SolitaireGeneticParametersControl />
+                                    </DataTemplate>
+                                    <DataTemplate
+                                        DataType="{x:Type solvitaireGenetics:QuadraticGeneticAlgorithmParameters}">
+                                        <local:QuadraticGeneticParametersControl />
+                                    </DataTemplate>
+                                </ContentControl.Resources>
+                            </ContentControl>
                         </StackPanel>
 
-                        <Grid DataContext="{Binding Parameters}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200" />
-                                <!-- Label column -->
-                                <ColumnDefinition Width="*" />
-                                <!-- Input column -->
-                            </Grid.ColumnDefinitions>
 
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                    </GroupBox>
 
-                            <!-- Output Directory -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Output Directory:" VerticalAlignment="Center" Margin="5" />
-                            <TextBox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right"  
-                                     TextAlignment="Right"
-                                     Text="{Binding OutputDirectory}" Margin="5"
-                                     Style="{StaticResource TextBoxStyle}" MinWidth="240"/>
-
-                            <!-- Population Size -->
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Population Size:" VerticalAlignment="Center" Margin="5" />
-                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding PopulationSize}" Margin="5"
-                                     Style="{StaticResource TextBoxStyle}" />
-
-                            <!-- Generations -->
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Generations:" VerticalAlignment="Center" Margin="5" />
-                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Generations}" Margin="5"
-                                     Style="{StaticResource TextBoxStyle}" />
-
-                            <!-- Mutation Rate -->
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Mutation Rate:" VerticalAlignment="Center" Margin="5" />
-                            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding MutationRate}" Margin="5"
-                                     Style="{StaticResource TextBoxStyle}" />
-
-                            <!-- Tournament Size -->
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Tournament Size:" VerticalAlignment="Center" Margin="5" />
-                            <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding TournamentSize}" Margin="5"
-                                     Style="{StaticResource TextBoxStyle}" />
-                        </Grid>
-
-                    </StackPanel>
+                    <!-- Template Chromosome Selection -->
+                    <GroupBox Header="Chromosome Template" DockPanel.Dock="Top"
+                              local:CollapsibleGroupBoxHelper.IsExpanded="True"
+                              Style="{StaticResource CollapsibleGroupBoxStyle}">
+                        <DockPanel>
+                            <!-- Checkbox to enable/disable the use of the chromosome template -->
 
 
-                </GroupBox>
+                            <Grid  Margin="5" HorizontalAlignment="Stretch" DockPanel.Dock="Top">
+                                <CheckBox Content="Use Chromosome Template" 
+                                          IsChecked="{Binding UseChromosomeTemplate}"
+                                          Margin="5"
+                                          VerticalAlignment="Top"
+                                          HorizontalAlignment="Left" />
 
-            <GroupBox Header="Specific Parameters" DockPanel.Dock="Top" BorderBrush="{StaticResource BorderColor}">
-                    <!-- Dynamically load the relevant control -->
-                    <ContentControl Content="{Binding Parameters}">
-                        <ContentControl.Resources>
-                            <DataTemplate DataType="{x:Type solvitaireGenetics:SolitaireGeneticAlgorithmParameters}">
-                                <local:SolitaireGeneticParametersControl />
-                            </DataTemplate>
-                            <DataTemplate DataType="{x:Type solvitaireGenetics:QuadraticGeneticAlgorithmParameters}">
-                                <local:QuadraticGeneticParametersControl />
-                            </DataTemplate>
-                        </ContentControl.Resources>
-                    </ContentControl>
-                </GroupBox>
-            </DockPanel>
+                                <TextBlock Text="Initial Template Ratio:"  VerticalAlignment="Center"  HorizontalAlignment="Right" Margin="0 0 86 0"/>
+                                <TextBox Text="{Binding TemplateChromosomeRatio}" Width="80" HorizontalAlignment="Right" Style="{StaticResource TextBoxStyle}" />
+                            </Grid>
+
+                            <ItemsControl ItemsSource="{Binding ChromosomeTemplate.Weights}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid  Margin="5" HorizontalAlignment="Stretch" >
+                                            <TextBlock Text="{Binding Name}"  VerticalAlignment="Center"  HorizontalAlignment="Left"/>
+                                            <TextBox Text="{Binding Value}" Width="80" HorizontalAlignment="Right" Style="{StaticResource TextBoxStyle}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DockPanel>
+                        
+                    </GroupBox>
+                </DockPanel>
+            </ScrollViewer>
+            
         </Expander>
         
 

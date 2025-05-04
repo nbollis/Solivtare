@@ -9,6 +9,9 @@ public abstract class GeneticAlgorithmParameters
     public virtual int Generations { get; set; } = 100;
     public virtual double MutationRate { get; set; } = 0.01;
     public virtual int TournamentSize { get; set; } = 5;
+    public virtual double TemplateInitialRatio { get; set; } = .1;
+    public Chromosome? TemplateChromosome { get; set; } = null;
+
 
     public static GeneticAlgorithmParameters LoadFromFile(string filePath)
     {

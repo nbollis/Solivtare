@@ -241,8 +241,9 @@ public class GeneticAlgorithmTests
         template.SetWeight(QuadraticChromosome.C, 3.0);
         template.SetWeight(QuadraticChromosome.YIntercept, 4.0);
         template.SetWeight(QuadraticChromosome.EvalFunction, 1.0);
+        parameters.TemplateChromosome = template;
 
-        var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters, template);
+        var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
         var field = typeof(QuadraticRegressionGeneticAlgorithm).GetField("CrossOverRate", BindingFlags.NonPublic | BindingFlags.Instance);
         Assert.That(field, Is.Not.Null, "Field 'CrossOverRate' not found.");
         field.SetValue(algorithm, 0.0);

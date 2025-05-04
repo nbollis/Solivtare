@@ -14,7 +14,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
     public override event Action<AgentLog>? AgentCompleted;
 
     public GeneticSolitaireAlgorithm(SolitaireGeneticAlgorithmParameters parameters)
-        : base(parameters, BestSoFar())
+        : base(parameters)
     {
         _parameters = parameters;
         _maxMovesPerAgent = parameters.MaxMovesPerGeneration;

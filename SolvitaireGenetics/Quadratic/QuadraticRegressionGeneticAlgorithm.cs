@@ -8,8 +8,7 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
     public double[] CorrectLine { get; }
     public override event Action<AgentLog>? AgentCompleted;
 
-    public QuadraticRegressionGeneticAlgorithm(QuadraticGeneticAlgorithmParameters parameters,
-        QuadraticChromosome? chromosomeTemplate = null) : base(parameters, chromosomeTemplate)
+    public QuadraticRegressionGeneticAlgorithm(QuadraticGeneticAlgorithmParameters parameters) : base(parameters)
     {
         CorrectLine = new double[_samplingSize];
         for (int i = 0; i < _samplingSize; i++)

@@ -1,18 +1,20 @@
 ﻿using System.Globalization;
-using System.Windows.Data;
 
 namespace SolvitaireGUI;
 
-public class InverseBooleanConverter : BaseValueConverter<InverseBooleanConverter>
+public class BooleanToAngleConverter : BaseValueConverter<BooleanToAngleConverter>
 {
-
     public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        return !(bool)value;
+        if (value is bool isChecked)
+        {
+            return isChecked ? 90 : 0; // Rotate 90 degrees when expanded
+        }
+        return 0;
     }
 
     public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        return (bool)value;
+        throw new NotImplementedException();
     }
 }

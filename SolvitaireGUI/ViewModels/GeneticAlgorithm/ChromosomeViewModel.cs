@@ -22,46 +22,10 @@ public class ChromosomeViewModel : BaseViewModel
     public ChromosomeViewModel(Chromosome chromosome)
     {
         BaseChromosome = chromosome;
-        Sync();
-    }
-
-    /// <summary>
-    /// Synchronizes the ViewModel with the underlying Chromosome.
-    /// </summary>
-    public void Sync()
-    {
-        Weights.Clear();
         foreach (var kvp in BaseChromosome.MutableStatsByName)
         {
-            Weights.Add(new ChromosomeWeight(kvp.Key, kvp.Value));
+            Weights.Add(new ChromosomeWeight(kvp.Key, kvp.Value, BaseChromosome.MutableStatsByName));
         }
-
-        OnPropertyChanged(nameof(Weights));
-    }
-
-    /// <summary>
-    /// Updates the weight in the underlying Chromosome and synchronizes the ViewModel.
-    /// </summary>
-    /// <param name="weightName">The name of the weight to update.</param>
-    /// <param name="value">The new value for the weight.</param>
-    public void UpdateWeight(string weightName, double value)
-    {
-        BaseChromosome.SetWeight(weightName, value);
-        Sync();
-    }
-
-    /// <summary>
-    /// Updates multiple weights in the underlying Chromosome and synchronizes the ViewModel.
-    /// </summary>
-    /// <param name="weights">A dictionary of weight names and their values.</param>
-    public void UpdateWeights(Dictionary<string, double> weights)
-    {
-        foreach (var kvp in weights)
-        {
-            BaseChromosome.SetWeight(kvp.Key, kvp.Value);
-        }
-
-        Sync();
     }
 }
 
@@ -72,6 +36,7 @@ public class ChromosomeWeight : BaseViewModel
 {
     private string _name;
     private double _value;
+    private readonly Dictionary<string, double> _baseWeights;
 
     public string Name
     {
@@ -89,14 +54,16 @@ public class ChromosomeWeight : BaseViewModel
         set
         {
             _value = value;
+            _baseWeights[_name] = value;
             OnPropertyChanged(nameof(Value));
         }
     }
 
-    public ChromosomeWeight(string name, double value)
+    public ChromosomeWeight(string name, double value, Dictionary<string, double> baseWeights)
     {
         _name = name;
         _value = value;
+        _baseWeights = baseWeights;
     }
 }
 

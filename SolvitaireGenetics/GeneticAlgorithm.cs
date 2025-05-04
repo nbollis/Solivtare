@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
 
 namespace SolvitaireGenetics;
@@ -13,6 +12,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     public virtual event Action<AgentLog>? AgentCompleted;
     protected readonly TParameters Parameters;
     protected readonly TChromosome? ChromosomeTemplate;
+    protected readonly double TemplateInitialRatio;
     protected readonly GeneticAlgorithmLogger<TChromosome>? Logger;
     protected readonly int PopulationSize;
     protected readonly Random Random = new();
@@ -26,14 +26,16 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     // Fitness cache
     private readonly ConcurrentDictionary<string, double> _fitnessCache = new();
 
-    protected GeneticAlgorithm(TParameters parameters, TChromosome? chromosomeTemplate = null)
+    protected GeneticAlgorithm(TParameters parameters)
     {
         CurrentGeneration = 0;
         Parameters = parameters;
         PopulationSize = parameters.PopulationSize;
         MutationRate = parameters.MutationRate;
         TournamentSize = parameters.TournamentSize;
-        ChromosomeTemplate = chromosomeTemplate;
+        TemplateInitialRatio = parameters.TemplateInitialRatio;
+        if (parameters.TemplateChromosome is TChromosome template)
+            ChromosomeTemplate = template;
 
 
         Logger = new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory);
@@ -167,7 +169,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         // The other 90% will be random chromosomes crossed over with the template. 
         if (ChromosomeTemplate != null)
         {
-            int copiesOfBest = (int)Math.Ceiling(PopulationSize / 10.0f);
+            int copiesOfBest = (int)Math.Ceiling(PopulationSize * TemplateInitialRatio);
             var best = Enumerable.Range(0, copiesOfBest).Select(_ => ChromosomeTemplate)
                 .Select(b => Chromosome.Mutate(b, MutationRate));
 
