@@ -116,7 +116,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         if (gamesPlayed > 0)
         {
             fitness -= 0.5 * movesPlayed / (gamesPlayed * _maxMovesPerAgent);
-            fitness += 0.1 * tableauCards / (gamesPlayed * 52);
+            fitness += 2.0 * tableauCards / (gamesPlayed * 52);
         }
 
         var agentLog = new AgentLog
@@ -134,6 +134,8 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
     public static SolitaireChromosome BestSoFar()
     {
         var best = new SolitaireChromosome(Random.Shared);
+
+        // Evaluating the Position
         best.MutableStatsByName[SolitaireChromosome.LegalMoveWeightName] = 0.01;
         best.MutableStatsByName[SolitaireChromosome.FoundationWeightName] = 3.2;
         best.MutableStatsByName[SolitaireChromosome.WasteWeightName] = -0.01;
@@ -146,7 +148,12 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         best.MutableStatsByName[SolitaireChromosome.FaceUpBottomCardTableauWeightName] = 0.2;
         best.MutableStatsByName[SolitaireChromosome.KingIsBottomCardTableauWeightName] = 0.4;
         best.MutableStatsByName[SolitaireChromosome.AceInTableauWeightName] = -1;
+
+        // Skipping Games
         best.MutableStatsByName[SolitaireChromosome.MoveCountScalarName] = 0;
+        best.MutableStatsByName[SolitaireChromosome.SkipLegalMoveWeightName] = 0;
+        best.MutableStatsByName[SolitaireChromosome.SkipFoundationWeightName] = 0;
+        best.MutableStatsByName[SolitaireChromosome.SkipThresholdWeightName] = 0;
         return best;
     }
 }

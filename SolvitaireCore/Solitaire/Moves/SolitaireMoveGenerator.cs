@@ -61,10 +61,11 @@ public class SolitaireMoveGenerator
                 var faceUpStartIndex = tableau.Cards.FindIndex(c => c.IsFaceUp);
                 if (faceUpStartIndex == -1) continue;
 
-                //var faceUpCards = tableau.Cards.GetRange(faceUpStartIndex, tableau.Cards.Count - faceUpStartIndex);
-                for (int i = faceUpStartIndex; i < tableau.Count; i++)
+                var faceUpCards = tableau.Cards.GetRange(faceUpStartIndex, tableau.Cards.Count - faceUpStartIndex);
+
+                for (int i = 0; i < faceUpCards.Count; i++)
                 {
-                    var cards = tableau.Cards.GetRange(i, tableau.Count - i);
+                    var cards = faceUpCards.GetRange(i, faceUpCards.Count - i);
                     foreach (var targetTableau in tableauPiles)
                     {
                         if (targetTableau.Index == tableau.Index)

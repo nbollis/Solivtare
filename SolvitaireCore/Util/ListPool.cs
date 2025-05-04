@@ -36,7 +36,7 @@ public class ListPool<T>
     public ListPool(int initialCapacity = 16)
     {
         var policy = new ListPooledObjectPolicy<T>(initialCapacity);
-        var provider = new DefaultObjectPoolProvider { MaximumRetained = Environment.ProcessorCount * 2 };
+        var provider = new DefaultObjectPoolProvider { MaximumRetained = Environment.ProcessorCount * 10 };
         _pool = provider.Create(policy);
     }
 

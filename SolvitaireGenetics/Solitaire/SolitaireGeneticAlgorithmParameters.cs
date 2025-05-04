@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using System.Text.Json;
 
 namespace SolvitaireGenetics;
 
@@ -30,4 +31,10 @@ public class SolitaireGeneticAlgorithmParameters : GeneticAlgorithmParameters
 
     [Option('l', "limit", Default = 10, HelpText = "Maximum number of games per generation.")]
     public int MaxGamesPerGeneration { get; set; } = 10;
+
+    public override void SaveToFile(string filePath)
+    {
+        var json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(filePath, json);
+    }
 }

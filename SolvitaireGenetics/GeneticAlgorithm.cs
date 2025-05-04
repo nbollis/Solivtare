@@ -157,7 +157,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             {
                 // If we have a last generation, use it to initialize the population
                 CurrentGeneration = generationNumber;
-                return lastGeneration;
+                return Population = lastGeneration;
             }
         }
 
@@ -167,7 +167,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         // The other 90% will be random chromosomes crossed over with the template. 
         if (ChromosomeTemplate != null)
         {
-            int copiesOfBest = PopulationSize / 10;
+            int copiesOfBest = (int)Math.Ceiling(PopulationSize / 10.0f);
             var best = Enumerable.Range(0, copiesOfBest).Select(_ => ChromosomeTemplate)
                 .Select(b => Chromosome.Mutate(b, MutationRate));
 

@@ -16,6 +16,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     
     public GeneticAlgorithmTabViewModel()
     {
+        _writeOutput = true;
         CurrentGeneration = 0;
         SelectedAlgorithmType = GeneticAlgorithmType.Solitaire; // Default selection
         UpdateParameters();
@@ -101,13 +102,20 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
             // Create and run the genetic algorithm using the factory
             IGeneticAlgorithm? algorithm = null;
+            string? filePath = null;
+            if (WriteOutput)
+                filePath = Path.Combine(Parameters.OutputDirectory!, "RunParameters.json");
             switch (Parameters)
             {
                 case SolitaireGeneticAlgorithmParameters solitaireParams:
                     algorithm = new GeneticSolitaireAlgorithm(solitaireParams);
+                    if (WriteOutput)
+                        solitaireParams.SaveToFile(filePath!);
                     break;
                 case QuadraticGeneticAlgorithmParameters quad:
                     algorithm = new QuadraticRegressionGeneticAlgorithm(quad);
+                    if (WriteOutput)
+                        quad.SaveToFile(filePath!);
                     break;
                 default:
                     MessageBox.Show("Invalid parameters provided for the Genetic Algorithm.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -119,7 +127,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
             if (WriteOutput)
             {
-                var filePath = Path.Combine(Parameters.OutputDirectory, "RunParameters.json");
+                
                 Parameters.SaveToFile(filePath);
             }
             

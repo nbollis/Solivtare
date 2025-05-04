@@ -73,6 +73,7 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
 
     public void Reset()
     {
+        _isDirty = true;
         CycleCount = 0;
         MovesMade = 0;
 
