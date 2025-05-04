@@ -127,7 +127,7 @@ public class GeneticAlgorithmLoggerTests
                 .ToDictionary(p => p.Key, p => p.ToList());
 
             Assert.That(agents.Count, Is.EqualTo(i + 1)); // +1 because we start from 0
-            Assert.That(agents[i].Count, Is.EqualTo(parameters.PopulationSize));
+            Assert.That(agents[i].Sum(p => p.Count), Is.EqualTo(parameters.PopulationSize));
             Assert.That(agents[i].All(a => a.Generation == i));
 
             var agentsFromThisGen = agents[i];

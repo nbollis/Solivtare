@@ -55,4 +55,60 @@ public class ChromosomeTests
         Assert.That(averageChromosome.MutableStatsByName["stat1"], Is.EqualTo(2.0));
         Assert.That(averageChromosome.MutableStatsByName["stat2"], Is.EqualTo(3.0));
     }
+
+    [Test]
+    public void StableHashesAreUnique_Quadratic()
+    {
+        int count = 1000;
+        QuadraticChromosome[] quadratic = new QuadraticChromosome[count];
+        for (int i = 0; i < count; i++)
+        {
+            quadratic[i] = Chromosome.CreateRandom<QuadraticChromosome>(new Random());
+        }
+
+        var distinctChromosomes = quadratic.Distinct().ToList();
+        Assert.That(quadratic.Count, Is.EqualTo(distinctChromosomes.Count), "Duplicate Detected.");
+
+        var temp = quadratic.Select(p => string.Join(',', p.MutableStatsByName.Values)).ToList();
+        var distinctTemp = temp.Distinct().ToList();
+        Assert.That(temp.Count, Is.EqualTo(distinctTemp.Count), "Duplicate Detected.");
+
+        var hashCodes = quadratic.Select(q => q.GetStableHash()).ToList();
+        var distinctHashCodes = hashCodes.Distinct().ToList();
+        Assert.That(hashCodes.Count, Is.EqualTo(distinctHashCodes.Count), "Hash code collision detected.");
+
+        HashSet<string> hashSet = new ();
+        foreach (var q in quadratic)
+        {
+            Assert.That(hashSet.Add(q.GetStableHash()), Is.True, "Hash code collision detected.");
+        }
+    }
+
+    [Test]
+    public void StableHashesAreUnique_Solitaire()
+    {
+        int count = 1000;
+        SolitaireChromosome[] testChromosomes = new SolitaireChromosome[count];
+        for (int i = 0; i < count; i++)
+        {
+            testChromosomes[i] = Chromosome.CreateRandom<SolitaireChromosome>(new Random());
+        }
+
+        var distinctChromosomes = testChromosomes.Distinct().ToList();
+        Assert.That(testChromosomes.Count, Is.EqualTo(distinctChromosomes.Count), "Duplicate Detected.");
+
+        var temp = testChromosomes.Select(p => string.Join(',', p.MutableStatsByName.Values)).ToList();
+        var distinctTemp = temp.Distinct().ToList();
+        Assert.That(temp.Count, Is.EqualTo(distinctTemp.Count), "Duplicate Detected.");
+
+        var hashCodes = testChromosomes.Select(q => q.GetStableHash()).ToList();
+        var distinctHashCodes = hashCodes.Distinct().ToList();
+        Assert.That(hashCodes.Count, Is.EqualTo(distinctHashCodes.Count), "Hash code collision detected.");
+
+        HashSet<string> hashSet = new();
+        foreach (var q in testChromosomes)
+        {
+            Assert.That(hashSet.Add(q.GetStableHash()), Is.True, "Hash code collision detected.");
+        }
+    }
 }

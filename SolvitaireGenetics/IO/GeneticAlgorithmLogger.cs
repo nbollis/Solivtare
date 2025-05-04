@@ -16,9 +16,10 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
     private readonly string? _agentLogFilePath;
     private readonly object _generationLogLock = new();
     private readonly object _agentLogLock = new();
-    private readonly List<GenerationLogDto> _generationLog = new();
-    private int _lastGenerationNumber;
-    private readonly ConcurrentBag<AgentLog> _agentLogBatch = new(); // In-memory batch for AgentLogs
+
+    private readonly object _eventLock = new();
+    private int _lastGenerationNumber = 0; // Last generation number logged
+    private readonly ConcurrentQueue<AgentLog> _agentLogBatch = new(); // In-memory batch for AgentLogs
     internal readonly string OutputDirectory;
 
     public GeneticAlgorithmLogger(string? outputDirectory, bool ensureUniquePath = false)
@@ -180,9 +181,9 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
     /// </summary>
     public void AccumulateAgentLog(AgentLog agentLog)
     {
-        lock (_agentLogLock)
+        lock (_eventLock)
         {
-            _agentLogBatch.Add(agentLog);
+            _agentLogBatch.Enqueue(agentLog);
         }
     }
 
@@ -191,57 +192,67 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
     /// </summary>
     public void FlushAgentLogs(int currentGeneration, List<TChromosome> population)
     {
-        if (_agentLogFilePath is not null)
+        List<AgentLog> agentLogsInBatch = new(population.Count);
+        List<AgentLog> agentLogsToWrite = new(population.Count);
+        lock (_eventLock)
         {
-            lock (_agentLogLock)
+            while (_agentLogBatch.TryDequeue(out var log))
             {
-                // Read existing agent logs from the file
-                var existingAgentLogs =
-                    JsonSerializer.Deserialize<List<AgentLog>>(File.ReadAllText(_agentLogFilePath), _jsonOptions) ??
-                    new List<AgentLog>();
-
-                // reverse for easier lookup
-                existingAgentLogs.Reverse();
-
-                // Populate count information and ensure all chromosomes are represented in the log, even if they were not in the batch. 
-                // This happens when Genetic algorithm uses a cached fitness instead of using the EvaluateFitness method.
-                foreach (var chromosomeGroup in population.GroupBy(p => p))
-                {
-                    int populationCount = chromosomeGroup.Count();
-                    TChromosome chromosome = chromosomeGroup.Key;
-
-                    AgentLog? match = _agentLogBatch.FirstOrDefault(p => p.Chromosome.Equals(chromosome));
-
-                    // Chromosome was previously evaluated, finds its log and create a new one for this generation. 
-                    if (match is null && currentGeneration > 0)
-                    {
-                        var old = existingAgentLogs.FirstOrDefault(p => p.Chromosome.Equals(chromosome));
-
-                        match = new AgentLog() // create a new log for output with the replaced generation number
-                        {
-                            Chromosome = chromosome, Fitness = chromosome.Fitness, Generation = currentGeneration,
-                            GamesPlayed = old!.GamesPlayed, GamesWon = old!.GamesWon, MovesMade = old!.MovesMade
-                        };
-                        _agentLogBatch.Add(match);
-                    }
-
-                    match!.Count = populationCount;
-                }
-
-                existingAgentLogs.Reverse();
-
-                // Add the accumulated logs
-                existingAgentLogs.AddRange(_agentLogBatch);
-
-                // Write back to the file
-                File.WriteAllText(_agentLogFilePath, JsonSerializer.Serialize(existingAgentLogs, _jsonOptions));
+                agentLogsInBatch.Add(log);
             }
         }
 
-        Console.WriteLine($"Chromosome Logged Count: {_agentLogBatch.Sum(p => p.Count)} Unique: {_agentLogBatch.Count}");
+        if (_agentLogFilePath is null)
+            return; // No file path, so just clear the batch and return
 
-        // Clear the in-memory batch
-        _agentLogBatch.Clear();
+        // Read existing agent logs from the file
+
+        var existingAgentLogs =
+            JsonSerializer.Deserialize<List<AgentLog>>(File.ReadAllText(_agentLogFilePath), _jsonOptions) ??
+            new List<AgentLog>();
+        
+        
+        // reverse for easier lookup
+        existingAgentLogs.Reverse();
+
+        // Populate count information and ensure all chromosomes are represented in the log, even if they were not in the batch. 
+        // This happens when Genetic algorithm uses a cached fitness instead of using the EvaluateFitness method.
+        var grouped = population.GroupBy(p => p.GetStableHash());
+        foreach (var chromosomeGroup in grouped)
+        {
+            int populationCount = chromosomeGroup.Count();
+            TChromosome chromosome = chromosomeGroup.First();
+
+            AgentLog? match = agentLogsInBatch.FirstOrDefault(p => p.Chromosome.Equals(chromosome));
+
+            // Chromosome was previously evaluated, finds its log and create a new one for this generation. 
+            if (match is null && currentGeneration > 0)
+            {
+                var old = existingAgentLogs.FirstOrDefault(p => p.Chromosome.Equals(chromosome));
+
+                match = new AgentLog() // create a new log for output with the replaced generation number
+                {
+                    Chromosome = chromosome, Fitness = chromosome.Fitness, Generation = currentGeneration,
+                    GamesPlayed = old!.GamesPlayed, GamesWon = old!.GamesWon, MovesMade = old!.MovesMade
+                };
+                agentLogsInBatch.Add(match);
+            }
+
+            match!.Count = populationCount;
+            agentLogsToWrite.Add(match);
+        }
+
+        // Add the accumulated logs
+        existingAgentLogs.Reverse();
+        existingAgentLogs.AddRange(agentLogsToWrite);
+
+        // Write back to the file
+        lock (_agentLogLock)
+        {
+            File.WriteAllText(_agentLogFilePath, JsonSerializer.Serialize(existingAgentLogs, _jsonOptions));
+        }
+
+        Console.WriteLine($"Chromosome Logged Count: {agentLogsInBatch.Sum(p => p.Count)} Unique: {agentLogsInBatch.Count}");
     }
 
     #endregion

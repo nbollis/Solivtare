@@ -1,6 +1,8 @@
 ﻿using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
 using System;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace SolvitaireGenetics;
@@ -183,12 +185,27 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         unchecked
         {
             int hash = 17;
-            foreach (var kvp in MutableStatsByName)
+
+            // Order keys to ensure consistent hashing
+            foreach (var kvp in MutableStatsByName.OrderBy(k => k.Key))
             {
-                hash = (hash * 7) ^ kvp.Value.GetHashCode();
+                // Combine key and value hashes
+                hash = hash * 31 + kvp.Key.GetHashCode();
+                hash = hash * 31 + kvp.Value.GetHashCode();
             }
             return hash;
         }
+    }
+
+    public string GetStableHash()
+    {
+        var ordered = MutableStatsByName.OrderBy(kvp => kvp.Key)
+            .Select(kvp => $"{kvp.Key}:{kvp.Value:F6}"); // fixed precision
+        var data = string.Join("|", ordered);
+
+        using var sha = SHA256.Create();
+        var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(data));
+        return Convert.ToHexString(bytes); // or Convert.ToBase64String
     }
 
     public int CompareTo(Chromosome? other)

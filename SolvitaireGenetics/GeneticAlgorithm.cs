@@ -24,7 +24,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     public List<TChromosome> Population { get; protected set; } = [];
 
     // Fitness cache
-    private readonly ConcurrentDictionary<int, double> _fitnessCache = new();
+    private readonly ConcurrentDictionary<string, double> _fitnessCache = new();
 
     protected GeneticAlgorithm(TParameters parameters, TChromosome? chromosomeTemplate = null)
     {
@@ -44,7 +44,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     private double GetFitness(TChromosome chromosome)
     {
         // Serialize the chromosome to use as a cache key
-        int chromosomeKey = chromosome.GetHashCode();
+        string chromosomeKey = chromosome.GetStableHash();
 
         // Use GetOrAdd to ensure thread-safe access to the cache
         return _fitnessCache.GetOrAdd(chromosomeKey, _ => EvaluateFitness(chromosome));
@@ -196,7 +196,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         LogPopulation(population);
         return Population = population;
     }
-
+    public static int acount = 0;
     private void LogPopulation(List<TChromosome> population)
     {
         var fitness = population.Select(chr => chr.Fitness).ToList();
