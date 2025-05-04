@@ -269,6 +269,12 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     public static int StockIndex = 11;
     public static int WasteIndex = 12;
 
+    public FoundationPile this[Suit suit]
+    {
+        get => FoundationPiles[(int)suit];
+        set => FoundationPiles[(int)suit] = value;
+    }
+
     public Pile GetPileByIndex(int index)
     {
         if (index < TableauPiles.Count)

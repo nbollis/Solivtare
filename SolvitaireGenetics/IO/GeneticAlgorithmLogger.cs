@@ -20,7 +20,6 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
     private int _lastGenerationNumber;
     private readonly ConcurrentBag<AgentLog> _agentLogBatch = new(); // In-memory batch for AgentLogs
     internal readonly string OutputDirectory;
-    public int BatchCount => _agentLogBatch.Count;
 
     public GeneticAlgorithmLogger(string? outputDirectory, bool ensureUniquePath = false)
     {
@@ -173,10 +172,7 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
             Chromosome = chromosome
         };
 
-        lock (_agentLogLock)
-        {
-            _agentLogBatch.Add(agentLog);
-        }
+        AccumulateAgentLog(agentLog);
     }
 
     /// <summary>
@@ -184,7 +180,10 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
     /// </summary>
     public void AccumulateAgentLog(AgentLog agentLog)
     {
-        _agentLogBatch.Add(agentLog);
+        lock (_agentLogLock)
+        {
+            _agentLogBatch.Add(agentLog);
+        }
     }
 
     /// <summary>
@@ -214,7 +213,7 @@ public class GeneticAlgorithmLogger<TChromosome> where TChromosome : Chromosome,
                     AgentLog? match = _agentLogBatch.FirstOrDefault(p => p.Chromosome.Equals(chromosome));
 
                     // Chromosome was previously evaluated, finds its log and create a new one for this generation. 
-                    if (match is null)
+                    if (match is null && currentGeneration > 0)
                     {
                         var old = existingAgentLogs.FirstOrDefault(p => p.Chromosome.Equals(chromosome));
 

@@ -231,7 +231,7 @@ public class GeneticAlgorithmTests
         // Arrange
         var parameters = new QuadraticGeneticAlgorithmParameters
         {
-            PopulationSize = 1000,
+            PopulationSize = 10000,
             MutationRate = 0,
             OutputDirectory = OutputDirectory
         };

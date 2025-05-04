@@ -22,17 +22,21 @@ public class SolitaireMoveGenerator
             if (!wastePile.IsEmpty)
             {
                 var topCard = wastePile.TopCard!;
-                // Waste → Foundation
-                var targetFoundation = foundationPiles.FirstOrDefault(f => f.Suit == topCard.Suit && f.CanAddCard(topCard));
-                if (targetFoundation != null)
-                {
-                    validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, targetFoundation.Index, topCard));
-                }
 
-                // Waste → Tableau
-                foreach (var tableau in tableauPiles.Where(t => t.CanAddCard(topCard)))
+                // Waste → Foundation
+                var foundation = state[topCard.Suit];
+                if (foundation.CanAddCard(topCard))
                 {
-                    validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, tableau.Index, topCard));
+                    validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, foundation.Index, topCard));
+                }
+                
+                // Waste → Tableau
+                foreach (var tableau in tableauPiles)
+                {
+                    if (tableau.CanAddCard(topCard))
+                    {
+                        validMoves.Add(new SingleCardMove(SolitaireGameState.WasteIndex, tableau.Index, topCard));
+                    }
                 }
             }
 
@@ -42,10 +46,10 @@ public class SolitaireMoveGenerator
                 if (tableau.IsEmpty) continue;
 
                 var topCard = tableau.TopCard!;
-                var targetFoundation = foundationPiles.FirstOrDefault(f => f.Suit == topCard.Suit && f.CanAddCard(topCard));
-                if (targetFoundation != null)
+                var foundation = state[topCard.Suit];
+                if (foundation.CanAddCard(topCard))
                 {
-                    validMoves.Add(new SingleCardMove(tableau.Index, targetFoundation.Index, topCard));
+                    validMoves.Add(new SingleCardMove(tableau.Index, foundation.Index, topCard));
                 }
             }
 
@@ -57,11 +61,10 @@ public class SolitaireMoveGenerator
                 var faceUpStartIndex = tableau.Cards.FindIndex(c => c.IsFaceUp);
                 if (faceUpStartIndex == -1) continue;
 
-                var faceUpCards = tableau.Cards.GetRange(faceUpStartIndex, tableau.Cards.Count - faceUpStartIndex);
-
-                for (int i = 0; i < faceUpCards.Count; i++)
+                //var faceUpCards = tableau.Cards.GetRange(faceUpStartIndex, tableau.Cards.Count - faceUpStartIndex);
+                for (int i = faceUpStartIndex; i < tableau.Count; i++)
                 {
-                    var cards = faceUpCards.GetRange(i, faceUpCards.Count - i);
+                    var cards = tableau.Cards.GetRange(i, tableau.Count - i);
                     foreach (var targetTableau in tableauPiles)
                     {
                         if (targetTableau.Index == tableau.Index)
@@ -84,7 +87,6 @@ public class SolitaireMoveGenerator
                 var topCard = foundation.TopCard!;
                 foreach (var tableau in tableauPiles)
                 {
-                    
                     if (tableau.CurrentColor != topCard.Color && tableau.CurrentRank == topCard.Rank + 1)
                     {
                         validMoves.Add(new SingleCardMove(foundation.Index, tableau.Index, topCard));
@@ -95,7 +97,9 @@ public class SolitaireMoveGenerator
             // Stock → Waste (Cycling)
             if (!stockPile.IsEmpty)
             {
-                validMoves.Add(state.CycleMove);
+                validMoves.Add(
+                    new MultiCardMove(stockPile.Index, wastePile.Index,
+                        stockPile.Cards.TakeLast(Math.Min(state.CardsPerCycle, stockPile.Count))));
             }
 
             // Waste → Stock (Recycle)
