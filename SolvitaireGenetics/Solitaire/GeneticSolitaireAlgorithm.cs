@@ -49,7 +49,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         int movesPlayed = 0;
         int gamesPlayed = 0;
         int gamesWon = 0;
-        int tableauCards = 0;
+        int foundationCards = 0;
 
         // multiple game loop
         while (gamesPlayed < _maxGamesPerAgent && movesPlayed < _maxMovesPerAgent)
@@ -108,15 +108,22 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
                 }
             }
 
-            tableauCards += gameState.TableauPiles.Sum(p => p.Count);
+            foundationCards += gameState.FoundationPiles.Sum(p => p.Count);
         }
 
         // Calculate fitness based on the number of games won and moves played
-        double fitness = (double)gamesWon / gamesPlayed;
+        double fitness = gamesWon;
         if (gamesPlayed > 0)
         {
+            // Penalize making a lot of moves, but worsen the penalty as more games get played
             fitness -= 0.5 * movesPlayed / (gamesPlayed * _maxMovesPerAgent);
-            fitness += 2.0 * tableauCards / (gamesPlayed * 52);
+
+            // Add decimal equal to average % of deck that made it to the foundation
+            fitness += foundationCards / (gamesPlayed * 52.0); 
+        }
+        else
+        {
+            fitness = -1;
         }
 
         var agentLog = new AgentLog
