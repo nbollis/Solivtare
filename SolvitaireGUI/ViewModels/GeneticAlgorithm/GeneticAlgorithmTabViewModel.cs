@@ -20,6 +20,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         StartAlgorithmCommand = new RelayCommand(() => _ = RunAlgorithm());
         PauseCommand = new DelegateCommand(_ => PauseAlgorithm(), _ => IsAlgorithmRunning && !IsPaused);
         ResumeCommand = new DelegateCommand(_ => ResumeAlgorithm(), _ => IsAlgorithmRunning && IsPaused);
+        StopCommand = new DelegateCommand(_ => StopAlgorithm(), _ => IsAlgorithmRunning);
 
         IsAlgorithmRunning = false;
         SelectedAlgorithmType = GeneticAlgorithmType.Solitaire; // Default selection
@@ -52,6 +53,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             // Explicitly notify the commands to re-evaluate CanExecute
             (PauseCommand as DelegateCommand)?.RaiseCanExecuteChanged();
             (ResumeCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+            (StopCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         }
     }
 
@@ -68,6 +70,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             // Explicitly notify the commands to re-evaluate CanExecute
             (PauseCommand as DelegateCommand)?.RaiseCanExecuteChanged();
             (ResumeCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+            (StopCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         }
     }
 
@@ -84,7 +87,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     public ICommand StartAlgorithmCommand { get; }
     public ICommand PauseCommand { get; }
     public ICommand ResumeCommand { get; }
-
+    public ICommand StopCommand { get; }
     private async Task RunAlgorithm()
     {
         // Cancel any currently running algorithm
@@ -157,6 +160,15 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     {
         _pauseEvent.Set(); // Resume the algorithm
         IsPaused = false;
+    }
+    private void StopAlgorithm()
+    {
+        if (IsAlgorithmRunning)
+        {
+            _cancellationTokenSource?.Cancel(); // Cancel the running algorithm
+            IsAlgorithmRunning = false; // Reset the state
+            IsPaused = false; // Reset the paused state
+        }
     }
 
     private IGeneticAlgorithm GetAlgorithm()
