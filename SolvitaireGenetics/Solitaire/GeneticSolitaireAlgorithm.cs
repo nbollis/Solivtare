@@ -38,7 +38,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         };
     }
 
-    public override double EvaluateFitness(SolitaireChromosome chromosome)
+    public override double EvaluateFitness(SolitaireChromosome chromosome, CancellationToken? cancellationToken = null)
     {
         var sw = Stopwatch.StartNew();
         // TODO: Make this more generic to support different agents. 
@@ -79,6 +79,11 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
                 {
                     break;
                 }
+                // Check for cancellation
+                if (cancellationToken?.IsCancellationRequested == true)
+                {
+                    break;
+                }
 
                 var decision = agent.GetNextAction(gameState);
 
@@ -109,6 +114,12 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
             }
 
             foundationCards += gameState.FoundationPiles.Sum(p => p.Count);
+
+            // Check for cancellation
+            if (cancellationToken?.IsCancellationRequested == true)
+            {
+                break;
+            }
         }
 
         // Calculate fitness based on the number of games won and moves played

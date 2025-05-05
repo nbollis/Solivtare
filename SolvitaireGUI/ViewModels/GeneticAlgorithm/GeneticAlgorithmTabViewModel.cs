@@ -36,7 +36,8 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     private int _currentGeneration;
     private bool _isAlgorithmRunning;
-    private bool _isPaused;
+    private bool _isPaused; 
+    private Task? _runningTask;
     private CancellationTokenSource _cancellationTokenSource;
     private ManualResetEventSlim _pauseEvent = new(true); // Initially not paused
     private readonly ConcurrentQueue<GenerationLogDto> _generationalLogs = new();
@@ -93,7 +94,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         // Cancel any currently running algorithm
         if (IsAlgorithmRunning)
         {
-            await _cancellationTokenSource!.CancelAsync();
+            await StopRunningTaskAsync();
         }
 
         _cancellationTokenSource = new CancellationTokenSource();
@@ -101,9 +102,10 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
         IsAlgorithmRunning = true;
         IsPaused = false;
-        // SetWeight up the plots
-        _generationalLogs.Clear();
-        SetUpPlots();
+
+        // IF previous state was loaded on file drop, plots will already be set up
+        if (_generationalLogs.IsEmpty)
+            SetUpPlots();
 
         // Create algorithm and subscribe to events. 
         IGeneticAlgorithm? algorithm = GetAlgorithm();
@@ -111,9 +113,16 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
         try
         {
-            await Task.Run(() => RunEvolutionWithControl(algorithm, Parameters.Generations, _cancellationTokenSource.Token));
+            var token = _cancellationTokenSource.Token;
+            _runningTask = Task.Run(() => RunEvolutionWithControl(algorithm, Parameters.Generations, token), token);
+            await _runningTask;
 
-            MessageBox.Show("Genetic Algorithm completed successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (!token.IsCancellationRequested)
+                MessageBox.Show("Genetic Algorithm completed successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            else
+            {
+                _generationalLogs.Clear();
+            }
         }
         catch (OperationCanceledException)
         {
@@ -132,6 +141,8 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             {
                 algorithm.Logger.CreateTsvSummaries(Parameters.OutputDirectory!);
             }
+
+            _runningTask = null; // Clear the reference to the completed task
         }
     }
 
@@ -140,13 +151,16 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         for (int generation = 0; generation < generations; generation++)
         {
             // Check for cancellation
-            cancellationToken.ThrowIfCancellationRequested();
+            if (cancellationToken.IsCancellationRequested)
+            {
+                break; // Exit the loop if cancellation is requested
+            }
 
             // Wait if paused
             _pauseEvent.Wait(cancellationToken);
 
             // Run one generation
-            algorithm.RunEvolution(1);
+            algorithm.RunEvolution(1, cancellationToken);
         }
     }
 
@@ -161,13 +175,31 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         _pauseEvent.Set(); // Resume the algorithm
         IsPaused = false;
     }
+
     private void StopAlgorithm()
     {
         if (IsAlgorithmRunning)
         {
             _cancellationTokenSource?.Cancel(); // Cancel the running algorithm
+            _pauseEvent.Set(); // Ensure the algorithm is not paused, so it can exit immediately
             IsAlgorithmRunning = false; // Reset the state
             IsPaused = false; // Reset the paused state
+        }
+    }
+
+    private async Task StopRunningTaskAsync()
+    {
+        if (_runningTask is not null && !_runningTask.IsCompleted)
+        {
+            _cancellationTokenSource?.Cancel(); // Signal cancellation
+            try
+            {
+                await _runningTask; // Wait for the task to complete
+            }
+            catch (OperationCanceledException)
+            {
+                // Ignore cancellation exceptions
+            }
         }
     }
 

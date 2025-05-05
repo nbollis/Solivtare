@@ -42,20 +42,20 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         Logger.SubscribeToAlgorithm(this);
     }
 
-    public abstract double EvaluateFitness(TChromosome chromosome);
-    private double GetFitness(TChromosome chromosome)
+    public abstract double EvaluateFitness(TChromosome chromosome, CancellationToken? cancellationToken = null);
+    private double GetFitness(TChromosome chromosome, CancellationToken? cancellationToken = null)
     {
         // Serialize the chromosome to use as a cache key
         string chromosomeKey = chromosome.GetStableHash();
 
         // Use GetOrAdd to ensure thread-safe access to the cache
-        return _fitnessCache.GetOrAdd(chromosomeKey, _ => EvaluateFitness(chromosome));
+        return _fitnessCache.GetOrAdd(chromosomeKey, _ => EvaluateFitness(chromosome, cancellationToken));
     }
 
-    public Chromosome RunEvolution(int generations)
+    public Chromosome RunEvolution(int generations, CancellationToken? cancellationToken = null)
     {
         if (Population.Count == 0)
-            Population = InitializePopulation();
+            Population = InitializePopulation(cancellationToken);
 
         int endGeneration = CurrentGeneration + generations;
         for (; CurrentGeneration < endGeneration;)
@@ -83,20 +83,26 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
             // Step 3: Evaluate fitness for the new population
             Parallel.ForEach(Population, chromosome =>
-            {
-                chromosome.Fitness = GetFitness(chromosome);
-            });
+               {
+                   chromosome.Fitness = GetFitness(chromosome, cancellationToken);
+               });
 
             // Step 4: Sort the new population by fitness (descending)
             Population = Population.OrderByDescending(chromosome => chromosome.Fitness).ToList();
 
             // Step 5: Log the generation information
             LogPopulation(Population);
+
+            if (cancellationToken?.IsCancellationRequested == true)
+            {
+                Console.WriteLine("Evolution process was cancelled.");
+                break;
+            }
         }
 
         // Return the best chromosome from the last generation
         var bestChromosome = Population[0];
-        bestChromosome.Fitness = GetFitness(bestChromosome);
+        bestChromosome.Fitness = GetFitness(bestChromosome, cancellationToken);
         return bestChromosome;
     }
 
@@ -148,7 +154,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     /// Creates a random population of chromosomes with random weights.
     /// </summary>
     /// <returns></returns>
-    public List<TChromosome> InitializePopulation()
+    public List<TChromosome> InitializePopulation(CancellationToken? cancellationToken = null)
     {
         // Check if we have a last generation to load
         if (Logger is not null)
@@ -190,9 +196,9 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         }
 
         Parallel.ForEach(population, chromosome =>
-        {
-            chromosome.Fitness = GetFitness(chromosome);
-        });
+               {
+                   chromosome.Fitness = GetFitness(chromosome, cancellationToken);
+               });
 
         // Sort the population by fitness (descending)
         population = population.OrderByDescending(chromosome => chromosome.Fitness).ToList();

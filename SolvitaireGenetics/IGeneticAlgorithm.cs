@@ -7,7 +7,7 @@ public interface IGeneticAlgorithm
     public event Action<int, GenerationLogDto>? GenerationCompleted;
     public event Action<AgentLog>? AgentCompleted; 
     public IGeneticAlgorithmLogger Logger { get; }
-    public Chromosome RunEvolution(int generations);
+    public Chromosome RunEvolution(int generations, CancellationToken? cancellationToken = null);
 }
 
 public interface IGeneticAlgorithmLogger

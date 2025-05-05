@@ -14,7 +14,7 @@ public class SolitaireGeneticAlgorithmParameters : GeneticAlgorithmParameters
 
 
     [Option('o', "output", Required = true, HelpText = "Directory for output files.")]
-    public override string OutputDirectory { get; set; } = ".";
+    public override string? OutputDirectory { get; set; } = null;
 
     [Option('p', "population", Default = 100, HelpText = "Size of the population.")]
     public override int PopulationSize { get; set; } = 100;

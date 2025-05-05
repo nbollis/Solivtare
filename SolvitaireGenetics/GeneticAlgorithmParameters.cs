@@ -23,14 +23,16 @@ public abstract class GeneticAlgorithmParameters
         var json = File.ReadAllText(filePath);
 
         // Use a discriminator or heuristic to determine the parameter type
-        if (json.Contains("\"DecksToUse\"")) 
+        if (json.Contains("\"DecksToUse\""))
         {
-            return JsonSerializer.Deserialize<SolitaireGeneticAlgorithmParameters>(json)
+            return JsonSerializer.Deserialize<SolitaireGeneticAlgorithmParameters>(json,
+                       new JsonSerializerOptions() { Converters = { new ChromosomeConverter<SolitaireChromosome>() } })
                    ?? throw new InvalidOperationException("Failed to deserialize SolitaireGeneticAlgorithmParameters.");
         }
         if (json.Contains("\"CorrectA\"")) 
         {
-            return JsonSerializer.Deserialize<QuadraticGeneticAlgorithmParameters>(json)
+            return JsonSerializer.Deserialize<QuadraticGeneticAlgorithmParameters>(json,
+            new JsonSerializerOptions() { Converters = { new ChromosomeConverter<QuadraticChromosome>() } })
                    ?? throw new InvalidOperationException("Failed to deserialize SolitaireGeneticAlgorithmParameters.");
         }
 
