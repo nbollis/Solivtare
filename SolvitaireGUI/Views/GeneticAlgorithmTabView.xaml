@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SolvitaireGUI"
              xmlns:solvitaireGenetics="clr-namespace:SolvitaireGenetics;assembly=SolvitaireGenetics"
+             xmlns:scottplot="http://schemas.scottplot.net/2008/xaml/presentation"
              d:DataContext="{x:Static local:GeneticAlgorithmTabModel.Instance}"
              mc:Ignorable="d" 
              Name="GeneticsTab"
@@ -75,6 +76,7 @@
             <Setter Property="BorderBrush" Value="{StaticResource BorderColor}" />
             <Setter Property="Background" Value="{StaticResource BackgroundLightColor}" />
         </Style>
+
     </UserControl.Resources>
 
 
@@ -245,16 +247,14 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </DockPanel>
-                        
                     </GroupBox>
                 </DockPanel>
             </ScrollViewer>
-            
         </Expander>
-        
+
 
         <TabControl Grid.Column="1" Grid.ColumnSpan="2">
-
+            <!-- Outer TabControl -->
             <TabItem Header="Run Algorithm">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -262,12 +262,46 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <ContentControl Grid.Row="0" Content="{Binding FitnessPlotManager.Plot}"/>
-                    <ContentControl Grid.Row="1" Content="{Binding AverageStatPlotManager.Plot}"/>
+                    <!-- First TabControl (Top) -->
+                    <TabControl Grid.Row="0" DataContext="{Binding TopPlotsTabControl}">
+                        <TabItem Header="Fitness Plot">
+                                <ContentControl Content="{Binding FitnessPlotManager.Plot}" />
+                        </TabItem>
+                        <TabItem Header="Weights Trace">
+                                <ContentControl Content="{Binding AverageStatPlotManager.Plot}" />
+                        </TabItem>
+                        <TabItem Header="Best Chromosome">
+                                <ContentControl Content="{Binding BestChromosomeHeatmapPlotManager.Plot}" />
+                        </TabItem>
+                        <TabItem Header="Average Chromosome">
+                            <Grid>
+                                <ContentControl Content="{Binding AverageChromosomeHeatmapPlotManager.Plot}" />
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+
+                    <!-- First TabControl (Top) -->
+                    <TabControl Grid.Row="1" DataContext="{Binding BottomPlotsTabControl}">
+                        <TabItem Header="Fitness Plot">
+                            <ContentControl Content="{Binding FitnessPlotManager.Plot}" />
+                        </TabItem>
+                        <TabItem Header="Weights Trace">
+                            <ContentControl Content="{Binding AverageStatPlotManager.Plot}" />
+                        </TabItem>
+                        <TabItem Header="Best Chromosome">
+                            <ContentControl Content="{Binding BestChromosomeHeatmapPlotManager.Plot}" />
+                        </TabItem>
+                        <TabItem Header="Average Chromosome">
+                            <ContentControl Content="{Binding AverageChromosomeHeatmapPlotManager.Plot}" />
+                        </TabItem>
+                    </TabControl>
                 </Grid>
             </TabItem>
-        </TabControl>
-        
 
+            <!-- Agent Explorer -->
+
+            <!-- Deck Explorer -->
+
+        </TabControl>
     </Grid>
 </UserControl>

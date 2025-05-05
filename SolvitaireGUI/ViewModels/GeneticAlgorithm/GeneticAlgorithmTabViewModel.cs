@@ -22,8 +22,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         ResumeCommand = new DelegateCommand(_ => ResumeAlgorithm(), _ => IsAlgorithmRunning && IsPaused);
         StopCommand = new DelegateCommand(_ => StopAlgorithm(), _ => IsAlgorithmRunning);
 
-        FitnessPlotManager = new PlotManager(new WpfPlot(), new FitnessPlotStrategy());
-        AverageStatPlotManager = new PlotManager(new WpfPlot(), new AverageStatPlotStrategy());
+        
 
         IsAlgorithmRunning = false;
         SelectedAlgorithmType = GeneticAlgorithmType.Solitaire; // Default selection
@@ -116,8 +115,9 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
         // Restore cached generation data if this is a continuation. 
         var previousGenerationLogs = GetAlgorithm().Logger.ReadGenerationLogs();
-        if (previousGenerationLogs.Count != 0)
+        if (previousGenerationLogs.Count != _generationalLogs.Count)
         {
+            _generationalLogs.Clear(); // Clear the queue if the number of logs is different
             for (int i = 0; i < previousGenerationLogs.Count - 1; i++)
             {
                 _generationalLogs.Enqueue(previousGenerationLogs[i]);
@@ -330,16 +330,13 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     #region Plotting
 
-    public PlotManager FitnessPlotManager { get; }
-    public PlotManager AverageStatPlotManager { get; }
+    public PlotTabControlViewModel TopPlotsTabControl { get; } = new();
+    public PlotTabControlViewModel BottomPlotsTabControl { get; } = new();
 
     private void SetUpPlots()
     {
-        FitnessPlotManager.PlottingStrategy = new FitnessPlotStrategy() {Generations = Parameters.Generations };
-        FitnessPlotManager.SetUpPlot();
-
-        AverageStatPlotManager.PlottingStrategy = new AverageStatPlotStrategy() { Generations = Parameters.Generations };
-        AverageStatPlotManager.SetUpPlot();
+        TopPlotsTabControl.SetUpPlots(Parameters, ChromosomeTemplate.BaseChromosome);
+        BottomPlotsTabControl.SetUpPlots(Parameters, ChromosomeTemplate.BaseChromosome);
     }
 
     private void OnGenerationFinished(int generation, GenerationLogDto generationLog)
@@ -347,12 +344,100 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         CurrentGeneration = generation;
         _generationalLogs.Enqueue(generationLog);
 
-        var sortedLogs = _generationalLogs.ToList();
+        var sortedLogs = _generationalLogs.OrderByDescending(p => p.Generation)
+            .ToList();
+        TopPlotsTabControl.UpdatePlots(sortedLogs);
+        BottomPlotsTabControl.UpdatePlots(sortedLogs);
+    }
 
-        FitnessPlotManager.UpdatePlot(sortedLogs);
-        AverageStatPlotManager.UpdatePlot(sortedLogs);
+    #endregion
 
-        // Add Target lines to quadratic. 
+    public void HandleFileDrop(object paths)
+    {
+        if (paths is string[] { Length: > 0 } files)
+        {
+            var filePath = files[0];
+            if (Path.GetExtension(filePath).Equals(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    // Dynamically load the correct parameter type, Update the Parameters property
+                    Parameters = GeneticAlgorithmParameters.LoadFromFile(filePath);
+                    OnPropertyChanged(nameof(Parameters));
+                    SetUpPlots();
+
+                    var previousGenerationLogs = GetAlgorithm().Logger.ReadGenerationLogs();
+                    if (previousGenerationLogs.Count == 0)
+                        return;
+
+                    for (int i = 0; i < previousGenerationLogs.Count -1; i++)
+                    {
+                        _generationalLogs.Enqueue(previousGenerationLogs[i]);   
+                    }
+                    OnGenerationFinished(previousGenerationLogs[^1].Generation, previousGenerationLogs[^1]);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to load parameters from the dropped file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please drop a valid JSON file.", "Invalid File", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+    }
+}
+
+public class GeneticAlgorithmTabModel : GeneticAlgorithmTabViewModel
+{
+    public static GeneticAlgorithmTabModel Instance => new();
+
+    public GeneticAlgorithmTabModel() : base(new SolitaireGeneticAlgorithmParameters())
+    {
+
+    }
+}
+
+public class PlotTabControlViewModel : BaseViewModel
+{
+    public GeneticAlgorithmParameters Parameters { get; set; }
+    public PlotManager FitnessPlotManager { get; set; }
+    public PlotManager AverageStatPlotManager { get; set; }
+    public PlotManager BestChromosomeHeatmapPlotManager { get; set; }
+    public PlotManager AverageChromosomeHeatmapPlotManager { get; set; }
+
+    public PlotTabControlViewModel()
+    {
+        FitnessPlotManager = new PlotManager(new WpfPlot(), new FitnessPlotStrategy());
+        AverageStatPlotManager = new PlotManager(new WpfPlot(), new AverageStatLinePlotStrategy());
+        BestChromosomeHeatmapPlotManager = new PlotManager(new WpfPlot(), new GenerationStatHeatmapStrategy());
+        AverageChromosomeHeatmapPlotManager = new PlotManager(new WpfPlot(), new GenerationStatHeatmapStrategy());
+    }
+
+    public void SetUpPlots(GeneticAlgorithmParameters parameters, Chromosome template)
+    {
+        Parameters = parameters;
+        FitnessPlotManager.PlottingStrategy = new FitnessPlotStrategy() { Generations = parameters.Generations };
+        FitnessPlotManager.SetUpPlot();
+
+        AverageStatPlotManager.PlottingStrategy = new AverageStatLinePlotStrategy() { Generations = parameters.Generations };
+        AverageStatPlotManager.SetUpPlot();
+
+        Dictionary<string, bool> statNames = template.MutableStatsByName.Keys.Reverse().ToDictionary(kvp => kvp, _ => true);
+        BestChromosomeHeatmapPlotManager.PlottingStrategy = new GenerationStatHeatmapStrategy() { Generations = parameters.Generations, StatVisibility = statNames, PlotAverage = false };
+        BestChromosomeHeatmapPlotManager.SetUpPlot();
+        AverageChromosomeHeatmapPlotManager.PlottingStrategy = new GenerationStatHeatmapStrategy() { Generations = parameters.Generations, StatVisibility = statNames };
+        AverageChromosomeHeatmapPlotManager.SetUpPlot();
+    }
+
+    public void UpdatePlots(List<GenerationLogDto> sortedGenerationLogs)
+    {
+        FitnessPlotManager.UpdatePlot(sortedGenerationLogs);
+        AverageStatPlotManager.UpdatePlot(sortedGenerationLogs);
+        BestChromosomeHeatmapPlotManager.UpdatePlot(sortedGenerationLogs);
+        AverageChromosomeHeatmapPlotManager.UpdatePlot(sortedGenerationLogs);
+
         if (Parameters is QuadraticGeneticAlgorithmParameters quad)
         {
             int colorIndex = -1;
@@ -403,51 +488,4 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         }
     }
 
-    #endregion
-
-    public void HandleFileDrop(object paths)
-    {
-        if (paths is string[] { Length: > 0 } files)
-        {
-            var filePath = files[0];
-            if (Path.GetExtension(filePath).Equals(".json", StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    // Dynamically load the correct parameter type, Update the Parameters property
-                    Parameters = GeneticAlgorithmParameters.LoadFromFile(filePath);
-                    OnPropertyChanged(nameof(Parameters));
-                    SetUpPlots();
-
-                    var previousGenerationLogs = GetAlgorithm().Logger.ReadGenerationLogs();
-                    if (previousGenerationLogs.Count == 0)
-                        return;
-
-                    for (int i = 0; i < previousGenerationLogs.Count -1; i++)
-                    {
-                        _generationalLogs.Enqueue(previousGenerationLogs[i]);   
-                    }
-                    OnGenerationFinished(previousGenerationLogs[^1].Generation, previousGenerationLogs[^1]);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Failed to load parameters from the dropped file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Please drop a valid JSON file.", "Invalid File", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-    }
-}
-
-public class GeneticAlgorithmTabModel : GeneticAlgorithmTabViewModel
-{
-    public static GeneticAlgorithmTabModel Instance => new();
-
-    public GeneticAlgorithmTabModel() : base(new SolitaireGeneticAlgorithmParameters())
-    {
-
-    }
 }

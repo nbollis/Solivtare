@@ -6,7 +6,7 @@ namespace SolvitaireGUI;
 
 public class PlotManager
 {
-    public WpfPlot Plot { get; }
+    public WpfPlot Plot { get; set; }
     public IPlottingStrategy PlottingStrategy { get; set; }
 
     public PlotManager(WpfPlot plot, IPlottingStrategy plottingStrategy)

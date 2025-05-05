@@ -43,7 +43,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         var sw = Stopwatch.StartNew();
         // TODO: Make this more generic to support different agents. 
         var evaluator = new GeneticSolitaireEvaluator(chromosome);
-        var agent = new MaxiMaxAgent(evaluator, 10);
+        var agent = new MaxiMaxAgent(evaluator, 8);
         var gameState = new SolitaireGameState();
 
         int movesPlayed = 0;
