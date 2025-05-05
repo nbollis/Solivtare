@@ -22,6 +22,9 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         ResumeCommand = new DelegateCommand(_ => ResumeAlgorithm(), _ => IsAlgorithmRunning && IsPaused);
         StopCommand = new DelegateCommand(_ => StopAlgorithm(), _ => IsAlgorithmRunning);
 
+        FitnessPlotManager = new PlotManager(new WpfPlot(), new FitnessPlotStrategy());
+        AverageStatPlotManager = new PlotManager(new WpfPlot(), new AverageStatPlotStrategy());
+
         IsAlgorithmRunning = false;
         SelectedAlgorithmType = GeneticAlgorithmType.Solitaire; // Default selection
     }
@@ -111,6 +114,17 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         IGeneticAlgorithm? algorithm = GetAlgorithm();
         algorithm.GenerationCompleted += OnGenerationFinished;
 
+        // Restore cached generation data if this is a continuation. 
+        var previousGenerationLogs = GetAlgorithm().Logger.ReadGenerationLogs();
+        if (previousGenerationLogs.Count != 0)
+        {
+            for (int i = 0; i < previousGenerationLogs.Count - 1; i++)
+            {
+                _generationalLogs.Enqueue(previousGenerationLogs[i]);
+            }
+
+            OnGenerationFinished(previousGenerationLogs[^1].Generation, previousGenerationLogs[^1]);
+        }
         try
         {
             var token = _cancellationTokenSource.Token;
@@ -119,10 +133,6 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
             if (!token.IsCancellationRequested)
                 MessageBox.Show("Genetic Algorithm completed successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            else
-            {
-                _generationalLogs.Clear();
-            }
         }
         catch (OperationCanceledException)
         {
@@ -135,6 +145,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         }
         finally
         {
+            _generationalLogs.Clear();
             IsAlgorithmRunning = false;
 
             if (algorithm is not null)
@@ -319,155 +330,77 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     #region Plotting
 
-    public WpfPlot AverageStatByGeneration { get; set; } = new WpfPlot();
-    public WpfPlot FitnessByGeneration { get; set; } = new WpfPlot();
+    public PlotManager FitnessPlotManager { get; }
+    public PlotManager AverageStatPlotManager { get; }
 
     private void SetUpPlots()
     {
-        FitnessByGeneration.Plot.Clear();
-        FitnessByGeneration.Plot.Axes.SetLimits(0, Parameters.Generations - 1, -1, 1.5);
-        FitnessByGeneration.Plot.XLabel("Generation");
-        FitnessByGeneration.Plot.YLabel("Fitness");
-        FitnessByGeneration.Refresh();
+        FitnessPlotManager.PlottingStrategy = new FitnessPlotStrategy() {Generations = Parameters.Generations };
+        FitnessPlotManager.SetUpPlot();
 
-        AverageStatByGeneration.Plot.Clear();
-        AverageStatByGeneration.Plot.Axes.SetLimits(0, Parameters.Generations - 1, -3, 3);
-        AverageStatByGeneration.Plot.XLabel("Generation");
-        AverageStatByGeneration.Plot.YLabel("Weight");
-        AverageStatByGeneration.Refresh();
+        AverageStatPlotManager.PlottingStrategy = new AverageStatPlotStrategy() { Generations = Parameters.Generations };
+        AverageStatPlotManager.SetUpPlot();
     }
 
     private void OnGenerationFinished(int generation, GenerationLogDto generationLog)
     {
-        int movingAverageAmount = 1;
         CurrentGeneration = generation;
         _generationalLogs.Enqueue(generationLog);
 
         var sortedLogs = _generationalLogs.ToList();
 
-        // Extract fitness data in a single pass
-        var bestFitness = new double[sortedLogs.Count];
-        var averageFitness = new double[sortedLogs.Count];
-        var stdFitness = new double[sortedLogs.Count];
-        var statNames = generationLog.AverageChromosome.MutableStatsByName.Keys.ToArray();
-        var averageStatValues = new Dictionary<string, double[]>();
-        var bestStatValues = new Dictionary<string, double[]>();
+        FitnessPlotManager.UpdatePlot(sortedLogs);
+        AverageStatPlotManager.UpdatePlot(sortedLogs);
 
-        for (int i = 0; i < sortedLogs.Count; i++)
+        // Add Target lines to quadratic. 
+        if (Parameters is QuadraticGeneticAlgorithmParameters quad)
         {
-            bestFitness[i] = sortedLogs[i].BestFitness;
-            averageFitness[i] = sortedLogs[i].AverageFitness;
-            stdFitness[i] = sortedLogs[i].StdFitness;
-        }
-
-        // Extract values for each stat  
-        foreach (var statName in statNames)
-        {
-            var averageValues = sortedLogs.Select(log => log.AverageChromosome.MutableStatsByName[statName]).ToArray();
-            var bestValues = sortedLogs.Select(log => log.BestChromosome.MutableStatsByName[statName]).ToArray();
-            averageStatValues[statName] = averageValues;
-            bestStatValues[statName] = bestValues;
-        }
-
-        lock (AverageStatByGeneration.Plot.Sync)
-        {
-            AverageStatByGeneration.Plot.Clear();
-
-            // Add extracted values to the plots  
-            for (int i = 0; i < statNames.Length; i++)
+            int colorIndex = -1;
+            var aLine = new ScottPlot.Plottables.LinePlot()
             {
-                var statName = statNames[i];
+                Start = new Coordinates(0, quad.CorrectA),
+                End = new Coordinates(quad.Generations, quad.CorrectA),
+                LineColor = PlottingConstants.AllColors[++colorIndex],
+                LinePattern = LinePattern.Dotted,
+                LineWidth = 1.5f,
+            };
 
-                // Generate a consistent color for both average and best plots  
-                var color = PlottingConstants.AllColors[i];
-
-                // Add Average scatter plot for each stat  
-                var scatter = AverageStatByGeneration.Plot.Add.Signal(averageStatValues[statName]);
-                scatter.LegendText = statName;
-                scatter.LinePattern = LinePattern.Solid;
-                scatter.Color = color;
-                scatter.LineWidth = 2;
-
-                // Add Best scatter plot for each stat  
-                var bestScatter = AverageStatByGeneration.Plot.Add.Signal(bestStatValues[statName]);
-                bestScatter.LinePattern = LinePattern.DenselyDashed;
-                bestScatter.Color = color;
-            }
-
-            // Add Target lines to quadratic. 
-            if (Parameters is QuadraticGeneticAlgorithmParameters quad)
+            var bLine = new ScottPlot.Plottables.LinePlot()
             {
-                int colorIndex = -1;
-                var aLine = new ScottPlot.Plottables.LinePlot()
-                {
-                    Start = new Coordinates(0, quad.CorrectA),
-                    End = new Coordinates(quad.Generations, quad.CorrectA),
-                    LineColor = PlottingConstants.AllColors[++colorIndex],
-                    LinePattern = LinePattern.Dotted,
-                    LineWidth = 1.5f,
-                };
+                Start = new Coordinates(0, quad.CorrectB),
+                End = new Coordinates(quad.Generations, quad.CorrectB),
+                LineColor = PlottingConstants.AllColors[++colorIndex],
+                LinePattern = LinePattern.Dotted,
+                LineWidth = 1.5f,
+            };
 
-                var bLine = new ScottPlot.Plottables.LinePlot()
-                {
-                    Start = new Coordinates(0, quad.CorrectB),
-                    End = new Coordinates(quad.Generations, quad.CorrectB),
-                    LineColor = PlottingConstants.AllColors[++colorIndex],
-                    LinePattern = LinePattern.Dotted,
-                    LineWidth = 1.5f,
-                };
+            var cLine = new ScottPlot.Plottables.LinePlot()
+            {
+                Start = new Coordinates(0, quad.CorrectC),
+                End = new Coordinates(quad.Generations, quad.CorrectC),
+                LineColor = PlottingConstants.AllColors[++colorIndex],
+                LinePattern = LinePattern.Dotted,
+                LineWidth = 1.5f,
+            };
 
-                var cLine = new ScottPlot.Plottables.LinePlot()
-                {
-                    Start = new Coordinates(0, quad.CorrectC),
-                    End = new Coordinates(quad.Generations, quad.CorrectC),
-                    LineColor = PlottingConstants.AllColors[++colorIndex],
-                    LinePattern = LinePattern.Dotted,
-                    LineWidth = 1.5f,
-                };
+            var yIntLine = new ScottPlot.Plottables.LinePlot()
+            {
+                Start = new Coordinates(0, quad.CorrectIntercept),
+                End = new Coordinates(quad.Generations, quad.CorrectIntercept),
+                LineColor = PlottingConstants.AllColors[++colorIndex],
+                LinePattern = LinePattern.Dotted,
+                LineWidth = 1.5f,
+            };
 
-                var yIntLine = new ScottPlot.Plottables.LinePlot()
-                {
-                    Start = new Coordinates(0, quad.CorrectIntercept),
-                    End = new Coordinates(quad.Generations, quad.CorrectIntercept),
-                    LineColor = PlottingConstants.AllColors[++colorIndex],
-                    LinePattern = LinePattern.Dotted,
-                    LineWidth = 1.5f,
-                };
-
-                AverageStatByGeneration.Plot.Add.Plottable(aLine);
-                AverageStatByGeneration.Plot.Add.Plottable(bLine);
-                AverageStatByGeneration.Plot.Add.Plottable(cLine);
-                AverageStatByGeneration.Plot.Add.Plottable(yIntLine);
+            lock (AverageStatPlotManager.Plot.Plot.Sync)
+            {
+                AverageStatPlotManager.Plot.Plot.Add.Plottable(aLine);
+                AverageStatPlotManager.Plot.Plot.Add.Plottable(bLine);
+                AverageStatPlotManager.Plot.Plot.Add.Plottable(cLine);
+                AverageStatPlotManager.Plot.Plot.Add.Plottable(yIntLine);
             }
-
-            AverageStatByGeneration.Plot.ShowLegend(Alignment.UpperLeft, Orientation.Horizontal);
+            AverageStatPlotManager.Plot.Refresh();
         }
-
-        lock (FitnessByGeneration.Plot.Sync)
-        {
-            FitnessByGeneration.Plot.Clear();
-
-            // Fitness Plot
-            var bestSig = FitnessByGeneration.Plot.Add.Signal(bestFitness);
-            bestSig.LegendText = "Best Fitness";
-            bestSig.LineWidth = 2;
-
-            var avgSig = FitnessByGeneration.Plot.Add.Signal(averageFitness);
-            avgSig.LegendText = "Average Fitness";
-            avgSig.LineWidth = 2;
-
-            var stdSig = FitnessByGeneration.Plot.Add.Signal(stdFitness);
-            stdSig.LegendText = "Std Fitness";
-            stdSig.LineWidth = 2;
-
-            FitnessByGeneration.Plot.ShowLegend(Alignment.UpperLeft, Orientation.Vertical);
-        }
-
-        // Refresh the plots
-        FitnessByGeneration.Refresh();
-        AverageStatByGeneration.Refresh();
-
-        OnPropertyChanged(nameof(FitnessByGeneration));
     }
 
     #endregion

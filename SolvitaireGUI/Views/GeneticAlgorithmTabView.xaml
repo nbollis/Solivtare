@@ -262,8 +262,8 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <ContentControl Grid.Row="0" Content="{Binding FitnessByGeneration}"/>
-                    <ContentControl Grid.Row="1" Content="{Binding AverageStatByGeneration}"/>
+                    <ContentControl Grid.Row="0" Content="{Binding FitnessPlotManager.Plot}"/>
+                    <ContentControl Grid.Row="1" Content="{Binding AverageStatPlotManager.Plot}"/>
                 </Grid>
             </TabItem>
         </TabControl>
