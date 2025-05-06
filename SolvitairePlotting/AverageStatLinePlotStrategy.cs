@@ -50,10 +50,9 @@ public class GenerationStatHeatmapStrategy : IPlottingStrategy
         var heatmap = plot.Add.Heatmap(statValues);
         heatmap.Colormap = new ScottPlot.Colormaps.Viridis();
 
-        if (previousHeatmap is not null)
-            plot.Remove(previousHeatmap);
+        if (previousHeatmap == null)
+            plot.Add.ColorBar(heatmap);
 
-        plot.Add.ColorBar(heatmap);
         previousHeatmap = heatmap;
     }
 }

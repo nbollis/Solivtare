@@ -40,8 +40,6 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
 
     public override double EvaluateFitness(SolitaireChromosome chromosome, CancellationToken? cancellationToken = null)
     {
-        var sw = Stopwatch.StartNew();
-        // TODO: Make this more generic to support different agents. 
         var evaluator = new GeneticSolitaireEvaluator(chromosome);
         var agent = new MaxiMaxAgent(evaluator, 8);
         var gameState = new SolitaireGameState();
@@ -50,9 +48,9 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         int gamesPlayed = 0;
         int gamesWon = 0;
         int foundationCards = 0;
+        int faceUpTableau = 0;
 
-        // multiple game loop
-        while (gamesPlayed < _maxGamesPerAgent && movesPlayed < _maxMovesPerAgent)
+        for (int i = 0; i < Parameters.MaxGamesPerGeneration; i++)
         {
             StandardDeck deck = null!;
             // If we have predefined decks, use them in order. Otherwise create a new deck and shuffle it. 
@@ -72,8 +70,9 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
 
             gamesPlayed++;
 
-            // individual game loop
-            while (!gameState.IsGameWon)
+            int movesPlayedThisGame = 0;
+            // Evenly divide the moves across the max allowed games. 
+            while (!gameState.IsGameWon && movesPlayedThisGame <= Parameters.MaxMovesPerGeneration / Parameters.MaxGamesPerGeneration)
             {
                 if (movesPlayed >= _maxMovesPerAgent)
                 {
@@ -99,6 +98,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
                 }
 
                 movesPlayed++;
+                movesPlayedThisGame++;
             }
 
             if (gameState.IsGameWon)
@@ -114,6 +114,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
             }
 
             foundationCards += gameState.FoundationPiles.Sum(p => p.Count);
+            faceUpTableau += gameState.TableauPiles.Sum(pile => pile.Count(card => card.IsFaceUp));
 
             // Check for cancellation
             if (cancellationToken?.IsCancellationRequested == true)
@@ -122,30 +123,29 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
             }
         }
 
-        // Calculate fitness based on the number of games won and moves played
         double fitness = gamesWon;
-        if (gamesPlayed > 0)
-        {
-            // Penalize making a lot of moves, but worsen the penalty as more games get played
-            fitness -= 0.5 * movesPlayed / (gamesPlayed * _maxMovesPerAgent);
 
-            // Add decimal equal to average % of deck that made it to the foundation
-            fitness += foundationCards / (gamesPlayed * 52.0); 
-        }
-        else
-        {
-            fitness = -1;
-        }
+        // Add a small gain for face up in tableau
+        fitness += 0.01 * faceUpTableau / 52.0;
+
+        // Add decimal equal to average % of deck that made it to the foundation
+        //fitness += foundationCards / (gamesPlayed * 52.0); 
+        // 1 game won = Add 0.5. Two Games won = Add 1. Three Games won = Add 1.5; 
+        // Probably bad. 
+        fitness += 0.5 * foundationCards / 52.0;
 
         var agentLog = new AgentLog
         {
-            Chromosome = chromosome, Fitness = fitness, Generation = CurrentGeneration,
-            GamesPlayed = gamesPlayed, MovesMade = movesPlayed, GamesWon = gamesWon
+            Chromosome = chromosome,
+            Fitness = fitness,
+            Generation = CurrentGeneration,
+            GamesPlayed = gamesPlayed,
+            MovesMade = movesPlayed,
+            GamesWon = gamesWon
         };
 
         chromosome.Fitness = fitness;
         AgentCompleted?.Invoke(agentLog);
-        Console.WriteLine(sw.Elapsed + "Elapsed");
         return fitness;
     }
 
@@ -168,10 +168,10 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         best.MutableStatsByName[SolitaireChromosome.AceInTableauWeightName] = -1;
 
         // Skipping Games
-        best.MutableStatsByName[SolitaireChromosome.MoveCountScalarName] = 0;
-        best.MutableStatsByName[SolitaireChromosome.SkipLegalMoveWeightName] = 0;
-        best.MutableStatsByName[SolitaireChromosome.SkipFoundationWeightName] = 0;
-        best.MutableStatsByName[SolitaireChromosome.SkipThresholdWeightName] = 0;
+        best.MutableStatsByName[SolitaireChromosome.MoveCountScalarName] = -0.9;
+        best.MutableStatsByName[SolitaireChromosome.SkipFoundationWeightName] = -0.43;
+        best.MutableStatsByName[SolitaireChromosome.SkipLegalMoveWeightName] = -1.67;
+        best.MutableStatsByName[SolitaireChromosome.SkipThresholdWeightName] = -1.20;
         return best;
     }
 }
