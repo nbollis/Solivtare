@@ -170,7 +170,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     /// Lower = more similar. Rooted for normalization. 
     /// </summary>
     /// <returns>The root of teh euclidean distance where lower is more similar</returns>
-    public static double EuclideanDistance(SolitaireChromosome a, SolitaireChromosome b)
+    public static double EuclideanDistance(Chromosome a, Chromosome b)
     {
         double sum = 0.0;
         foreach (var key in a.MutableStatsByName.Keys)
@@ -186,7 +186,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     /// Useful if you care more about direction of weights than their absolute values
     /// </summary>
     /// <returns>A value from -1 to 1 where 1 is more similar. </returns>
-    public static double CosineSimilarity(SolitaireChromosome a, SolitaireChromosome b)
+    public static double CosineSimilarity(Chromosome a, Chromosome b)
     {
         double dot = 0, magA = 0, magB = 0;
         foreach (var key in a.MutableStatsByName.Keys)
@@ -205,7 +205,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     /// Normalized Mean Absolute Error (MAE) is a measure of the average magnitude of the errors in a set of predictions, without considering their direction. Handy if you care about the absolute difference between weights.
     /// </summary>
     /// <returns>Scale invariant metric between 0 and 1 where 0 is more similar.</returns>
-    public static double NormalizedMAE(SolitaireChromosome a, SolitaireChromosome b, double min = -3, double max = 3)
+    public static double NormalizedMAE(Chromosome a, Chromosome b, double min = -3, double max = 3)
     {
         double sum = 0.0;
         int n = a.MutableStatsByName.Count;
@@ -216,11 +216,196 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         return sum / (n * (max - min));
     }
 
+    /// <summary>
+    /// Measures the average pairwise distance between all chromosomes in the population.
+    /// Tells how spread out your population is 
+    /// </summary>
+    /// <param name="population"></param>
+    /// <returns></returns>
+    public static double AveragePairwiseDiversity(List<Chromosome> population)
+    {
+        double total = 0.0;
+        int count = 0;
+
+        for (int i = 0; i < population.Count; i++)
+        {
+            for (int j = i + 1; j < population.Count; j++)
+            {
+                total += EuclideanDistance(population[i], population[j]);
+                count++;
+            }
+        }
+
+        return count > 0 ? total / count : 0.0;
+    }
+
+    /// <summary>
+    /// Measures distance from the average of the population.
+    /// Gives you an idea of the spread of the population.
+    /// </summary>
+    /// <param name="population"></param>
+    /// <returns></returns>
+    public static double VarianceFromCentroid(List<Chromosome> population)
+    {
+        var keys = population[0].MutableStatsByName.Keys;
+        var centroid = new Dictionary<string, double>();
+
+        foreach (var key in keys)
+            centroid[key] = population.Average(chr => chr.GetWeight(key));
+
+        double sumSquares = 0.0;
+        foreach (var chr in population)
+        {
+            foreach (var key in keys)
+            {
+                double diff = chr.GetWeight(key) - centroid[key];
+                sumSquares += diff * diff;
+            }
+        }
+
+        return sumSquares / population.Count;
+    }
+
     #endregion
 
+    #region Speciation
 
+    public static (List<List<Chromosome>> Clusters, double TotalIntraClusterDistance)
+        KMeans(List<Chromosome> population, int k, int iterations = 10)
+    {
+        var rnd = new Random();
+        var centroids = population.OrderBy(_ => rnd.Next()).Take(k).ToList();
+        List<List<Chromosome>> species = Enumerable.Range(0, k).Select(_ => new List<Chromosome>()).ToList();
 
+        for (int iter = 0; iter < iterations; iter++)
+        {
+            // Reset species
+            species = Enumerable.Range(0, k).Select(_ => new List<Chromosome>()).ToList();
 
+            foreach (var chr in population)
+            {
+                int bestIndex = 0;
+                double bestDist = double.MaxValue;
+
+                for (int i = 0; i < k; i++)
+                {
+                    double dist = EuclideanDistance(chr, centroids[i]);
+                    if (dist < bestDist)
+                    {
+                        bestDist = dist;
+                        bestIndex = i;
+                    }
+                }
+
+                species[bestIndex].Add(chr);
+            }
+
+            // Update centroids
+            for (int i = 0; i < k; i++)
+            {
+                if (species[i].Count > 0)
+                    centroids[i] = GetAverageChromosome(species[i]);
+            }
+        }
+
+        // Compute total intra-cluster distance
+        double totalDistance = 0.0;
+        for (int i = 0; i < k; i++)
+        {
+            var centroid = GetAverageChromosome(species[i]);
+            foreach (var chr in species[i])
+            {
+                totalDistance += EuclideanDistance(chr, centroid);
+            }
+        }
+
+        return (species, totalDistance);
+    }
+
+    public static List<List<Chromosome>> KMeansSpeciationElbow(List<Chromosome> population, int kMin = 2, int kMax = 10)
+    {
+        var distances = new List<(int K, double TotalDistance)>();
+
+        for (int k = kMin; k <= kMax; k++)
+        {
+            var (_, totalDist) = KMeans(population, k);
+            distances.Add((k, totalDist));
+        }
+
+        // Use a simple heuristic: find the "knee" where relative improvement drops
+        int bestK = distances[0].K;
+        double bestImprovement = 0;
+
+        for (int i = 1; i < distances.Count - 1; i++)
+        {
+            double prev = distances[i - 1].TotalDistance;
+            double curr = distances[i].TotalDistance;
+            double next = distances[i + 1].TotalDistance;
+
+            double improvement = prev - curr;
+            double nextImprovement = curr - next;
+
+            if (nextImprovement < 0.5 * improvement) // Elbow heuristic
+            {
+                bestK = distances[i].K;
+                break;
+            }
+        }
+
+        var (finalSpecies, _) = KMeans(population, bestK);
+        return finalSpecies;
+    }
+
+    /// <summary>
+    /// Measures how diverse the chromosomes are within a species.
+    /// </summary>
+    /// <param name="species"></param>
+    /// <returns></returns>
+    public static double IntraSpeciesDiversity(List<List<Chromosome>> species)
+    {
+        double total = 0;
+        int count = 0;
+
+        foreach (var group in species)
+        {
+            for (int i = 0; i < group.Count; i++)
+            {
+                for (int j = i + 1; j < group.Count; j++)
+                {
+                    total += EuclideanDistance(group[i], group[j]);
+                    count++;
+                }
+            }
+        }
+
+        return count > 0 ? total / count : 0;
+    }
+
+    /// <summary>
+    /// Takes the average of each species and calculates the distance between them.
+    /// </summary>
+    /// <param name="species"></param>
+    /// <returns></returns>
+    public static double InterSpeciesDiversity(List<List<Chromosome>> species)
+    {
+        var centroids = species.Select(GetAverageChromosome).ToList();
+
+        double total = 0;
+        int count = 0;
+
+        for (int i = 0; i < centroids.Count; i++)
+        {
+            for (int j = i + 1; j < centroids.Count; j++)
+            {
+                total += EuclideanDistance(centroids[i], centroids[j]);
+                count++;
+            }
+        }
+
+        return count > 0 ? total / count : 0;
+    }
+
+    #endregion
 
     public bool Equals(Chromosome? other)
     {
