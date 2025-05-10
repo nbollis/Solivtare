@@ -2,6 +2,7 @@
 
 public class SolitaireChromosome : Chromosome
 {
+    // For move decisions
     public const string LegalMoveWeightName = "LegalMoveWeight";
     public const string FoundationWeightName = "FoundationWeight";
     public const string WasteWeightName = "WasteWeight";
@@ -14,10 +15,23 @@ public class SolitaireChromosome : Chromosome
     public const string FaceUpBottomCardTableauWeightName = "FaceUpBottomCardTableauWeight";
     public const string KingIsBottomCardTableauWeightName = "KingIsBottomCardTableauWeight";
     public const string AceInTableauWeightName = "AceInTableauWeight";
+    public const string FoundationRangeWeight = "FoundationRange";
+    public const string FoundationDeviationWeight = "FoundationDeviation";
+    public const string FoundationRangeWeightName = "FoundationRangeWeight";
+    public const string FoundationDeviationWeightName = "FoundationDeviationWeight";
+
+    // For skip decisions. 
     public const string MoveCountScalarName = "MoveCountWeight";
-    public const string SkipThresholdWeightName = "SkipThresholdWeight";
-    public const string SkipFoundationWeightName = "SkipFoundationWeight";
-    public const string SkipLegalMoveWeightName = "SkipLegalMoveWeight";
+    public const string Skip_ThresholdWeightName = "SkipThresholdWeight";
+    public const string Skip_FoundationCount = "SkipFoundationWeight";
+    public const string Skip_LegalMoveCount = "SkipLegalMoveWeight";
+    public const string Skip_TopWasteIsUseful = "SkipTopWasteIsUseful";
+    public const string Skip_CycleWeight = "SkipCycleWeight";
+    public const string Skip_StockWeight = "SkipStockWeight";
+    public const string Skip_WasteWeight = "SkipWasteWeight";
+    public const string Skip_EmptyTableauCount = "SkipEmptyTableauWeight";
+    public const string Skip_FaceUpTableauCount = "SkipFaceUpTableauWeight";
+    public const string Skip_FaceDownTableauCount = "SkipFaceDownTableauWeight";
 
     public SolitaireChromosome(Random random) : base(random)
     {
@@ -33,10 +47,22 @@ public class SolitaireChromosome : Chromosome
         MutableStatsByName[FaceUpBottomCardTableauWeightName] = GenerateRandomWeight();
         MutableStatsByName[KingIsBottomCardTableauWeightName] = GenerateRandomWeight();
         MutableStatsByName[AceInTableauWeightName] = GenerateRandomWeight();
+        MutableStatsByName[FoundationRangeWeight] = GenerateRandomWeight();
+        MutableStatsByName[FoundationDeviationWeight] = GenerateRandomWeight();
+        MutableStatsByName[FoundationRangeWeightName] = GenerateRandomWeight();
+        MutableStatsByName[FoundationDeviationWeightName] = GenerateRandomWeight();
+
         MutableStatsByName[MoveCountScalarName] = GenerateRandomWeight();
-        MutableStatsByName[SkipThresholdWeightName] = GenerateRandomWeight();
-        MutableStatsByName[SkipFoundationWeightName] = GenerateRandomWeight();
-        MutableStatsByName[SkipLegalMoveWeightName] = GenerateRandomWeight();
+        MutableStatsByName[Skip_ThresholdWeightName] = GenerateRandomWeight();
+        MutableStatsByName[Skip_FoundationCount] = GenerateRandomWeight();
+        MutableStatsByName[Skip_LegalMoveCount] = GenerateRandomWeight();
+        MutableStatsByName[Skip_TopWasteIsUseful] = GenerateRandomWeight();
+        MutableStatsByName[Skip_CycleWeight] = GenerateRandomWeight();
+        MutableStatsByName[Skip_EmptyTableauCount] = GenerateRandomWeight();
+        MutableStatsByName[Skip_FaceUpTableauCount] = GenerateRandomWeight();
+        MutableStatsByName[Skip_FaceDownTableauCount] = GenerateRandomWeight();
+        MutableStatsByName[Skip_StockWeight] = GenerateRandomWeight();
+        MutableStatsByName[Skip_WasteWeight] = GenerateRandomWeight();
     }
 
     public SolitaireChromosome() : this(Random.Shared) { }

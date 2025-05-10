@@ -1,4 +1,5 @@
-﻿using SolvitaireCore;
+﻿using MathNet.Numerics.Statistics;
+using SolvitaireCore;
 
 namespace SolvitaireGenetics;
 
@@ -8,6 +9,8 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
     {
         int legalMoveCount = state.GetLegalMoves().Count;
         int foundationCount = state.FoundationPiles.Sum(pile => pile.Count);
+        double foundationRange = state.FoundationPiles.Max(pile => pile.Count) - state.FoundationPiles.Min(pile => pile.Count);
+        double foundationDeviation = state.FoundationPiles.Select(p => p.TopCard != null ? (double)p.TopCard.Rank : 0.0).StandardDeviation();
         int wasteCount = state.WastePile.Count;
         int stockCount = state.StockPile.Count;
         int cycleCount = state.CycleCount;
@@ -80,6 +83,8 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
         score += chromosome.GetWeight(SolitaireChromosome.FaceUpBottomCardTableauWeightName) * faceUpBottomCardTableauCount;
         score += chromosome.GetWeight(SolitaireChromosome.KingIsBottomCardTableauWeightName) * kingIsBottomCardTableauCount;
         score += chromosome.GetWeight(SolitaireChromosome.AceInTableauWeightName) * aceInTableauCount;
+        score += chromosome.GetWeight(SolitaireChromosome.FoundationRangeWeight) * foundationRange;
+        score += chromosome.GetWeight(SolitaireChromosome.FoundationDeviationWeight) * foundationDeviation;
 
         return score;
     }
@@ -88,11 +93,34 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
     {
         double score = 0.0;
 
-        score += chromosome.GetWeight(SolitaireChromosome.SkipLegalMoveWeightName) * state.GetLegalMoves().Count;
-        score += chromosome.GetWeight(SolitaireChromosome.SkipFoundationWeightName) * state.FoundationPiles.Sum(p => p.Count);
+        // Parse out data
+        var moves = state.GetLegalMoves();
+        int legalMoveCount = moves.Count;
+        int foundationCount = state.FoundationPiles.Sum(pile => pile.Count);
+
+        int wasteCount = state.WastePile.Count;
+        int stockCount = state.StockPile.Count;
+        int cycleCount = state.CycleCount;
+        int emptyTableauCount = state.TableauPiles.Count(pile => pile.IsEmpty);
+        int faceUpTableauCount = state.TableauPiles.Sum(pile => pile.Cards.Count(card => card.IsFaceUp));
+        int faceDownTableauCount = state.TableauPiles.Sum(pile => pile.Cards.Count(card => !card.IsFaceUp));
+        int isWasteUseful = moves.Any(p => p.FromPileIndex == SolitaireGameState.WasteIndex) ? 1 : 0;
+
+        // Sum up score contributions
+        score += chromosome.GetWeight(SolitaireChromosome.Skip_LegalMoveCount) * legalMoveCount;
+        score += chromosome.GetWeight(SolitaireChromosome.Skip_FoundationCount) * foundationCount;
+        score += chromosome.GetWeight(SolitaireChromosome.Skip_TopWasteIsUseful) * isWasteUseful;
+        score += chromosome.GetWeight(SolitaireChromosome.Skip_WasteWeight) * wasteCount;
+        score += chromosome.GetWeight(SolitaireChromosome.Skip_StockWeight) * stockCount;
+        score += chromosome.GetWeight(SolitaireChromosome.Skip_CycleWeight) * cycleCount;
+        score += chromosome.GetWeight(SolitaireChromosome.Skip_EmptyTableauCount) * emptyTableauCount;
+        score += chromosome.GetWeight(SolitaireChromosome.Skip_FaceUpTableauCount) * faceUpTableauCount;
+        score += chromosome.GetWeight(SolitaireChromosome.Skip_FaceDownTableauCount) * faceDownTableauCount;
+
+        // Multiply by the number of moves made so far and its weight
         score *= chromosome.GetWeight(SolitaireChromosome.MoveCountScalarName) * state.MovesMade;
 
-        double threshold = chromosome.GetWeight(SolitaireChromosome.SkipThresholdWeightName);
+        double threshold = chromosome.GetWeight(SolitaireChromosome.Skip_ThresholdWeightName);
         return score < threshold;
     }
 }

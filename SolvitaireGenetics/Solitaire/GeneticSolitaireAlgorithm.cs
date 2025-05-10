@@ -72,7 +72,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
 
             int movesPlayedThisGame = 0;
             // Evenly divide the moves across the max allowed games. 
-            while (!gameState.IsGameWon && movesPlayedThisGame <= Parameters.MaxMovesPerGeneration / Parameters.MaxGamesPerGeneration)
+            while (!gameState.IsGameWon && movesPlayedThisGame <= (_maxMovesPerAgent - movesPlayed) / (Parameters.MaxGamesPerGeneration - gamesPlayed))
             {
                 if (movesPlayed >= _maxMovesPerAgent)
                 {
@@ -126,13 +126,11 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         double fitness = gamesWon;
 
         // Add a small gain for face up in tableau
-        fitness += 0.01 * faceUpTableau / 52.0;
+        fitness += (0.01 * faceUpTableau / 52.0);
 
-        // Add decimal equal to average % of deck that made it to the foundation
-        //fitness += foundationCards / (gamesPlayed * 52.0); 
         // 1 game won = Add 0.5. Two Games won = Add 1. Three Games won = Add 1.5; 
         // Probably bad. 
-        fitness += 0.5 * foundationCards / 52.0;
+        fitness += (0.5 * foundationCards / 52.0);
 
         var agentLog = new AgentLog
         {
@@ -166,12 +164,21 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         best.MutableStatsByName[SolitaireChromosome.FaceUpBottomCardTableauWeightName] = 0.2;
         best.MutableStatsByName[SolitaireChromosome.KingIsBottomCardTableauWeightName] = 0.4;
         best.MutableStatsByName[SolitaireChromosome.AceInTableauWeightName] = -1;
+        best.MutableStatsByName[SolitaireChromosome.FoundationRangeWeight] = 0;
+        best.MutableStatsByName[SolitaireChromosome.FoundationDeviationWeight] = 0;
 
         // Skipping Games
         best.MutableStatsByName[SolitaireChromosome.MoveCountScalarName] = -0.9;
-        best.MutableStatsByName[SolitaireChromosome.SkipFoundationWeightName] = -0.43;
-        best.MutableStatsByName[SolitaireChromosome.SkipLegalMoveWeightName] = -1.67;
-        best.MutableStatsByName[SolitaireChromosome.SkipThresholdWeightName] = -1.20;
+        best.MutableStatsByName[SolitaireChromosome.Skip_FoundationCount] = -0.43;
+        best.MutableStatsByName[SolitaireChromosome.Skip_LegalMoveCount] = -1.67;
+        best.MutableStatsByName[SolitaireChromosome.Skip_ThresholdWeightName] = -1.20;
+        best.MutableStatsByName[SolitaireChromosome.Skip_TopWasteIsUseful] = 0.0;
+        best.MutableStatsByName[SolitaireChromosome.Skip_CycleWeight] = 0;
+        best.MutableStatsByName[SolitaireChromosome.Skip_StockWeight] = 0;
+        best.MutableStatsByName[SolitaireChromosome.Skip_WasteWeight] = 0;
+        best.MutableStatsByName[SolitaireChromosome.Skip_EmptyTableauCount] = 0;
+        best.MutableStatsByName[SolitaireChromosome.Skip_FaceUpTableauCount] = 0;
+        best.MutableStatsByName[SolitaireChromosome.Skip_FaceDownTableauCount] = 0;
         return best;
     }
 }

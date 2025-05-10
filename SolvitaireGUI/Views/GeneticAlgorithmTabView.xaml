@@ -258,8 +258,9 @@
             <TabItem Header="Run Algorithm">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="*" />
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="3*" />
                     </Grid.RowDefinitions>
 
                     <!-- First TabControl (Top) -->
@@ -280,8 +281,15 @@
                         </TabItem>
                     </TabControl>
 
+                    <GridSplitter Grid.Row="1"
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Stretch"
+                                  Background="Transparent"
+                                  Height="5"
+                                  Margin="20,0,0,0"/>
+
                     <!-- First TabControl (Top) -->
-                    <TabControl Grid.Row="1" DataContext="{Binding BottomPlotsTabControl}">
+                    <TabControl Grid.Row="2" DataContext="{Binding BottomPlotsTabControl}">
                         <TabItem Header="Fitness Plot">
                             <ContentControl Content="{Binding FitnessPlotManager.Plot}" />
                         </TabItem>

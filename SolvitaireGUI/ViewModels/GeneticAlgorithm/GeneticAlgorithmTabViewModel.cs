@@ -427,7 +427,7 @@ public class PlotTabControlViewModel : BaseViewModel
         Dictionary<string, bool> statNames = template.MutableStatsByName.Keys.Reverse().ToDictionary(kvp => kvp, _ => true);
         BestChromosomeHeatmapPlotManager.PlottingStrategy = new GenerationStatHeatmapStrategy() { Generations = parameters.Generations, StatVisibility = statNames, PlotAverage = false };
         BestChromosomeHeatmapPlotManager.SetUpPlot();
-        AverageChromosomeHeatmapPlotManager.PlottingStrategy = new GenerationStatHeatmapStrategy() { Generations = parameters.Generations, StatVisibility = statNames };
+        AverageChromosomeHeatmapPlotManager.PlottingStrategy = new GenerationStatHeatmapStrategy() { Generations = parameters.Generations, StatVisibility = statNames, PlotAverage = true };
         AverageChromosomeHeatmapPlotManager.SetUpPlot();
     }
 
