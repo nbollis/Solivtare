@@ -111,4 +111,61 @@ public class ChromosomeTests
             Assert.That(hashSet.Add(q.GetStableHash()), Is.True, "Hash code collision detected.");
         }
     }
+
+    [Test]
+    public void EuclideanDistance_ShouldReturnCorrectDistance()
+    {
+        var random = new Random();
+        var chromosome1 = new SolitaireChromosome(random);
+        chromosome1.MutableStatsByName.Clear();
+        chromosome1.MutableStatsByName["stat1"] = 1.0;
+        chromosome1.MutableStatsByName["stat2"] = 2.0;
+
+        var chromosome2 = new SolitaireChromosome(random);
+        chromosome2.MutableStatsByName.Clear();
+        chromosome2.MutableStatsByName["stat1"] = 4.0;
+        chromosome2.MutableStatsByName["stat2"] = 6.0;
+
+        var distance = Chromosome.EuclideanDistance(chromosome1, chromosome2);
+
+        Assert.That(distance, Is.EqualTo(5.0).Within(1e-5));
+    }
+
+    [Test]
+    public void CosineSimilarity_ShouldReturnCorrectSimilarity()
+    {
+        var random = new Random();
+        var chromosome1 = new SolitaireChromosome(random);
+        chromosome1.MutableStatsByName.Clear();
+        chromosome1.MutableStatsByName["stat1"] = 1.0;
+        chromosome1.MutableStatsByName["stat2"] = 0.0;
+
+        var chromosome2 = new SolitaireChromosome(random);
+        chromosome2.MutableStatsByName.Clear();
+        chromosome2.MutableStatsByName["stat1"] = 1.0;
+        chromosome2.MutableStatsByName["stat2"] = 0.0;
+
+        var similarity = Chromosome.CosineSimilarity(chromosome1, chromosome2);
+
+        Assert.That(similarity, Is.EqualTo(1.0).Within(1e-5));
+    }
+
+    [Test]
+    public void NormalizedMAE_ShouldReturnCorrectError()
+    {
+        var random = new Random();
+        var chromosome1 = new SolitaireChromosome(random);
+        chromosome1.MutableStatsByName.Clear();
+        chromosome1.MutableStatsByName["stat1"] = 1.0;
+        chromosome1.MutableStatsByName["stat2"] = 2.0;
+
+        var chromosome2 = new SolitaireChromosome(random);
+        chromosome2.MutableStatsByName.Clear();
+        chromosome2.MutableStatsByName["stat1"] = 3.0;
+        chromosome2.MutableStatsByName["stat2"] = 4.0;
+
+        var error = Chromosome.NormalizedMAE(chromosome1, chromosome2, -3, 3);
+
+        Assert.That(error, Is.EqualTo(0.3333).Within(1e-4));
+    }
 }

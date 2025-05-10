@@ -16,7 +16,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     public double Fitness { get; set; } = double.MinValue;
 
     public Dictionary<string, double> MutableStatsByName { get; set; }
-    public double GetWeight(string name) => MutableStatsByName.TryGetValue(name, out var v) ? v : 0;
+    public double GetWeight(string name) => MutableStatsByName.GetValueOrDefault(name, 0);
     public void SetWeight(string name, double value) => MutableStatsByName[name] = value;
 
     protected Chromosome(Random random)
@@ -42,17 +42,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         return clone;
     }
 
-    public TChromosome CrossOver<TChromosome>(TChromosome other, double crossoverRate = 0.5) 
-        where TChromosome : Chromosome
-    {
-        return Crossover((TChromosome)this, other, crossoverRate);
-    }
 
-    public TChromosome Mutate<TChromosome>(double mutationRate)
-        where TChromosome : Chromosome
-    {
-        return Mutate((TChromosome)this, mutationRate);
-    }
 
     /// <summary>
     /// Creates a random weight from Min to Max Value
@@ -68,6 +58,20 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     public static TChromosome CreateRandom<TChromosome>(Random random)
     {
         return (TChromosome)Activator.CreateInstance(typeof(TChromosome), random)!;
+    }
+
+    #region Evolution
+
+    public TChromosome CrossOver<TChromosome>(TChromosome other, double crossoverRate = 0.5)
+        where TChromosome : Chromosome
+    {
+        return Crossover((TChromosome)this, other, crossoverRate);
+    }
+
+    public TChromosome Mutate<TChromosome>(double mutationRate)
+        where TChromosome : Chromosome
+    {
+        return Mutate((TChromosome)this, mutationRate);
     }
 
     /// <summary>
@@ -122,8 +126,12 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         }
         return child;
     }
+    
+    #endregion
 
-    public static TChromosome GetAverageChromosome<TChromosome>(List<TChromosome> chromosomes) 
+    #region Statistics
+
+    public static TChromosome GetAverageChromosome<TChromosome>(List<TChromosome> chromosomes)
         where TChromosome : Chromosome
     {
         if (chromosomes == null || chromosomes.Count == 0)
@@ -140,7 +148,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         return firstChromosome;
     }
 
-    public static TChromosome GetStandardDeviationChromosome<TChromosome>(List<TChromosome> chromosomes) 
+    public static TChromosome GetStandardDeviationChromosome<TChromosome>(List<TChromosome> chromosomes)
         where TChromosome : Chromosome
     {
         if (chromosomes == null || chromosomes.Count == 0)
@@ -157,6 +165,62 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         firstChromosome.Fitness = chromosomes.Select(p => p.Fitness).StandardDeviation();
         return firstChromosome;
     }
+
+    /// <summary>
+    /// Lower = more similar. Rooted for normalization. 
+    /// </summary>
+    /// <returns>The root of teh euclidean distance where lower is more similar</returns>
+    public static double EuclideanDistance(SolitaireChromosome a, SolitaireChromosome b)
+    {
+        double sum = 0.0;
+        foreach (var key in a.MutableStatsByName.Keys)
+        {
+            double diff = a.GetWeight(key) - b.GetWeight(key);
+            sum += diff * diff;
+        }
+        return Math.Sqrt(sum);
+    }
+
+    /// <summary>
+    /// Cosine similarity is a measure of similarity between two non-zero vectors of an inner product space.
+    /// Useful if you care more about direction of weights than their absolute values
+    /// </summary>
+    /// <returns>A value from -1 to 1 where 1 is more similar. </returns>
+    public static double CosineSimilarity(SolitaireChromosome a, SolitaireChromosome b)
+    {
+        double dot = 0, magA = 0, magB = 0;
+        foreach (var key in a.MutableStatsByName.Keys)
+        {
+            double wa = a.GetWeight(key);
+            double wb = b.GetWeight(key);
+            dot += wa * wb;
+            magA += wa * wa;
+            magB += wb * wb;
+        }
+
+        return dot / (Math.Sqrt(magA) * Math.Sqrt(magB));
+    }
+
+    /// <summary>
+    /// Normalized Mean Absolute Error (MAE) is a measure of the average magnitude of the errors in a set of predictions, without considering their direction. Handy if you care about the absolute difference between weights.
+    /// </summary>
+    /// <returns>Scale invariant metric between 0 and 1 where 0 is more similar.</returns>
+    public static double NormalizedMAE(SolitaireChromosome a, SolitaireChromosome b, double min = -3, double max = 3)
+    {
+        double sum = 0.0;
+        int n = a.MutableStatsByName.Count;
+        foreach (var key in a.MutableStatsByName.Keys)
+        {
+            sum += Math.Abs(a.GetWeight(key) - b.GetWeight(key));
+        }
+        return sum / (n * (max - min));
+    }
+
+    #endregion
+
+
+
+
 
     public bool Equals(Chromosome? other)
     {

@@ -68,7 +68,6 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
             faceDownTableauCount += faceDownCount;
         }
 
-
         // Now combine everything using the chromosome weights:
         double score = 0.0;
         score += chromosome.GetWeight(SolitaireChromosome.LegalMoveWeightName) * legalMoveCount;
