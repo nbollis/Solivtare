@@ -12,7 +12,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     protected bool CanFullRandomMutate = true;
     protected int WeightMinStartValue = -2;
     protected int WeightMaxStartValue = 2;
-
+    public int SpeciesIndex = -1;
     public double Fitness { get; set; } = double.MinValue;
 
     public Dictionary<string, double> MutableStatsByName { get; set; }
@@ -360,6 +360,14 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         }
 
         var (finalSpecies, _) = KMeans(population, bestK);
+        for (int i = 0; i < finalSpecies.Count; i++)
+        {
+            var species = finalSpecies[i];
+            foreach (var chrom in species)
+            {
+                chrom.SpeciesIndex = i;
+            }
+        }
         return finalSpecies;
     }
 

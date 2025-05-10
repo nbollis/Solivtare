@@ -10,6 +10,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 {
     public event Action<int, GenerationLogDto>? GenerationCompleted;
     public virtual event Action<AgentLog>? AgentCompleted;
+    private Task _loggingTask = Task.CompletedTask; // Initially completed
     protected readonly TParameters Parameters;
     protected readonly TChromosome? ChromosomeTemplate;
     protected readonly double TemplateInitialRatio;
@@ -90,8 +91,11 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             // Step 4: Sort the new population by fitness (descending)
             Population = Population.OrderByDescending(chromosome => chromosome.Fitness).ToList();
 
-            // Step 5: Log the generation information
-            LogPopulation(Population);
+            // Step 5: Wait for the previous logging task to complete if it hasn't finished
+            _loggingTask.Wait();
+
+            // Step 6: Start logging the current generation asynchronously
+            _loggingTask = LogPopulationAsync(Population);
 
             if (cancellationToken?.IsCancellationRequested == true)
             {
@@ -99,6 +103,9 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
                 break;
             }
         }
+
+        // Ensure the final logging task is complete before returning
+        _loggingTask.Wait();
 
         // Return the best chromosome from the last generation
         var bestChromosome = Population[0];
@@ -203,26 +210,45 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         // Sort the population by fitness (descending)
         population = population.OrderByDescending(chromosome => chromosome.Fitness).ToList();
 
-        LogPopulation(population);
+        // Log the population and return. 
+        _loggingTask = LogPopulationAsync(population);
         return Population = population;
     }
-    public static int acount = 0;
-    private void LogPopulation(List<TChromosome> population)
+
+    private async Task LogPopulationAsync(List<TChromosome> population)
     {
-        var fitness = population.Select(chr => chr.Fitness).ToList();
+        // Create a local copy of the population to ensure thread safety
+        var populationSnapshot = population.ToList();
+
+        var fitness = populationSnapshot.Select(chr => chr.Fitness).ToList();
+        var species = Chromosome.KMeansSpeciationElbow(populationSnapshot);
         var generationLog = new GenerationLogDto
         {
             Generation = CurrentGeneration,
             BestFitness = fitness[0],
             AverageFitness = fitness.Average(),
             StdFitness = fitness.StandardDeviation(),
+            AveragePairwiseDiversity = Chromosome.AveragePairwiseDiversity(populationSnapshot),
+            VarianceFromAverageChromosome = Chromosome.VarianceFromCentroid(populationSnapshot),
+            SpeciesCount = species.Count,
+            IntraSpeciesDiversity = Chromosome.IntraSpeciesDiversity(species),
+            InterSpeciesDiversity = Chromosome.InterSpeciesDiversity(species),
             BestChromosome = population[0],
-            AverageChromosome =  Chromosome.GetAverageChromosome(population),
-            StdChromosome = Chromosome.GetStandardDeviationChromosome(population)
+            AverageChromosome = Chromosome.GetAverageChromosome(populationSnapshot),
+            StdChromosome = Chromosome.GetStandardDeviationChromosome(populationSnapshot)
         };
 
-        GenerationCompleted?.Invoke(CurrentGeneration, generationLog); // Fire the GenerationCompleted event  
-        Logger?.FlushAgentLogs(CurrentGeneration, population);
+        // Fire the GenerationCompleted event asynchronously
+        if (GenerationCompleted != null)
+        {
+            await Task.Run(() => GenerationCompleted.Invoke(CurrentGeneration, generationLog));
+        }
+
+        // Flush agent logs asynchronously
+        if (Logger != null)
+        {
+            await Task.Run(() => Logger.FlushAgentLogs(CurrentGeneration, populationSnapshot));
+        }
     }
 }
 

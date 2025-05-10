@@ -70,6 +70,9 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
 
             gamesPlayed++;
 
+            if (gamesPlayed >= _maxGamesPerAgent)
+                break;
+
             int movesPlayedThisGame = 0;
             // Evenly divide the moves across the max allowed games. 
             while (!gameState.IsGameWon && movesPlayedThisGame <= (_maxMovesPerAgent - movesPlayed) / (Parameters.MaxGamesPerGeneration - gamesPlayed))
@@ -105,12 +108,12 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
             {
                 gamesWon++;
                 Console.WriteLine("Game Won.");
+            }
 
-                // Only record winnable decks for right now. 
-                if (_deckFile is DeckStatisticsFile stats)
-                {
-                    stats.AddOrUpdateWinnableDeck(deck, gameState.MovesMade, gameState.IsGameWon);
-                }
+            // Update Deck Log. 
+            if (_deckFile is DeckStatisticsFile stats)
+            {
+                stats.AddOrUpdateWinnableDeck(deck, gameState.MovesMade, gameState.IsGameWon);
             }
 
             foundationCards += gameState.FoundationPiles.Sum(p => p.Count);

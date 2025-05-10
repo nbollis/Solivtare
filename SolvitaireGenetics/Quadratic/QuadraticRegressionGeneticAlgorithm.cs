@@ -37,7 +37,6 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
     
     public override double EvaluateFitness(QuadraticChromosome chromosome, CancellationToken? cancellationToken = null)
     {
-        Interlocked.Increment(ref acount);
         double a = chromosome.GetWeight(QuadraticChromosome.A);
         double b = chromosome.GetWeight(QuadraticChromosome.B);
         double c = chromosome.GetWeight(QuadraticChromosome.C);
