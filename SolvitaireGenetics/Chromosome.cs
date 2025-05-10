@@ -170,7 +170,8 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     /// Lower = more similar. Rooted for normalization. 
     /// </summary>
     /// <returns>The root of teh euclidean distance where lower is more similar</returns>
-    public static double EuclideanDistance(Chromosome a, Chromosome b)
+    public static double EuclideanDistance<TChromosome>(TChromosome a, TChromosome b)
+        where TChromosome : Chromosome
     {
         double sum = 0.0;
         foreach (var key in a.MutableStatsByName.Keys)
@@ -186,7 +187,8 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     /// Useful if you care more about direction of weights than their absolute values
     /// </summary>
     /// <returns>A value from -1 to 1 where 1 is more similar. </returns>
-    public static double CosineSimilarity(Chromosome a, Chromosome b)
+    public static double CosineSimilarity<TChromosome>(TChromosome a, TChromosome b)
+        where TChromosome : Chromosome
     {
         double dot = 0, magA = 0, magB = 0;
         foreach (var key in a.MutableStatsByName.Keys)
@@ -205,7 +207,8 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     /// Normalized Mean Absolute Error (MAE) is a measure of the average magnitude of the errors in a set of predictions, without considering their direction. Handy if you care about the absolute difference between weights.
     /// </summary>
     /// <returns>Scale invariant metric between 0 and 1 where 0 is more similar.</returns>
-    public static double NormalizedMAE(Chromosome a, Chromosome b, double min = -3, double max = 3)
+    public static double NormalizedMAE<TChromosome>(TChromosome a, TChromosome b, double min = -3, double max = 3)
+        where TChromosome : Chromosome
     {
         double sum = 0.0;
         int n = a.MutableStatsByName.Count;
@@ -222,7 +225,8 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     /// </summary>
     /// <param name="population"></param>
     /// <returns></returns>
-    public static double AveragePairwiseDiversity(List<Chromosome> population)
+    public static double AveragePairwiseDiversity<TChromosome>(List<TChromosome> population)
+        where TChromosome : Chromosome
     {
         double total = 0.0;
         int count = 0;
@@ -245,7 +249,8 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     /// </summary>
     /// <param name="population"></param>
     /// <returns></returns>
-    public static double VarianceFromCentroid(List<Chromosome> population)
+    public static double VarianceFromCentroid<TChromosome>(List<TChromosome> population)
+        where TChromosome : Chromosome
     {
         var keys = population[0].MutableStatsByName.Keys;
         var centroid = new Dictionary<string, double>();
@@ -270,17 +275,18 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
 
     #region Speciation
 
-    public static (List<List<Chromosome>> Clusters, double TotalIntraClusterDistance)
-        KMeans(List<Chromosome> population, int k, int iterations = 10)
+    public static (List<List<TChromosome>> Clusters, double TotalIntraClusterDistance)
+        KMeans<TChromosome>(List<TChromosome> population, int k, int iterations = 10)
+        where TChromosome : Chromosome
     {
         var rnd = new Random();
         var centroids = population.OrderBy(_ => rnd.Next()).Take(k).ToList();
-        List<List<Chromosome>> species = Enumerable.Range(0, k).Select(_ => new List<Chromosome>()).ToList();
+        List<List<TChromosome>> species = Enumerable.Range(0, k).Select(_ => new List<TChromosome>()).ToList();
 
         for (int iter = 0; iter < iterations; iter++)
         {
             // Reset species
-            species = Enumerable.Range(0, k).Select(_ => new List<Chromosome>()).ToList();
+            species = Enumerable.Range(0, k).Select(_ => new List<TChromosome>()).ToList();
 
             foreach (var chr in population)
             {
@@ -322,7 +328,8 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         return (species, totalDistance);
     }
 
-    public static List<List<Chromosome>> KMeansSpeciationElbow(List<Chromosome> population, int kMin = 2, int kMax = 10)
+    public static List<List<TChromosome>> KMeansSpeciationElbow<TChromosome>(List<TChromosome> population, int kMin = 2, int kMax = 10)
+        where TChromosome : Chromosome
     {
         var distances = new List<(int K, double TotalDistance)>();
 
@@ -361,7 +368,8 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     /// </summary>
     /// <param name="species"></param>
     /// <returns></returns>
-    public static double IntraSpeciesDiversity(List<List<Chromosome>> species)
+    public static double IntraSpeciesDiversity<TChromosome>(List<List<TChromosome>> species)
+        where TChromosome : Chromosome
     {
         double total = 0;
         int count = 0;
@@ -386,7 +394,8 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     /// </summary>
     /// <param name="species"></param>
     /// <returns></returns>
-    public static double InterSpeciesDiversity(List<List<Chromosome>> species)
+    public static double InterSpeciesDiversity<TChromosome>(List<List<TChromosome>> species)
+        where TChromosome : Chromosome
     {
         var centroids = species.Select(GetAverageChromosome).ToList();
 
