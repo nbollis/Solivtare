@@ -6,20 +6,13 @@ namespace SolvitaireGenetics;
 
 public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, SolitaireGeneticAlgorithmParameters>
 {
-    private readonly int _maxMovesPerAgent;
-    private readonly int _maxGamesPerAgent;
     private readonly List<StandardDeck> _predefinedDecks = new();
     private readonly IDeckFile? _deckFile;
-    private readonly SolitaireGeneticAlgorithmParameters _parameters;
     public override event Action<AgentLog>? AgentCompleted;
 
     public GeneticSolitaireAlgorithm(SolitaireGeneticAlgorithmParameters parameters)
         : base(parameters)
     {
-        _parameters = parameters;
-        _maxMovesPerAgent = parameters.MaxMovesPerGeneration;
-        _maxGamesPerAgent = parameters.MaxGamesPerGeneration;
-
         // Deserialize predefined decks if provided
         if (parameters.DecksToUse is not null)
         {
@@ -70,14 +63,14 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
 
             gamesPlayed++;
 
-            if (gamesPlayed >= _maxGamesPerAgent)
+            if (gamesPlayed >= Parameters.MaxGamesPerGeneration)
                 break;
 
             int movesPlayedThisGame = 0;
             // Evenly divide the moves across the max allowed games. 
-            while (!gameState.IsGameWon && movesPlayedThisGame <= (_maxMovesPerAgent - movesPlayed) / (Parameters.MaxGamesPerGeneration - gamesPlayed))
+            while (!gameState.IsGameWon && movesPlayedThisGame <= (Parameters.MaxMovesPerGeneration - movesPlayed) / (Parameters.MaxGamesPerGeneration - gamesPlayed))
             {
-                if (movesPlayed >= _maxMovesPerAgent)
+                if (movesPlayed >= Parameters.MaxMovesPerGeneration)
                 {
                     break;
                 }

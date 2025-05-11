@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using MathNet.Numerics.Statistics;
+using SolvitaireIO.Database.Repositories;
 
 namespace SolvitaireGenetics;
 
@@ -11,14 +12,10 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     public event Action<int, GenerationLogDto>? GenerationCompleted;
     public virtual event Action<AgentLog>? AgentCompleted;
     private Task _loggingTask = Task.CompletedTask; // Initially completed
+
     protected readonly TParameters Parameters;
     protected readonly TChromosome? ChromosomeTemplate;
-    protected readonly double TemplateInitialRatio;
-    protected readonly int PopulationSize;
     protected readonly Random Random = new();
-    protected readonly double MutationRate;
-    protected readonly double CrossOverRate = 0.5;
-    protected readonly int TournamentSize;
 
     public int CurrentGeneration { get; protected set; }
     public List<TChromosome> Population { get; protected set; } = [];
@@ -31,10 +28,6 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     {
         CurrentGeneration = 0;
         Parameters = parameters;
-        PopulationSize = parameters.PopulationSize;
-        MutationRate = parameters.MutationRate;
-        TournamentSize = parameters.TournamentSize;
-        TemplateInitialRatio = parameters.TemplateInitialRatio;
         if (parameters.TemplateChromosome is TChromosome template)
             ChromosomeTemplate = template;
 
@@ -64,18 +57,18 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation {CurrentGeneration}: Evaluating population...");
 
             // Step 1: Select parents for the entire population
-            int numberOfParents = PopulationSize * 2; // Each child needs 2 parents
+            int numberOfParents = Parameters.PopulationSize * 2; // Each child needs 2 parents
             var parents = TournamentSelection(Population, numberOfParents);
 
             // Step 2: Create the new population
-            for (int i = 0; i < PopulationSize; i++)
+            for (int i = 0; i < Parameters.PopulationSize; i++)
             {
                 var parent1 = parents[i * 2];
                 var parent2 = parents[i * 2 + 1];
 
                 // Perform crossover and mutation
                 var child = Chromosome.Crossover(parent1, parent2);
-                child = Chromosome.Mutate(child, MutationRate);
+                child = Chromosome.Mutate(child, Parameters.MutationRate);
 
                 Population[i] = child;
             }
@@ -130,10 +123,10 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         // Create tournaments
         for (int i = 0; i < numberOfParents; i++)
         {
-            var tournament = new List<TChromosome>(TournamentSize);
+            var tournament = new List<TChromosome>(Parameters.TournamentSize);
 
             // Select TournamentSize chromosomes from the shuffled population
-            for (int j = 0; j < TournamentSize; j++)
+            for (int j = 0; j < Parameters.TournamentSize; j++)
             {
                 // If we reach the end of the shuffled population, reshuffle and reset the index
                 if (currentIndex >= shuffledPopulation.Count)
@@ -170,7 +163,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
                 .Select(p => p.Chromosome as TChromosome)
                 .ToList();
 
-            if (lastGeneration.Count == PopulationSize)
+            if (lastGeneration.Count == Parameters.PopulationSize)
             {
                 // If we have a last generation, use it to initialize the population
                 CurrentGeneration = generationNumber;
@@ -184,11 +177,11 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         // The other 90% will be random chromosomes crossed over with the template. 
         if (ChromosomeTemplate != null)
         {
-            int copiesOfBest = (int)Math.Ceiling(PopulationSize * TemplateInitialRatio);
+            int copiesOfBest = (int)Math.Ceiling(Parameters.PopulationSize * Parameters.TemplateInitialRatio);
             var best = Enumerable.Range(0, copiesOfBest).Select(_ => ChromosomeTemplate)
-                .Select(b => Chromosome.Mutate(b, MutationRate));
+                .Select(b => Chromosome.Mutate(b, Parameters.MutationRate));
 
-            population =  Enumerable.Range(0, PopulationSize - copiesOfBest)
+            population =  Enumerable.Range(0, Parameters.PopulationSize - copiesOfBest)
                 .Select(_ => Chromosome.CreateRandom<TChromosome>(Random)
                         .CrossOver(ChromosomeTemplate) // Temporary? Cross over with best.
                 ).Concat(best)
@@ -197,7 +190,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         // If we don't have a last generation or a template, create a new random population
         else
         {
-            population = Enumerable.Range(0, PopulationSize)
+            population = Enumerable.Range(0, Parameters.PopulationSize)
                 .Select(_ => Chromosome.CreateRandom<TChromosome>(Random))
                 .ToList();
         }
