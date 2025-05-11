@@ -1,4 +1,5 @@
-﻿using SolvitaireIO.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using SolvitaireIO.Database;
 using SolvitaireIO.Database.Models;
 using SolvitaireIO.Database.Repositories;
 
@@ -11,6 +12,7 @@ public class GenerationalLogDbTests
     private SolvitaireDbContext _context = null!;
     private GenerationLogRepository _generationRepository = null!;
     private AgentLogRepository _agentRepository = null!;
+    private ChromosomeRepository _chromosomeRepository = null!;
 
     [SetUp]
     public async Task SetUp()
@@ -21,6 +23,7 @@ public class GenerationalLogDbTests
 
         _generationRepository = new GenerationLogRepository(_context);
         _agentRepository = new AgentLogRepository(_context);
+        _chromosomeRepository = new ChromosomeRepository(_context);
     }
 
     [TearDown]
@@ -44,13 +47,12 @@ public class GenerationalLogDbTests
             SpeciesCount = 3,
             IntraSpeciesDiversity = 0.4,
             InterSpeciesDiversity = 0.6,
-            BestChromosomeJson = "{\"genes\": [1, 2, 3]}",
-            AverageChromosmeJson = "{\"genes\": [2, 3, 4]}",
-            StdChromosmeJson = "{\"genes\": [0.5, 0.6, 0.7]}"
+
+            
         };
 
         // Act  
-        await _generationRepository.AddGenerationLogAsync(log);
+        await _generationRepository.AddGenerationAsync(log);
         var logs = await _generationRepository.GetAllGenerationLogsAsync();
 
         // Assert  
@@ -63,9 +65,7 @@ public class GenerationalLogDbTests
         Assert.That(logs[0].SpeciesCount, Is.EqualTo(3));
         Assert.That(logs[0].IntraSpeciesDiversity, Is.EqualTo(0.4));
         Assert.That(logs[0].InterSpeciesDiversity, Is.EqualTo(0.6));
-        Assert.That(logs[0].BestChromosomeJson, Is.EqualTo("{\"genes\": [1, 2, 3]}"));
-        Assert.That(logs[0].AverageChromosmeJson, Is.EqualTo("{\"genes\": [2, 3, 4]}"));
-        Assert.That(logs[0].StdChromosmeJson, Is.EqualTo("{\"genes\": [0.5, 0.6, 0.7]}"));
+  
     }
 
     [Test]
@@ -83,9 +83,6 @@ public class GenerationalLogDbTests
             SpeciesCount = 3,
             IntraSpeciesDiversity = 0.4,
             InterSpeciesDiversity = 0.6,
-            BestChromosomeJson = "{\"genes\": [1, 2, 3]}",
-            AverageChromosmeJson = "{\"genes\": [2, 3, 4]}",
-            StdChromosmeJson = "{\"genes\": [0.5, 0.6, 0.7]}"
         };
 
         var agentLog = new AgentLog
@@ -95,12 +92,11 @@ public class GenerationalLogDbTests
             GamesPlayed = 10,
             GamesWon = 5,
             MovesMade = 50,
-            ChromosomeJson = "{\"genes\": [1, 2, 3]}"
         };
 
         // Act
-         _generationRepository.AddGenerationLogAsync(generationLog).Wait();
-         _agentRepository.AddAgentLogAsync(agentLog).Wait();
+         _generationRepository.AddGenerationAsync(generationLog).Wait();
+         _agentRepository.AddAgentAsync(agentLog).Wait();
 
         var retrievedGenerationLog =  _generationRepository.GetGenerationLogWithAgentsAsync(1).Result;
 
@@ -108,6 +104,46 @@ public class GenerationalLogDbTests
         Assert.That(retrievedGenerationLog, Is.Not.Null);
         Assert.That(retrievedGenerationLog!.AgentLogs.Count, Is.EqualTo(1));
         Assert.That(retrievedGenerationLog.AgentLogs.First().Fitness, Is.EqualTo(0.9));
+    }
+
+    [Test]
+    public async Task Test_GenerationLog_WithChromosomes()
+    {
+        // Arrange
+        var generationLog = new GenerationLog
+        {
+            Generation = 1,
+            GenerationFinishedTime = DateTime.UtcNow,
+            BestFitness = 0.95,
+            AverageFitness = 0.85,
+            StdFitness = 0.1,
+            BestChromosome = new ChromosomeLog
+            {
+                ChromosomeType = "BestChromosome",
+                GeneData = "{\"genes\": [1, 2, 3]}"
+            },
+            AverageChromosome = new ChromosomeLog
+            {
+                ChromosomeType = "AverageChromosome",
+                GeneData = "{\"genes\": [2, 3, 4]}"
+            },
+            StdChromosome = new ChromosomeLog
+            {
+                ChromosomeType = "StdChromosome",
+                GeneData = "{\"genes\": [0.5, 0.6, 0.7]}"
+            }
+        };
+
+        // Act
+        _generationRepository.AddGenerationAsync(generationLog).Wait();
+
+        var retrievedGenerationLog = _generationRepository.GetLastGenerationAsync().Result;
+
+        // Assert
+        Assert.That(retrievedGenerationLog, Is.Not.Null);
+        Assert.That(retrievedGenerationLog!.BestChromosome!.GeneData, Is.EqualTo("{\"genes\": [1, 2, 3]}"));
+        Assert.That(retrievedGenerationLog.AverageChromosome!.GeneData, Is.EqualTo("{\"genes\": [2, 3, 4]}"));
+        Assert.That(retrievedGenerationLog.StdChromosome!.GeneData, Is.EqualTo("{\"genes\": [0.5, 0.6, 0.7]}"));
     }
 }
 

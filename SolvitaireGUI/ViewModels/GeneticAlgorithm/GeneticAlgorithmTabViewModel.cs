@@ -7,6 +7,8 @@ using ScottPlot.WPF;
 using SolvitairePlotting;
 using ScottPlot;
 using System.Security.Cryptography;
+using SolvitaireCore;
+using SolvitaireIO.Database.Models;
 
 namespace SolvitaireGUI;
 
@@ -42,7 +44,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     private Task? _runningTask;
     private CancellationTokenSource _cancellationTokenSource;
     private ManualResetEventSlim _pauseEvent = new(true); // Initially not paused
-    private readonly ConcurrentQueue<GenerationLogDto> _generationalLogs = new();
+    private readonly ConcurrentQueue<GenerationLog> _generationalLogs = new();
 
     public bool IsAlgorithmRunning
     {
@@ -339,7 +341,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         BottomPlotsTabControl.SetUpPlots(Parameters, ChromosomeTemplate.BaseChromosome);
     }
 
-    private void OnGenerationFinished(int generation, GenerationLogDto generationLog)
+    private void OnGenerationFinished(int generation, GenerationLog generationLog)
     {
         CurrentGeneration = generation;
         _generationalLogs.Enqueue(generationLog);

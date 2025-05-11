@@ -1,4 +1,5 @@
-﻿using SolvitaireGenetics;
+﻿using SolvitaireCore;
+using SolvitaireGenetics;
 
 namespace Test;
 

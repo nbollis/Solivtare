@@ -1,5 +1,6 @@
 using ScottPlot;
 using SolvitaireGenetics;
+using SolvitaireIO.Database.Models;
 
 namespace SolvitairePlotting;
 
@@ -24,11 +25,11 @@ public class GenerationStatHeatmapStrategy : IPlottingStrategy
     }
 
     private IPlottable? previousHeatmap;
-    public void UpdatePlot(Plot plot, List<GenerationLogDto> sortedLogs)
+    public void UpdatePlot(Plot plot, List<GenerationLog> sortedLogs)
     {
         plot.Clear();
 
-        var statNames = sortedLogs.First().AverageChromosome.MutableStatsByName.Keys.ToArray();
+        var statNames = sortedLogs.First().AverageChromosome.Chromosome.MutableStatsByName.Keys.ToArray();
 
         // Create a 2D array to hold the stat values for the heatmap
         var statValues = new double[statNames.Length, sortedLogs.Count];
@@ -41,7 +42,7 @@ public class GenerationStatHeatmapStrategy : IPlottingStrategy
             for (int j = 0; j < sortedLogs.Count; j++)
             {
                 var log = sortedLogs[j];
-                var statValue = PlotAverage ? log.AverageChromosome.MutableStatsByName[statName] : log.BestChromosome.MutableStatsByName[statName];
+                var statValue = PlotAverage ? log.AverageChromosome.Chromosome.MutableStatsByName[statName] : log.BestChromosome.Chromosome.MutableStatsByName[statName];
                 statValues[i, j] = statValue;
             }
         }
@@ -73,9 +74,9 @@ public class AverageStatLinePlotStrategy : IPlottingStrategy
         plot.Axes.SetLimits(0, Generations, Min, Max); 
     }
 
-    public void UpdatePlot(Plot plot, List<GenerationLogDto> sortedLogs)
+    public void UpdatePlot(Plot plot, List<GenerationLog> sortedLogs)
     {
-        var statNames = sortedLogs.First().AverageChromosome.MutableStatsByName.Keys.ToArray();
+        var statNames = sortedLogs.First().AverageChromosome.Chromosome.MutableStatsByName.Keys.ToArray();
 
         plot.Clear();
         for (int i = 0; i < statNames.Length; i++)
@@ -84,8 +85,8 @@ public class AverageStatLinePlotStrategy : IPlottingStrategy
             if (StatVisibility.TryGetValue(statName, out bool value) && !value)
                 continue;
 
-            var averageValues = sortedLogs.Select(log => log.AverageChromosome.MutableStatsByName[statName]).ToArray();
-            var bestStatValues = sortedLogs.Select(log => log.BestChromosome.MutableStatsByName[statName]).ToArray();
+            var averageValues = sortedLogs.Select(log => log.AverageChromosome.Chromosome.MutableStatsByName[statName]).ToArray();
+            var bestStatValues = sortedLogs.Select(log => log.BestChromosome.Chromosome.MutableStatsByName[statName]).ToArray();
 
             // Generate a consistent color for both average and best plots  
             var color = PlottingConstants.AllColors[i];

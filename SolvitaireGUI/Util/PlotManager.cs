@@ -1,5 +1,6 @@
 using ScottPlot.WPF;
 using SolvitaireGenetics;
+using SolvitaireIO.Database.Models;
 using SolvitairePlotting;
 
 namespace SolvitaireGUI;
@@ -25,7 +26,7 @@ public class PlotManager
         }
     }
 
-    public void UpdatePlot(List<GenerationLogDto> generationalLogs)
+    public void UpdatePlot(List<GenerationLog> generationalLogs)
     {
         lock (Plot.Plot.Sync)
         {
