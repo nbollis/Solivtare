@@ -1,5 +1,10 @@
 ﻿using System.Collections.Concurrent;
+using System.Text.Json;
 using MathNet.Numerics.Statistics;
+using SolvitaireCore;
+using SolvitaireIO;
+using SolvitaireIO.Database;
+using SolvitaireIO.Database.Models;
 using SolvitaireIO.Database.Repositories;
 
 namespace SolvitaireGenetics;
@@ -9,7 +14,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     where TParameters : GeneticAlgorithmParameters 
 
 {
-    public event Action<int, GenerationLogDto>? GenerationCompleted;
+    public event Action<int, GenerationLog>? GenerationCompleted;
     public virtual event Action<AgentLog>? AgentCompleted;
     private Task _loggingTask = Task.CompletedTask; // Initially completed
 
@@ -19,7 +24,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
     public int CurrentGeneration { get; protected set; }
     public List<TChromosome> Population { get; protected set; } = [];
-    public IGeneticAlgorithmLogger Logger { get; }
+    public GeneticAlgorithmLogger Logger { get; }
 
     // Fitness cache
     private readonly ConcurrentDictionary<string, double> _fitnessCache = new();
@@ -30,7 +35,6 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         Parameters = parameters;
         if (parameters.TemplateChromosome is TChromosome template)
             ChromosomeTemplate = template;
-
 
         Logger = new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory);
         Logger.SubscribeToAlgorithm(this);
@@ -210,25 +214,31 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
     private async Task LogPopulationAsync(List<TChromosome> population)
     {
-        // Create a local copy of the population to ensure thread safety
         var populationSnapshot = population.ToList();
 
-        var fitness = populationSnapshot.Select(chr => chr.Fitness).ToList();
+        // Create ChromosomeLogs for best, average, and std chromosomes
+        var bestChromosome = populationSnapshot[0];
+        var averageChromosome = Chromosome.GetAverageChromosome(populationSnapshot);
+        var stdChromosome = Chromosome.GetStandardDeviationChromosome(populationSnapshot);
+
+        
+
+        // Create the GenerationLog
         var species = Chromosome.KMeansSpeciationElbow(populationSnapshot);
-        var generationLog = new GenerationLogDto
+        var generationLog = new GenerationLog
         {
             Generation = CurrentGeneration,
-            BestFitness = fitness[0],
-            AverageFitness = fitness.Average(),
-            StdFitness = fitness.StandardDeviation(),
+            BestFitness = populationSnapshot.Max(c => c.Fitness),
+            AverageFitness = populationSnapshot.Average(c => c.Fitness),
+            StdFitness = populationSnapshot.Select(c => c.Fitness).StandardDeviation(),
             AveragePairwiseDiversity = Chromosome.AveragePairwiseDiversity(populationSnapshot),
             VarianceFromAverageChromosome = Chromosome.VarianceFromCentroid(populationSnapshot),
             SpeciesCount = species.Count,
             IntraSpeciesDiversity = Chromosome.IntraSpeciesDiversity(species),
             InterSpeciesDiversity = Chromosome.InterSpeciesDiversity(species),
-            BestChromosome = population[0],
-            AverageChromosome = Chromosome.GetAverageChromosome(populationSnapshot),
-            StdChromosome = Chromosome.GetStandardDeviationChromosome(populationSnapshot)
+            BestChromosomeId = bestChromosome.GetStableHash(),
+            AverageChromosomeId = averageChromosome.GetStableHash(),
+            StdChromosomeId = stdChromosome.GetStableHash(),
         };
 
         // Fire the GenerationCompleted event asynchronously
@@ -240,6 +250,10 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         // Flush agent logs asynchronously
         if (Logger != null)
         {
+            // Log the best, average, and std chromosomes
+            Logger.LogChromosome(bestChromosome);
+            Logger.LogChromosome(averageChromosome);
+            Logger.LogChromosome(stdChromosome);
             await Task.Run(() => Logger.FlushAgentLogs(CurrentGeneration, populationSnapshot));
         }
     }

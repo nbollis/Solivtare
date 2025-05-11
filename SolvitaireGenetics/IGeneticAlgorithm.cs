@@ -1,23 +1,24 @@
-﻿using MathNet.Numerics;
+﻿using SolvitaireCore;
+using SolvitaireIO.Database.Models;
 
 namespace SolvitaireGenetics;
 
 public interface IGeneticAlgorithm
 {
-    public event Action<int, GenerationLogDto>? GenerationCompleted;
-    public event Action<AgentLog>? AgentCompleted; 
-    public IGeneticAlgorithmLogger Logger { get; }
+    public event Action<int, GenerationLog>? GenerationCompleted;
+    public event Action<AgentLog>? AgentCompleted;
+    public GeneticAlgorithmLogger Logger { get; }
     public Chromosome RunEvolution(int generations, CancellationToken? cancellationToken = null);
 }
 
-public interface IGeneticAlgorithmLogger
+public abstract class GeneticAlgorithmLogger
 {
-    public List<GenerationLogDto> ReadGenerationLogs();
-    public void LogGenerationInfo(GenerationLogDto generationLog);
-
-    public List<AgentLog> ReadAllAgentLogs();
-    public void LogAgentDetail(AgentLog agentLog);
-    public void AccumulateAgentLog(AgentLog agentLog);
+    public abstract List<GenerationLog> ReadGenerationLogs();
+    public abstract void LogGenerationInfo(GenerationLog generationLog);
+    public abstract void LogChromosome(Chromosome chromosome);
+    public abstract List<AgentLog> ReadAllAgentLogs();
+    public abstract void LogAgentDetail(AgentLog agentLog);
+    public abstract void AccumulateAgentLog(AgentLog agentLog);
 
     public void SubscribeToAlgorithm(IGeneticAlgorithm algorithm)
     {
@@ -29,12 +30,25 @@ public interface IGeneticAlgorithmLogger
         algorithm.AgentCompleted += AccumulateAgentLog;
     }
 
-    public List<AgentLog> LoadLastGeneration(out int generationNumber);
+    public abstract List<AgentLog> LoadLastGeneration(out int generationNumber);
 
-    public void FlushAgentLogs<TChromosome>(int currentGeneration, List<TChromosome> population)
-        where TChromosome : Chromosome, new();
+    public virtual void FlushAgentLogs<TChromosome>(int currentGeneration, List<TChromosome> population)
+        where TChromosome : Chromosome, new()
+    {
+        foreach (var chromosome in population)
+        {
+            var agentLog = new AgentLog
+            {
+                Generation = currentGeneration,
+                Fitness = chromosome.Fitness,
+                Chromosome = ChromosomeLog.FromChromosome(chromosome)
+            };
 
-    public void CreateTsvSummaries(string outputDirectory)
+            LogAgentDetail(agentLog);
+        }
+    }
+
+    public virtual void CreateTsvSummaries(string outputDirectory)
     {
         string averagePath = Path.Combine(outputDirectory, "AverageChromosome.tsv");
         string bestPath = Path.Combine(outputDirectory, "BestChromosome.tsv");

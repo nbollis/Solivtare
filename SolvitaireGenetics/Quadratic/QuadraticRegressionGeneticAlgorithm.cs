@@ -1,4 +1,4 @@
-﻿using MathNet.Numerics;
+﻿using SolvitaireIO.Database.Models;
 
 namespace SolvitaireGenetics;
 
@@ -34,7 +34,6 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
         }
     }
 
-    
     public override double EvaluateFitness(QuadraticChromosome chromosome, CancellationToken? cancellationToken = null)
     {
         double a = chromosome.GetWeight(QuadraticChromosome.A);
@@ -71,8 +70,13 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
 
         fitness = Math.Pow(fitness, 2); // Square the fitness score
 
-        var agentLog = new AgentLog() { Chromosome = chromosome, Fitness = fitness, Generation = CurrentGeneration };
-        
+        var agentLog = new AgentLog()
+        {
+            Chromosome = ChromosomeLog.FromChromosome(chromosome), 
+            Fitness = fitness, 
+            Generation = CurrentGeneration
+        };
+
         AgentCompleted?.Invoke(agentLog);
         return fitness;
     }

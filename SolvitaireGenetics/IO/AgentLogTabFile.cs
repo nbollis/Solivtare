@@ -1,4 +1,5 @@
 using System.Globalization;
+using SolvitaireCore;
 using SolvitaireIO.Database.Models;
 
 namespace SolvitaireGenetics;
@@ -62,5 +63,82 @@ public static class AgentLogTabFile
 
             writer.WriteLine(string.Join("\t", row));
         }
+    }
+
+
+    /// <summary>
+    /// Reads a tab-separated file into a list of AgentLog objects.
+    /// </summary>
+    /// <param name="filePath">The file path to read from.</param>
+    /// <returns>A list of AgentLog objects.</returns>
+    public static List<AgentLog> ReadFromFile(string filePath)
+    {
+        var agentLogs = new List<AgentLog>();
+
+        using var reader = new StreamReader(filePath);
+
+        // Read the header
+        var header = reader.ReadLine();
+        if (header == null)
+        {
+            throw new InvalidDataException("The file does not have a valid header.");
+        }
+
+        var headers = header.Split('\t');
+        if (headers.Length < 7 || headers[6] != "ChromosomeType")
+        {
+            throw new InvalidDataException("The file does not have a valid header.");
+        }
+
+        // Extract weight names from the headers
+        var weightNames = headers.Skip(7).ToList();
+
+        // Read each line
+        string? line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            var parts = line.Split('\t');
+            if (parts.Length != headers.Length)
+            {
+                throw new InvalidDataException("The file contains an invalid row.");
+            }
+
+            // Create the chromosome
+            var typeName = parts[6];
+            var type = Type.GetType(typeName);
+            if (type == null || !typeof(Chromosome).IsAssignableFrom(type))
+            {
+                throw new InvalidDataException($"Unknown or invalid chromosome type: {typeName}");
+            }
+
+            var chromosome = (Chromosome)Activator.CreateInstance(type)!;
+
+            // Populate the weights
+            for (int i = 0; i < weightNames.Count; i++)
+            {
+                var weightName = weightNames[i];
+                if (!string.IsNullOrEmpty(parts[7 + i]))
+                {
+                    chromosome.SetWeight(weightName, double.Parse(parts[7 + i], CultureInfo.InvariantCulture));
+                }
+            }
+
+            // Create the AgentLog
+            var agentLog = new AgentLog
+            {
+                Generation = int.Parse(parts[0], CultureInfo.InvariantCulture),
+                Count = float.Parse(parts[1], CultureInfo.InvariantCulture),
+                Fitness = double.Parse(parts[2], CultureInfo.InvariantCulture),
+                GamesWon = int.Parse(parts[3], CultureInfo.InvariantCulture),
+                MovesMade = int.Parse(parts[4], CultureInfo.InvariantCulture),
+                GamesPlayed = int.Parse(parts[5], CultureInfo.InvariantCulture),
+                Chromosome = ChromosomeLog.FromChromosome(chromosome)
+            };
+
+            agentLog.Chromosome.Fitness = agentLog.Fitness;
+            agentLogs.Add(agentLog);
+        }
+
+        return agentLogs;
     }
 }

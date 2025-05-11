@@ -1,6 +1,8 @@
 using System.Reflection;
 using System.Text.Json;
+using SolvitaireCore;
 using SolvitaireGenetics;
+using SolvitaireIO.Database.Models;
 
 namespace Test.Genetics;
 
@@ -34,14 +36,14 @@ public class GeneticAlgorithmTests
         // Arrange  
         var logger = new GeneticAlgorithmLogger<TestChromosome>(OutputDirectory);
 
-        var generationLog = new GenerationLogDto
+        var generationLog = new GenerationLog
         {
             Generation = 1,
             BestFitness = 100.0,
             AverageFitness = 50.0,
-            BestChromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat1", 1.0 } } },
-            AverageChromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat2", 2.0 } } },
-            StdChromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat3", 3.0 } } }
+            BestChromosome = ChromosomeLog.FromChromosome(new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat1", 1.0 } } }),
+            AverageChromosome = ChromosomeLog.FromChromosome(new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat2", 2.0 } } }),
+            StdChromosome = ChromosomeLog.FromChromosome(new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat3", 3.0 } } })
         };
 
         var agentLogs = new List<AgentLog>
@@ -53,7 +55,7 @@ public class GeneticAlgorithmTests
                GamesWon = 10,
                MovesMade = 50,
                GamesPlayed = 20,
-               Chromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat1", 1.0 } } }
+               Chromosome = ChromosomeLog.FromChromosome(new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat1", 1.0 } } })
            },
            new AgentLog
            {
@@ -62,11 +64,11 @@ public class GeneticAlgorithmTests
                GamesWon = 8,
                MovesMade = 40,
                GamesPlayed = 18,
-               Chromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat2", 2.0 } } }
+               Chromosome = ChromosomeLog.FromChromosome(new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Stat2", 2.0 } } })
            }
        };
 
-        File.WriteAllText(Path.Combine(OutputDirectory, "GenerationalLog.json"), JsonSerializer.Serialize(new List<GenerationLogDto> { generationLog }));
+        File.WriteAllText(Path.Combine(OutputDirectory, "GenerationalLog.json"), JsonSerializer.Serialize(new List<GenerationLog> { generationLog }));
         File.WriteAllText(Path.Combine(OutputDirectory, "AgentLog.json"), JsonSerializer.Serialize(agentLogs));
 
         // Act  
@@ -74,8 +76,8 @@ public class GeneticAlgorithmTests
 
         // Assert  
         Assert.That(lastGenerationChromosomes.Count, Is.EqualTo(2));
-        Assert.That(lastGenerationChromosomes[0].MutableStatsByName["Stat1"], Is.EqualTo(1.0));
-        Assert.That(lastGenerationChromosomes[1].MutableStatsByName["Stat2"], Is.EqualTo(2.0));
+        Assert.That(lastGenerationChromosomes[0].Chromosome.MutableStatsByName["Stat1"], Is.EqualTo(1.0));
+        Assert.That(lastGenerationChromosomes[1].Chromosome.MutableStatsByName["Stat2"], Is.EqualTo(2.0));
     }
 
     [Test]

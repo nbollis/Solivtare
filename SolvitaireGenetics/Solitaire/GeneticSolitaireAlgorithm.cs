@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
-using SolvitaireCore;
+﻿using SolvitaireCore;
 using SolvitaireIO;
+using SolvitaireIO.Database.Models;
 
 namespace SolvitaireGenetics;
 
@@ -130,12 +130,12 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
 
         var agentLog = new AgentLog
         {
-            Chromosome = chromosome,
-            Fitness = fitness,
             Generation = CurrentGeneration,
+            Fitness = fitness,
             GamesPlayed = gamesPlayed,
             MovesMade = movesPlayed,
-            GamesWon = gamesWon
+            GamesWon = gamesWon,
+            Chromosome = ChromosomeLog.FromChromosome(chromosome)
         };
 
         chromosome.Fitness = fitness;

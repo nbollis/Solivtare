@@ -1,9 +1,9 @@
-﻿using MathNet.Numerics;
-using MathNet.Numerics.Statistics;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
+using MathNet.Numerics;
+using MathNet.Numerics.Statistics;
 
-namespace SolvitaireGenetics;
+namespace SolvitaireCore;
 
 public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosome>
 {
@@ -464,15 +464,21 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         }
     }
 
+    private string? _cachedStableHash;
+
     public string GetStableHash()
     {
+        if (_cachedStableHash != null)
+            return _cachedStableHash;
+
         var ordered = MutableStatsByName.OrderBy(kvp => kvp.Key)
             .Select(kvp => $"{kvp.Key}:{kvp.Value:F6}"); // fixed precision
         var data = string.Join("|", ordered);
 
         using var sha = SHA256.Create();
         var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(data));
-        return Convert.ToHexString(bytes); // or Convert.ToBase64String
+        _cachedStableHash = Convert.ToHexString(bytes); // or Convert.ToBase64String
+        return _cachedStableHash;
     }
 
     public int CompareTo(Chromosome? other)

@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using SolvitaireGenetics;
+using SolvitaireIO.Database.Models;
 
 namespace Test.IO;
 
@@ -33,7 +34,7 @@ public class AgentLogTests
             GamesWon = 10,
             MovesMade = 50,
             GamesPlayed = 20,
-            Chromosome = chromosome
+            Chromosome = ChromosomeLog.FromChromosome(chromosome)
         };
 
         // Act & Assert  
@@ -42,7 +43,7 @@ public class AgentLogTests
         Assert.That(agentLog.GamesWon, Is.EqualTo(10));
         Assert.That(agentLog.MovesMade, Is.EqualTo(50));
         Assert.That(agentLog.GamesPlayed, Is.EqualTo(20));
-        Assert.That(agentLog.Chromosome, Is.EqualTo(chromosome));
+        Assert.That(agentLog.Chromosome.Chromosome, Is.EqualTo(chromosome));
     }
 
     [Test]
@@ -50,10 +51,10 @@ public class AgentLogTests
     {
         // Arrange  
         var chromosome = new TestChromosome { MutableStatsByName = new Dictionary<string, double> { { "Speed", 1.5 }, { "Strength", 3.0 } } };
-        var agentLog = new AgentLog { Chromosome = chromosome };
+        var agentLog = new AgentLog { Chromosome = ChromosomeLog.FromChromosome(chromosome) };
 
         // Act & Assert  
-        Assert.That(agentLog.Chromosome.MutableStatsByName["Speed"], Is.EqualTo(1.5));
-        Assert.That(agentLog.Chromosome.MutableStatsByName["Strength"], Is.EqualTo(3.0));
+        Assert.That(agentLog.Chromosome.Chromosome.MutableStatsByName["Speed"], Is.EqualTo(1.5));
+        Assert.That(agentLog.Chromosome.Chromosome.MutableStatsByName["Strength"], Is.EqualTo(3.0));
     }
 }

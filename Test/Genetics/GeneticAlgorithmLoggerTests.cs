@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MathNet.Numerics.Statistics;
+using SolvitaireIO.Database.Models;
 
 namespace Test.Genetics;
 
@@ -37,10 +38,10 @@ public class GeneticAlgorithmLoggerTests
     {
         // Arrange  
         var logger = new GeneticAlgorithmLogger<TestChromosome>("TestOutput");
-        var expectedLogs = new List<GenerationLogDto>
+        var expectedLogs = new List<GenerationLog>
         {
-            new GenerationLogDto { Generation = 0, BestFitness = 1.0, AverageFitness = 0.8, StdFitness = 0.1 },
-            new GenerationLogDto { Generation = 1, BestFitness = 0.9, AverageFitness = 0.7, StdFitness = 0.2 }
+            new GenerationLog { Generation = 0, BestFitness = 1.0, AverageFitness = 0.8, StdFitness = 0.1 },
+            new GenerationLog { Generation = 1, BestFitness = 0.9, AverageFitness = 0.7, StdFitness = 0.2 }
         };
 
         foreach (var log in expectedLogs)
@@ -78,8 +79,8 @@ public class GeneticAlgorithmLoggerTests
         Assert.That(result.ContainsKey(1));
         Assert.That(result[0].Count, Is.EqualTo(1));
         Assert.That(result[1].Count, Is.EqualTo(1));
-        Assert.That(result[0].First().Chromosome, Is.EqualTo(chromosome1));
-        Assert.That(result[1].First().Chromosome, Is.EqualTo(chromosome2));
+        Assert.That(result[0].First().Chromosome.Chromosome, Is.EqualTo(chromosome1));
+        Assert.That(result[1].First().Chromosome.Chromosome, Is.EqualTo(chromosome2));
     }
 
     [Test]
@@ -164,7 +165,7 @@ public class GeneticAlgorithmLoggerTests
         var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
         var logger = algorithm.Logger;
 
-        List<GenerationLogDto> generations = new();
+        List<GenerationLog> generations = new();
         algorithm.GenerationCompleted += (a, l) =>
         {
             // Log the generation info

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using SolvitaireGenetics;
+using SolvitaireIO.Database.Models;
 
 namespace Test.IO;
 
@@ -54,7 +55,7 @@ public class AgentLogTabFileTests
                GamesWon = 5,
                MovesMade = 50,
                GamesPlayed = 20,
-               Chromosome = chromosome
+               Chromosome = ChromosomeLog.FromChromosome(chromosome)
            }
        };
 
@@ -97,8 +98,8 @@ public class AgentLogTabFileTests
         Assert.That(log.MovesMade, Is.EqualTo(50));
         Assert.That(log.GamesPlayed, Is.EqualTo(20));
         Assert.That(log.Chromosome, Is.TypeOf<QuadraticChromosome>());
-        Assert.That(log.Chromosome.MutableStatsByName["Speed"], Is.EqualTo(1.5));
-        Assert.That(log.Chromosome.MutableStatsByName["Strength"], Is.EqualTo(3.0));
+        Assert.That(log.Chromosome.Chromosome.MutableStatsByName["Speed"], Is.EqualTo(1.5));
+        Assert.That(log.Chromosome.Chromosome.MutableStatsByName["Strength"], Is.EqualTo(3.0));
     }
 
     [Test]

@@ -1,4 +1,6 @@
 ﻿using System.Text.Json;
+using SolvitaireCore;
+using SolvitaireIO;
 
 namespace SolvitaireGenetics;
 

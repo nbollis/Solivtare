@@ -21,41 +21,53 @@ namespace SolvitaireGenetics
             var parser = new Parser(with => with.HelpWriter = null);
             var parserResult = parser.ParseArguments<SolitaireGeneticAlgorithmParameters>(args);
 
-
-            if (!parserResult.Errors.Any())
-            {
-                // Set up the DI container
-                var services = new ServiceCollection();
-
-                // Register the DbContext
-                services.AddDbContext<SolvitaireDbContext>(options =>
-                    options.UseSqlite("Data Source=solvitaire.db"));
-
-                // Register repositories
-                services.AddScoped<GenerationLogRepository>();
-                services.AddScoped<AgentLogRepository>();
-
-                // Build the service provider
-                var serviceProvider = services.BuildServiceProvider();
-                parserResult.WithParsed<SolitaireGeneticAlgorithmParameters>(options => errorCode = Run(options));
-            }
-            else
-            {
-                parserResult.WithNotParsed(errs => errorCode = DisplayHelp(parserResult, errs));
-            }
-
+            parserResult
+                .WithParsed<SolitaireGeneticAlgorithmParameters>(options => errorCode = Run(options))
+                .WithNotParsed(errs => errorCode = DisplayHelp(parserResult, errs));
 
             return errorCode;
         }
 
         private static int Run(SolitaireGeneticAlgorithmParameters options)
         {
+            // Ensure the output directory exists
+            if (!Directory.Exists(options.OutputDirectory))
+            {
+                Directory.CreateDirectory(options.OutputDirectory);
+            }
+
+            // Build the path to the SQLite database file in the output directory
+            var databasePath = Path.Combine(options.OutputDirectory, "solvitaire.db");
+
+            // Set up the DI container
+            var services = new ServiceCollection();
+
+            // Register the DbContext with a dynamic connection string
+            services.AddDbContext<SolvitaireDbContext>(options =>
+                options.UseSqlite($"Data Source={databasePath}"));
+
+            // Register the RepositoryManager
+            services.AddScoped<IRepositoryManager, RepositoryManager>();
+
+            // Build the service provider
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Resolve the RepositoryManager
+            var repositoryManager = serviceProvider.GetRequiredService<IRepositoryManager>();
+
+            // Run the genetic algorithm
+            return RunAlgorithm(options, repositoryManager);
+        }
+
+
+        private static int RunAlgorithm(SolitaireGeneticAlgorithmParameters options, IRepositoryManager repositoryManager)
+        {
             // Set it all up
             GeneticSolitaireAlgorithm algorithm;
             try
             {
-                // Build the Genetic Algorithm
-                algorithm = new GeneticSolitaireAlgorithm(options); 
+                // Build the Genetic Algorithm with the RepositoryManager
+                algorithm = new GeneticSolitaireAlgorithm(options);
             }
             catch (Exception ex)
             {
@@ -73,7 +85,6 @@ namespace SolvitaireGenetics
                 }
                 options.SaveToFile(configFilePath);
 
-
                 algorithm.RunEvolution(options.Generations);
             }
             catch (Exception ex)
@@ -82,9 +93,10 @@ namespace SolvitaireGenetics
                 return 2; // Return a non-zero error code
             }
 
-
             return 0;
         }
+
+
 
         private static int DisplayHelp<T>(ParserResult<T> result, IEnumerable<Error> errs)
         {
