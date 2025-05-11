@@ -82,8 +82,8 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
         score += chromosome.GetWeight(SolitaireChromosome.FaceUpBottomCardTableauWeightName) * faceUpBottomCardTableauCount;
         score += chromosome.GetWeight(SolitaireChromosome.KingIsBottomCardTableauWeightName) * kingIsBottomCardTableauCount;
         score += chromosome.GetWeight(SolitaireChromosome.AceInTableauWeightName) * aceInTableauCount;
-        score += chromosome.GetWeight(SolitaireChromosome.FoundationRangeWeight) * foundationRange;
-        score += chromosome.GetWeight(SolitaireChromosome.FoundationDeviationWeight) * foundationDeviation;
+        score += chromosome.GetWeight(SolitaireChromosome.FoundationRangeWeightName) * foundationRange;
+        score += chromosome.GetWeight(SolitaireChromosome.FoundationDeviationWeightName) * foundationDeviation;
 
         return score;
     }

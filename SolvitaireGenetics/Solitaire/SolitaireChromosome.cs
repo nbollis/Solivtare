@@ -15,8 +15,6 @@ public class SolitaireChromosome : Chromosome
     public const string FaceUpBottomCardTableauWeightName = "FaceUpBottomCardTableauWeight";
     public const string KingIsBottomCardTableauWeightName = "KingIsBottomCardTableauWeight";
     public const string AceInTableauWeightName = "AceInTableauWeight";
-    public const string FoundationRangeWeight = "FoundationRange";
-    public const string FoundationDeviationWeight = "FoundationDeviation";
     public const string FoundationRangeWeightName = "FoundationRangeWeight";
     public const string FoundationDeviationWeightName = "FoundationDeviationWeight";
 
@@ -47,8 +45,6 @@ public class SolitaireChromosome : Chromosome
         MutableStatsByName[FaceUpBottomCardTableauWeightName] = GenerateRandomWeight();
         MutableStatsByName[KingIsBottomCardTableauWeightName] = GenerateRandomWeight();
         MutableStatsByName[AceInTableauWeightName] = GenerateRandomWeight();
-        MutableStatsByName[FoundationRangeWeight] = GenerateRandomWeight();
-        MutableStatsByName[FoundationDeviationWeight] = GenerateRandomWeight();
         MutableStatsByName[FoundationRangeWeightName] = GenerateRandomWeight();
         MutableStatsByName[FoundationDeviationWeightName] = GenerateRandomWeight();
 

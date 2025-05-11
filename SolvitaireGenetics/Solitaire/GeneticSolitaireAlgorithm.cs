@@ -167,8 +167,8 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         best.MutableStatsByName[SolitaireChromosome.FaceUpBottomCardTableauWeightName] = 0.2;
         best.MutableStatsByName[SolitaireChromosome.KingIsBottomCardTableauWeightName] = 0.4;
         best.MutableStatsByName[SolitaireChromosome.AceInTableauWeightName] = -1;
-        best.MutableStatsByName[SolitaireChromosome.FoundationRangeWeight] = 0;
-        best.MutableStatsByName[SolitaireChromosome.FoundationDeviationWeight] = 0;
+        best.MutableStatsByName[SolitaireChromosome.FoundationRangeWeightName] = 0;
+        best.MutableStatsByName[SolitaireChromosome.FoundationDeviationWeightName] = 0;
 
         // Skipping Games
         best.MutableStatsByName[SolitaireChromosome.MoveCountScalarName] = -0.9;
