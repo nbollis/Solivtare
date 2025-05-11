@@ -17,12 +17,22 @@ public class GenerationLog
     public int SpeciesCount { get; set; }
     public double IntraSpeciesDiversity { get; set; }
     public double InterSpeciesDiversity { get; set; }
-    public string BestChromosomeJson { get; set; } // Store Chromosome as JSON for now
-    public string AverageChromosmeJson { get; set; }
-    public string StdChromosmeJson { get; set; }
+
+    // Navigation properties for best, average, and std chromosomes
+    [ForeignKey(nameof(BestChromosome))]
+    public string BestChromosomeId { get; set; }
+    public ChromosomeLog? BestChromosome { get; set; }
+
+    [ForeignKey(nameof(AverageChromosome))]
+    public string AverageChromosomeId { get; set; }
+    public ChromosomeLog? AverageChromosome { get; set; }
+
+    [ForeignKey(nameof(StdChromosome))]
+    public string StdChromosomeId { get; set; }
+    public ChromosomeLog? StdChromosome { get; set; }
 
 
-    // Navigation property for related AgentLogs
+    // Navigation property for related AgentRepository
     [InverseProperty(nameof(AgentLog.GenerationLog))]
     public List<AgentLog> AgentLogs { get; set; } = new();
 }

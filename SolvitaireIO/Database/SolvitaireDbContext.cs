@@ -12,6 +12,7 @@ public class SolvitaireDbContext(DbContextOptions<SolvitaireDbContext> options) 
 {
     public DbSet<AgentLog> Agents { get; set; }
     public DbSet<GenerationLog> Generations { get; set; }
+    public DbSet<ChromosomeLog> Chromosomes { get; set; } // TODO: avoid duplication
     //public DbSet<Deck> Decks { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
