@@ -20,4 +20,9 @@ public class GenerationLog
     public string BestChromosomeJson { get; set; } // Store Chromosome as JSON for now
     public string AverageChromosmeJson { get; set; }
     public string StdChromosmeJson { get; set; }
+
+
+    // Navigation property for related AgentLogs
+    [InverseProperty(nameof(AgentLog.GenerationLog))]
+    public List<AgentLog> AgentLogs { get; set; } = new();
 }

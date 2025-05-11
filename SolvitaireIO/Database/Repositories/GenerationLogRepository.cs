@@ -22,6 +22,13 @@ public class GenerationLogRepository
     {
         return await _context.Generations.ToListAsync();
     }
+
+    public async Task<GenerationLog?> GetGenerationLogWithAgentsAsync(int generation)
+    {
+        return await _context.Generations
+            .Include(g => g.AgentLogs) // Eagerly load AgentLogs
+            .FirstOrDefaultAsync(g => g.Generation == generation);
+    }
 }
 
 public class AgentLogRepository

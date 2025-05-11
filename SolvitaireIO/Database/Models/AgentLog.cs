@@ -10,7 +10,7 @@ public class AgentLog
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [ForeignKey("generations")]
+    [ForeignKey(nameof(GenerationLog))]
     public int Generation { get; set; }
     public float Count { get; set; } = 1;
     public double Fitness { get; set; }
@@ -18,4 +18,8 @@ public class AgentLog
     public int MovesMade { get; set; }
     public int GamesPlayed { get; set; }
     public string ChromosomeJson { get; set; } = null!;
+
+    // Navigation property for the related GenerationLog
+    [InverseProperty(nameof(GenerationLog.AgentLogs))]
+    public GenerationLog GenerationLog { get; set; } = null!;
 }

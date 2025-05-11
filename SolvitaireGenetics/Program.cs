@@ -1,5 +1,9 @@
 ﻿using CommandLine;
 using CommandLine.Text;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using SolvitaireIO.Database.Repositories;
+using SolvitaireIO.Database;
 
 namespace SolvitaireGenetics
 {
@@ -13,19 +17,40 @@ namespace SolvitaireGenetics
             // this makes it easier to determine via scripts when the program fails.
             int errorCode = 0;
 
+            // Set up the command line parser
             var parser = new Parser(with => with.HelpWriter = null);
             var parserResult = parser.ParseArguments<SolitaireGeneticAlgorithmParameters>(args);
 
-            parserResult
-                .WithParsed<SolitaireGeneticAlgorithmParameters>(options => errorCode = Run(options))
-                .WithNotParsed(errs => errorCode = DisplayHelp(parserResult, errs));
+
+            if (!parserResult.Errors.Any())
+            {
+                // Set up the DI container
+                var services = new ServiceCollection();
+
+                // Register the DbContext
+                services.AddDbContext<SolvitaireDbContext>(options =>
+                    options.UseSqlite("Data Source=solvitaire.db"));
+
+                // Register repositories
+                services.AddScoped<GenerationLogRepository>();
+                services.AddScoped<AgentLogRepository>();
+
+                // Build the service provider
+                var serviceProvider = services.BuildServiceProvider();
+                parserResult.WithParsed<SolitaireGeneticAlgorithmParameters>(options => errorCode = Run(options));
+            }
+            else
+            {
+                parserResult.WithNotParsed(errs => errorCode = DisplayHelp(parserResult, errs));
+            }
+
 
             return errorCode;
         }
 
         private static int Run(SolitaireGeneticAlgorithmParameters options)
         {
-            // SetWeight it all up
+            // Set it all up
             GeneticSolitaireAlgorithm algorithm;
             try
             {

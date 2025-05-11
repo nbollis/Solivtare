@@ -24,30 +24,17 @@ public class SolvitaireDbContext(DbContextOptions<SolvitaireDbContext> options) 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Configure the GenerationLog table
-        modelBuilder.Entity<GenerationLog>(entity =>
-        {
-            entity.ToTable("generations");
-            entity.HasKey(e => e.Generation);
-        });
 
-        // Configure the AgentLog table
-        modelBuilder.Entity<AgentLog>(entity =>
-        {
-            entity.ToTable("agents");
-            entity.HasKey(e => e.Id);
-            entity.HasOne<GenerationLog>()
-                .WithMany()
-                .HasForeignKey(a => a.Generation)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
     }
 
-    public static SolvitaireDbContext CreateInMemoryDbContext()
+    public static SolvitaireDbContext CreateInMemoryDbContext(string? databaseName = null)
     {
-        var options = new DbContextOptionsBuilder<SolvitaireDbContext>()
-            .UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
+        databaseName ??= Guid.NewGuid().ToString(); // Generate a unique name if none is provided
 
-        return new SolvitaireDbContext(options.Options);
+        var options = new DbContextOptionsBuilder<SolvitaireDbContext>()
+            .UseInMemoryDatabase(databaseName) // Use the unique database name
+            .Options;
+
+        return new SolvitaireDbContext(options);
     }
 }
