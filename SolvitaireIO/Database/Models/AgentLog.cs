@@ -3,14 +3,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SolvitaireIO.Database.Models;
 
-[Table("AgentLogs")]
+[Table("agents")]
 public class AgentLog
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [ForeignKey("GenerationLog")]
+    [ForeignKey("generations")]
     public int Generation { get; set; }
     public float Count { get; set; } = 1;
     public double Fitness { get; set; }

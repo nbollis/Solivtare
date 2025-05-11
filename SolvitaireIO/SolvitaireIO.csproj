@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="Converters\" />
+    <Folder Include="Database\Migrations\" />
     <Folder Include="Database\Repositories\" />
   </ItemGroup>
 

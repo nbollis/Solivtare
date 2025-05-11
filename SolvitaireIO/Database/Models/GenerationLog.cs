@@ -3,11 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SolvitaireIO.Database.Models;
 
-[Table("GenerationLogs")]
+[Table("generations")]
 public class GenerationLog
 {
     [Key]
     public int Generation { get; set; }
+    public DateTime GenerationFinishedTime { get; set; }
     public double BestFitness { get; set; }
     public double AverageFitness { get; set; }
     public double StdFitness { get; set; }

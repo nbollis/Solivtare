@@ -8,14 +8,39 @@ namespace SolvitaireIO.Database;
 /// <summary>
 /// Manages database connections and operations. 
 /// </summary>
-public class SolvitaireDbContext : DbContext
+public class SolvitaireDbContext(DbContextOptions<SolvitaireDbContext> options) : DbContext(options)
 {
-    public DbSet<GenerationLog> GenerationLogs { get; set; }
-    public DbSet<Deck> Decks { get; set; }
+    public DbSet<AgentLog> Agents { get; set; }
+    public DbSet<GenerationLog> Generations { get; set; }
+    //public DbSet<Deck> Decks { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite("Data Source=solvitaire.db");
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlite("Data Source=solvitaire.db");
+        }
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // Configure the GenerationLog table
+        modelBuilder.Entity<GenerationLog>(entity =>
+        {
+            entity.ToTable("generations");
+            entity.HasKey(e => e.Generation);
+        });
+
+        // Configure the AgentLog table
+        modelBuilder.Entity<AgentLog>(entity =>
+        {
+            entity.ToTable("agents");
+            entity.HasKey(e => e.Id);
+            entity.HasOne<GenerationLog>()
+                .WithMany()
+                .HasForeignKey(a => a.Generation)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 
     public static SolvitaireDbContext CreateInMemoryDbContext()
@@ -23,13 +48,6 @@ public class SolvitaireDbContext : DbContext
         var options = new DbContextOptionsBuilder<SolvitaireDbContext>()
             .UseMemoryCache(new MemoryCache(new MemoryCacheOptions()));
 
-        var context = new SolvitaireDbContext();
-        context.OnConfiguring(options);
-        return context;
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        // Configure entity relationships and constraints here
+        return new SolvitaireDbContext(options.Options);
     }
 }
