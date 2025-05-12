@@ -48,6 +48,7 @@ public class SolvitaireDbContext : DbContext
             .UseInMemoryDatabase(databaseName) // Use the unique database name
             .Options;
 
-        return new SolvitaireDbContext(options);
+        var context =  new SolvitaireDbContext(options);
+        return context;
     }
 }

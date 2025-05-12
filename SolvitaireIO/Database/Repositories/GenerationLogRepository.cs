@@ -16,7 +16,18 @@ public class GenerationLogRepository
 
     public async Task AddGenerationAsync(GenerationLog log)
     {
-        _context.Generations.Add(log);
+        var existingEntity = await _context.Generations.FindAsync(log.Generation);
+        if (existingEntity != null)
+        {
+            // Update the existing entity if needed
+            _context.Entry(existingEntity).CurrentValues.SetValues(log);
+        }
+        else
+        {
+            // Add the new entity
+            _context.Generations.Add(log);
+        }
+
         await _context.SaveChangesAsync();
     }
 

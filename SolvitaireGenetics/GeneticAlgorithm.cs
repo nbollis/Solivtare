@@ -39,11 +39,10 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         if (parameters.TemplateChromosome is TChromosome template)
             ChromosomeTemplate = template;
 
-        Logger = new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory);
         Logger = parameters.LoggingType switch
         {
             LoggingType.Json => new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory),
-            LoggingType.Database => new DatabaseGeneticAlgorithmLogger(null, parameters.OutputDirectory),
+            LoggingType.Database => new DatabaseGeneticAlgorithmLogger(new DbContextFactory(parameters.OutputDirectory)),
             _ => throw new NotSupportedException($"Logging type {parameters.LoggingType} is not supported.")
         };
         Logger.SubscribeToAlgorithm(this);
@@ -226,14 +225,6 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         var averageChromosome = ChromosomeLog.FromChromosome(Chromosome.GetAverageChromosome(population));
         var stdChromosome = ChromosomeLog.FromChromosome(Chromosome.GetStandardDeviationChromosome(population));
 
-        // Log the best, average, and std chromosomes asynchronously
-        await Task.Run(() =>
-        {
-            Logger.LogChromosome(bestChromosome);
-            Logger.LogChromosome(averageChromosome);
-            Logger.LogChromosome(stdChromosome);
-        });
-
         // Flush agent logs asynchronously
         await Task.Run(() =>
         {
@@ -264,10 +255,13 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
 
         // Fire the GenerationCompleted event asynchronously
+        var generationLogging = Task.Run(() => Logger.LogGenerationInfo(generationLog));
         if (GenerationCompleted != null)
         {
-            GenerationCompleted.Invoke(generation, generationLog);
+            GenerationCompleted.Invoke(generation, generationLog); // GUI is listening
         }
+
+        await generationLogging;
     }
 }
 

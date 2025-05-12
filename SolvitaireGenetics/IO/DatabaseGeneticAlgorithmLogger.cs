@@ -8,44 +8,39 @@ public class DatabaseGeneticAlgorithmLogger : GeneticAlgorithmLogger
 {
     private readonly IRepositoryManager _repositoryManager;
 
-    public DatabaseGeneticAlgorithmLogger(IRepositoryManager? repositoryManager = null, string? outputDirectory = null) : base(outputDirectory)
+    public DatabaseGeneticAlgorithmLogger(DbContextFactory dbContextFactory, IRepositoryManager? repositoryManager = null) : base(dbContextFactory.OutputDirectory)
     {
-        repositoryManager ??= outputDirectory != null
-            ? new RepositoryManager(new SolvitaireDbContext(outputDirectory))
-            : new RepositoryManager(SolvitaireDbContext.CreateInMemoryDbContext());
-
-        _repositoryManager = repositoryManager;
+        _repositoryManager = repositoryManager ?? new RepositoryManager(dbContextFactory);
     }
 
     public override List<GenerationLog> ReadGenerationLogs()
     {
-        // Retrieve all generation logs from the database
-        return _repositoryManager.GenerationRepository.GetAllGenerationLogsAsync().Result;
+        var generationRepository = _repositoryManager.CreateGenerationRepository();
+        return generationRepository.GetAllGenerationLogsAsync().Result;
     }
 
     public override void LogGenerationInfo(GenerationLog generationLog)
     {
-        // Add the generation log to the database
-        _repositoryManager.GenerationRepository.AddGenerationAsync(generationLog).Wait();
-        _repositoryManager.SaveChangesAsync().Wait();
+        var generationRepository = _repositoryManager.CreateGenerationRepository();
+        generationRepository.AddGenerationAsync(generationLog).Wait();
     }
 
     public override void LogChromosome(ChromosomeLog chromosome)
     {
-        _repositoryManager.ChromosomeRepository.AddChromosomeLogAsync(chromosome).Wait();
+        var chromosomeRepository = _repositoryManager.CreateChromosomeRepository();
+        chromosomeRepository.AddChromosomeLogAsync(chromosome).Wait();
     }
 
     public override List<AgentLog> ReadAllAgentLogs()
     {
-        // Retrieve all agent logs from the database
-        return _repositoryManager.AgentRepository.GetAgentLogsByGenerationAsync().Result; // -1 to get all logs
+        var agentRepository = _repositoryManager.CreateAgentRepository();
+        return agentRepository.GetAgentLogsByGenerationAsync().Result;
     }
 
     public override void LogAgentDetail(AgentLog agentLog)
     {
-        // Add the agent log to the database
-        _repositoryManager.AgentRepository.AddAgentAsync(agentLog).Wait();
-        _repositoryManager.SaveChangesAsync().Wait();
+        var agentRepository = _repositoryManager.CreateAgentRepository();
+        agentRepository.AddAgentAsync(agentLog).Wait();
     }
 
     public override void LogAgentDetails(IEnumerable<AgentLog> agentLogs)
@@ -59,11 +54,14 @@ public class DatabaseGeneticAlgorithmLogger : GeneticAlgorithmLogger
     public override List<AgentLog> LoadLastGeneration(out int generationNumber)
     {
         // Retrieve the last generation and its associated agent logs
-        var lastGeneration = _repositoryManager.GenerationRepository.GetLastGenerationAsync().Result;
+        var generationRepository = _repositoryManager.CreateGenerationRepository();
+        var agentRepository = _repositoryManager.CreateAgentRepository();
+
+        var lastGeneration = generationRepository.GetLastGenerationAsync().Result;
         generationNumber = lastGeneration?.Generation ?? 0;
 
         return lastGeneration != null
-            ? _repositoryManager.AgentRepository.GetAgentLogsByGenerationAsync(lastGeneration.Generation).Result
+            ? agentRepository.GetAgentLogsByGenerationAsync(lastGeneration.Generation).Result
             : new List<AgentLog>();
     }
 }

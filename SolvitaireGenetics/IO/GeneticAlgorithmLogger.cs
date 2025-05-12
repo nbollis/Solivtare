@@ -41,10 +41,10 @@ public abstract class GeneticAlgorithmLogger
 
     public void SubscribeToAlgorithm(IGeneticAlgorithm algorithm)
     {
-        algorithm.GenerationCompleted += (generation, generationLog) =>
-        {
-            LogGenerationInfo(generationLog);
-        };
+        //algorithm.GenerationCompleted += (generation, generationLog) =>
+        //{
+        //    LogGenerationInfo(generationLog);
+        //};
 
         algorithm.AgentCompleted += AccumulateAgentLog;
     }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MathNet.Numerics.Statistics;
+using SolvitaireGenetics.IO;
 using SolvitaireIO.Database.Models;
 
 namespace Test.Genetics;
@@ -12,6 +13,7 @@ namespace Test.Genetics;
 public class GeneticAlgorithmLoggerTests
 {
     private const string OutputDirectory = "TestOutput";
+    public static IEnumerable<LoggingType> LoggingTypSource => Enum.GetValues<LoggingType>();
 
     [SetUp]
     public void SetUp()
@@ -29,15 +31,28 @@ public class GeneticAlgorithmLoggerTests
     {
         if (Directory.Exists(OutputDirectory))
         {
+            Thread.Sleep(500);
             Directory.Delete(OutputDirectory, true);
         }
     }
 
+    public static GeneticAlgorithmLogger GetLogger(LoggingType type)
+    {
+        return type switch
+        {
+            LoggingType.Json => new GeneticAlgorithmLogger<TestChromosome>(OutputDirectory),
+            LoggingType.Database => new DatabaseGeneticAlgorithmLogger(null, null), // null for in-memory
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
     [Test]
-    public void GetAllGenerationalLogs_ShouldReturnAllLogs()
+    [TestCaseSource(nameof(LoggingTypSource))]
+    public void GetAllGenerationalLogs_ShouldReturnAllLogs(LoggingType loggingType)
     {
         // Arrange  
-        var logger = new GeneticAlgorithmLogger<TestChromosome>("TestOutput");
+        var logger = GetLogger(loggingType);
+
         var expectedLogs = new List<GenerationLog>
         {
             new GenerationLog { Generation = 0, BestFitness = 1.0, AverageFitness = 0.8, StdFitness = 0.1 },
@@ -59,15 +74,33 @@ public class GeneticAlgorithmLoggerTests
     }
 
     [Test]
-    public void GetAllChromosomesByGeneration_ShouldReturnCorrectMapping()
+    [TestCaseSource(nameof(LoggingTypSource))]
+    public void GetAllChromosomesByGeneration_ShouldReturnCorrectMapping(LoggingType loggingType)
     {
         // Arrange  
-        var logger = new GeneticAlgorithmLogger<TestChromosome>("TestOutput");
+        var logger = GetLogger(loggingType);
         var chromosome1 = new TestChromosome();
         var chromosome2 = new TestChromosome();
 
-        logger.LogAgentDetail(0, chromosome1, 1.0, 10, 20, 5);
-        logger.LogAgentDetail(1, chromosome2, 0.9, 8, 18, 4);
+        logger.LogAgentDetail(new AgentLog
+        {
+            Generation = 0,
+            Fitness = 1.0,
+            GamesWon = 10,
+            MovesMade = 20,
+            GamesPlayed = 5,
+            Chromosome = ChromosomeLog.FromChromosome(chromosome1)
+        });
+
+        logger.LogAgentDetail(new AgentLog
+        {
+            Generation = 1,
+            Fitness = 0.9,
+            GamesWon = 8,
+            MovesMade = 18,
+            GamesPlayed = 4,
+            Chromosome = ChromosomeLog.FromChromosome(chromosome2)
+        });
 
         // Act  
         var result = logger.ReadAllAgentLogs()
@@ -84,7 +117,8 @@ public class GeneticAlgorithmLoggerTests
     }
 
     [Test]
-    public void GeneticAlgorithm_RunEvolutionInStages_ShouldReportCorrectAgentCount()
+    [TestCaseSource(nameof(LoggingTypSource))]
+    public void GeneticAlgorithm_RunEvolutionInStages_ShouldReportCorrectAgentCount(LoggingType loggingType)
     {
         // Arrange  
         var parameters = new QuadraticGeneticAlgorithmParameters
@@ -92,7 +126,8 @@ public class GeneticAlgorithmLoggerTests
             PopulationSize = 4,
             MutationRate = 0.25,
             TournamentSize = 4,
-            OutputDirectory = OutputDirectory
+            OutputDirectory = loggingType == LoggingType.Database ? null : OutputDirectory,
+            LoggingType = loggingType
         };
         var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
         var logger = algorithm.Logger;
@@ -149,7 +184,8 @@ public class GeneticAlgorithmLoggerTests
     }
 
     [Test]
-    public void GeneticAlgorithmLogger_CreateTsvSummariesHasCorrectChromosomes()
+    [TestCaseSource(nameof(LoggingTypSource))]
+    public void GeneticAlgorithmLogger_CreateTsvSummariesHasCorrectChromosomes(LoggingType loggingType)
     {
         // Arrange  
         var parameters = new QuadraticGeneticAlgorithmParameters
@@ -158,7 +194,8 @@ public class GeneticAlgorithmLoggerTests
             MutationRate = 0.25,
             TournamentSize = 4,
             Generations = 100,
-            OutputDirectory = OutputDirectory
+            OutputDirectory = loggingType == LoggingType.Database ? null : OutputDirectory,
+            LoggingType = loggingType
         };
 
         var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
