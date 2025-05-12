@@ -135,13 +135,12 @@ public class GeneticAlgorithmLoggerTests
             // All chromosomes in the population are represented in the log
             foreach (var agent in agentsFromThisGen)
             {
-                var matchingChromosome = populationFromThisGen.FirstOrDefault(c => c.Equals(agent.Chromosome));
+                var matchingChromosome = populationFromThisGen.FirstOrDefault(c => c.Equals(agent.Chromosome.Chromosome));
                 if (matchingChromosome == null)
                 {
                     Console.WriteLine($"Mismatch found for Chromosome: {agent.Chromosome}");
                     Console.WriteLine($"Agent Chromosome Fitness: {agent.Chromosome.Fitness}");
-                    Console.WriteLine(
-                        $"Population Chromosomes: {string.Join(", ", populationFromThisGen.Select(c => c.Fitness))}");
+                    Console.WriteLine($"Population Chromosomes: {string.Join(", ", populationFromThisGen.Select(c => c.Fitness))}");
                 }
 
                 Assert.That(matchingChromosome, Is.Not.Null, $"Chromosome not found: {agent.Chromosome}");
@@ -189,8 +188,8 @@ public class GeneticAlgorithmLoggerTests
             var averageChromosome = averageTsv[i].Chromosome;
             var bestChromosome = bestTsv[i].Chromosome;
 
-            Assert.That(averageChromosome, Is.EqualTo(generations[i].AverageChromosome));
-            Assert.That(bestChromosome, Is.EqualTo(generations[i].BestChromosome));
+            Assert.That(averageChromosome.Chromosome, Is.EqualTo(generations[i].AverageChromosome.Chromosome));
+            Assert.That(bestChromosome.Chromosome, Is.EqualTo(generations[i].BestChromosome.Chromosome));
         }
 
     }

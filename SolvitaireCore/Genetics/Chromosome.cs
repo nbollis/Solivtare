@@ -276,9 +276,18 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     #region Speciation
 
     public static (List<List<TChromosome>> Clusters, double TotalIntraClusterDistance)
-        KMeans<TChromosome>(List<TChromosome> population, int k, int iterations = 10)
-        where TChromosome : Chromosome
+    KMeans<TChromosome>(List<TChromosome> population, int k, int iterations = 10)
+    where TChromosome : Chromosome
     {
+        if (population == null || population.Count == 0)
+            throw new ArgumentException("Population cannot be null or empty.", nameof(population));
+
+        if (k <= 0)
+            throw new ArgumentException("Number of clusters (k) must be greater than 0.", nameof(k));
+
+        if (k > population.Count)
+            throw new ArgumentException("Number of clusters (k) cannot exceed the population size.", nameof(k));
+
         var rnd = new Random();
         var centroids = population.OrderBy(_ => rnd.Next()).Take(k).ToList();
         List<List<TChromosome>> species = Enumerable.Range(0, k).Select(_ => new List<TChromosome>()).ToList();
@@ -288,6 +297,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
             // Reset species
             species = Enumerable.Range(0, k).Select(_ => new List<TChromosome>()).ToList();
 
+            // Assign each chromosome to the nearest centroid
             foreach (var chr in population)
             {
                 int bestIndex = 0;
@@ -306,11 +316,13 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
                 species[bestIndex].Add(chr);
             }
 
-            // Update centroids
+            // Update centroids for non-empty clusters
             for (int i = 0; i < k; i++)
             {
-                if (species[i].Count > 0)
+                if (species[i].Count > 0) // Only update centroid if the cluster is not empty
+                {
                     centroids[i] = GetAverageChromosome(species[i]);
+                }
             }
         }
 
@@ -318,10 +330,13 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         double totalDistance = 0.0;
         for (int i = 0; i < k; i++)
         {
-            var centroid = GetAverageChromosome(species[i]);
-            foreach (var chr in species[i])
+            if (species[i].Count > 0) // Skip empty clusters
             {
-                totalDistance += EuclideanDistance(chr, centroid);
+                var centroid = GetAverageChromosome(species[i]);
+                foreach (var chr in species[i])
+                {
+                    totalDistance += EuclideanDistance(chr, centroid);
+                }
             }
         }
 
@@ -331,6 +346,14 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     public static List<List<TChromosome>> KMeansSpeciationElbow<TChromosome>(List<TChromosome> population, int kMin = 2, int kMax = 10)
         where TChromosome : Chromosome
     {
+        if (population == null || population.Count == 0)
+            throw new ArgumentException("Population cannot be null or empty.", nameof(population));
+
+        if (kMin <= 0 || kMax <= 0 || kMin > kMax)
+            throw new ArgumentException("Invalid range for kMin and kMax.");
+
+        kMax = Math.Min(kMax, population.Count); // Ensure kMax does not exceed population size
+
         var distances = new List<(int K, double TotalDistance)>();
 
         for (int k = kMin; k <= kMax; k++)

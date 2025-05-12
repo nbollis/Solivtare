@@ -102,6 +102,35 @@ public class GeneticAlgorithmTests
     }
 
     [Test]
+    public void GeneticAlgorithm_RunEvolutionMultipleTimes_ShouldAccumulateGenerations()
+    {
+        // Arrange  
+        var parameters = new QuadraticGeneticAlgorithmParameters
+        {
+            PopulationSize = 15,
+            MutationRate = 0.2,
+            TournamentSize = 4,
+            OutputDirectory = OutputDirectory
+        };
+        var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
+
+        // Act - Run the first 5 generations  
+        algorithm.RunEvolution(5);
+        var firstRunGeneration = algorithm.CurrentGeneration;
+
+        // Assert - Ensure the first run completed correctly  
+        Assert.That(firstRunGeneration, Is.EqualTo(5));
+
+        // Act - Run another 5 generations  
+        algorithm.RunEvolution(5);
+        var secondRunGeneration = algorithm.CurrentGeneration;
+
+        // Assert - Ensure the total generations accumulated correctly  
+        Assert.That(secondRunGeneration, Is.EqualTo(10));
+    }
+
+    [Test]
+    [NonParallelizable]
     public void GeneticAlgorithm_InitializePopulation_ShouldCreateCorrectSize()
     {
         // Arrange
@@ -120,6 +149,7 @@ public class GeneticAlgorithmTests
     }
 
     [Test]
+    [NonParallelizable]
     public void GeneticAlgorithm_TournamentSelection_ShouldReturnValidChromosome()
     {
         // Arrange
@@ -149,6 +179,7 @@ public class GeneticAlgorithmTests
     }
 
     [Test]
+    [NonParallelizable]
     public void GeneticAlgorithm_TournamentSelection_ShouldReturnBestChromosome()
     {
         // Arrange

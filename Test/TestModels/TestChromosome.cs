@@ -3,7 +3,7 @@ using SolvitaireGenetics;
 
 namespace Test;
 
-internal class TestChromosome : Chromosome
+public class TestChromosome : Chromosome
 {
     public TestChromosome(Random random) : base(random) { }
 

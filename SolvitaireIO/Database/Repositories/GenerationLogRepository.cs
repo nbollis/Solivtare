@@ -102,15 +102,16 @@ public class ChromosomeRepository
         _context = context;
     }
 
+    public async Task AddChromosomeLogAsync(ChromosomeLog chromosomeLog)
+    {
+        _context.Chromosomes.Add(chromosomeLog);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task AddChromosomeAsync<TChromosome>(TChromosome chromosome)
         where TChromosome : Chromosome
     {
-        var chromosomeLog = new ChromosomeLog
-        {
-            StableHash = chromosome.GetStableHash(),
-            ChromosomeType = chromosome.GetType().FullName!,
-            GeneData = chromosome.ToGeneData()
-        };
+        var chromosomeLog = ChromosomeLog.FromChromosome(chromosome);
 
         _context.Chromosomes.Add(chromosomeLog);
         await _context.SaveChangesAsync();

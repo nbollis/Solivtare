@@ -47,8 +47,9 @@ public class GenerationalLogDbTests
             SpeciesCount = 3,
             IntraSpeciesDiversity = 0.4,
             InterSpeciesDiversity = 0.6,
-
-            
+            BestChromosomeId = "",
+            AverageChromosomeId = "",
+            StdChromosomeId = "",
         };
 
         // Act  
@@ -83,6 +84,9 @@ public class GenerationalLogDbTests
             SpeciesCount = 3,
             IntraSpeciesDiversity = 0.4,
             InterSpeciesDiversity = 0.6,
+            BestChromosomeId = "",
+            AverageChromosomeId = "",
+            StdChromosomeId = "",
         };
 
         var agentLog = new AgentLog
@@ -92,6 +96,7 @@ public class GenerationalLogDbTests
             GamesPlayed = 10,
             GamesWon = 5,
             MovesMade = 50,
+            Chromosome = ChromosomeLog.FromChromosome(new TestChromosome() { MutableStatsByName = new() { { "a", 1 } } }),
         };
 
         // Act
@@ -117,21 +122,9 @@ public class GenerationalLogDbTests
             BestFitness = 0.95,
             AverageFitness = 0.85,
             StdFitness = 0.1,
-            BestChromosome = new ChromosomeLog
-            {
-                ChromosomeType = "BestChromosome",
-                GeneData = "{\"genes\": [1, 2, 3]}"
-            },
-            AverageChromosome = new ChromosomeLog
-            {
-                ChromosomeType = "AverageChromosome",
-                GeneData = "{\"genes\": [2, 3, 4]}"
-            },
-            StdChromosome = new ChromosomeLog
-            {
-                ChromosomeType = "StdChromosome",
-                GeneData = "{\"genes\": [0.5, 0.6, 0.7]}"
-            }
+            BestChromosome = ChromosomeLog.FromChromosome(new TestChromosome(){ MutableStatsByName = new (){{"a", 1}}}),
+            AverageChromosome = ChromosomeLog.FromChromosome(new TestChromosome() { MutableStatsByName = new() { { "a", 2 } } }),
+            StdChromosome = ChromosomeLog.FromChromosome(new TestChromosome() { MutableStatsByName = new() { { "a", 3 } } }),
         };
 
         // Act
@@ -141,9 +134,12 @@ public class GenerationalLogDbTests
 
         // Assert
         Assert.That(retrievedGenerationLog, Is.Not.Null);
-        Assert.That(retrievedGenerationLog!.BestChromosome!.GeneData, Is.EqualTo("{\"genes\": [1, 2, 3]}"));
-        Assert.That(retrievedGenerationLog.AverageChromosome!.GeneData, Is.EqualTo("{\"genes\": [2, 3, 4]}"));
-        Assert.That(retrievedGenerationLog.StdChromosome!.GeneData, Is.EqualTo("{\"genes\": [0.5, 0.6, 0.7]}"));
+        Assert.That(retrievedGenerationLog!.BestChromosome, Is.Not.Null);
+        Assert.That(retrievedGenerationLog.BestChromosome!.Chromosome.GetWeight("a"), Is.EqualTo(1));
+        Assert.That(retrievedGenerationLog.AverageChromosome, Is.Not.Null);
+        Assert.That(retrievedGenerationLog.AverageChromosome!.Chromosome.GetWeight("a"), Is.EqualTo(2));
+        Assert.That(retrievedGenerationLog.StdChromosome, Is.Not.Null);
+        Assert.That(retrievedGenerationLog.StdChromosome!.Chromosome.GetWeight("a"), Is.EqualTo(3));
     }
 }
 

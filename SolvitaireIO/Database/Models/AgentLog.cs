@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using SolvitaireCore;
 
 namespace SolvitaireIO.Database.Models;
@@ -8,6 +9,7 @@ namespace SolvitaireIO.Database.Models;
 public class AgentLog
 {
     [Key]
+    [JsonIgnore]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
@@ -21,9 +23,11 @@ public class AgentLog
 
     // Navigation property for the related GenerationLog
     [InverseProperty(nameof(GenerationLog.AgentLogs))]
+    [JsonIgnore]
     public GenerationLog GenerationLog { get; set; } = null!;
 
     [ForeignKey(nameof(Chromosome))]
+    [JsonIgnore]
     public string ChromosomeId { get; set; } = null!; 
 
     // Navigation property for the related ChromosomeLog
@@ -40,21 +44,31 @@ public class ChromosomeLog // TODO: avoid duplication
     public string ChromosomeType { get; set; } = null!; // Store the type of the chromosome
     public string GeneData { get; set; } = null!; // Store the chromosome's gene data
 
+    public string SpeciesIdentifier { get; set; } = null!;
+
     [InverseProperty(nameof(AgentLog.Chromosome))]
+    [JsonIgnore]
     public AgentLog? AgentLog { get; set; } = null;
 
 
     private Chromosome? _chromosome = null!; // Placeholder for the actual Chromosome object
-    [NotMapped] public Chromosome Chromosome => _chromosome ??= Create(); // Lazy initialization of the Chromosome object
+    [NotMapped]
+    [JsonIgnore]
+    public Chromosome Chromosome 
+    {
+        get =>_chromosome ??= Create(); // Lazy initialization of the Chromosome object
+        set => _chromosome = value;
+    }
 
-    public static ChromosomeLog FromChromosome(Chromosome chromosome, double fitness = -1)
+    public static ChromosomeLog FromChromosome(Chromosome chromosome)
     {
         return new ChromosomeLog
         {
             StableHash = chromosome.GetStableHash(),
-            ChromosomeType = chromosome.GetType().FullName!,
+            ChromosomeType = chromosome.GetType().AssemblyQualifiedName!,
             GeneData = chromosome.ToGeneData(),
-            Fitness = fitness
+            Fitness = chromosome.Fitness,
+            SpeciesIdentifier = chromosome.SpeciesIndex.ToString()
         };
     }
 
@@ -63,12 +77,17 @@ public class ChromosomeLog // TODO: avoid duplication
         if (_chromosome != null) 
             return _chromosome;
 
-        var type = Type.GetType(ChromosomeType);
+        var type = Type.GetType(ChromosomeType) ??
+                   AppDomain.CurrentDomain.GetAssemblies()
+                       .SelectMany(a => a.GetTypes())
+                       .FirstOrDefault(t => t.FullName == ChromosomeType);
+
         if (type == null)
             throw new InvalidOperationException($"Type '{ChromosomeType}' not found.");
         _chromosome = (Chromosome)Activator.CreateInstance(type)!;
         _chromosome.LoadGeneData(GeneData);
         _chromosome.Fitness = Fitness;
+        _chromosome.SpeciesIndex = int.Parse(SpeciesIdentifier);
         return _chromosome;
     }
 }

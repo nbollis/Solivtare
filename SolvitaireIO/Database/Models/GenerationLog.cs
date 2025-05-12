@@ -21,15 +21,16 @@ public class GenerationLog
     // Navigation properties for best, average, and std chromosomes
     [ForeignKey(nameof(BestChromosome))]
     public string BestChromosomeId { get; set; }
-    public ChromosomeLog? BestChromosome { get; set; }
+    public ChromosomeLog BestChromosome { get; set; }
 
     [ForeignKey(nameof(AverageChromosome))]
     public string AverageChromosomeId { get; set; }
-    public ChromosomeLog? AverageChromosome { get; set; }
+    public ChromosomeLog AverageChromosome { get; set; }
 
     [ForeignKey(nameof(StdChromosome))]
     public string StdChromosomeId { get; set; }
-    public ChromosomeLog? StdChromosome { get; set; }
+
+    public ChromosomeLog StdChromosome { get; set; }
 
 
     // Navigation property for related AgentRepository

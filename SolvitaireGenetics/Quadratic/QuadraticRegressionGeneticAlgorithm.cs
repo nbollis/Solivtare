@@ -69,12 +69,14 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
             / 2);
 
         fitness = Math.Pow(fitness, 2); // Square the fitness score
+        chromosome.Fitness = fitness;
 
         var agentLog = new AgentLog()
         {
             Chromosome = ChromosomeLog.FromChromosome(chromosome), 
             Fitness = fitness, 
-            Generation = CurrentGeneration
+            Generation = CurrentGeneration,
+            ChromosomeId = chromosome.GetStableHash()
         };
 
         AgentCompleted?.Invoke(agentLog);

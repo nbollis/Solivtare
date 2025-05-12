@@ -8,7 +8,7 @@ public class DatabaseGeneticAlgorithmLogger : GeneticAlgorithmLogger
 {
     private readonly IRepositoryManager _repositoryManager;
 
-    public DatabaseGeneticAlgorithmLogger(IRepositoryManager repositoryManager)
+    public DatabaseGeneticAlgorithmLogger(IRepositoryManager repositoryManager, string? outputDirectory) : base(outputDirectory)
     {
         _repositoryManager = repositoryManager;
     }
@@ -26,9 +26,9 @@ public class DatabaseGeneticAlgorithmLogger : GeneticAlgorithmLogger
         _repositoryManager.SaveChangesAsync().Wait();
     }
 
-    public override void LogChromosome(Chromosome chromosome)
+    public override void LogChromosome(ChromosomeLog chromosome)
     {
-        _repositoryManager.ChromosomeRepository.AddChromosomeAsync(chromosome).Wait();
+        _repositoryManager.ChromosomeRepository.AddChromosomeLogAsync(chromosome).Wait();
     }
 
     public override List<AgentLog> ReadAllAgentLogs()
@@ -44,10 +44,12 @@ public class DatabaseGeneticAlgorithmLogger : GeneticAlgorithmLogger
         _repositoryManager.SaveChangesAsync().Wait();
     }
 
-    public override void AccumulateAgentLog(AgentLog agentLog)
+    public override void LogAgentDetails(IEnumerable<AgentLog> agentLogs)
     {
-        // Add or update the agent log in the database
-        LogAgentDetail(agentLog);
+        foreach (var agentLog in agentLogs)
+        {
+            LogAgentDetail(agentLog);
+        }
     }
 
     public override List<AgentLog> LoadLastGeneration(out int generationNumber)

@@ -71,7 +71,7 @@ public class AgentLogTabFileTests
         var expectedHeader = "Generation\tCount\tFitness\tGamesWon\tMovesMade\tGamesPlayed\tChromosomeType\tSpeed\tStrength";
         Assert.That(lines[0], Is.EqualTo(expectedHeader));
 
-        var expectedData = "1\t10\t95.5\t5\t50\t20\tSolvitaireGenetics.QuadraticChromosome\t1.5\t3";
+        var expectedData = "1\t10\t95.5\t5\t50\t20\tSolvitaireGenetics.QuadraticChromosome, SolvitaireGenetics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\t1.5\t3";
         Assert.That(lines[1], Is.EqualTo(expectedData));
     }
 
@@ -81,7 +81,7 @@ public class AgentLogTabFileTests
         // Arrange  
         var content =
             "Generation\tCount\tFitness\tGamesWon\tMovesMade\tGamesPlayed\tChromosomeType\tSpeed\tStrength\n" +
-            "1\t10\t95.5\t5\t50\t20\tSolvitaireGenetics.QuadraticChromosome\t1.5\t3";
+            "1\t10\t95.5\t5\t50\t20\tSolvitaireGenetics.QuadraticChromosome, SolvitaireGenetics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\t1.5\t3";
         File.WriteAllText(TestFilePath, content);
 
         // Act  
@@ -97,7 +97,7 @@ public class AgentLogTabFileTests
         Assert.That(log.GamesWon, Is.EqualTo(5));
         Assert.That(log.MovesMade, Is.EqualTo(50));
         Assert.That(log.GamesPlayed, Is.EqualTo(20));
-        Assert.That(log.Chromosome, Is.TypeOf<QuadraticChromosome>());
+        Assert.That(log.Chromosome.Chromosome, Is.TypeOf<QuadraticChromosome>());
         Assert.That(log.Chromosome.Chromosome.MutableStatsByName["Speed"], Is.EqualTo(1.5));
         Assert.That(log.Chromosome.Chromosome.MutableStatsByName["Strength"], Is.EqualTo(3.0));
     }
@@ -106,7 +106,7 @@ public class AgentLogTabFileTests
     public void ReadFromFile_InvalidHeader_ShouldThrowException()
     {
         // Arrange  
-        var content = "InvalidHeader\n1\t10\t95.5\t5\t50\t20\tSolvitaireGenetics.QuadraticChromosome\t1.5\t3";
+        var content = "InvalidHeader\n1\t10\t95.5\t5\t50\t20\tSolvitaireGenetics.QuadraticChromosome, SolvitaireGenetics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\t1.5\t3";
         File.WriteAllText(TestFilePath, content);
 
         // Act & Assert  
