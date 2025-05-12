@@ -26,9 +26,15 @@ public class AgentLog
     [JsonIgnore]
     public GenerationLog GenerationLog { get; set; } = null!;
 
+    private string _chromosmeId;
+
     [ForeignKey(nameof(Chromosome))]
     [JsonIgnore]
-    public string ChromosomeId { get; set; } = null!; 
+    public string ChromosomeId
+    {
+        get => _chromosmeId ??= Chromosome.StableHash;
+        set => _chromosmeId = value;
+    }
 
     // Navigation property for the related ChromosomeLog
     [InverseProperty(nameof(ChromosomeLog.AgentLog))]

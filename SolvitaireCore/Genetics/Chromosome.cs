@@ -144,6 +144,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
             firstChromosome.MutableStatsByName[key] = averageValue;
         }
 
+        firstChromosome.SpeciesIndex = -2;
         firstChromosome.Fitness = chromosomes.Select(p => p.Fitness).Average();
         return firstChromosome;
     }
@@ -162,6 +163,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
             firstChromosome.MutableStatsByName[key] = stdValue;
         }
 
+        firstChromosome.SpeciesIndex = -3;
         firstChromosome.Fitness = chromosomes.Select(p => p.Fitness).StandardDeviation();
         return firstChromosome;
     }

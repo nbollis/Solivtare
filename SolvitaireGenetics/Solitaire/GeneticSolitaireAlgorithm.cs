@@ -164,10 +164,10 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         best.MutableStatsByName[SolitaireChromosome.FoundationDeviationWeightName] = 0;
 
         // Skipping Games
-        best.MutableStatsByName[SolitaireChromosome.MoveCountScalarName] = -0.9;
-        best.MutableStatsByName[SolitaireChromosome.Skip_FoundationCount] = -0.43;
-        best.MutableStatsByName[SolitaireChromosome.Skip_LegalMoveCount] = -1.67;
-        best.MutableStatsByName[SolitaireChromosome.Skip_ThresholdWeightName] = -1.20;
+        best.MutableStatsByName[SolitaireChromosome.MoveCountScalarName] = -0.9273;
+        best.MutableStatsByName[SolitaireChromosome.Skip_FoundationCount] = -0.7625;
+        best.MutableStatsByName[SolitaireChromosome.Skip_LegalMoveCount] = -1.0254;
+        best.MutableStatsByName[SolitaireChromosome.Skip_ThresholdWeightName] = -1.3483;
         best.MutableStatsByName[SolitaireChromosome.Skip_TopWasteIsUseful] = 0.0;
         best.MutableStatsByName[SolitaireChromosome.Skip_CycleWeight] = 0;
         best.MutableStatsByName[SolitaireChromosome.Skip_StockWeight] = 0;

@@ -129,7 +129,7 @@ public abstract class GeneticAlgorithmLogger
         {
             if (agentLogsByGeneration.TryGetValue(generation.Generation, out var logsForGeneration))
             {
-                var best = logsForGeneration.FirstOrDefault(p => p.Chromosome.Chromosome.Equals(generation.BestChromosome.Chromosome));
+                var best = agentLogs.FirstOrDefault(p => p.ChromosomeId.Equals(generation.BestChromosomeId));
 
                 var avgLog = new AgentLog()
                 {
@@ -145,8 +145,11 @@ public abstract class GeneticAlgorithmLogger
 
                 if (best != null)
                 {
+                    best.Chromosome ??= generation.BestChromosome;
                     bestLog.Add(best);
                 }
+                else
+                    Debugger.Break();
             }
         }
 

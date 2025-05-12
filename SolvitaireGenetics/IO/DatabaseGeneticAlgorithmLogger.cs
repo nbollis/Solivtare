@@ -1,4 +1,3 @@
-using SolvitaireCore;
 using SolvitaireIO.Database;
 using SolvitaireIO.Database.Models;
 
@@ -21,6 +20,7 @@ public class DatabaseGeneticAlgorithmLogger : GeneticAlgorithmLogger
 
     public override void LogGenerationInfo(GenerationLog generationLog)
     {
+        LastGenerationNumber = generationLog.Generation;
         var generationRepository = _repositoryManager.CreateGenerationRepository();
         generationRepository.AddGenerationAsync(generationLog).Wait();
     }

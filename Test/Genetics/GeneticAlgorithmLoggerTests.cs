@@ -41,7 +41,7 @@ public class GeneticAlgorithmLoggerTests
         return type switch
         {
             LoggingType.Json => new GeneticAlgorithmLogger<TestChromosome>(OutputDirectory),
-            LoggingType.Database => new DatabaseGeneticAlgorithmLogger(null, null), // null for in-memory
+            LoggingType.Database => new DatabaseGeneticAlgorithmLogger(new(null)), // null for in-memory
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

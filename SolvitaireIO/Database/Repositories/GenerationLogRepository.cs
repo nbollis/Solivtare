@@ -16,6 +16,15 @@ public class GenerationLogRepository
 
     public async Task AddGenerationAsync(GenerationLog log)
     {
+        // Ensure the BestChromosome is not added again
+        var bestChromosomeEntry = _context.Entry(log.BestChromosome);
+        if (bestChromosomeEntry.State == EntityState.Detached)
+        {
+            // Attach the chromosome to the DbContext if it's not already tracked
+            _context.Chromosomes.Attach(log.BestChromosome);
+        }
+        
+
         var existingEntity = await _context.Generations.FindAsync(log.Generation);
         if (existingEntity != null)
         {
@@ -33,12 +42,20 @@ public class GenerationLogRepository
 
     public async Task<List<GenerationLog>> GetAllGenerationLogsAsync()
     {
-        return await _context.Generations.ToListAsync();
+        var toreturn =  await _context.Generations
+            .Include(g => g.BestChromosome)
+            .Include(g => g.AverageChromosome)
+            .Include(g => g.StdChromosome)
+            .ToListAsync();
+        return toreturn;
     }
 
     public async Task<GenerationLog?> GetLastGenerationAsync()
     {
         return await _context.Generations
+            .Include(g => g.BestChromosome)
+            .Include(g => g.AverageChromosome)
+            .Include(g => g.StdChromosome)
             .OrderByDescending(g => g.Generation)
             .FirstOrDefaultAsync();
     }
@@ -82,6 +99,9 @@ public class AgentLogRepository
                 Debugger.Break();
         }
 
+        if (log.Chromosome == null)
+            Debugger.Break();
+
         _context.Agents.Add(log);
         await _context.SaveChangesAsync();
     }
@@ -89,9 +109,12 @@ public class AgentLogRepository
     public async Task<List<AgentLog>> GetAgentLogsByGenerationAsync(int generation = -1)
     {
         if (generation == -1)
-            return await _context.Agents.ToListAsync();
+            return await _context.Agents
+                .Include(p => p.Chromosome)
+                .ToListAsync();
         return await _context.Agents
             .Where(log => log.Generation == generation)
+            .Include(p => p.Chromosome)
             .ToListAsync();
     }
 
