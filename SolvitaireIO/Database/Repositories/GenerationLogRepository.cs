@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using SolvitaireCore;
 using SolvitaireIO.Database.Models;
@@ -59,29 +60,55 @@ public class AgentLogRepository
 
     public async Task AddAgentAsync(AgentLog log)
     {
+        var existingChromosome = await _context.Chromosomes
+            .FindAsync(log.Chromosome.StableHash);
+
+        if (existingChromosome != null)
+        {
+            _context.Entry(existingChromosome).State = EntityState.Unchanged;
+            log.Chromosome = existingChromosome;
+            if (!existingChromosome.Chromosome.Equals(log.Chromosome.Chromosome))
+                Debugger.Break();
+        }
+
         _context.Agents.Add(log);
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<AgentLog>> GetAgentLogsByGenerationAsync(int generation)
+    public async Task<List<AgentLog>> GetAgentLogsByGenerationAsync(int generation = -1)
     {
+        if (generation == -1)
+            return await _context.Agents.ToListAsync();
         return await _context.Agents
             .Where(log => log.Generation == generation)
             .ToListAsync();
     }
 
     public async Task<List<TChromosome>> GetChromosomesByGenerationAsync<TChromosome>(int generation)
-        where TChromosome : Chromosome, new()
+       where TChromosome : Chromosome, new()
     {
         var chromosomeLogs = await _context.Chromosomes
             .Include(c => c.AgentLog)
-            .Where(c => c.AgentLog.Generation == generation)
+            .Where(c => c.AgentLog != null && c.AgentLog.Generation == generation)
             .ToListAsync();
 
         if (chromosomeLogs == null || !chromosomeLogs.Any())
             return new List<TChromosome>();
 
-        return chromosomeLogs.Select(DeserializeChromosome<TChromosome>).ToList();
+        var result = new List<TChromosome>();
+
+        foreach (var chromosomeLog in chromosomeLogs)
+        {
+            if (chromosomeLog.AgentLog != null)
+            {
+                for (int i = 0; i < chromosomeLog.AgentLog.Count; i++)
+                {
+                    result.Add(DeserializeChromosome<TChromosome>(chromosomeLog));
+                }
+            }
+        }
+
+        return result;
     }
 
     private TChromosome DeserializeChromosome<TChromosome>(ChromosomeLog chromosomeLog)

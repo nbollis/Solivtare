@@ -141,9 +141,16 @@
                         <StackPanel>
 
                             <StackPanel Orientation="Horizontal" Margin="10" DockPanel.Dock="Top">
-                                <TextBlock Text="Algorithm Type:" VerticalAlignment="Center" Margin="0,0,5,0" />
+                                <TextBlock Text="Algorithm Type:" VerticalAlignment="Center" Margin="0,0,5,0" Width="120" />
                                 <ComboBox ItemsSource="{Binding AlgorithmTypes}"
                                           SelectedItem="{Binding SelectedAlgorithmType}"
+                                          Width="150" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="10" DockPanel.Dock="Top" >
+                                <TextBlock Text="Logging Type:" VerticalAlignment="Center" Margin="0,0,5,0" Width="120" />
+                                <ComboBox ItemsSource="{Binding LoggingTypes}"
+                                          SelectedItem="{Binding SelectedLoggingType}"
                                           Width="150" />
                             </StackPanel>
 

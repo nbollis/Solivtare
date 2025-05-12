@@ -8,8 +8,12 @@ public class DatabaseGeneticAlgorithmLogger : GeneticAlgorithmLogger
 {
     private readonly IRepositoryManager _repositoryManager;
 
-    public DatabaseGeneticAlgorithmLogger(IRepositoryManager repositoryManager, string? outputDirectory) : base(outputDirectory)
+    public DatabaseGeneticAlgorithmLogger(IRepositoryManager? repositoryManager = null, string? outputDirectory = null) : base(outputDirectory)
     {
+        repositoryManager ??= outputDirectory != null
+            ? new RepositoryManager(new SolvitaireDbContext(outputDirectory))
+            : new RepositoryManager(SolvitaireDbContext.CreateInMemoryDbContext());
+
         _repositoryManager = repositoryManager;
     }
 
@@ -34,7 +38,7 @@ public class DatabaseGeneticAlgorithmLogger : GeneticAlgorithmLogger
     public override List<AgentLog> ReadAllAgentLogs()
     {
         // Retrieve all agent logs from the database
-        return _repositoryManager.AgentRepository.GetAgentLogsByGenerationAsync(-1).Result; // -1 to get all logs
+        return _repositoryManager.AgentRepository.GetAgentLogsByGenerationAsync().Result; // -1 to get all logs
     }
 
     public override void LogAgentDetail(AgentLog agentLog)

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using SolvitaireCore;
+using SolvitaireGenetics.IO;
 using SolvitaireIO;
 
 namespace SolvitaireGenetics;
@@ -12,6 +13,7 @@ public abstract class GeneticAlgorithmParameters
     public virtual double MutationRate { get; set; } = 0.01;
     public virtual int TournamentSize { get; set; } = 5;
     public virtual double TemplateInitialRatio { get; set; } = .1;
+    public virtual LoggingType LoggingType { get; set; } = LoggingType.Json;
     public Chromosome? TemplateChromosome { get; set; } = null;
 
 

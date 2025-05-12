@@ -340,7 +340,7 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
             }
         }
 
-        return (species, totalDistance);
+        return (species.Where(p => p.Count > 0).ToList(), totalDistance);
     }
 
     public static List<List<TChromosome>> KMeansSpeciationElbow<TChromosome>(List<TChromosome> population, int kMin = 2, int kMax = 10)

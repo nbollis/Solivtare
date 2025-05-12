@@ -333,7 +333,7 @@ public class GeneticAlgorithmLogger<TChromosome> : GeneticAlgorithmLogger
         AccumulateAgentLog(agentLog);
     }
 
-    public override void FlushAgentLogs<TChromosome>(int currentGeneration, List<TChromosome> population)
+    public override void FlushAgentLogs<TChromosomeBase>(int currentGeneration, List<TChromosomeBase> population)
     {
         if (_agentLogFilePath is null)
         {

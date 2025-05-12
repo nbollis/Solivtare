@@ -1,7 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
 using MathNet.Numerics.Statistics;
+using Microsoft.Extensions.Logging;
 using SolvitaireCore;
+using SolvitaireGenetics.IO;
 using SolvitaireIO;
 using SolvitaireIO.Database;
 using SolvitaireIO.Database.Models;
@@ -38,6 +40,12 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             ChromosomeTemplate = template;
 
         Logger = new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory);
+        Logger = parameters.LoggingType switch
+        {
+            LoggingType.Json => new GeneticAlgorithmLogger<TChromosome>(parameters.OutputDirectory),
+            LoggingType.Database => new DatabaseGeneticAlgorithmLogger(null, parameters.OutputDirectory),
+            _ => throw new NotSupportedException($"Logging type {parameters.LoggingType} is not supported.")
+        };
         Logger.SubscribeToAlgorithm(this);
     }
 
@@ -80,19 +88,19 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
             CurrentGeneration++;
 
-            // Step 3: Wait for the previous logging task to complete if it hasn't finished
-            _loggingTask.Wait();
+            _loggingTask.Wait(); // Wait for the previous logging task to complete if it hasn't finished
 
-            // Step 4: Evaluate fitness for the new population
+            // Step 3: Evaluate fitness for the new population
             Parallel.ForEach(Population, chromosome =>
                {
                    chromosome.Fitness = GetFitness(chromosome, cancellationToken);
                });
 
-            // Step 5: Sort the new population by fitness (descending)
+            // Step 4: Sort the new population by fitness (descending)
             Population = Population.OrderByDescending(chromosome => chromosome.Fitness).ToList();
 
-            // Step 6: Start logging the current generation asynchronously
+            // Step 5: Start logging the current generation asynchronously
+            
             _loggingTask = LogPopulationAsync(Population.ToList(), CurrentGeneration);
 
             if (cancellationToken?.IsCancellationRequested == true)
@@ -174,7 +182,6 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             return Population = lastGeneration;
         }
 
-
         List<TChromosome> population;
 
         // If we have a chromosome template, use it to create 10% of the population and mutate them
@@ -212,17 +219,26 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         return Population = population;
     }
 
-    private Task LogPopulationAsync(List<TChromosome> population, int generation)
+    private async Task LogPopulationAsync(List<TChromosome> population, int generation)
     {
         // Create ChromosomeLogs for best, average, and std chromosomes
         var bestChromosome = ChromosomeLog.FromChromosome(population[0]);
         var averageChromosome = ChromosomeLog.FromChromosome(Chromosome.GetAverageChromosome(population));
         var stdChromosome = ChromosomeLog.FromChromosome(Chromosome.GetStandardDeviationChromosome(population));
 
-        // Log the best, average, and std chromosomes
-        Logger.LogChromosome(bestChromosome);
-        Logger.LogChromosome(averageChromosome);
-        Logger.LogChromosome(stdChromosome);
+        // Log the best, average, and std chromosomes asynchronously
+        await Task.Run(() =>
+        {
+            Logger.LogChromosome(bestChromosome);
+            Logger.LogChromosome(averageChromosome);
+            Logger.LogChromosome(stdChromosome);
+        });
+
+        // Flush agent logs asynchronously
+        await Task.Run(() =>
+        {
+            Logger.FlushAgentLogs(generation, population);
+        });
 
         // Create the GenerationLog
         var species = Chromosome.KMeansSpeciationElbow(population);
@@ -247,17 +263,11 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         };
 
 
-
-        // Flush agent logs asynchronously
-        Logger.FlushAgentLogs(generation, population);
-
         // Fire the GenerationCompleted event asynchronously
         if (GenerationCompleted != null)
         {
             GenerationCompleted.Invoke(generation, generationLog);
         }
-
-        return Task.CompletedTask;
     }
 }
 

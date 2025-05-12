@@ -8,8 +8,20 @@ namespace SolvitaireIO.Database;
 /// <summary>
 /// Manages database connections and operations. 
 /// </summary>
-public class SolvitaireDbContext(DbContextOptions<SolvitaireDbContext> options) : DbContext(options)
+public class SolvitaireDbContext : DbContext
 {
+    /// <summary>
+    /// Manages database connections and operations. 
+    /// </summary>
+    public SolvitaireDbContext(DbContextOptions<SolvitaireDbContext> options) : base(options)
+    {
+    }
+
+    public SolvitaireDbContext(string outputDirectory) : base(new DbContextOptionsBuilder<SolvitaireDbContext>()
+        .UseSqlite($"Data Source={outputDirectory}/solvitaire.db").Options)
+    {
+    }
+
     public DbSet<AgentLog> Agents { get; set; }
     public DbSet<GenerationLog> Generations { get; set; }
     public DbSet<ChromosomeLog> Chromosomes { get; set; } // TODO: avoid duplication

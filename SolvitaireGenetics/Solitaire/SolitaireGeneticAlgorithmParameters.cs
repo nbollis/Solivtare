@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using System.Text.Json;
+using SolvitaireGenetics.IO;
 
 namespace SolvitaireGenetics;
 
@@ -28,6 +29,11 @@ public class SolitaireGeneticAlgorithmParameters : GeneticAlgorithmParameters
     [Option('t', "tournament", Default = 5, HelpText = "Tournament size for selection.")]
     public override int TournamentSize { get; set; } = 5;
 
+    [Option('s', "template", Default = 0.1, HelpText = "Initial ratio of template chromosomes.")]
+    public override double TemplateInitialRatio { get; set; } = .1;
+
+    [Option('z', "logging", Default = LoggingType.Json, HelpText = "Logging type (Json or Tsv).")]
+    public override LoggingType LoggingType { get; set; } = LoggingType.Json;
 
     [Option('d', "deckjson", Required = false, HelpText = "Path to a json file of serialized decks to use.")]
     public string? DecksToUse { get; set; } = null;
@@ -37,6 +43,7 @@ public class SolitaireGeneticAlgorithmParameters : GeneticAlgorithmParameters
 
     [Option('l', "limit", Default = 10, HelpText = "Maximum number of games per generation.")]
     public int MaxGamesPerGeneration { get; set; } = 10;
+
 
     public override void SaveToFile(string filePath)
     {

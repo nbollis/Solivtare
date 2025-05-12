@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using SolvitaireGenetics;
+using SolvitaireGenetics.IO;
 
 namespace SolvitaireGUI;
 
@@ -15,6 +16,16 @@ public abstract class GeneticAlgorithmParametersViewModel : BaseViewModel
         {
             _parameters.OutputDirectory = value;
             OnPropertyChanged(nameof(OutputDirectory));
+        }
+    }
+
+    public LoggingType LoggingType
+    {
+        get => _parameters.LoggingType;
+        set
+        {
+            _parameters.LoggingType = value;
+            OnPropertyChanged(nameof(LoggingType));
         }
     }
 

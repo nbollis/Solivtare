@@ -26,6 +26,7 @@ public class GeneticAlgorithmTests
     {
         if (Directory.Exists(OutputDirectory))
         {
+            Thread.Sleep(200); // Sleep to ensure the population is initialized and logged
             Directory.Delete(OutputDirectory, true);
         }
     }
@@ -130,7 +131,6 @@ public class GeneticAlgorithmTests
     }
 
     [Test]
-    [NonParallelizable]
     public void GeneticAlgorithm_InitializePopulation_ShouldCreateCorrectSize()
     {
         // Arrange
@@ -149,7 +149,6 @@ public class GeneticAlgorithmTests
     }
 
     [Test]
-    [NonParallelizable]
     public void GeneticAlgorithm_TournamentSelection_ShouldReturnValidChromosome()
     {
         // Arrange
@@ -179,7 +178,6 @@ public class GeneticAlgorithmTests
     }
 
     [Test]
-    [NonParallelizable]
     public void GeneticAlgorithm_TournamentSelection_ShouldReturnBestChromosome()
     {
         // Arrange
@@ -330,9 +328,9 @@ public class GeneticAlgorithmTests
             CorrectIntercept = 3
         };
         var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
-        //var field = typeof(QuadraticRegressionGeneticAlgorithm).GetField("CrossOverRate", BindingFlags.NonPublic | BindingFlags.Instance);
-        //Assert.That(field, Is.Not.Null, "Field 'CrossOverRate' not found.");
-        //field.SetValue(algorithm, 0.0);
+        var field = typeof(QuadraticRegressionGeneticAlgorithm).GetField("CrossOverRate", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.That(field, Is.Not.Null, "Field 'CrossOverRate' not found.");
+        field.SetValue(algorithm, 0.0);
 
         // Act - Run the first 3 generations  
         var firstFitness = algorithm.RunEvolution(1).Fitness;

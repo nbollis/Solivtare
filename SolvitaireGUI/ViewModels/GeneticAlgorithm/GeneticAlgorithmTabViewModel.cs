@@ -8,6 +8,7 @@ using SolvitairePlotting;
 using ScottPlot;
 using System.Security.Cryptography;
 using SolvitaireCore;
+using SolvitaireGenetics.IO;
 using SolvitaireIO.Database.Models;
 
 namespace SolvitaireGUI;
@@ -249,6 +250,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     private GeneticAlgorithmParameters _parameters;
     private ChromosomeViewModel _chromosomeViewModel;
 
+    public List<LoggingType> LoggingTypes { get; } = Enum.GetValues(typeof(LoggingType)).Cast<LoggingType>().ToList();
     public List<GeneticAlgorithmType> AlgorithmTypes { get; } = Enum.GetValues(typeof(GeneticAlgorithmType)).Cast<GeneticAlgorithmType>().ToList();
     public GeneticAlgorithmType SelectedAlgorithmType
     {
@@ -269,6 +271,17 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         }
     }
 
+    public LoggingType SelectedLoggingType
+    {
+        get => _parameters.LoggingType;
+        set
+        {
+            _parameters.LoggingType = value;
+            OnPropertyChanged(nameof(SelectedLoggingType));
+        }
+    }
+
+
     public GeneticAlgorithmParameters Parameters
     {
         get => _parameters;
@@ -280,6 +293,9 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             _selectedAlgorithmType = Parameters.FromParams();
             SelectedAlgorithmType = _selectedAlgorithmType;
             OnPropertyChanged(nameof(SelectedAlgorithmType));
+
+            SelectedLoggingType = Parameters.LoggingType;
+            OnPropertyChanged(nameof(SelectedLoggingType));
 
             // Update the Chromosome Template to be the correct type
             ChromosomeTemplate = SelectedAlgorithmType.ToNewChromosomeViewModel();
@@ -433,7 +449,7 @@ public class PlotTabControlViewModel : BaseViewModel
         AverageChromosomeHeatmapPlotManager.SetUpPlot();
     }
 
-    public void UpdatePlots(List<GenerationLogDto> sortedGenerationLogs)
+    public void UpdatePlots(List<GenerationLog> sortedGenerationLogs)
     {
         FitnessPlotManager.UpdatePlot(sortedGenerationLogs);
         AverageStatPlotManager.UpdatePlot(sortedGenerationLogs);
