@@ -389,4 +389,32 @@ public class GeneticAlgorithmTests
             Assert.That(count, Is.GreaterThan(0), "Every chromosome should be selected at least once.");
         }
     }
+
+    [Test]
+    public void GeneticAlgorithm_ThanosSnapTriggered_ShouldHalvePopulation()
+    {
+        // Arrange
+        var parameters = new QuadraticGeneticAlgorithmParameters
+        {
+            PopulationSize = 10,
+            Generations = 2,
+            MutationRate = 0.1,
+            TournamentSize = 3,
+            OutputDirectory = OutputDirectory
+        };
+        var algorithm = new QuadraticRegressionGeneticAlgorithm(parameters);
+
+        // Initialize population and run one generation
+        algorithm.InitializePopulation();
+        var initialPopulationCount = algorithm.Population.Count;
+
+        // Act: Set ThanosSnapTriggered and run one more generation
+        algorithm.ThanosSnapTriggered = true;
+        algorithm.RunEvolution(1);
+
+        // Assert: Population should be halved (rounded down)
+        var expectedCount = initialPopulationCount / 2;
+        Assert.That(algorithm.Population.Count, Is.EqualTo(expectedCount));
+        Assert.That(algorithm.ThanosSnapTriggered, Is.False, "ThanosSnapTriggered should reset to false after snap.");
+    }
 }

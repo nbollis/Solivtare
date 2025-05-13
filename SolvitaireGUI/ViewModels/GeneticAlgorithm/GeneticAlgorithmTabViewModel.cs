@@ -24,8 +24,8 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         PauseCommand = new DelegateCommand(_ => PauseAlgorithm(), _ => IsAlgorithmRunning && !IsPaused);
         ResumeCommand = new DelegateCommand(_ => ResumeAlgorithm(), _ => IsAlgorithmRunning && IsPaused);
         StopCommand = new DelegateCommand(_ => StopAlgorithm(), _ => IsAlgorithmRunning);
+        ThanosSnapCommand = new DelegateCommand(_ => ExecuteThanosSnap(), _ => IsAlgorithmRunning && _algorithm is not null && !_algorithm.ThanosSnapTriggered);
 
-        
 
         IsAlgorithmRunning = false;
         SelectedAlgorithmType = GeneticAlgorithmType.Solitaire; // Default selection
@@ -60,6 +60,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             (PauseCommand as DelegateCommand)?.RaiseCanExecuteChanged();
             (ResumeCommand as DelegateCommand)?.RaiseCanExecuteChanged();
             (StopCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+            (ThanosSnapCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         }
     }
 
@@ -77,7 +78,13 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             (PauseCommand as DelegateCommand)?.RaiseCanExecuteChanged();
             (ResumeCommand as DelegateCommand)?.RaiseCanExecuteChanged();
             (StopCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+            (ThanosSnapCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         }
+    }
+
+    public bool ThanosSnapTriggered
+    {
+        get => _algorithm?.ThanosSnapTriggered ?? false;
     }
 
     public int CurrentGeneration
@@ -94,6 +101,9 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
     public ICommand PauseCommand { get; }
     public ICommand ResumeCommand { get; }
     public ICommand StopCommand { get; }
+    public ICommand ThanosSnapCommand { get; }
+
+    private IGeneticAlgorithm? _algorithm;
     private async Task RunAlgorithm()
     {
         // Cancel any currently running algorithm
@@ -113,8 +123,9 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             SetUpPlots();
 
         // Create algorithm and subscribe to events. 
-        IGeneticAlgorithm? algorithm = GetAlgorithm();
-        algorithm.GenerationCompleted += OnGenerationFinished;
+        _algorithm = GetAlgorithm();
+        _algorithm.GenerationCompleted += OnGenerationFinished;
+        (ThanosSnapCommand as DelegateCommand)?.RaiseCanExecuteChanged();
 
         // Restore cached generation data if this is a continuation. 
         var previousGenerationLogs = GetAlgorithm().Logger.ReadGenerationLogs();
@@ -131,7 +142,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         try
         {
             var token = _cancellationTokenSource.Token;
-            _runningTask = Task.Run(() => RunEvolutionWithControl(algorithm, Parameters.Generations, token), token);
+            _runningTask = Task.Run(() => RunEvolutionWithControl(_algorithm, Parameters.Generations, token), token);
             await _runningTask;
 
             if (!token.IsCancellationRequested)
@@ -151,9 +162,10 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             _generationalLogs.Clear();
             IsAlgorithmRunning = false;
 
-            if (algorithm is not null)
+            if (_algorithm is not null)
             {
-                algorithm.Logger.CreateTsvSummaries(Parameters.OutputDirectory!);
+                _algorithm.Logger.CreateTsvSummaries(Parameters.OutputDirectory!);
+                _algorithm = null;
             }
 
             _runningTask = null; // Clear the reference to the completed task
@@ -198,6 +210,24 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             _pauseEvent.Set(); // Ensure the algorithm is not paused, so it can exit immediately
             IsAlgorithmRunning = false; // Reset the state
             IsPaused = false; // Reset the paused state
+        }
+    }
+
+    private void ExecuteThanosSnap()
+    {
+        if (_algorithm is null)
+            return;
+
+        var result = MessageBox.Show(
+            "Are you sure you want to perform the Thanos Snap? This will cut the population in half at the end of the current generation.",
+            "Confirm Thanos Snap",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            _algorithm.ThanosSnapTriggered = true;
+            OnPropertyChanged(nameof(ThanosSnapTriggered));
         }
     }
 
@@ -298,7 +328,9 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             OnPropertyChanged(nameof(SelectedLoggingType));
 
             // Update the Chromosome Template to be the correct type
-            ChromosomeTemplate = SelectedAlgorithmType.ToNewChromosomeViewModel();
+            ChromosomeTemplate = value.TemplateChromosome is not null 
+                ? new ChromosomeViewModel(value.TemplateChromosome)
+                : SelectedAlgorithmType.ToNewChromosomeViewModel();
         }
     }
 

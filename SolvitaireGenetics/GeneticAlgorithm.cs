@@ -69,11 +69,11 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation {CurrentGeneration}: Evaluating population...");
 
             // Step 1: Select parents for the entire population
-            int numberOfParents = Parameters.PopulationSize * 2; // Each child needs 2 parents
+            int numberOfParents = Population.Count * 2; // Each child needs 2 parents
             var parents = TournamentSelection(Population, numberOfParents);
 
             // Step 2: Create the new population
-            for (int i = 0; i < Parameters.PopulationSize; i++)
+            for (int i = 0; i < Population.Count; i++)
             {
                 var parent1 = parents[i * 2];
                 var parent2 = parents[i * 2 + 1];

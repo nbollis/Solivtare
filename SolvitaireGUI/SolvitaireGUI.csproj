@@ -63,6 +63,8 @@
     <None Remove="Resources\Cards\QD.png" />
     <None Remove="Resources\Cards\QH.png" />
     <None Remove="Resources\Cards\QS.png" />
+    <None Remove="Resources\Icons\gauntlet.png" />
+    <None Remove="Resources\Icons\snap.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -133,6 +135,8 @@
     <Resource Include="Resources\Cards\QD.png" />
     <Resource Include="Resources\Cards\QH.png" />
     <Resource Include="Resources\Cards\QS.png" />
+    <Resource Include="Resources\Icons\gauntlet.png" />
+    <Resource Include="Resources\Icons\snap.png" />
   </ItemGroup>
 
 </Project>

@@ -92,9 +92,9 @@
         </Grid.ColumnDefinitions>
 
         <!-- Algorithm Type Selection -->
-        <Expander  ExpandDirection="Left" IsExpanded="True">
+        <Expander  ExpandDirection="Left" IsExpanded="True" VerticalAlignment="Stretch" Name="MainExpander">
             <Expander.Header>
-                <DockPanel>
+                <DockPanel LastChildFill="False" Height="{Binding ActualHeight, ElementName=MainExpander}" >
                     <!-- Expander Header Text -->
                     <TextBlock Text="Parameters" VerticalAlignment="Center" HorizontalAlignment="Center"
                                Margin="5" FontWeight="Bold"  DockPanel.Dock="Top" />
@@ -129,6 +129,28 @@
                                 Background="{StaticResource RedAccentColor}" 
                                 Width="80" Margin="5" />
                     </StackPanel>
+
+                    <!-- Snap Button at the bottom -->
+                    <Button Command="{Binding ThanosSnapCommand}" 
+                            Style="{StaticResource AlgorithmControlButtonStyle}" 
+                            Background="{StaticResource RedAccentColor}" 
+                            Width="80" Height="40" Margin="0 0 0 30"
+                            VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
+                        <Button.Content>
+                            <Image Width="32" Height="32">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Source" Value="pack://application:,,,/Resources/Icons/gauntlet.png"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ThanosSnapTriggered}" Value="True">
+                                                <Setter Property="Source" Value="pack://application:,,,/Resources/Icons/snap.png"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                        </Button.Content>
+                    </Button>
                 </DockPanel>
             </Expander.Header>
 
