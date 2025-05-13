@@ -59,7 +59,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         for (int i = 0; i < Parameters.MaxGamesPerGeneration; i++)
         {
             StandardDeck deck = _predefinedDecks[gamesPlayed];
-            agent.ResetState();
+            //agent.ResetState();
             gameState.Reset();
             gameState.DealCards(deck);
 

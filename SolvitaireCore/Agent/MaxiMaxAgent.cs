@@ -8,6 +8,7 @@ namespace SolvitaireCore;
 /// </summary>  
 public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) : SolitaireAgent
 {
+    
     private SolitaireMove? _previousBestMove;
 
     public override string Name => "MaxiMax Agent";
@@ -68,26 +69,6 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
         return evaluator.ShouldSkipGame(gameState);
     }
 
-    private IEnumerable<SolitaireMove> OrderMoves(SolitaireGameState gameState, IEnumerable<SolitaireMove> moves)
-    {
-        return moves.OrderByDescending(move =>
-        {
-            if (_previousBestMove != null && move.Equals(_previousBestMove))
-            {
-                return int.MaxValue; // Highest priority
-            }
-            // Heuristic-based scoring for move ordering
-            double score = 0;
-            if (move.ToPileIndex == SolitaireGameState.FoundationStartIndex) score += 20; // Moves to foundation
-            if (move.ToPileIndex <= SolitaireGameState.TableauEndIndex && move.FromPileIndex > SolitaireGameState.TableauEndIndex) score += 10; // Moves to tableau
-            if (move.FromPileIndex == SolitaireGameState.StockIndex) score += 2; // Reduces stock pile
-
-            score += gameState.EvaluateMove(move, evaluator);
-
-            return score;
-        });
-    }
-
     private double EvaluateWithLookahead(SolitaireGameState gameState, int depth, double alpha, int moveCount)
     {
         // Generate a hash for the current game state
@@ -144,5 +125,38 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
         };
 
         return bestScore;
+    }
+
+    private static readonly ListPool<(SolitaireMove move, double score)> _scoredMovePool = new(8);
+
+    private IEnumerable<SolitaireMove> OrderMoves(SolitaireGameState gameState, IEnumerable<SolitaireMove> moves)
+    {
+        // Get a pooled list for scored moves
+        var scoredMoves = _scoredMovePool.Get();
+        try
+        {
+            foreach (var move in moves)
+            {
+                double score = 0;
+                if (_previousBestMove != null && move.Equals(_previousBestMove))
+                    score = int.MaxValue;
+                else
+                {
+                    if (move.ToPileIndex == SolitaireGameState.FoundationStartIndex) score += 20;
+                    if (move.ToPileIndex <= SolitaireGameState.TableauEndIndex && move.FromPileIndex > SolitaireGameState.TableauEndIndex) score += 10;
+                    if (move.FromPileIndex == SolitaireGameState.StockIndex) score += 2;
+                    score += gameState.EvaluateMove(move, evaluator);
+                }
+                scoredMoves.Add((move, score));
+            }
+
+            // Sort once, then yield
+            foreach (var (move, _) in scoredMoves.OrderByDescending(x => x.score))
+                yield return move;
+        }
+        finally
+        {
+            _scoredMovePool.Return(scoredMoves);
+        }
     }
 }
