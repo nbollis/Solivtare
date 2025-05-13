@@ -133,11 +133,12 @@
                     <!-- Snap Button at the bottom -->
                     <Button Command="{Binding ThanosSnapCommand}" 
                             Style="{StaticResource AlgorithmControlButtonStyle}" 
-                            Background="{StaticResource RedAccentColor}" 
+                            Background="{StaticResource PurpleAccentColor}" 
+                            IsEnabled="{Binding ThanosSnapTriggered, Converter={StaticResource InverseBooleanConverter}}"
                             Width="80" Height="40" Margin="0 0 0 30"
                             VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                         <Button.Content>
-                            <Image Width="32" Height="32">
+                            <Image VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="-5">
                                 <Image.Style>
                                     <Style TargetType="Image">
                                         <Setter Property="Source" Value="pack://application:,,,/Resources/Icons/gauntlet.png"/>

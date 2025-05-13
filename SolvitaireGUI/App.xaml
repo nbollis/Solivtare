@@ -20,6 +20,7 @@
         <SolidColorBrush x:Key="BlueAccentColor" Color="#4ba3c3" />
         <SolidColorBrush x:Key="RedAccentColor" Color="#ff9b85" />
         <SolidColorBrush x:Key="YellowAccentColor" Color="#ffd97d" />
+        <SolidColorBrush x:Key="PurpleAccentColor" Color="#9B7EBD" />
 
         <!-- Converters -->
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

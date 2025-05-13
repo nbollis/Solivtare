@@ -125,7 +125,6 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         // Create algorithm and subscribe to events. 
         _algorithm = GetAlgorithm();
         _algorithm.GenerationCompleted += OnGenerationFinished;
-        (ThanosSnapCommand as DelegateCommand)?.RaiseCanExecuteChanged();
 
         // Restore cached generation data if this is a continuation. 
         var previousGenerationLogs = GetAlgorithm().Logger.ReadGenerationLogs();
@@ -182,6 +181,14 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
                 break; // Exit the loop if cancellation is requested
             }
 
+            // Update Snap Icon and Availability
+            Application.Current.Dispatcher.Invoke(() =>  
+            {
+                (ThanosSnapCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+                OnPropertyChanged(nameof(ThanosSnapTriggered));
+            });
+        
+
             // Wait if paused
             _pauseEvent.Wait(cancellationToken);
 
@@ -227,6 +234,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         if (result == MessageBoxResult.Yes)
         {
             _algorithm.ThanosSnapTriggered = true;
+            (ThanosSnapCommand as DelegateCommand)?.RaiseCanExecuteChanged();
             OnPropertyChanged(nameof(ThanosSnapTriggered));
         }
     }
