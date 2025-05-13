@@ -111,8 +111,10 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             Population = Population.OrderByDescending(chromosome => chromosome.Fitness).ToList();
 
             // Step 5: Start logging the current generation asynchronously
-            
             _loggingTask = LogPopulationAsync(Population.ToList(), CurrentGeneration);
+
+            if (ThanosSnapTriggered)
+                PerfectlyBalanced();
 
             if (cancellationToken?.IsCancellationRequested == true)
             {
@@ -278,14 +280,20 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
     #region Thanos
 
-    public event Action? ThanosSnap;
-    public bool PerfectlyBalanced { get; set; }
+    /// <summary>
+    /// Flag to indicate if the Thanos snap should be triggered at the end of the generation.
+    /// </summary>
+    public bool ThanosSnapTriggered { get; set; }
 
-    private void AsAllThingsShouldBe()
+    private void PerfectlyBalanced()
     {
+        // Keep the top half (fittest) of the population
+        int survivors = Population.Count / 2;
+        Population = Population.Take(survivors).ToList();
 
+        // Optionally reset the flag if you want it to be a one-time event
+        ThanosSnapTriggered = false;
     }
-
 
     #endregion
 }
