@@ -129,7 +129,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
 
     private static readonly ListPool<(SolitaireMove move, double score)> _scoredMovePool = new(8);
 
-    private IEnumerable<SolitaireMove> OrderMoves(SolitaireGameState gameState, IEnumerable<SolitaireMove> moves)
+    private IEnumerable<SolitaireMove> OrderMoves(SolitaireGameState gameState, List<SolitaireMove> moves)
     {
         // Get a pooled list for scored moves
         var scoredMoves = _scoredMovePool.Get();
@@ -145,14 +145,16 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
                     if (move.ToPileIndex == SolitaireGameState.FoundationStartIndex) score += 20;
                     if (move.ToPileIndex <= SolitaireGameState.TableauEndIndex && move.FromPileIndex > SolitaireGameState.TableauEndIndex) score += 10;
                     if (move.FromPileIndex == SolitaireGameState.StockIndex) score += 2;
-                    score += gameState.EvaluateMove(move, evaluator);
                 }
                 scoredMoves.Add((move, score));
             }
 
-            // Sort once, then yield
-            foreach (var (move, _) in scoredMoves.OrderByDescending(x => x.score))
+            scoredMoves.Sort((a, b) => b.score.CompareTo(a.score));
+
+            foreach (var move in scoredMoves.Select(p => p.move))
+            {
                 yield return move;
+            }
         }
         finally
         {
