@@ -89,11 +89,23 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
             _loggingTask.Wait(); // Wait for the previous logging task to complete if it hasn't finished
 
-            // Step 3: Evaluate fitness for the new population
-            Parallel.ForEach(Population, chromosome =>
-               {
-                   chromosome.Fitness = GetFitness(chromosome, cancellationToken);
-               });
+            // Step 3: Evaluate fitness for unique chromosomes only
+            var uniqueChromosomes = Population
+                .GroupBy(c => c.GetStableHash())
+                .Select(g => g.First())
+                .ToList();
+
+            Parallel.ForEach(uniqueChromosomes, chromosome =>
+            {
+                // This will cache the fitness for each unique chromosome
+                chromosome.Fitness = GetFitness(chromosome, cancellationToken);
+            });
+
+            // Assign cached fitness to all chromosomes in the population
+            foreach (var chromosome in Population)
+            {
+                chromosome.Fitness = GetFitness(chromosome, cancellationToken);
+            }
 
             // Step 4: Sort the new population by fitness (descending)
             Population = Population.OrderByDescending(chromosome => chromosome.Fitness).ToList();
@@ -263,5 +275,18 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
         await generationLogging;
     }
+
+    #region Thanos
+
+    public event Action? ThanosSnap;
+    public bool PerfectlyBalanced { get; set; }
+
+    private void AsAllThingsShouldBe()
+    {
+
+    }
+
+
+    #endregion
 }
 

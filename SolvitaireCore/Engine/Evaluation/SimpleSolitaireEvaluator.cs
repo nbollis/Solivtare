@@ -2,7 +2,7 @@
 
 public class SimpleSolitaireEvaluator : SolitaireEvaluator
 {
-    public override double Evaluate(SolitaireGameState state)
+    public override double Evaluate(SolitaireGameState state, int? moveCount = null)
     {
         // Example: more cards in foundation = better
         return state.FoundationPiles.Sum(stack => stack.Count)

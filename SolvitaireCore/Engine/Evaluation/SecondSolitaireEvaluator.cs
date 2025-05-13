@@ -4,7 +4,7 @@ namespace SolvitaireCore;
 
 public class SecondSolitaireEvaluator : SolitaireEvaluator
 {
-    public override double Evaluate(SolitaireGameState state)
+    public override double Evaluate(SolitaireGameState state, int? moveCount = null)
     {
         double score = 0;
 
@@ -58,8 +58,7 @@ public class SecondSolitaireEvaluator : SolitaireEvaluator
 
 
         // Reward each unique move 
-        var moves = state.GetLegalMoves().ToHashSet();
-        score += 0.01 * moves.Count;
+        score += 0.01 * (moveCount ?? state.GetLegalMoves().Count);
 
         return score;
     }

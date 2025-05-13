@@ -36,27 +36,27 @@ namespace SolvitaireGenetics
                 Directory.CreateDirectory(options.OutputDirectory);
             }
 
-            // Build the path to the SQLite database file in the output directory
-            var databasePath = Path.Combine(options.OutputDirectory, "solvitaire.db");
+            //// Build the path to the SQLite database file in the output directory
+            //var databasePath = Path.Combine(options.OutputDirectory, "solvitaire.db");
 
-            // Set up the DI container
-            var services = new ServiceCollection();
+            //// Set up the DI container
+            //var services = new ServiceCollection();
 
-            // Register the DbContext with a dynamic connection string
-            services.AddDbContext<SolvitaireDbContext>(options =>
-                options.UseSqlite($"Data Source={databasePath}"));
+            //// Register the DbContext with a dynamic connection string
+            //services.AddDbContext<SolvitaireDbContext>(options =>
+            //    options.UseSqlite($"Data Source={databasePath}"));
 
-            // Register the RepositoryManager
-            services.AddScoped<IRepositoryManager, RepositoryManager>();
+            //// Register the RepositoryManager
+            //services.AddScoped<IRepositoryManager, RepositoryManager>();
 
-            // Build the service provider
-            var serviceProvider = services.BuildServiceProvider();
+            //// Build the service provider
+            //var serviceProvider = services.BuildServiceProvider();
 
-            // Resolve the RepositoryManager
-            var repositoryManager = serviceProvider.GetRequiredService<IRepositoryManager>();
+            //// Resolve the RepositoryManager
+            //var repositoryManager = serviceProvider.GetRequiredService<IRepositoryManager>();
 
             // Run the genetic algorithm
-            return RunAlgorithm(options, repositoryManager);
+            return RunAlgorithm(options, null);
         }
 
 

@@ -80,12 +80,12 @@ public abstract class GeneticAlgorithmLogger
             int populationCount = chromosomeGroup.Count();
             TChromosome chromosome = chromosomeGroup.First();
 
-            AgentLog? match = agentLogsInBatch.FirstOrDefault(p => p.Chromosome.Chromosome.Equals(chromosome));
+            AgentLog? match = agentLogsInBatch.FirstOrDefault(p => p.ChromosomeId.Equals(chromosome.GetStableHash()));
 
             // Chromosome was previously evaluated, finds its log and create a new one for this generation. 
             if (match is null && currentGeneration > 0)
             {
-                var old = existingAgentLogs.FirstOrDefault(p => p.Chromosome.Chromosome.Equals(chromosome));
+                var old = existingAgentLogs.FirstOrDefault(p => p.ChromosomeId.Equals(chromosome.GetStableHash()));
 
                 match = new AgentLog() // create a new log for output with the replaced generation number
                 {

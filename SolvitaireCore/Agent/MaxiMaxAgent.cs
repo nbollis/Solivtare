@@ -18,7 +18,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
         SolitaireMove bestMove = null!;
 
         var moves = gameState.GetLegalMoves();
-        if (IsGameUnwinnable(gameState)) // TODO: Some better criteria for skipping games
+        if (evaluator.ShouldSkipGame(gameState)) // TODO: Some better criteria for skipping games
         {
             return AgentDecision.SkipGame();
         }
@@ -33,7 +33,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
             foreach (var move in OrderMoves(gameState, moves))
             {
                 gameState.ExecuteMove(move);
-                double score = EvaluateWithLookahead(gameState, depth - 1, alpha);
+                double score = EvaluateWithLookahead(gameState, depth - 1, alpha, moves.Count);
                 gameState.UndoMove(move);
 
                 if (score > alpha)
@@ -88,7 +88,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
         });
     }
 
-    private double EvaluateWithLookahead(SolitaireGameState gameState, int depth, double alpha)
+    private double EvaluateWithLookahead(SolitaireGameState gameState, int depth, double alpha, int moveCount)
     {
         // Generate a hash for the current game state
         int stateHash = gameState.GetHashCode();
@@ -106,7 +106,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
         // Base case: If depth is 0 or the game is over, evaluate the current state
         if (depth == 0 || gameState.IsGameWon /*|| gameState.IsGameLost*/)
         {
-            double score = evaluator.Evaluate(gameState);
+            double score = evaluator.Evaluate(gameState, moveCount);
             TranspositionTable[stateHash] = new TranspositionTableEntry
             {
                 Score = score,
@@ -118,10 +118,11 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
 
         // Recursive case: Evaluate moves - Order moves to improve pruning
         double bestScore = double.NegativeInfinity;
-        foreach (var move in OrderMoves(gameState, gameState.GetLegalMoves()))
+        var moves = gameState.GetLegalMoves();
+        foreach (var move in OrderMoves(gameState, moves))
         {
             gameState.ExecuteMove(move);
-            double eval = EvaluateWithLookahead(gameState, depth - 1, alpha);
+            double eval = EvaluateWithLookahead(gameState, depth - 1, alpha, moves.Count);
             gameState.UndoMove(move);
 
             bestScore = Math.Max(bestScore, eval);

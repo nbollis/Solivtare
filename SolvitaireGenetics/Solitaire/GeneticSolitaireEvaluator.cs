@@ -5,9 +5,9 @@ namespace SolvitaireGenetics;
 
 public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : SolitaireEvaluator
 {
-    public override double Evaluate(SolitaireGameState state)
+    public override double Evaluate(SolitaireGameState state, int? moveCount = null)
     {
-        int legalMoveCount = state.GetLegalMoves().Count;
+        int legalMoveCount = moveCount ?? state.GetLegalMoves().Count;
         int foundationCount = state.FoundationPiles.Sum(pile => pile.Count);
         double foundationRange = state.FoundationPiles.Max(pile => pile.Count) - state.FoundationPiles.Min(pile => pile.Count);
         double foundationDeviation = state.FoundationPiles.Select(p => p.TopCard != null ? (double)p.TopCard.Rank : 0.0).StandardDeviation();

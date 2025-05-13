@@ -1,6 +1,7 @@
 ﻿using SolvitaireCore;
 using SolvitaireIO;
 using SolvitaireIO.Database.Models;
+using System;
 
 namespace SolvitaireGenetics;
 
@@ -13,13 +14,25 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
     public GeneticSolitaireAlgorithm(SolitaireGeneticAlgorithmParameters parameters)
         : base(parameters)
     {
+        _predefinedDecks = new();
         // Deserialize predefined decks if provided
         if (parameters.DecksToUse is not null)
         {
             _deckFile = new DeckStatisticsFile(parameters.DecksToUse);
-            _predefinedDecks = _deckFile.ReadAllDecks();
+            _predefinedDecks.AddRange(_deckFile.ReadAllDecks());
             _predefinedDecks.ForEach(p => p.FlipAllCardsDown());
         }
+
+        Random rand = new(42);
+        while (_predefinedDecks.Count < parameters.MaxGamesPerGeneration)
+        {
+            var deck = new StandardDeck(rand.Next(0, 42));
+            for (int i = 0; i < rand.Next(0, 10); i++)
+                deck.Shuffle();
+            _predefinedDecks.Add(deck);
+        }
+
+        _predefinedDecks = _predefinedDecks.OrderBy(_ => Random.Next()).ToList();
 
         // Be sure to flush the deck file at the end of the generation.
         GenerationCompleted += (a, b) =>
@@ -45,24 +58,12 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
 
         for (int i = 0; i < Parameters.MaxGamesPerGeneration; i++)
         {
-            StandardDeck deck = null!;
-            // If we have predefined decks, use them in order. Otherwise create a new deck and shuffle it. 
-            if (_predefinedDecks.Count == 0 || gamesPlayed >= _predefinedDecks.Count)
-            {
-                deck ??= new StandardDeck();
-                deck.Shuffle();
-            }
-            else
-            {
-                deck = _predefinedDecks[gamesPlayed];
-            }
-
+            StandardDeck deck = _predefinedDecks[gamesPlayed];
             agent.ResetState();
             gameState.Reset();
             gameState.DealCards(deck);
 
             gamesPlayed++;
-
             if (gamesPlayed >= Parameters.MaxGamesPerGeneration)
                 break;
 
@@ -87,6 +88,9 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
                 {
                     Console.WriteLine("Game Skipped.");
                     break;
+                }
+                else if (decision.Move == null)
+                {
                 }
                 else
                 {
