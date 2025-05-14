@@ -236,8 +236,8 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     {
         // Create ChromosomeLogs for best, average, and std chromosomes
         var bestChromosome = ChromosomeLog.FromChromosome(population[0]);
-        var averageChromosome = ChromosomeLog.FromChromosome(Chromosome.GetAverageChromosome(population));
-        var stdChromosome = ChromosomeLog.FromChromosome(Chromosome.GetStandardDeviationChromosome(population));
+        var averageChromosome = ChromosomeLog.FromChromosome(population.GetAverageChromosome());
+        var stdChromosome = ChromosomeLog.FromChromosome(population.GetStandardDeviationChromosome());
 
         // Flush agent logs asynchronously
         await Task.Run(() =>
@@ -253,8 +253,8 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             BestFitness = population.Max(c => c.Fitness),
             AverageFitness = population.Average(c => c.Fitness),
             StdFitness = population.Select(c => c.Fitness).StandardDeviation(),
-            AveragePairwiseDiversity = Chromosome.AveragePairwiseDiversity(population),
-            VarianceFromAverageChromosome = Chromosome.VarianceFromCentroid(population),
+            AveragePairwiseDiversity = population.AveragePairwiseDiversity(),
+            VarianceFromAverageChromosome = population.VarianceFromCentroid(),
             SpeciesCount = species.Count,
             IntraSpeciesDiversity = Chromosome.IntraSpeciesDiversity(species),
             InterSpeciesDiversity = Chromosome.InterSpeciesDiversity(species),
