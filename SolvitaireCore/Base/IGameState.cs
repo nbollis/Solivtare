@@ -1,14 +1,10 @@
 ﻿namespace SolvitaireCore;
 
-public interface IGameState
+public interface IGameState<TMove>
 {
-    public bool IsGameLost { get; }
-    public bool IsGameWon { get; }
+    bool IsGameLost { get; }
+    bool IsGameWon { get; }
     void Reset();
-}
-
-public interface IGameState<TMove> : IGameState where TMove : IMove
-{
     List<TMove> GetLegalMoves();
     void ExecuteMove(TMove move);
     void UndoMove(TMove move);

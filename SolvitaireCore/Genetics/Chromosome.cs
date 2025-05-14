@@ -68,19 +68,19 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
         return Crossover((TChromosome)this, other, crossoverRate);
     }
 
+    /// <summary>
+    /// Mutates the chromosome by randomly changing its weights based on the mutation rate.
+    /// Current mutation is to find a new double as defined by <see cref="GenerateRandomWeight"/>
+    /// </summary>
+    /// <param name="mutationRate"></param>
+    /// <returns></returns>
     public TChromosome Mutate<TChromosome>(double mutationRate)
         where TChromosome : Chromosome
     {
         return Mutate((TChromosome)this, mutationRate);
     }
 
-    /// <summary>
-    /// Mutates the chromosome by randomly changing its weights based on the mutation rate.
-    /// Current mutation is to find a new double as defined by <see cref="GenerateRandomWeight"/>
-    /// </summary>
-    /// <param name="chromosome"></param>
-    /// <param name="mutationRate"></param>
-    /// <returns></returns>
+
     public static TChromosome Mutate<TChromosome>(TChromosome chromosome, double mutationRate) 
         where TChromosome : Chromosome
     {

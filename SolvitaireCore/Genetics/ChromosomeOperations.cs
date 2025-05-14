@@ -4,6 +4,10 @@ namespace SolvitaireCore;
 
 public static class ChromosomeOperations
 {
+
+
+
+
     public static TChromosome GetAverageChromosome<TChromosome>(this List<TChromosome> chromosomes)
         where TChromosome : Chromosome
     {
