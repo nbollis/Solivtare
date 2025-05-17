@@ -1,7 +1,6 @@
-using NUnit.Framework;
 using SolvitaireGenetics;
 
-namespace Test.Selection;
+namespace Test.Genetics;
 
 [TestFixture]
 public class SelectionStrategyFactoryTests

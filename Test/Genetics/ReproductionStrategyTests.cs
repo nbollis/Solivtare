@@ -1,10 +1,6 @@
-using NUnit.Framework;
 using SolvitaireGenetics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace Test.Reproduction;
+namespace Test.Genetics;
 
 [TestFixture]
 public class ReproductionStrategyTests
