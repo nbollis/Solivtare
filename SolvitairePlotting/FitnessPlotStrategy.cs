@@ -25,6 +25,8 @@ public class FitnessPlotStrategy : IPlottingStrategy
         var bestFitness = sortedLogs.Select(log => log.BestFitness).ToArray();
         var averageFitness = sortedLogs.Select(log => log.AverageFitness).ToArray();
         var stdFitness = sortedLogs.Select(log => log.StdFitness).ToArray();
+        var speciesCount = sortedLogs.Select(log => log.SpeciesCount).ToArray();
+        var averagePairwiseDiversity = sortedLogs.Select(log => log.AveragePairwiseDiversity).ToArray();
 
         plot.Clear();
 
@@ -39,6 +41,12 @@ public class FitnessPlotStrategy : IPlottingStrategy
         var stdSig = plot.Add.Signal(stdFitness);
         stdSig.LegendText = "Std Fitness";
         stdSig.LineWidth = 2;
+
+
+
+        var diversitySig = plot.Add.Signal(averagePairwiseDiversity);
+        diversitySig.LegendText = "Genetic Diversity";
+        diversitySig.LineWidth = 1;
 
         plot.ShowLegend(Alignment.UpperLeft, Orientation.Vertical);
     }

@@ -1,13 +1,9 @@
 ﻿using System.Collections.Concurrent;
-using System.Text.Json;
 using MathNet.Numerics.Statistics;
-using Microsoft.Extensions.Logging;
 using SolvitaireCore;
 using SolvitaireGenetics.IO;
-using SolvitaireIO;
 using SolvitaireIO.Database;
 using SolvitaireIO.Database.Models;
-using SolvitaireIO.Database.Repositories;
 
 namespace SolvitaireGenetics;
 
@@ -25,6 +21,9 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     protected readonly TChromosome? ChromosomeTemplate;
     protected readonly Random Random = new();
     protected double CrossOverRate = 0.5; // Default crossover rate
+    protected ISelectionStrategy<TChromosome> SelectionStrategy;
+    protected IReproductionStrategy<TChromosome> ReproductionStrategy;
+
     public int CurrentGeneration { get; protected set; }
     public List<TChromosome> Population { get; protected set; } = [];
     public GeneticAlgorithmLogger Logger { get; }
@@ -38,6 +37,10 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         Parameters = parameters;
         if (parameters.TemplateChromosome is TChromosome template)
             ChromosomeTemplate = template;
+
+
+        SelectionStrategy = SelectionStrategyFactory.Create<TChromosome>(parameters.SelectionStrategy);
+        ReproductionStrategy = ReproductionStrategyFactory.Create<TChromosome>(parameters.ReproductionStrategy);
 
         Logger = parameters.LoggingType switch
         {
@@ -68,22 +71,12 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         {
             Console.WriteLine($"{DateTime.Now.ToShortTimeString()}: Generation {CurrentGeneration}: Evaluating population...");
 
-            // Step 1: Select parents for the entire population
-            int numberOfParents = Population.Count * 2; // Each child needs 2 parents
-            var parents = TournamentSelection(Population, numberOfParents);
+            // Step 1: Select parents using the strategy
+            int numberOfParents = Population.Count * 2; // Or as needed by your strategy
+            var parents = SelectionStrategy.Select(Population, numberOfParents, Parameters, Random);
 
-            // Step 2: Create the new population
-            for (int i = 0; i < Population.Count; i++)
-            {
-                var parent1 = parents[i * 2];
-                var parent2 = parents[i * 2 + 1];
-
-                // Perform crossover and mutation
-                var child = Chromosome.Crossover(parent1, parent2, CrossOverRate);
-                child = Chromosome.Mutate(child, Parameters.MutationRate);
-
-                Population[i] = child;
-            }
+            // Step 2: Create the new population using the reproduction strategy
+            Population = ReproductionStrategy.Reproduce(parents, Parameters.PopulationSize, CrossOverRate, Parameters.MutationRate, Random);
 
             CurrentGeneration++;
 
