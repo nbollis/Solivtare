@@ -19,6 +19,9 @@ public class SelectionStrategyFactoryTests
     [TestCase(SelectionStrategy.TopHalf, 3, 5, TestName = "TopHalf_ParentsGreaterThanPopulation")]
     [TestCase(SelectionStrategy.TopHalf, 10, 5, TestName = "TopHalf_ParentsLessThanPopulation")]
     [TestCase(SelectionStrategy.TopHalf, 5, 5, TestName = "TopHalf_ParentsEqualToPopulation")]
+    [TestCase(SelectionStrategy.FitnessScaled, 3, 5, TestName = "FitnessScaled_ParentsGreaterThanPopulation")]
+    [TestCase(SelectionStrategy.FitnessScaled, 10, 5, TestName = "FitnessScaled_ParentsLessThanPopulation")]
+    [TestCase(SelectionStrategy.FitnessScaled, 5, 5, TestName = "FitnessScaled_ParentsEqualToPopulation")]
     public void Select_ShouldReturnCorrectNumberOfParents_WhenPopulationSizeVaries(SelectionStrategy strategy, int populationSize, int numberOfParents)
     {
         // Arrange  
@@ -47,6 +50,9 @@ public class SelectionStrategyFactoryTests
     [TestCase(SelectionStrategy.TopHalf, 3, 5, TestName = "TopHalf_ParentsGreaterThanPopulation")]
     [TestCase(SelectionStrategy.TopHalf, 10, 5, TestName = "TopHalf_ParentsLessThanPopulation")]
     [TestCase(SelectionStrategy.TopHalf, 5, 5, TestName = "TopHalf_ParentsEqualToPopulation")]
+    [TestCase(SelectionStrategy.FitnessScaled, 3, 5, TestName = "FitnessScaled_ParentsGreaterThanPopulation")]
+    [TestCase(SelectionStrategy.FitnessScaled, 10, 5, TestName = "FitnessScaled_ParentsLessThanPopulation")]
+    [TestCase(SelectionStrategy.FitnessScaled, 5, 5, TestName = "FitnessScaled_ParentsEqualToPopulation")]
     public void Select_ShouldReturnCorrectNumberOfParents(SelectionStrategy strategy, int populationSize, int numberOfParents)
     {
         // Arrange  

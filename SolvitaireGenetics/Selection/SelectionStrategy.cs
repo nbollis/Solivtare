@@ -3,5 +3,6 @@
 public enum SelectionStrategy
 {
     Tournament,
-    TopHalf
+    TopHalf,
+    FitnessScaled
 }

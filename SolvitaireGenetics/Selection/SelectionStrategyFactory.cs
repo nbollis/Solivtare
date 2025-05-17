@@ -11,6 +11,7 @@ public static class SelectionStrategyFactory
         {
             SelectionStrategy.Tournament => new TournamentSelectionStrategy<TChromosome>(),
             SelectionStrategy.TopHalf => new TopHalfSelectionStrategy<TChromosome>(),
+            SelectionStrategy.FitnessScaled => new FitnessScaledSelectionStrategy<TChromosome>(),
             _ => throw new ArgumentOutOfRangeException(nameof(strategy), $"Unknown selection strategy: {strategy}")
         };
     }
