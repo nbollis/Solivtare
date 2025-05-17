@@ -5,15 +5,17 @@ using SolvitaireIO;
 
 namespace SolvitaireGenetics;
 
-public abstract class GeneticAlgorithmParameters
+public class GeneticAlgorithmParameters
 {
     public virtual string? OutputDirectory { get; set; } = null;
     public virtual int PopulationSize { get; set; } = 1000;
     public virtual int Generations { get; set; } = 100;
     public virtual double MutationRate { get; set; } = 0.01;
+    public virtual SelectionStrategy SelectionStrategy { get; set; } = SelectionStrategy.Tournament;
+    public virtual ReproductionStrategy ReproductionStrategy { get; set; } = ReproductionStrategy.Sexual;
+    public virtual LoggingType LoggingType { get; set; } = LoggingType.Json;
     public virtual int TournamentSize { get; set; } = 5;
     public virtual double TemplateInitialRatio { get; set; } = .1;
-    public virtual LoggingType LoggingType { get; set; } = LoggingType.Json;
     public Chromosome? TemplateChromosome { get; set; } = null;
 
 
