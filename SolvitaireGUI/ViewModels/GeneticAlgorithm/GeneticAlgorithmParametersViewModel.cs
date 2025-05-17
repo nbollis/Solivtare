@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.ComponentModel.Design;
+using System.Windows;
 using System.Windows.Input;
 using SolvitaireGenetics;
 using SolvitaireGenetics.IO;
@@ -7,7 +8,17 @@ namespace SolvitaireGUI;
 
 public abstract class GeneticAlgorithmParametersViewModel : BaseViewModel
 {
-    protected GeneticAlgorithmParameters _parameters;
+    private GeneticAlgorithmParameters _parameters;
+
+    public GeneticAlgorithmParameters Parameters
+    {
+        get => _parameters;
+        set
+        {
+            _parameters = value;
+            OnPropertyChanged(nameof(Parameters));
+        }
+    }
 
     public string? OutputDirectory
     {
@@ -26,6 +37,26 @@ public abstract class GeneticAlgorithmParametersViewModel : BaseViewModel
         {
             _parameters.LoggingType = value;
             OnPropertyChanged(nameof(LoggingType));
+        }
+    }
+
+    public SelectionStrategy SelectionStrategy
+    {
+        get => _parameters.SelectionStrategy;
+        set
+        {
+            _parameters.SelectionStrategy = value;
+            OnPropertyChanged(nameof(SelectionStrategy));
+        }
+    }
+
+    public ReproductionStrategy ReproductionStrategy
+    {
+        get => _parameters.ReproductionStrategy;
+        set
+        {
+            _parameters.ReproductionStrategy = value;
+            OnPropertyChanged(nameof(ReproductionStrategy));
         }
     }
 
@@ -68,13 +99,32 @@ public abstract class GeneticAlgorithmParametersViewModel : BaseViewModel
             OnPropertyChanged(nameof(TournamentSize));
         }
     }
+    public double TemplateChromosomeRatio
+    {
+        get => _parameters.TemplateInitialRatio;
+        set
+        {
+            if (value is > 1 or < 0)
+                return;
+
+            _parameters.TemplateInitialRatio = value;
+            OnPropertyChanged(nameof(TemplateChromosomeRatio));
+        }
+    }
 
     public virtual ICommand SaveParametersCommand { get; }
     public virtual ICommand LoadParametersCommand { get; }
-
+    public List<LoggingType> LoggingTypes { get; } 
+    public List<ReproductionStrategy> ReproductionStrategies { get; }
+    public List<SelectionStrategy> SelectionStrategies { get; }
     public GeneticAlgorithmParametersViewModel(GeneticAlgorithmParameters parameters)
     {
         _parameters = parameters;
+
+        LoggingTypes = Enum.GetValues(typeof(LoggingType)).Cast<LoggingType>().ToList();
+        ReproductionStrategies = Enum.GetValues(typeof(ReproductionStrategy)).Cast<ReproductionStrategy>().ToList();
+        SelectionStrategies = Enum.GetValues(typeof(SelectionStrategy)).Cast<SelectionStrategy>().ToList();
+
         SaveParametersCommand = new RelayCommand(SaveParameters);
         LoadParametersCommand = new RelayCommand(LoadParameters);
     }
@@ -91,7 +141,7 @@ public abstract class GeneticAlgorithmParametersViewModel : BaseViewModel
 
             if (saveFileDialog.ShowDialog() == true)
             {
-                _parameters.SaveToFile(saveFileDialog.FileName);
+                Parameters.SaveToFile(saveFileDialog.FileName);
                 MessageBox.Show("Parameters saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
@@ -113,7 +163,7 @@ public abstract class GeneticAlgorithmParametersViewModel : BaseViewModel
 
             if (openFileDialog.ShowDialog() == true)
             {
-                _parameters = GeneticAlgorithmParameters.LoadFromFile(openFileDialog.FileName);
+                Parameters = GeneticAlgorithmParameters.LoadFromFile(openFileDialog.FileName);
                 OnPropertyChanged(null); // Notify all properties have changed
                 MessageBox.Show("Parameters loaded successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }

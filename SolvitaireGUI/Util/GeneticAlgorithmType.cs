@@ -39,4 +39,34 @@ public static class GeneticAlgorithmTypeExtensions
             _ => throw new ArgumentOutOfRangeException()
         };
     }
+
+    public static GeneticAlgorithmParametersViewModel ToNewViewModel(this GeneticAlgorithmType type)
+    {
+        return type switch
+        {
+            GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParametersViewModel(new SolitaireGeneticAlgorithmParameters()),
+            GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParametersViewModel(new QuadraticGeneticAlgorithmParameters()),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    public static GeneticAlgorithmParametersViewModel ToViewModel(this GeneticAlgorithmType type, GeneticAlgorithmParameters parameters)
+    {
+        return type switch
+        {
+            GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParametersViewModel((SolitaireGeneticAlgorithmParameters)parameters),
+            GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParametersViewModel((QuadraticGeneticAlgorithmParameters)parameters),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    public static GeneticAlgorithmParametersViewModel ToViewModel(this GeneticAlgorithmParameters parameters)
+    {
+        return parameters switch
+        {
+            SolitaireGeneticAlgorithmParameters algorithmParameters => new SolitaireGeneticAlgorithmParametersViewModel(algorithmParameters),
+            QuadraticGeneticAlgorithmParameters algorithmParameters => new QuadraticGeneticAlgorithmParametersViewModel(algorithmParameters),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
 }

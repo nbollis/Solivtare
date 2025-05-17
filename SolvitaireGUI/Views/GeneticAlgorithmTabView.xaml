@@ -163,19 +163,35 @@
                               Style="{StaticResource CollapsibleGroupBoxStyle}">
                         <StackPanel>
 
-                            <StackPanel Orientation="Horizontal" Margin="10" DockPanel.Dock="Top">
+                            <StackPanel Orientation="Horizontal" Margin="10 2" DockPanel.Dock="Top">
                                 <TextBlock Text="Algorithm Type:" VerticalAlignment="Center" Margin="0,0,5,0" Width="120" />
                                 <ComboBox ItemsSource="{Binding AlgorithmTypes}"
                                           SelectedItem="{Binding SelectedAlgorithmType}"
                                           Width="150" />
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" Margin="10" DockPanel.Dock="Top" >
+                            <StackPanel Orientation="Horizontal" Margin="10 2" DockPanel.Dock="Top" >
                                 <TextBlock Text="Logging Type:" VerticalAlignment="Center" Margin="0,0,5,0" Width="120" />
-                                <ComboBox ItemsSource="{Binding LoggingTypes}"
-                                          SelectedItem="{Binding SelectedLoggingType}"
+                                <ComboBox ItemsSource="{Binding Parameters.LoggingTypes}"
+                                          SelectedItem="{Binding Parameters.LoggingType}"
                                           Width="150" />
                             </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="10 2" DockPanel.Dock="Top" >
+                                <TextBlock Text="Selection Strategy:" VerticalAlignment="Center" Margin="0,0,5,0" Width="120" />
+                                <ComboBox ItemsSource="{Binding Parameters.SelectionStrategies}"
+                                          SelectedItem="{Binding Parameters.SelectionStrategy}"
+                                          Width="150" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="10 2" DockPanel.Dock="Top" >
+                                <TextBlock Text="Reproduction Strategy:" VerticalAlignment="Center" Margin="0,0,5,0" Width="120" />
+                                <ComboBox ItemsSource="{Binding Parameters.ReproductionStrategies}"
+                                          SelectedItem="{Binding Parameters.ReproductionStrategy}"
+                                          Width="150" />
+                            </StackPanel>
+
+                            
 
                             <Grid DataContext="{Binding Parameters}">
                                 <Grid.ColumnDefinitions>
@@ -263,7 +279,7 @@
                                           HorizontalAlignment="Left" />
 
                                 <TextBlock Text="Initial Template Ratio:"  VerticalAlignment="Center"  HorizontalAlignment="Right" Margin="0 0 86 0"/>
-                                <TextBox Text="{Binding TemplateChromosomeRatio}" Width="80" HorizontalAlignment="Right" Style="{StaticResource TextBoxStyle}" />
+                                <TextBox Text="{Binding Parameters.TemplateChromosomeRatio}" Width="80" HorizontalAlignment="Right" Style="{StaticResource TextBoxStyle}" />
                             </Grid>
 
                             <ItemsControl ItemsSource="{Binding ChromosomeTemplate.Weights}">

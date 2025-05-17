@@ -33,7 +33,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     public GeneticAlgorithmTabViewModel(GeneticAlgorithmParameters parameters) : this()
     {
-        Parameters = parameters;
+        Parameters = parameters.ToViewModel();
         SetUpPlots();
     }
 
@@ -262,7 +262,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             filePath = Path.Combine(Parameters.OutputDirectory!, "RunParameters.json");
 
         IGeneticAlgorithm algorithm = null!;
-        switch (Parameters)
+        switch (Parameters.Parameters)
         {
             case SolitaireGeneticAlgorithmParameters solitaireParams:
                 algorithm = new GeneticSolitaireAlgorithm(solitaireParams);
@@ -285,10 +285,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     private bool _useChromosomeTemplate;
     private GeneticAlgorithmType _selectedAlgorithmType = GeneticAlgorithmType.Quadratic;
-    private GeneticAlgorithmParameters _parameters;
     private ChromosomeViewModel _chromosomeViewModel;
-
-    public List<LoggingType> LoggingTypes { get; } = Enum.GetValues(typeof(LoggingType)).Cast<LoggingType>().ToList();
     public List<GeneticAlgorithmType> AlgorithmTypes { get; } = Enum.GetValues(typeof(GeneticAlgorithmType)).Cast<GeneticAlgorithmType>().ToList();
     public GeneticAlgorithmType SelectedAlgorithmType
     {
@@ -301,7 +298,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
                 OnPropertyChanged(nameof(SelectedAlgorithmType));
 
                 // Update the parameters based on the selected algorithm type
-                Parameters = SelectedAlgorithmType.ToNewParams();
+                Parameters = SelectedAlgorithmType.ToNewViewModel();
 
                 // Update the Chromosome Template to be the correct type
                 ChromosomeTemplate = SelectedAlgorithmType.ToNewChromosomeViewModel();
@@ -309,18 +306,9 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         }
     }
 
-    public LoggingType SelectedLoggingType
-    {
-        get => _parameters.LoggingType;
-        set
-        {
-            _parameters.LoggingType = value;
-            OnPropertyChanged(nameof(SelectedLoggingType));
-        }
-    }
 
-
-    public GeneticAlgorithmParameters Parameters
+    private GeneticAlgorithmParametersViewModel _parameters;
+    public GeneticAlgorithmParametersViewModel Parameters
     {
         get => _parameters;
         set
@@ -328,16 +316,13 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             _parameters = value;
             OnPropertyChanged(nameof(Parameters));
 
-            _selectedAlgorithmType = Parameters.FromParams();
+            _selectedAlgorithmType = Parameters.Parameters.FromParams();
             SelectedAlgorithmType = _selectedAlgorithmType;
             OnPropertyChanged(nameof(SelectedAlgorithmType));
 
-            SelectedLoggingType = Parameters.LoggingType;
-            OnPropertyChanged(nameof(SelectedLoggingType));
-
             // Update the Chromosome Template to be the correct type
-            ChromosomeTemplate = value.TemplateChromosome is not null 
-                ? new ChromosomeViewModel(value.TemplateChromosome)
+            ChromosomeTemplate = value.Parameters.TemplateChromosome is not null 
+                ? new ChromosomeViewModel(value.Parameters.TemplateChromosome)
                 : SelectedAlgorithmType.ToNewChromosomeViewModel();
         }
     }
@@ -362,27 +347,16 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
             if (value)
             {
-                Parameters.TemplateChromosome = ChromosomeTemplate.BaseChromosome;
+                Parameters.Parameters.TemplateChromosome = ChromosomeTemplate.BaseChromosome;
             }
             else
             {
-                Parameters.TemplateChromosome = null;
+                Parameters.Parameters.TemplateChromosome = null;
             }
         }
     }
 
-    public double TemplateChromosomeRatio
-    {
-        get => _parameters.TemplateInitialRatio;
-        set
-        {
-            if (value is > 1 or < 0)
-                return;
 
-            _parameters.TemplateInitialRatio = value;
-            OnPropertyChanged(nameof(TemplateChromosomeRatio));
-        }
-    }
 
     #endregion
 
@@ -393,8 +367,8 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
 
     private void SetUpPlots()
     {
-        TopPlotsTabControl.SetUpPlots(Parameters, ChromosomeTemplate.BaseChromosome);
-        BottomPlotsTabControl.SetUpPlots(Parameters, ChromosomeTemplate.BaseChromosome);
+        TopPlotsTabControl.SetUpPlots(Parameters.Parameters, ChromosomeTemplate.BaseChromosome);
+        BottomPlotsTabControl.SetUpPlots(Parameters.Parameters, ChromosomeTemplate.BaseChromosome);
     }
 
     private void OnGenerationFinished(int generation, GenerationLog generationLog)
@@ -420,7 +394,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
                 try
                 {
                     // Dynamically load the correct parameter type, Update the Parameters property
-                    Parameters = GeneticAlgorithmParameters.LoadFromFile(filePath);
+                    Parameters = GeneticAlgorithmParameters.LoadFromFile(filePath).ToViewModel();
                     OnPropertyChanged(nameof(Parameters));
                     SetUpPlots();
 

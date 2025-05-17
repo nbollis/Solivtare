@@ -115,14 +115,6 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
         return _cachedMoves;
     }
 
-    public double EvaluateMove(SolitaireMove move, IStateEvaluator<SolitaireGameState> evaluator)
-    {
-        ExecuteMove(move);
-        var eval = evaluator.Evaluate(this);
-        UndoMove(move);
-        return eval;
-    }
-
     public void ExecuteMove(SolitaireMove move)
     {
         if (move.IsValid(this))

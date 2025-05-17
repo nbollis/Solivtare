@@ -6,40 +6,40 @@ public class QuadraticGeneticAlgorithmParametersViewModel(QuadraticGeneticAlgori
 {
     public double CorrectA
     {
-        get => ((QuadraticGeneticAlgorithmParameters)_parameters).CorrectA;
+        get => ((QuadraticGeneticAlgorithmParameters)Parameters).CorrectA;
         set
         {
-            ((QuadraticGeneticAlgorithmParameters)_parameters).CorrectA = value;
+            ((QuadraticGeneticAlgorithmParameters)Parameters).CorrectA = value;
             OnPropertyChanged(nameof(CorrectA));
         }
     }
 
     public double CorrectB
     {
-        get => ((QuadraticGeneticAlgorithmParameters)_parameters).CorrectB;
+        get => ((QuadraticGeneticAlgorithmParameters)Parameters).CorrectB;
         set
         {
-            ((QuadraticGeneticAlgorithmParameters)_parameters).CorrectB = value;
+            ((QuadraticGeneticAlgorithmParameters)Parameters).CorrectB = value;
             OnPropertyChanged(nameof(CorrectB));
         }
     }
 
     public double CorrectC
     {
-        get => ((QuadraticGeneticAlgorithmParameters)_parameters).CorrectC;
+        get => ((QuadraticGeneticAlgorithmParameters)Parameters).CorrectC;
         set
         {
-            ((QuadraticGeneticAlgorithmParameters)_parameters).CorrectC = value;
+            ((QuadraticGeneticAlgorithmParameters)Parameters).CorrectC = value;
             OnPropertyChanged(nameof(CorrectC));
         }
     }
 
     public double CorrectIntercept
     {
-        get => ((QuadraticGeneticAlgorithmParameters)_parameters).CorrectIntercept;
+        get => ((QuadraticGeneticAlgorithmParameters)Parameters).CorrectIntercept;
         set
         {
-            ((QuadraticGeneticAlgorithmParameters)_parameters).CorrectIntercept = value;
+            ((QuadraticGeneticAlgorithmParameters)Parameters).CorrectIntercept = value;
             OnPropertyChanged(nameof(CorrectIntercept));
         }
     }

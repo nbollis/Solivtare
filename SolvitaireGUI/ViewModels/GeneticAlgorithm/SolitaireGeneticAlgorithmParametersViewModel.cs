@@ -9,37 +9,37 @@ public class SolitaireGeneticAlgorithmParametersViewModel(SolitaireGeneticAlgori
 {
     public string? DecksToUse
     {
-        get => ((SolitaireGeneticAlgorithmParameters)_parameters).DecksToUse;
+        get => ((SolitaireGeneticAlgorithmParameters)Parameters).DecksToUse;
         set
         {
-            ((SolitaireGeneticAlgorithmParameters)_parameters).DecksToUse = value;
+            ((SolitaireGeneticAlgorithmParameters)Parameters).DecksToUse = value;
             OnPropertyChanged(nameof(DecksToUse));
         }
     }
 
     public int MaxMovesPerGeneration
     {
-        get => ((SolitaireGeneticAlgorithmParameters)_parameters).MaxMovesPerGeneration;
+        get => ((SolitaireGeneticAlgorithmParameters)Parameters).MaxMovesPerGeneration;
         set
         {
-            ((SolitaireGeneticAlgorithmParameters)_parameters).MaxMovesPerGeneration = value;
+            ((SolitaireGeneticAlgorithmParameters)Parameters).MaxMovesPerGeneration = value;
             OnPropertyChanged(nameof(MaxMovesPerGeneration));
         }
     }
 
     public int MaxGamesPerGeneration
     {
-        get => ((SolitaireGeneticAlgorithmParameters)_parameters).MaxGamesPerGeneration;
+        get => ((SolitaireGeneticAlgorithmParameters)Parameters).MaxGamesPerGeneration;
         set
         {
-            ((SolitaireGeneticAlgorithmParameters)_parameters).MaxGamesPerGeneration = value;
+            ((SolitaireGeneticAlgorithmParameters)Parameters).MaxGamesPerGeneration = value;
             OnPropertyChanged(nameof(MaxGamesPerGeneration));
         }
     }
 
     public SolitaireGeneticAlgorithmParameters GetParameters()
     {
-        return (SolitaireGeneticAlgorithmParameters)_parameters;
+        return (SolitaireGeneticAlgorithmParameters)Parameters;
     }
 
     protected override void LoadParameters()
@@ -54,7 +54,7 @@ public class SolitaireGeneticAlgorithmParametersViewModel(SolitaireGeneticAlgori
 
             if (openFileDialog.ShowDialog() == true)
             {
-                _parameters = GeneticAlgorithmParameters.LoadFromFile(openFileDialog.FileName);
+                Parameters = GeneticAlgorithmParameters.LoadFromFile(openFileDialog.FileName);
                 OnPropertyChanged(null); // Notify all properties have changed
                 MessageBox.Show("Parameters loaded successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
