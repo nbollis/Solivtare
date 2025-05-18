@@ -10,7 +10,7 @@ public class RandomSolitaireAgent : RandomAgent<SolitaireGameState, SolitaireMov
         if (moves.Count == 0)
             return new SkipGameMove();
 
-        var move = moves.Where(predicate => !predicate.ShouldSkip).ElementAt(_random.Next(moves.Count - 1));
+        var move = moves.Where(predicate => !predicate.IsTerminatingMove).ElementAt(_random.Next(moves.Count - 1));
         return move;
     }
 }

@@ -34,10 +34,10 @@ public class AgentPlayingViewModel : BaseViewModel
         AllAgents = new()
         {
             Agent,
-            new MaximizingSolitaireAgent(_evaluator, 20),
+            new MaximizingSolitaireAgent(_evaluator, 5),
         };
 
-        _shadowGameState = GameStateViewModel.BaseGameState.Clone();
+        _shadowGameState = (SolitaireGameState)GameStateViewModel.BaseGameState.Clone();
 
         ResetGameCommand = new RelayCommand(ResetGame);
         MakeMoveCommand = new RelayCommand(AgentMakeMove);
@@ -114,7 +114,7 @@ public class AgentPlayingViewModel : BaseViewModel
                 // Use the shadow game state for the agent's search
                 var decision = await Task.Run(() => Agent.GetNextAction(_shadowGameState), token);
 
-                if (decision.ShouldSkip)
+                if (decision.IsTerminatingMove)
                 {
                     // Handle the case where the agent decides to skip the game
                     break;
@@ -158,7 +158,7 @@ public class AgentPlayingViewModel : BaseViewModel
     {
         // Use the shadow game state for the agent's search
         var action = Agent.GetNextAction(_shadowGameState);
-        if (action.ShouldSkip)
+        if (action.IsTerminatingMove)
         {
             NewGame();
             return;
@@ -206,10 +206,10 @@ public class AgentPlayingViewModel : BaseViewModel
             case MoveViewModel vm:
                 move = vm.Move;
                 break;
-            case SolitaireMove { ShouldSkip: false } mo:
+            case SolitaireMove { IsTerminatingMove: false } mo:
                 move = mo;
                 break;
-            case SolitaireMove { ShouldSkip: true }:
+            case SolitaireMove { IsTerminatingMove: true }:
                 NewGame();
                 return;
             default:
@@ -249,7 +249,7 @@ public class AgentPlayingViewModel : BaseViewModel
         Agent.ResetState();
 
         GameStateViewModel = new(gameState);
-        _shadowGameState = gameState.Clone(); // Sync the shadow state
+        _shadowGameState = (SolitaireGameState)gameState.Clone(); // Sync the shadow state
         Refresh();
     }
 

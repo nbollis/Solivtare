@@ -93,7 +93,7 @@ namespace MyApp
 
                 try
                 {
-                    if (decision.ShouldSkip)
+                    if (decision.IsTerminatingMove)
                     {
                         Console.WriteLine($"Thread {threadId} skipped the game.");
                         break;

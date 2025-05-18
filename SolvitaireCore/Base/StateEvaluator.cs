@@ -4,6 +4,9 @@ public abstract class StateEvaluator<TGameState, TMove>
     where TGameState : IGameState<TMove>
     where TMove : IMove
 {
+    /// <summary>
+    /// Default implementation is to make the move and return the evaluation of the state. 
+    /// </summary>
     public virtual double EvaluateMove(TGameState state, TMove move)
     {
         // Evaluate the move by executing it and then evaluating the state

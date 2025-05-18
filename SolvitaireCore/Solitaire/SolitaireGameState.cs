@@ -428,7 +428,7 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
         }
     }
 
-    public SolitaireGameState Clone()
+    public IGameState<SolitaireMove> Clone()
     {
         var clone = new SolitaireGameState(CardsPerCycle)
         {

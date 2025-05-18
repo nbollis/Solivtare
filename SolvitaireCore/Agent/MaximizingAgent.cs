@@ -4,123 +4,141 @@
 /// Picks the move which maximizes the score of the game state.
 /// Best for one player games. 
 /// </summary>
-/// <param name="evaluator"></param>
-/// <param name="maxLookahead">Moves to look ahead</param>
-public class MaximizingAgent<TGameState, TMove>(StateEvaluator<TGameState, TMove> evaluator, int maxLookahead = 10) : BaseAgent<TGameState, TMove>
+public class MaximizingAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>
     where TGameState : IGameState<TMove>
     where TMove : IMove
 {
-    protected TMove? PreviousBestMove;
+    protected readonly StateEvaluator<TGameState, TMove> Evaluator;
+    protected readonly int MaxDepth;
+    protected readonly Random Rand;
+
+    public MaximizingAgent(StateEvaluator<TGameState, TMove> evaluator, int maxDepth = 3)
+    {
+        Evaluator = evaluator;
+        MaxDepth = maxDepth;
+        Rand = new();
+    }
 
     public override string Name => "Maximizing Agent";
-    public int LookAheadSteps { get; } = maxLookahead;
     public override TMove GetNextAction(TGameState gameState)
     {
-        var moves = gameState.GetLegalMoves();
-        TMove bestMove = moves[0]; // Fallback value
+        var legalMoves = gameState.GetLegalMoves();
+        if (legalMoves.Count == 0)
+            throw new InvalidOperationException("No legal moves available.");
 
-        // Iterative Deepening: Search for best of depth 1 and use that to determine the order to search depth 2 and so on.  
-        // You would think this would make the search slower, but alpha-beta gains far outweigh.  
-        for (int depth = 1; depth <= LookAheadSteps; depth++)
+        TMove bestMove = legalMoves[0];
+        //var debugInfo = new List<(TMove Move, double Score, int Depth)>(); // Store moves and evaluations for debugging  
+
+        // Iterative deepening: search from depth 1 up to MaxDepth  
+        for (int depth = 1; depth <= MaxDepth; depth++)
         {
-            double alpha = double.NegativeInfinity;
+            double bestScore = double.NegativeInfinity;
             List<TMove> bestMoves = new();
 
-            foreach (var move in OrderMovesForEvaluation(gameState, moves))
+            foreach (var move in legalMoves)
             {
-                gameState.ExecuteMove(move);
-                double score = EvaluateWithLookahead(gameState, depth - 1, alpha, moves.Count);
-                gameState.UndoMove(move);
+                var clone = (TGameState)gameState.Clone();
+                clone.ExecuteMove(move);
 
-                if (score > alpha)
+                double score;
+                if (move.IsTerminatingMove)
                 {
-                    alpha = score;
+                    // Evaluate as a leaf node, do not recurse
+                    score = Evaluator.EvaluateMove(gameState, move);
+                }
+                else
+                {
+                    score = Maximize(clone, depth - 1);
+                }
+
+                //debugInfo.Add((move, score, depth)); // Add move, score, and depth to debug info  
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
                     bestMoves.Clear();
                     bestMoves.Add(move);
                 }
-                else if (Math.Abs(score - alpha) < 0.0000001)
+                else if (Math.Abs(score - bestScore) < 1e-8)
                 {
                     bestMoves.Add(move);
                 }
             }
 
-            // Pick one move at random from the best moves  
             if (bestMoves.Count > 0)
-            {
-                Random random = new();
-                bestMove = bestMoves[random.Next(bestMoves.Count)];
-            }
-
-            // Cache the best move for the next depth  
-            PreviousBestMove = bestMove;
+                bestMove = bestMoves[Rand.Next(bestMoves.Count)];
         }
 
-
+        //debugInfo = debugInfo.OrderBy(p => p.Move.ToString()).ThenBy(p => p.Depth).ToList();
+        // Debugging: Place a breakpoint here to inspect debugInfo  
         return bestMove;
     }
 
-    protected double EvaluateWithLookahead(TGameState gameState, int depth, double alpha, int moveCount)
+    private double Maximize(TGameState state, int depth)
     {
-        // Generate a hash for the current game state
-        int stateHash = gameState.GetHashCode();
+        int stateHash = state.GetHashCode();
 
-        // Check if the state is already in the transposition table
+        // Check transposition table
         if (TranspositionTable.TryGetValue(stateHash, out var entry))
         {
-            // If the stored depth is greater than or equal to the current depth, use the cached score
-            if (entry.Depth >= depth && entry.Alpha <= alpha)
-            {
+            // If the stored entry is at least as deep, use it
+            if (entry.Depth >= depth)
                 return entry.Score;
-            }
         }
 
-        // Base case: If depth is 0 or the game is over, evaluate the current state
-        if (depth == 0 || gameState.IsGameWon || gameState.IsGameLost)
+        if (depth == 0 || state.IsGameWon || state.IsGameLost)
         {
-            double score = evaluator.EvaluateState(gameState, moveCount);
+            double eval = Evaluator.EvaluateState(state);
+            // Store in transposition table
             TranspositionTable[stateHash] = new TranspositionTableEntry
             {
-                Score = score,
-                Depth = depth,
-                Alpha = alpha
+                Score = eval,
+                Depth = depth
             };
-            return score;
+            return eval;
         }
 
-        // Recursive case: EvaluateState moves - Order moves to improve pruning
-        double bestScore = double.NegativeInfinity;
-        var moves = gameState.GetLegalMoves();
-        foreach (var move in OrderMovesForEvaluation(gameState, moves))
+        var moves = state.GetLegalMoves();
+        if (moves.Count == 0)
         {
-            gameState.ExecuteMove(move);
-            double eval = EvaluateWithLookahead(gameState, depth - 1, alpha, moves.Count);
-            gameState.UndoMove(move);
-
-            bestScore = Math.Max(bestScore, eval);
-            alpha = Math.Max(alpha, eval);
-
-            // Prune the branch if the score cannot improve further
-            if (eval <= alpha)
+            double eval = Evaluator.EvaluateState(state);
+            TranspositionTable[stateHash] = new TranspositionTableEntry
             {
-                break; // Prune the branch
+                Score = eval,
+                Depth = depth
+            };
+            return eval;
+        }
+
+        double bestScore = double.NegativeInfinity;
+        foreach (var move in moves)
+        {
+            var clone = (TGameState)state.Clone();
+            clone.ExecuteMove(move);
+
+            double score;
+            if (move.IsTerminatingMove)
+            {
+                // Evaluate as a leaf node, do not recurse
+                score = Evaluator.EvaluateMove(state, move);
             }
+            else
+            {
+                double moveScore = Evaluator.EvaluateMove(state, move);
+                score = moveScore + Maximize(clone, depth - 1);
+            }
+
+            if (score > bestScore)
+                bestScore = score;
         }
 
         // Store the result in the transposition table
         TranspositionTable[stateHash] = new TranspositionTableEntry
         {
             Score = bestScore,
-            Depth = depth,
-            Alpha = alpha
+            Depth = depth
         };
 
         return bestScore;
-    }
-
-    public virtual IEnumerable<TMove> OrderMovesForEvaluation(TGameState gameState, List<TMove> moves)
-    {
-        // Order moves based on some heuristic
-        // This is a placeholder implementation and should be replaced with actual logic
-        return moves;
     }
 }

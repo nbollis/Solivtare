@@ -3,7 +3,7 @@
 public abstract class SolitaireMove(int fromPileIndex, int toPileIndex, bool shouldSkip = false) 
     : IMove<SolitaireGameState>
 {
-    public bool ShouldSkip { get; } = shouldSkip;
+    public bool IsTerminatingMove { get; } = shouldSkip;
     public int FromPileIndex { get; } = fromPileIndex;
     public int ToPileIndex { get; } = toPileIndex;
 

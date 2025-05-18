@@ -83,7 +83,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
                 var decision = agent.GetNextAction(gameState);
 
                 // Handle possible actions. 
-                if (decision.ShouldSkip)
+                if (decision.IsTerminatingMove)
                 {
                     Console.WriteLine("Game Skipped.");
                     break;

@@ -3,23 +3,8 @@ using SolvitaireCore;
 
 namespace SolvitaireGenetics;
 
-public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : StateEvaluator<SolitaireGameState, SolitaireMove>
+public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : SolitaireEvaluator
 {
-    public override double EvaluateMove(SolitaireGameState state, SolitaireMove move)
-    {
-        if (move.ShouldSkip)
-        {
-            // Reuse skip evaluation logic
-            return EvaluateSkipScore(state);
-        }
-
-        // Temporarily apply move
-        state.ExecuteMove(move);
-        double score = EvaluateState(state);
-        state.UndoMove(move);
-        return score;
-    }
-
     public override double EvaluateState(SolitaireGameState state, int? moveCount = null)
     {
         int legalMoveCount = moveCount ?? state.GetLegalMoves().Count;
@@ -103,7 +88,7 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : StateEv
         return score;
     }
 
-    public double EvaluateSkipScore(SolitaireGameState state)
+    public override double EvaluateSkipScore(SolitaireGameState state)
     {
         double score = 0.0;
 

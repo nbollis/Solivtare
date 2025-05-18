@@ -41,7 +41,7 @@ public class AgentSimulation
                 }
 
                 var decision = Agent.GetNextAction(gameState);
-                if (decision.ShouldSkip)
+                if (decision.IsTerminatingMove)
                 {
                     break;
                 }
@@ -64,10 +64,8 @@ public class AgentSimulation
 
     public void GameWon(SolitaireGameState gamestate)
     {
-        GameWonHandler?.Invoke(this, new(gamestate.Clone()));
+        GameWonHandler?.Invoke(this, new((SolitaireGameState)gamestate.Clone()));
     }
-
-
 }
 
 public class AgentSimulationResult

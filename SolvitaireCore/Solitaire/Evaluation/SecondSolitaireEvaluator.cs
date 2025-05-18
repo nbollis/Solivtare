@@ -1,6 +1,6 @@
 ﻿namespace SolvitaireCore;
 
-public class SecondSolitaireEvaluator : StateEvaluator<SolitaireGameState, SolitaireMove>
+public class SecondSolitaireEvaluator : SolitaireEvaluator
 {
     public override double EvaluateState(SolitaireGameState state, int? moveCount = null)
     {

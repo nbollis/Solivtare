@@ -2,7 +2,10 @@
 
 public interface IMove
 {
-
+    /// <summary>
+    /// This move terminates the game outside normal win/loss conditions. True for solitaire skip game. 
+    /// </summary>
+    bool IsTerminatingMove { get; }
 }
 
 /// <summary>
