@@ -162,14 +162,9 @@ public class GeneticAlgorithmTests
         var population = algorithm.InitializePopulation();
         var avgChromosome = population.Average(c => c.Fitness);
 
-        // Act
-        // Use reflection to access the protected TournamentSelection method
-        var tournamentSelectionMethod = typeof(GeneticAlgorithm<QuadraticChromosome, QuadraticGeneticAlgorithmParameters>)
-            .GetMethod("TournamentSelection", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        Assert.That(tournamentSelectionMethod, Is.Not.Null, "TournamentSelection method not found.");
-
-        var selectedChromosome = (List<QuadraticChromosome>)tournamentSelectionMethod.Invoke(algorithm, new object[] { population, 1 });
+        var tournamentSelection = new TournamentSelectionStrategy<QuadraticChromosome>();
+        var selectedChromosome = tournamentSelection.Select(population, 1, parameters, Random.Shared);
 
         // Assert
         Assert.That(selectedChromosome, Is.Not.Null);
@@ -191,14 +186,8 @@ public class GeneticAlgorithmTests
         var population = algorithm.InitializePopulation();
         var bestChromosome = population.OrderByDescending(c => c.Fitness).First();
 
-        // Act
-        // Use reflection to access the protected TournamentSelection method
-        var tournamentSelectionMethod = typeof(GeneticAlgorithm<QuadraticChromosome, QuadraticGeneticAlgorithmParameters>)
-            .GetMethod("TournamentSelection", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        Assert.That(tournamentSelectionMethod, Is.Not.Null, "TournamentSelection method not found.");
-
-        var selectedChromosome = (List<QuadraticChromosome>)tournamentSelectionMethod.Invoke(algorithm, new object[] { population, 1 });
+        var tournamentSelection = new TournamentSelectionStrategy<QuadraticChromosome>();
+        var selectedChromosome = tournamentSelection.Select(population, 1, parameters, Random.Shared);
 
         // Assert
         Assert.That(selectedChromosome[0].Fitness, Is.EqualTo(bestChromosome.Fitness).Within(0.0001));
@@ -374,12 +363,9 @@ public class GeneticAlgorithmTests
         var population = algorithm.InitializePopulation();
 
         // Act
-        var tournamentSelectionMethod = typeof(GeneticAlgorithm<QuadraticChromosome, QuadraticGeneticAlgorithmParameters>)
-            .GetMethod("TournamentSelection", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        Assert.That(tournamentSelectionMethod, Is.Not.Null, "TournamentSelection method not found.");
-
-        var selectedParents = (List<QuadraticChromosome>)tournamentSelectionMethod.Invoke(algorithm, new object[] { population, 30 });
+        var tournamentSelection = new TournamentSelectionStrategy<QuadraticChromosome>();
+        var selectedParents = tournamentSelection.Select(population, 30, parameters, Random.Shared);
 
 
         // Assert

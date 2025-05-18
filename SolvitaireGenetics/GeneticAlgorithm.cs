@@ -126,50 +126,6 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     }
 
     /// <summary>
-    /// Grab a random sample of size _tournamentSize from the population and return the best one
-    /// </summary>
-    /// <summary>
-    /// Selects parents for the entire evolution process using tournament selection.
-    /// </summary>
-    protected List<TChromosome> TournamentSelection(List<TChromosome> population, int numberOfParents)
-    {
-        var selectedParents = new List<TChromosome>(numberOfParents);
-
-        // Shuffle the population to ensure fairness
-        var shuffledPopulation = population.OrderBy(_ => Random.Next()).ToList();
-        int currentIndex = 0;
-
-        // Create tournaments
-        for (int i = 0; i < numberOfParents; i++)
-        {
-            var tournament = new List<TChromosome>(Parameters.TournamentSize);
-
-            // Select TournamentSize chromosomes from the shuffled population
-            for (int j = 0; j < Parameters.TournamentSize; j++)
-            {
-                // If we reach the end of the shuffled population, reshuffle and reset the index
-                if (currentIndex >= shuffledPopulation.Count)
-                {
-                    shuffledPopulation = population.OrderBy(_ => Random.Next()).ToList();
-                    currentIndex = 0;
-                }
-
-                tournament.Add(shuffledPopulation[currentIndex]);
-                currentIndex++;
-            }
-
-            // Select the winner based on fitness
-            var winner = tournament
-                .OrderByDescending(chromosome => chromosome.Fitness)
-                .First();
-
-            selectedParents.Add(winner);
-        }
-
-        return selectedParents;
-    }
-
-    /// <summary>
     /// Creates a random population of chromosomes with random weights.
     /// </summary>
     /// <returns></returns>

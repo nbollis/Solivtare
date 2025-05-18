@@ -249,11 +249,11 @@
                             <ContentControl Content="{Binding Parameters}">
                                 <ContentControl.Resources>
                                     <DataTemplate
-                                        DataType="{x:Type solvitaireGenetics:SolitaireGeneticAlgorithmParameters}">
+                                        DataType="{x:Type local:SolitaireGeneticAlgorithmParametersViewModel}">
                                         <local:SolitaireGeneticParametersControl />
                                     </DataTemplate>
                                     <DataTemplate
-                                        DataType="{x:Type solvitaireGenetics:QuadraticGeneticAlgorithmParameters}">
+                                        DataType="{x:Type local:QuadraticGeneticAlgorithmParametersViewModel}">
                                         <local:QuadraticGeneticParametersControl />
                                     </DataTemplate>
                                 </ContentControl.Resources>
