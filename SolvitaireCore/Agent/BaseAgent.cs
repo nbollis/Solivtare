@@ -1,9 +1,11 @@
 ﻿namespace SolvitaireCore;
 
-public abstract class SolitaireAgent : IAgent<SolitaireGameState>
+public abstract class BaseAgent<TGameState, TMove> : IAgent<TGameState, TMove>
+    where TGameState : IGameState<TMove>
+    where TMove : IMove
 {
     public abstract string Name { get; }
-    public abstract AgentDecision GetNextAction(SolitaireGameState gameState);
+    public abstract TMove GetNextAction(TGameState gameState);
 
     /// <summary>
     /// Transposition table for memoization where the Key is the hash of the game state and the Value is the score.
@@ -13,17 +15,6 @@ public abstract class SolitaireAgent : IAgent<SolitaireGameState>
     public virtual void ResetState()
     {
         TranspositionTable.Clear();
-    }
-
-    /// <summary>
-    /// Determines if the current game state is unwinnable.
-    /// </summary>
-    /// <param name="gameState">The current game state.</param>
-    /// <returns>True if the game is unwinnable, otherwise false.</returns>
-    public virtual bool IsGameUnwinnable(SolitaireGameState gameState)
-    {
-        // Default implementation: Check if there are no legal moves and the game is not won.
-        return false;
     }
 }
 

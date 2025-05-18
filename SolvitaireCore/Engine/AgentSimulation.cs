@@ -9,12 +9,12 @@ public class GameStateEventArgs(SolitaireGameState result) : EventArgs()
 
 public class AgentSimulation
 {
-    public readonly SolitaireAgent Agent;
+    public readonly BaseAgent<SolitaireGameState, SolitaireMove> Agent;
     public readonly StandardDeck Deck;
 
     public static event EventHandler<GameStateEventArgs> GameWonHandler = null!; 
 
-    public AgentSimulation(SolitaireAgent agent, StandardDeck deck)
+    public AgentSimulation(BaseAgent<SolitaireGameState, SolitaireMove> agent, StandardDeck deck)
     {
         Agent = agent;
         Deck = deck;
@@ -41,13 +41,13 @@ public class AgentSimulation
                 }
 
                 var decision = Agent.GetNextAction(gameState);
-                if (decision.ShouldSkipGame)
+                if (decision.ShouldSkip)
                 {
                     break;
                 }
                 else
                 {
-                    gameState.ExecuteMove(decision.Move!);
+                    gameState.ExecuteMove(decision);
                 }
 
                 movesPlayed++;

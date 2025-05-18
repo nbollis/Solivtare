@@ -47,7 +47,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
     public override double EvaluateFitness(SolitaireChromosome chromosome, CancellationToken? cancellationToken = null)
     {
         var evaluator = new GeneticSolitaireEvaluator(chromosome);
-        var agent = new MaxiMaxAgent(evaluator, 8);
+        var agent = new MaximizingSolitaireAgent(evaluator, 8);
         var gameState = new SolitaireGameState();
 
         int movesPlayed = 0;
@@ -83,17 +83,17 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
                 var decision = agent.GetNextAction(gameState);
 
                 // Handle possible actions. 
-                if (decision.ShouldSkipGame)
+                if (decision.ShouldSkip)
                 {
                     Console.WriteLine("Game Skipped.");
                     break;
                 }
-                else if (decision.Move == null)
+                else if (decision == null)
                 {
                 }
                 else
                 {
-                    gameState.ExecuteMove(decision.Move!);
+                    gameState.ExecuteMove(decision);
                 }
 
                 movesPlayed++;

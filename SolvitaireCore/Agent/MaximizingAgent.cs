@@ -1,37 +1,32 @@
-﻿
-using System;
+﻿namespace SolvitaireCore;
 
-namespace SolvitaireCore;
-
-/// <summary>  
-/// A simple evaluation agent that uses a heuristic evaluation function to select the best move.  
-/// </summary>  
-public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) : SolitaireAgent
+/// <summary>
+/// Picks the move which maximizes the score of the game state.
+/// Best for one player games. 
+/// </summary>
+/// <param name="evaluator"></param>
+/// <param name="maxLookahead">Moves to look ahead</param>
+public class MaximizingAgent<TGameState, TMove>(IStateEvaluator<TGameState> evaluator, int maxLookahead = 10) : BaseAgent<TGameState, TMove>
+    where TGameState : IGameState<TMove>
+    where TMove : IMove
 {
-    
-    private SolitaireMove? _previousBestMove;
+    protected TMove? PreviousBestMove;
 
-    public override string Name => "MaxiMax Agent";
+    public override string Name => "Maximizing Agent";
     public int LookAheadSteps { get; } = maxLookahead;
-
-    public override AgentDecision GetNextAction(SolitaireGameState gameState)
+    public override TMove GetNextAction(TGameState gameState)
     {
-        SolitaireMove bestMove = null!;
-
         var moves = gameState.GetLegalMoves();
-        if (evaluator.ShouldSkipGame(gameState)) // TODO: Some better criteria for skipping games
-        {
-            return AgentDecision.SkipGame();
-        }
+        TMove bestMove = moves[0]; // Fallback value
 
         // Iterative Deepening: Search for best of depth 1 and use that to determine the order to search depth 2 and so on.  
         // You would think this would make the search slower, but alpha-beta gains far outweigh.  
         for (int depth = 1; depth <= LookAheadSteps; depth++)
         {
             double alpha = double.NegativeInfinity;
-            List<SolitaireMove> bestMoves = new();
+            List<TMove> bestMoves = new();
 
-            foreach (var move in OrderMoves(gameState, moves))
+            foreach (var move in OrderMovesForEvaluation(gameState, moves))
             {
                 gameState.ExecuteMove(move);
                 double score = EvaluateWithLookahead(gameState, depth - 1, alpha, moves.Count);
@@ -57,19 +52,14 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
             }
 
             // Cache the best move for the next depth  
-            _previousBestMove = bestMove;
+            PreviousBestMove = bestMove;
         }
 
 
-        return AgentDecision.PlayMove(bestMove);
+        return bestMove;
     }
 
-    public override bool IsGameUnwinnable(SolitaireGameState gameState)
-    {
-        return evaluator.ShouldSkipGame(gameState);
-    }
-
-    private double EvaluateWithLookahead(SolitaireGameState gameState, int depth, double alpha, int moveCount)
+    protected double EvaluateWithLookahead(TGameState gameState, int depth, double alpha, int moveCount)
     {
         // Generate a hash for the current game state
         int stateHash = gameState.GetHashCode();
@@ -85,7 +75,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
         }
 
         // Base case: If depth is 0 or the game is over, evaluate the current state
-        if (depth == 0 || gameState.IsGameWon /*|| gameState.IsGameLost*/)
+        if (depth == 0 || gameState.IsGameWon || gameState.IsGameLost)
         {
             double score = evaluator.Evaluate(gameState, moveCount);
             TranspositionTable[stateHash] = new TranspositionTableEntry
@@ -100,7 +90,7 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
         // Recursive case: Evaluate moves - Order moves to improve pruning
         double bestScore = double.NegativeInfinity;
         var moves = gameState.GetLegalMoves();
-        foreach (var move in OrderMoves(gameState, moves))
+        foreach (var move in OrderMovesForEvaluation(gameState, moves))
         {
             gameState.ExecuteMove(move);
             double eval = EvaluateWithLookahead(gameState, depth - 1, alpha, moves.Count);
@@ -127,38 +117,10 @@ public class MaxiMaxAgent(SolitaireEvaluator evaluator, int maxLookahead = 10) :
         return bestScore;
     }
 
-    private static readonly ListPool<(SolitaireMove move, double score)> _scoredMovePool = new(8);
-
-    private IEnumerable<SolitaireMove> OrderMoves(SolitaireGameState gameState, List<SolitaireMove> moves)
+    public virtual IEnumerable<TMove> OrderMovesForEvaluation(TGameState gameState, List<TMove> moves)
     {
-        // Get a pooled list for scored moves
-        var scoredMoves = _scoredMovePool.Get();
-        try
-        {
-            foreach (var move in moves)
-            {
-                double score = 0;
-                if (_previousBestMove != null && move.Equals(_previousBestMove))
-                    score = int.MaxValue;
-                else
-                {
-                    if (move.ToPileIndex == SolitaireGameState.FoundationStartIndex) score += 20;
-                    if (move.ToPileIndex <= SolitaireGameState.TableauEndIndex && move.FromPileIndex > SolitaireGameState.TableauEndIndex) score += 10;
-                    if (move.FromPileIndex == SolitaireGameState.StockIndex) score += 2;
-                }
-                scoredMoves.Add((move, score));
-            }
-
-            scoredMoves.Sort((a, b) => b.score.CompareTo(a.score));
-
-            foreach (var move in scoredMoves.Select(p => p.move))
-            {
-                yield return move;
-            }
-        }
-        finally
-        {
-            _scoredMovePool.Return(scoredMoves);
-        }
+        // Order moves based on some heuristic
+        // This is a placeholder implementation and should be replaced with actual logic
+        return moves;
     }
 }

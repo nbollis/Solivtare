@@ -30,12 +30,11 @@ public class AgentPlayingViewModel : BaseViewModel
         gameState.DealCards(_deck);
         GameStateViewModel = new GameStateViewModel(gameState);
         LegalMoves = new();
-        Agent = new RandomAgent();
+        Agent = new RandomSolitaireAgent();
         AllAgents = new()
         {
             Agent,
-            new BruteForceEvaluationAgent(_evaluator),
-            new MaxiMaxAgent(_evaluator, 20),
+            new MaximizingSolitaireAgent(_evaluator, 20),
         };
 
         _shadowGameState = GameStateViewModel.BaseGameState.Clone();
@@ -56,7 +55,7 @@ public class AgentPlayingViewModel : BaseViewModel
     private SolitaireEvaluator _evaluator;
     private SolitaireGameState _shadowGameState; // Used during gameplay to not update UI while moves are made and unmade
     private CancellationTokenSource? _agentCancellationTokenSource;
-    private SolitaireAgent _agent;
+    private BaseAgent<SolitaireGameState, SolitaireMove> _agent;
     private double _evaluation;
     private int _movesMade;
 
@@ -80,7 +79,7 @@ public class AgentPlayingViewModel : BaseViewModel
         }
     }
 
-    public SolitaireAgent Agent
+    public BaseAgent<SolitaireGameState, SolitaireMove> Agent
     {
         get => _agent;
         set
@@ -90,7 +89,7 @@ public class AgentPlayingViewModel : BaseViewModel
         }
     }
 
-    public ObservableCollection<SolitaireAgent> AllAgents { get; set; }
+    public ObservableCollection<BaseAgent<SolitaireGameState, SolitaireMove>> AllAgents { get; set; }
 
     public ICommand StartAgentCommand { get; set; }
     public ICommand StopAgentCommand { get; set; }
@@ -115,15 +114,15 @@ public class AgentPlayingViewModel : BaseViewModel
                 // Use the shadow game state for the agent's search
                 var decision = await Task.Run(() => Agent.GetNextAction(_shadowGameState), token);
 
-                if (decision.ShouldSkipGame)
+                if (decision.ShouldSkip)
                 {
                     // Handle the case where the agent decides to skip the game
                     break;
                 }
-                else if (decision.Move != null)
+                else if (decision != null)
                 {
                     // Apply the move to the real game state and update the shadow state
-                    MakeSpecificMove(decision.Move);
+                    MakeSpecificMove(decision);
                 }
                 else
                 {
@@ -159,14 +158,14 @@ public class AgentPlayingViewModel : BaseViewModel
     {
         // Use the shadow game state for the agent's search
         var action = Agent.GetNextAction(_shadowGameState);
-        if (action.ShouldSkipGame)
+        if (action.ShouldSkip)
         {
             NewGame();
             return;
         }
-        if (action.Move != null)
+        if (action != null)
         {
-            var move = action.Move;
+            var move = action;
             MakeSpecificMove(move);
         }
     }
@@ -207,15 +206,12 @@ public class AgentPlayingViewModel : BaseViewModel
             case MoveViewModel vm:
                 move = vm.Move;
                 break;
-            case SolitaireMove mo:
+            case SolitaireMove { ShouldSkip: false } mo:
                 move = mo;
                 break;
-            case AgentDecision { ShouldSkipGame: true }:
+            case SolitaireMove { ShouldSkip: true }:
                 NewGame();
                 return;
-            case AgentDecision decision:
-                move = decision.Move ?? throw new InvalidOperationException("Decision does not contain a valid move.");
-                break;
             default:
                 return;
         }
@@ -288,6 +284,6 @@ public class AgentPlayingModel : AgentPlayingViewModel
 
     AgentPlayingModel() : base()
     {
-        Agent = new RandomAgent();
+        Agent = new RandomSolitaireAgent();
     }
 }

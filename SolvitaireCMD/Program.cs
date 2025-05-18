@@ -15,7 +15,7 @@ namespace MyApp
                 {
                     int seconds = int.Parse(args[0]);
                     var gameState = new SolitaireGameState();
-                    var agent = new MaxiMaxAgent(new SecondSolitaireEvaluator());
+                    var agent = new MaximizingSolitaireAgent(new SecondSolitaireEvaluator());
                     var deck = new StandardDeck();
                     deck.Shuffle();
 
@@ -60,7 +60,7 @@ namespace MyApp
                     int threadId = i; // Capture loop variable  
                     workers[i] = Task.Run(() =>
                     {
-                        var agent = new MaxiMaxAgent(new SecondSolitaireEvaluator());
+                        var agent = new MaximizingSolitaireAgent(new SecondSolitaireEvaluator());
                         var moveGenerator = new SolitaireMoveGenerator();
 
                         var referenceDeck = new StandardDeck(threadId+1 * 7);
@@ -78,7 +78,7 @@ namespace MyApp
             }
         }
 
-        public static void RunGameWithAgentUntilWinOrTimeout(StandardDeck deck, SolitaireAgent agent,
+        public static void RunGameWithAgentUntilWinOrTimeout(StandardDeck deck, IAgent<SolitaireGameState, SolitaireMove> agent,
             SolitaireMoveGenerator moveGenerator, DeckStatisticsFile winningDealLog, DeckStatisticsFile allDealLog, int threadId, int timeout = 60)
         {
             var gameState = new SolitaireGameState();
@@ -93,19 +93,19 @@ namespace MyApp
 
                 try
                 {
-                    if (decision.ShouldSkipGame)
+                    if (decision.ShouldSkip)
                     {
                         Console.WriteLine($"Thread {threadId} skipped the game.");
                         break;
                     }
 
-                    if (decision.Move == null)
+                    if (decision == null)
                     {
                         Console.WriteLine($"Thread {threadId} made no move.");
                         break;
                     }
 
-                    gameState.ExecuteMove(decision.Move);
+                    gameState.ExecuteMove(decision);
                 }
                 catch
                 {
