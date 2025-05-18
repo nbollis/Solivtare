@@ -7,7 +7,7 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     public readonly int CardsPerCycle;
     public readonly int MaximumCycles = int.MaxValue;
     public int CycleCount = 0;
-    public int MovesMade = 0;
+    public int MovesMade { get; private set; } = 0;
 
     public List<TableauPile> TableauPiles { get; set; }
 
