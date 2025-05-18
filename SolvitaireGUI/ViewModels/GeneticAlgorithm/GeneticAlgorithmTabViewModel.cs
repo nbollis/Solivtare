@@ -321,9 +321,16 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             OnPropertyChanged(nameof(SelectedAlgorithmType));
 
             // Update the Chromosome Template to be the correct type
-            ChromosomeTemplate = value.Parameters.TemplateChromosome is not null 
-                ? new ChromosomeViewModel(value.Parameters.TemplateChromosome)
-                : SelectedAlgorithmType.ToNewChromosomeViewModel();
+            if (value.Parameters.TemplateChromosome != null)
+            {
+                ChromosomeTemplate = new ChromosomeViewModel(value.Parameters.TemplateChromosome);
+                UseChromosomeTemplate = true;
+            }
+            else
+            {
+                ChromosomeTemplate = SelectedAlgorithmType.ToNewChromosomeViewModel();
+                UseChromosomeTemplate = false;
+            }
         }
     }
 
