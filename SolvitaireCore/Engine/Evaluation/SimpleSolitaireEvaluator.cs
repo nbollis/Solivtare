@@ -1,8 +1,8 @@
 ﻿namespace SolvitaireCore;
 
-public class SimpleSolitaireEvaluator : SolitaireEvaluator
+public class SimpleSolitaireEvaluator : StateEvaluator<SolitaireGameState, SolitaireMove>
 {
-    public override double Evaluate(SolitaireGameState state, int? moveCount = null)
+    public override double EvaluateState(SolitaireGameState state, int? moveCount = null)
     {
         // Example: more cards in foundation = better
         return state.FoundationPiles.Sum(stack => stack.Count)

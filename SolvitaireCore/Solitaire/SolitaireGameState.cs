@@ -109,7 +109,8 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     {
         if (_cachedMoves is null || _isDirty)
         {
-            _cachedMoves = MoveGenerator.GenerateMoves(this).ToList();
+            _cachedMoves = MoveGenerator.GenerateMoves(this).ToList(); 
+            _cachedMoves.Add(new SkipGameMove()); // ← Add SkipMove
             _isDirty = false;
         }
         return _cachedMoves;

@@ -6,7 +6,7 @@
 /// </summary>
 /// <param name="evaluator"></param>
 /// <param name="maxLookahead">Moves to look ahead</param>
-public class MaximizingAgent<TGameState, TMove>(IStateEvaluator<TGameState> evaluator, int maxLookahead = 10) : BaseAgent<TGameState, TMove>
+public class MaximizingAgent<TGameState, TMove>(StateEvaluator<TGameState, TMove> evaluator, int maxLookahead = 10) : BaseAgent<TGameState, TMove>
     where TGameState : IGameState<TMove>
     where TMove : IMove
 {
@@ -77,7 +77,7 @@ public class MaximizingAgent<TGameState, TMove>(IStateEvaluator<TGameState> eval
         // Base case: If depth is 0 or the game is over, evaluate the current state
         if (depth == 0 || gameState.IsGameWon || gameState.IsGameLost)
         {
-            double score = evaluator.Evaluate(gameState, moveCount);
+            double score = evaluator.EvaluateState(gameState, moveCount);
             TranspositionTable[stateHash] = new TranspositionTableEntry
             {
                 Score = score,
@@ -87,7 +87,7 @@ public class MaximizingAgent<TGameState, TMove>(IStateEvaluator<TGameState> eval
             return score;
         }
 
-        // Recursive case: Evaluate moves - Order moves to improve pruning
+        // Recursive case: EvaluateState moves - Order moves to improve pruning
         double bestScore = double.NegativeInfinity;
         var moves = gameState.GetLegalMoves();
         foreach (var move in OrderMovesForEvaluation(gameState, moves))

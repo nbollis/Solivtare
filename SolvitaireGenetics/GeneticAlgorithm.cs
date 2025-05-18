@@ -82,7 +82,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
 
             _loggingTask.Wait(); // Wait for the previous logging task to complete if it hasn't finished
 
-            // Step 3: Evaluate fitness for unique chromosomes only
+            // Step 3: EvaluateState fitness for unique chromosomes only
             var uniqueChromosomes = Population
                 .GroupBy(c => c.GetStableHash())
                 .Select(g => g.First())

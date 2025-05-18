@@ -3,9 +3,24 @@ using SolvitaireCore;
 
 namespace SolvitaireGenetics;
 
-public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : SolitaireEvaluator
+public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : StateEvaluator<SolitaireGameState, SolitaireMove>
 {
-    public override double Evaluate(SolitaireGameState state, int? moveCount = null)
+    public override double EvaluateMove(SolitaireGameState state, SolitaireMove move)
+    {
+        if (move.ShouldSkip)
+        {
+            // Reuse skip evaluation logic
+            return EvaluateSkipScore(state);
+        }
+
+        // Temporarily apply move
+        state.ExecuteMove(move);
+        double score = EvaluateState(state);
+        state.UndoMove(move);
+        return score;
+    }
+
+    public override double EvaluateState(SolitaireGameState state, int? moveCount = null)
     {
         int legalMoveCount = moveCount ?? state.GetLegalMoves().Count;
         int foundationCount = state.FoundationPiles.Sum(pile => pile.Count);
@@ -88,7 +103,7 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
         return score;
     }
 
-    public override bool ShouldSkipGame(SolitaireGameState state)
+    public double EvaluateSkipScore(SolitaireGameState state)
     {
         double score = 0.0;
 
@@ -118,8 +133,6 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
 
         // Multiply by the number of moves made so far and its weight
         score *= chromosome.GetWeight(SolitaireChromosome.MoveCountScalarName) * state.MovesMade;
-
-        double threshold = chromosome.GetWeight(SolitaireChromosome.Skip_ThresholdWeightName);
-        return score < threshold;
+        return score;
     }
 }

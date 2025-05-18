@@ -52,7 +52,7 @@ public class AgentPlayingViewModel : BaseViewModel
 
     #region Agent Playing
 
-    private SolitaireEvaluator _evaluator;
+    private StateEvaluator<SolitaireGameState, SolitaireMove> _evaluator;
     private SolitaireGameState _shadowGameState; // Used during gameplay to not update UI while moves are made and unmade
     private CancellationTokenSource? _agentCancellationTokenSource;
     private BaseAgent<SolitaireGameState, SolitaireMove> _agent;
@@ -267,12 +267,12 @@ public class AgentPlayingViewModel : BaseViewModel
         foreach (var move in GameStateViewModel.GetLegalMoves())
         {
             _shadowGameState.ExecuteMove(move);
-            double eval = _evaluator.Evaluate(_shadowGameState);
+            double eval = _evaluator.EvaluateState(_shadowGameState);
             _shadowGameState.UndoMove(move);
             LegalMoves.Add(new MoveViewModel(move, eval));
         }
 
-        Evaluation = _evaluator.Evaluate(_shadowGameState);
+        Evaluation = _evaluator.EvaluateState(_shadowGameState);
         OnPropertyChanged(nameof(GameStateViewModel));
         OnPropertyChanged(nameof(Agent));
     }

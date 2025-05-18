@@ -1,10 +1,8 @@
-﻿using static System.Formats.Asn1.AsnWriter;
+﻿namespace SolvitaireCore;
 
-namespace SolvitaireCore;
-
-public class SecondSolitaireEvaluator : SolitaireEvaluator
+public class SecondSolitaireEvaluator : StateEvaluator<SolitaireGameState, SolitaireMove>
 {
-    public override double Evaluate(SolitaireGameState state, int? moveCount = null)
+    public override double EvaluateState(SolitaireGameState state, int? moveCount = null)
     {
         double score = 0;
 
