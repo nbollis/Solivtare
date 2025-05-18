@@ -67,9 +67,8 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
             if (gamesPlayed >= Parameters.MaxGamesPerGeneration)
                 break;
 
-            int movesPlayedThisGame = 0;
-            // Evenly divide the moves across the max allowed games. 
-            while (!gameState.IsGameWon && movesPlayedThisGame <= (Parameters.MaxMovesPerGeneration - movesPlayed) / (Parameters.MaxGamesPerGeneration - gamesPlayed))
+            // Play a game until it is skipped, or you run out of moves. 
+            while (!gameState.IsGameWon)
             {
                 if (movesPlayed >= Parameters.MaxMovesPerGeneration)
                 {
@@ -98,7 +97,6 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
                 }
 
                 movesPlayed++;
-                movesPlayedThisGame++;
             }
 
             if (gameState.IsGameWon)

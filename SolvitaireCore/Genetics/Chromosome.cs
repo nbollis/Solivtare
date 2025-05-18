@@ -10,8 +10,8 @@ public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosom
     private const int RoundingPlace = 4;
     protected readonly Random Random;
     protected bool CanFullRandomMutate = true;
-    protected int WeightMinStartValue = -2;
-    protected int WeightMaxStartValue = 2;
+    protected int WeightMinStartValue = -5;
+    protected int WeightMaxStartValue = 5;
     public int SpeciesIndex = -1;
     public double Fitness { get; set; } = double.MinValue;
 
