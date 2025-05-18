@@ -165,6 +165,15 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         best.MutableStatsByName[SolitaireChromosome.FoundationRangeWeightName] = -0.4776;
         best.MutableStatsByName[SolitaireChromosome.FoundationDeviationWeightName] = -1.1048;
 
+        // Evaluating Moves
+        best.MutableStatsByName[SolitaireChromosome.Move_FromTableauWeightName] = 0.0;
+        best.MutableStatsByName[SolitaireChromosome.Move_ToTableauWeightName] = 0.0;
+        best.MutableStatsByName[SolitaireChromosome.Move_ToFoundationWeightName] = 0.0;
+        best.MutableStatsByName[SolitaireChromosome.Move_FromFoundationWeightName] = 0.0;
+        best.MutableStatsByName[SolitaireChromosome.Move_FromWasteWeightName] = 0.0;
+        best.MutableStatsByName[SolitaireChromosome.Move_FromStockWeightName] = 0.0;
+        best.MutableStatsByName[SolitaireChromosome.Move_TableaToTableauWeightName] = 0.0;
+
         // Skipping Games
         best.MutableStatsByName[SolitaireChromosome.MoveCountScalarName] = -0.4904;
         best.MutableStatsByName[SolitaireChromosome.Skip_FoundationCount] = -1.8681;

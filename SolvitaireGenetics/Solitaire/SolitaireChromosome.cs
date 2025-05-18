@@ -4,7 +4,7 @@ namespace SolvitaireGenetics;
 
 public class SolitaireChromosome : Chromosome
 {
-    // For move decisions
+    // For position evaluation decisions
     public const string LegalMoveWeightName = "LegalMoveWeight";
     public const string FoundationWeightName = "FoundationWeight";
     public const string WasteWeightName = "WasteWeight";
@@ -19,6 +19,15 @@ public class SolitaireChromosome : Chromosome
     public const string AceInTableauWeightName = "AceInTableauWeight";
     public const string FoundationRangeWeightName = "FoundationRangeWeight";
     public const string FoundationDeviationWeightName = "FoundationDeviationWeight";
+
+    // For move evaluation
+    public const string Move_ToTableauWeightName = "ToTableauWeight";
+    public const string Move_FromTableauWeightName = "FromTableauWeight";
+    public const string Move_ToFoundationWeightName = "ToFoundationWeight";
+    public const string Move_FromFoundationWeightName = "FromFoundationWeight";
+    public const string Move_FromWasteWeightName = "FromWasteWeight";
+    public const string Move_FromStockWeightName = "FromStockWeight";
+    public const string Move_TableaToTableauWeightName = "TableaToTableauWeight"; 
 
     // For skip decisions. 
     public const string MoveCountScalarName = "MoveCountWeight";
@@ -35,6 +44,7 @@ public class SolitaireChromosome : Chromosome
 
     public SolitaireChromosome(Random random) : base(random)
     {
+        // Position evaluation weights
         MutableStatsByName[LegalMoveWeightName] = GenerateRandomWeight();
         MutableStatsByName[FoundationWeightName] = GenerateRandomWeight();
         MutableStatsByName[WasteWeightName] = GenerateRandomWeight();
@@ -50,6 +60,16 @@ public class SolitaireChromosome : Chromosome
         MutableStatsByName[FoundationRangeWeightName] = GenerateRandomWeight();
         MutableStatsByName[FoundationDeviationWeightName] = GenerateRandomWeight();
 
+        // Move evaluation weights
+        MutableStatsByName[Move_ToTableauWeightName] = GenerateRandomWeight();
+        MutableStatsByName[Move_FromTableauWeightName] = GenerateRandomWeight();
+        MutableStatsByName[Move_ToFoundationWeightName] = GenerateRandomWeight();
+        MutableStatsByName[Move_FromFoundationWeightName] = GenerateRandomWeight();
+        MutableStatsByName[Move_FromWasteWeightName] = GenerateRandomWeight();
+        MutableStatsByName[Move_FromStockWeightName] = GenerateRandomWeight();
+        MutableStatsByName[Move_TableaToTableauWeightName] = GenerateRandomWeight();
+
+        // Skip evaluation weights
         MutableStatsByName[MoveCountScalarName] = GenerateRandomWeight();
         MutableStatsByName[Skip_ThresholdWeightName] = GenerateRandomWeight();
         MutableStatsByName[Skip_FoundationCount] = GenerateRandomWeight();

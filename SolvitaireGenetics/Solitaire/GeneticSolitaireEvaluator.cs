@@ -5,6 +5,43 @@ namespace SolvitaireGenetics;
 
 public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : SolitaireEvaluator
 {
+    public override double EvaluateMove(SolitaireGameState state, SolitaireMove move)
+    {
+        if (move.IsTerminatingMove)
+        {
+            // Reuse skip evaluation logic
+            return EvaluateSkipScore(state);
+        }
+
+        double score = 0;
+
+        // Foundation moves are mutually exclusive
+        if (move.ToPileIndex >= SolitaireGameState.FoundationStartIndex && move.ToPileIndex <= SolitaireGameState.FoundationEndIndex) 
+            score += chromosome.GetWeight(SolitaireChromosome.Move_ToFoundationWeightName);
+        else if (move.FromPileIndex >= SolitaireGameState.FoundationStartIndex && move.ToPileIndex <= SolitaireGameState.FoundationEndIndex)
+            score += chromosome.GetWeight(SolitaireChromosome.Move_FromFoundationWeightName);
+
+        // Tableau moves
+        if (move.ToPileIndex <= SolitaireGameState.TableauEndIndex)
+        {
+            score += chromosome.GetWeight(SolitaireChromosome.Move_ToTableauWeightName);
+            if (move.FromPileIndex > SolitaireGameState.TableauEndIndex)
+                score += chromosome.GetWeight(SolitaireChromosome.Move_TableaToTableauWeightName);
+        }
+        else if (move.FromPileIndex <= SolitaireGameState.TableauEndIndex)
+            score += chromosome.GetWeight(SolitaireChromosome.Move_FromTableauWeightName);
+
+        // Waste moves
+        if (move.FromPileIndex == SolitaireGameState.WasteIndex)
+            score += chromosome.GetWeight(SolitaireChromosome.Move_FromWasteWeightName);
+
+        // Stock moves
+        if (move.FromPileIndex == SolitaireGameState.StockIndex)
+            score += chromosome.GetWeight(SolitaireChromosome.Move_FromStockWeightName);
+
+        return score;
+    }
+
     public override double EvaluateState(SolitaireGameState state, int? moveCount = null)
     {
         int legalMoveCount = moveCount ?? state.GetLegalMoves().Count;
