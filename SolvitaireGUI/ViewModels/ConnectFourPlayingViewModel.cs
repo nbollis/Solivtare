@@ -6,79 +6,23 @@ namespace SolvitaireGUI;
 
 public enum PlayerType { Human, Agent }
 
+
+
+
 public class ConnectFourPlayingViewModel : BaseViewModel
 {
     #region Agent Handling
 
     private CancellationTokenSource? _agentCts;
-    private PlayerType _player1Type = PlayerType.Agent;
-    public PlayerType Player1Type
-    {
-        get => _player1Type;
-        set
-        {
-            if (_player1Type != value)
-            {
-                _player1Type = value;
-                OnPropertyChanged(nameof(Player1Type));
-            }
-        }
-    }
-
-    private PlayerType _player2Type = PlayerType.Agent;
-    public PlayerType Player2Type
-    {
-        get => _player2Type;
-        set
-        {
-            if (_player2Type != value)
-            {
-                _player2Type = value;
-                OnPropertyChanged(nameof(Player2Type));
-            }
-        }
-    }
-
-    private IAgent<ConnectFourGameState, ConnectFourMove>? _player1Agent;
-    public IAgent<ConnectFourGameState, ConnectFourMove>? Player1Agent
-    {
-        get => _player1Agent;
-        set
-        {
-            if (_player1Agent != value)
-            {
-                _player1Agent = value;
-                OnPropertyChanged(nameof(Player1Agent));
-            }
-        }
-    }
-
-    private IAgent<ConnectFourGameState, ConnectFourMove>? _player2Agent;
-    public IAgent<ConnectFourGameState, ConnectFourMove>? Player2Agent
-    {
-        get => _player2Agent;
-        set
-        {
-            if (_player2Agent != value)
-            {
-                _player2Agent = value;
-                OnPropertyChanged(nameof(Player2Agent));
-            }
-        }
-    }
+    public AgentPanelViewModel Player1Panel { get; } 
+    public AgentPanelViewModel Player2Panel { get; }
 
     public ObservableCollection<IAgent<ConnectFourGameState, ConnectFourMove>> AvailableAgents { get; } // Populate with agent instances
-
-
     public ICommand SwapPlayersCommand { get; }
-    public ICommand SwitchPlayer1ToHumanCommand { get; }
-    public ICommand SwitchPlayer2ToHumanCommand { get; }
-    public ICommand SwitchPlayer1ToAgentCommand { get; }
-    public ICommand SwitchPlayer2ToAgentCommand { get; }
     private void SwapPlayers()
     {
-        (Player1Type, Player2Type) = (Player2Type, Player1Type);
-        (Player1Agent, Player2Agent) = (Player2Agent, Player1Agent);
+        (Player1Panel.PlayerType, Player2Panel.PlayerType) = (Player2Panel.PlayerType, Player1Panel.PlayerType);
+        (Player1Panel.SelectedAgent, Player2Panel.SelectedAgent) = (Player2Panel.SelectedAgent, Player1Panel.SelectedAgent);
     }
 
     private void StopAgentPlay()
@@ -114,8 +58,8 @@ public class ConnectFourPlayingViewModel : BaseViewModel
             return;
 
         int currentPlayer = GameStateViewModel.GameState.CurrentPlayer;
-        if ((currentPlayer == 1 && Player1Type != PlayerType.Human) ||
-            (currentPlayer == 2 && Player2Type != PlayerType.Human))
+        if ((currentPlayer == 1 && Player1Panel.PlayerType != PlayerType.Human) ||
+            (currentPlayer == 2 && Player2Panel.PlayerType != PlayerType.Human))
             return; // Not human's turn
 
         var move = new ConnectFourMove(column);
@@ -133,17 +77,17 @@ public class ConnectFourPlayingViewModel : BaseViewModel
     private void StartAgentTurnIfNeeded()
     {
         var currentPlayer = GameStateViewModel.GameState.CurrentPlayer;
-        if ((currentPlayer == 1 && Player1Type == PlayerType.Agent && Player1Agent != null))
+        if ((currentPlayer == 1 && Player1Panel.PlayerType == PlayerType.Agent && Player1Panel.SelectedAgent != null))
         {
-            var move = Player1Agent.GetNextAction(GameStateViewModel.GameState);
+            var move = Player1Panel.SelectedAgent.GetNextAction(GameStateViewModel.GameState);
             GameStateViewModel.ApplyMove(move);
             // If next turn is also an agent, continue
             if (!GameStateViewModel.GameState.IsGameWon && !GameStateViewModel.GameState.IsGameDraw)
                 StartAgentTurnIfNeeded();
         }
-        else if (currentPlayer == 2 && Player2Type == PlayerType.Agent && Player2Agent != null)
+        else if (currentPlayer == 2 && Player2Panel.PlayerType == PlayerType.Agent && Player2Panel.SelectedAgent != null)
         {
-            var move = Player2Agent.GetNextAction(GameStateViewModel.GameState);
+            var move = Player2Panel.SelectedAgent.GetNextAction(GameStateViewModel.GameState);
             GameStateViewModel.ApplyMove(move);
             if (!GameStateViewModel.GameState.IsGameWon && !GameStateViewModel.GameState.IsGameDraw)
                 StartAgentTurnIfNeeded();
@@ -163,17 +107,34 @@ public class ConnectFourPlayingViewModel : BaseViewModel
             await Task.Delay(100);
             // If it's a human's turn, break the loop
             var currentPlayer = GameStateViewModel.GameState.CurrentPlayer;
-            if ((currentPlayer == 1 && Player1Type == PlayerType.Human) ||
-                (currentPlayer == 2 && Player2Type == PlayerType.Human))
+            if ((currentPlayer == 1 && Player1Panel.PlayerType == PlayerType.Human) ||
+                (currentPlayer == 2 && Player2Panel.PlayerType == PlayerType.Human))
                 break;
+        }
+    }
+
+    private void MakeAgentMove(int playerNumber)
+    {
+        var currentPlayer = GameStateViewModel.GameState.CurrentPlayer;
+        if (currentPlayer != playerNumber)
+            return;
+
+        var agent = playerNumber == 1 ? Player1Panel.SelectedAgent : Player2Panel.SelectedAgent;
+        if (agent != null)
+        {
+            var move = agent.GetNextAction(GameStateViewModel.GameState);
+            GameStateViewModel.ApplyMove(move);
+            if (!GameStateViewModel.GameState.IsGameWon && !GameStateViewModel.GameState.IsGameDraw)
+                StartAgentTurnIfNeeded();
         }
     }
 
 
 
+
     #endregion
 
-    
+
 
 
 
@@ -199,11 +160,10 @@ public class ConnectFourPlayingViewModel : BaseViewModel
             new RandomAgent<ConnectFourGameState, ConnectFourMove>(),
             new MinimaxAgent<ConnectFourGameState, ConnectFourMove>(new ConnectFourHeuristicEvaluator(), 5),
         };
+        Player1Panel = new AgentPanelViewModel("Player 1", AvailableAgents, () => MakeAgentMove(1));
+        Player2Panel = new AgentPanelViewModel("Player 2", AvailableAgents, () => MakeAgentMove(2));
+
         SwapPlayersCommand = new RelayCommand(SwapPlayers);
-        SwitchPlayer1ToHumanCommand = new RelayCommand(() => Player1Type = PlayerType.Human);
-        SwitchPlayer2ToHumanCommand = new RelayCommand(() => Player2Type = PlayerType.Human);
-        SwitchPlayer1ToAgentCommand = new RelayCommand(() => Player1Type = PlayerType.Agent);
-        SwitchPlayer2ToAgentCommand = new RelayCommand(() => Player2Type = PlayerType.Agent);
     }
 
 
@@ -214,7 +174,7 @@ public class ConnectFourPlayingViewModel : BaseViewModel
         GameStateViewModel.UpdateBoard();
 
         // If both are agents, start play
-        if (Player1Type == PlayerType.Agent && Player2Type == PlayerType.Agent)
+        if (Player1Panel.PlayerType == PlayerType.Agent && Player2Panel.PlayerType == PlayerType.Agent)
             StartAgentPlay();
     }
 }

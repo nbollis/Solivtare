@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="SolvitaireGUI.AgentPanelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SolvitaireGUI"
+             d:DataContext="{x:Static local:AgentPlayingModel.Instance}"
+             mc:Ignorable="d" 
+             d:DesignHeight="350" d:DesignWidth="200">
+    <UserControl.Resources>
+        <local:PlayerTypeAgentModeToVisibilityConverter x:Key="PlayerTypeAgentModeToVisibilityConverter" />
+        <local:PlayerTypeHumanModeToVisibilityConverter x:Key="PlayerTypeHumanModeToVisibilityConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10">
+            <TextBlock Text="{Binding PlayerLabel}" FontWeight="Bold" FontSize="18" Margin="0,0,0,10"/>
+            <ComboBox ItemsSource="{Binding AvailableAgents}" 
+                      SelectedItem="{Binding SelectedAgent}" 
+                      DisplayMemberPath="Name"
+                      Margin="0,0,0,10"
+                      Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
+            <Button Content="Switch to Human" Command="{Binding SwitchToHumanCommand}" 
+                    Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
+            <Button Content="Switch to Agent" Command="{Binding SwitchToAgentCommand}" 
+                    Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeHumanModeToVisibilityConverter}}"/>
+            <Button Content="Make Move" Command="{Binding MakeMoveCommand}" 
+                    Margin="0,10,0,0"
+                    Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
+            <!-- Additional agent settings can go here -->
+        </StackPanel>
+    </Grid>
+</UserControl>
