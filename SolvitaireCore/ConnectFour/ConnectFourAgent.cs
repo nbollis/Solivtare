@@ -1,10 +1,10 @@
 ﻿namespace SolvitaireCore.ConnectFour;
 using SolvitaireCore;
 
-public class ConnectFourAgent(StateEvaluator<ConnectFourGameState, ConnectFourMove> evaluator, int maxDepth = 4) : IAgent<ConnectFourGameState, ConnectFourMove>
+public class ConnectFourAgent(StateEvaluator<ConnectFourGameState, ConnectFourMove> evaluator, int maxDepth = 4, string? name = null) : IAgent<ConnectFourGameState, ConnectFourMove>
 {
     protected readonly StateEvaluator<ConnectFourGameState, ConnectFourMove> StateEvaluator = evaluator;
-    public string Name => "Connect Four Agent";
+    public string Name => name ?? "Connect Four Agent";
 
     public ConnectFourMove GetNextAction(ConnectFourGameState state)
     {

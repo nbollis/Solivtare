@@ -10,13 +10,9 @@
         Title="MainWindow" Height="500" Width="1100">
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
         <TabControl SelectedIndex="2">
             <TabItem Header="Agent Playing" DataContext="{Binding AgentPlayingViewModel}">
-                <local:AgentPlayingView Grid.Column="0" DataContext="{Binding }"/>
+                <local:AgentPlayingView DataContext="{Binding }"/>
             </TabItem>
 
             <TabItem Header="Game Inspection" DataContext="{Binding GameInspectionTabViewModel}" >
@@ -25,6 +21,10 @@
 
             <TabItem Header="Genetic Algorithm" DataContext="{Binding GeneticAlgorithmTabViewModel}">
                 <local:GeneticAlgorithmTabView DataContext="{Binding }"/>
+            </TabItem>
+
+            <TabItem Header="Play Connect Four" DataContext="{Binding ConnectFourPlayingViewModel}">
+                <local:ConnectFourPlayingView DataContext="{Binding }" />
             </TabItem>
         </TabControl>
     </Grid>
