@@ -6,6 +6,10 @@ public class ConnectFourGameStateViewModel : BaseViewModel
 {
     public ConnectFourGameState GameState { get; }
     public ObservableCollection<int> FlatBoardCells { get; }
+    public HashSet<int> WinningCellIndices =>
+        new HashSet<int>(GameState.WinningCells.Select(cell => cell.Row * ConnectFourGameState.Columns + cell.Col));
+
+
     public int CurrentPlayer => GameState.CurrentPlayer;
     public bool IsGameWon => GameState.IsGameWon;
     public bool IsGameDraw => GameState.IsGameDraw;
@@ -44,5 +48,6 @@ public class ConnectFourGameStateViewModel : BaseViewModel
     {
         for (int i = 0; i < FlatBoardCells.Count; i++)
             FlatBoardCells[i] = GameState.Board[i / ConnectFourGameState.Columns, i % ConnectFourGameState.Columns];
+        OnPropertyChanged(nameof(WinningCellIndices));
     }
 }

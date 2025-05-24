@@ -13,6 +13,8 @@
         <local:PlayerTypeAgentModeToVisibilityConverter x:Key="PlayerTypeAgentModeToVisibilityConverter" />
         <local:PlayerTypeHumanModeToVisibilityConverter x:Key="PlayerTypeHumanModeToVisibilityConverter" />
         <local:FlatIndexToColumnConverter x:Key="FlatIndexToColumnConverter" />
+        <local:WinningCellToBrushConverter x:Key="WinningCellToBrushConverter"/>
+
     </UserControl.Resources>
 
     <Grid >
@@ -70,8 +72,7 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Border Background="Blue"
-                            MouseEnter="Cell_MouseEnter"
+                    <Border MouseEnter="Cell_MouseEnter"
                             MouseLeave="Cell_MouseLeave"
                             MouseLeftButtonUp="Cell_MouseLeftButtonUp"
                             Tag="{Binding (ItemsControl.AlternationIndex), 
@@ -79,6 +80,12 @@
                                       Converter={StaticResource FlatIndexToColumnConverter}}">
                         <Ellipse Width="40" Height="40"
                                  Fill="{Binding ., Converter={StaticResource PlayerToBrushConverter}}"/>
+                        <Border.Background>
+                            <MultiBinding Converter="{StaticResource WinningCellToBrushConverter}">
+                                <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}" Path="(ItemsControl.AlternationIndex)"/>
+                                <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" Path="DataContext.GameStateViewModel.WinningCellIndices"/>
+                            </MultiBinding>
+                        </Border.Background>
                     </Border>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

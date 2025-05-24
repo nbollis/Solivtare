@@ -9,7 +9,7 @@ namespace SolvitaireCore.ConnectFour;
 public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquatable<ConnectFourGameState>
 {
     private readonly List<ConnectFourMove> _moveHistory = new();
-
+    public List<(int Row, int Col)> WinningCells { get; } = new();
     public const int Rows = 6;
 
     public const int Columns = 7;
@@ -35,6 +35,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
         CurrentPlayer = 1;
         MovesMade = 0;
         IsGameWon = false;
+        WinningCells.Clear();
         _moveHistory.Clear();
     }
 
@@ -112,18 +113,29 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
     private bool CheckWin(int row, int col)
     {
         int player = Board[row, col];
-        return CheckDirection(row, col, 1, 0, player) || // vertical
-               CheckDirection(row, col, 0, 1, player) || // horizontal
-               CheckDirection(row, col, 1, 1, player) || // diagonal /
-               CheckDirection(row, col, 1, -1, player);  // diagonal \
+        foreach (var (dRow, dCol) in new[] { (1, 0), (0, 1), (1, 1), (1, -1) })
+        {
+            var cells = GetWinningCells(row, col, dRow, dCol, player);
+            if (cells.Count >= 4)
+            {
+                WinningCells.Clear();
+                WinningCells.AddRange(cells.Take(4));
+                return true;
+            }
+        }
+        return false;
     }
 
-    private bool CheckDirection(int row, int col, int dRow, int dCol, int player)
+    private List<(int Row, int Col)> GetWinningCells(int row, int col, int dRow, int dCol, int player)
     {
-        int count = 1;
-        count += CountDirection(row, col, dRow, dCol, player);
-        count += CountDirection(row, col, -dRow, -dCol, player);
-        return count >= 4;
+        var cells = new List<(int, int)> { (row, col) };
+        // Forward
+        for (int r = row + dRow, c = col + dCol; r >= 0 && r < Rows && c >= 0 && c < Columns && Board[r, c] == player; r += dRow, c += dCol)
+            cells.Add((r, c));
+        // Backward
+        for (int r = row - dRow, c = col - dCol; r >= 0 && r < Rows && c >= 0 && c < Columns && Board[r, c] == player; r -= dRow, c -= dCol)
+            cells.Add((r, c));
+        return cells;
     }
 
     private int CountDirection(int row, int col, int dRow, int dCol, int player)
