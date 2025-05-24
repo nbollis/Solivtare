@@ -1,6 +1,6 @@
 ﻿namespace SolvitaireCore;
 
-public abstract class SolitaireMove(int fromPileIndex, int toPileIndex, bool shouldSkip = false) 
+public abstract class SolitaireMove(int fromPileIndex, int toPileIndex, bool shouldSkip = false)
     : IMove<SolitaireGameState>
 {
     public bool IsTerminatingMove { get; } = shouldSkip;

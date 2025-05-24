@@ -1,7 +1,5 @@
 ﻿using SolvitaireCore;
 using SolvitaireIO.Database.Models;
-using System.Collections.Concurrent;
-using System.Text.Json;
 
 namespace SolvitaireGenetics;
 

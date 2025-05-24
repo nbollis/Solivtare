@@ -1,4 +1,6 @@
-﻿namespace SolvitaireCore;
+﻿using SolvitaireCore;
+
+namespace SolvitaireCore;
 
 public abstract class BaseAgent<TGameState, TMove> : IAgent<TGameState, TMove>
     where TGameState : IGameState<TMove>

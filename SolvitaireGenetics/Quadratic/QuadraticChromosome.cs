@@ -15,8 +15,6 @@ public class QuadraticChromosome : Chromosome
         MutableStatsByName[B] = GenerateRandomWeight();
         MutableStatsByName[C] = GenerateRandomWeight();
         MutableStatsByName[YIntercept] = GenerateRandomWeight();
-        //MutableStatsByName[EvalFunction] = GenerateRandomWeight();
-        //CanFullRandomMutate = false;
         WeightMinStartValue = -4;
         WeightMaxStartValue = 4;
     }

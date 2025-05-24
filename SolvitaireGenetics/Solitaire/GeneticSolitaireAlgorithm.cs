@@ -47,7 +47,7 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
     public override double EvaluateFitness(SolitaireChromosome chromosome, CancellationToken? cancellationToken = null)
     {
         var evaluator = new GeneticSolitaireEvaluator(chromosome);
-        var agent = new MaximizingSolitaireAgent(evaluator, 8);
+        var agent = new SolitaireGeneticAgent(chromosome, evaluator, 8);
         var gameState = new SolitaireGameState();
 
         int movesPlayed = 0;

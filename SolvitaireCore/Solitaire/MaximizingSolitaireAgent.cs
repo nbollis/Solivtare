@@ -1,6 +1,4 @@
-﻿using SolvitaireCore.ConnectFour;
-
-namespace SolvitaireCore;
+﻿namespace SolvitaireCore;
 
 /// <summary>  
 /// A simple evaluation agent that uses a heuristic evaluation function to select the best move.  

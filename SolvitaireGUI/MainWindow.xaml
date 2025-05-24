@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SolvitaireGUI"
         mc:Ignorable="d"
+        Icon="Resources/Icons/ApplicationIcon.png"
         d:DataContext="{x:Static local:MainWindowModel.Instance}"
         Title="MainWindow" Height="500" Width="1100">
 

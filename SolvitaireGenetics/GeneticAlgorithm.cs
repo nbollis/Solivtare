@@ -9,8 +9,7 @@ namespace SolvitaireGenetics;
 
 public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgorithm
     where TChromosome : Chromosome, new() 
-    where TParameters : GeneticAlgorithmParameters 
-
+    where TParameters : GeneticAlgorithmParameters
 {
     public event Action<int, GenerationLog>? GenerationCompleted;
     public virtual event Action<AgentLog>? AgentCompleted;

@@ -383,7 +383,7 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
         CurrentGeneration = generation;
         _generationalLogs.Enqueue(generationLog);
 
-        var sortedLogs = _generationalLogs.OrderByDescending(p => p.Generation)
+        var sortedLogs = _generationalLogs.OrderBy(p => p.Generation)
             .ToList();
         TopPlotsTabControl.UpdatePlots(sortedLogs);
         BottomPlotsTabControl.UpdatePlots(sortedLogs);
