@@ -1,8 +1,9 @@
-﻿using SolvitaireIO.Database.Models;
+﻿using SolvitaireCore;
+using SolvitaireIO.Database.Models;
 
 namespace SolvitaireGenetics;
 
-public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChromosome, QuadraticGeneticAlgorithmParameters>
+public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChromosome, QuadraticGeneticAlgorithmParameters, QuadraticRegressionAgent>
 {
     private int _samplingSize = 10000;
     public double[] CorrectLine { get; }
@@ -34,12 +35,12 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
         }
     }
 
-    public override double EvaluateFitness(QuadraticChromosome chromosome, CancellationToken? cancellationToken = null)
+    public override double EvaluateFitness(QuadraticRegressionAgent agent, CancellationToken? cancellationToken = null)
     {
-        double a = chromosome.GetWeight(QuadraticChromosome.A);
-        double b = chromosome.GetWeight(QuadraticChromosome.B);
-        double c = chromosome.GetWeight(QuadraticChromosome.C);
-        double yInt = chromosome.GetWeight(QuadraticChromosome.YIntercept);
+        double a = agent.Chromosome.GetWeight(QuadraticChromosome.A);
+        double b = agent.Chromosome.GetWeight(QuadraticChromosome.B);
+        double c = agent.Chromosome.GetWeight(QuadraticChromosome.C);
+        double yInt = agent.Chromosome.GetWeight(QuadraticChromosome.YIntercept);
 
         double[] chromosomeValues = new double[_samplingSize];
 
@@ -69,14 +70,14 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
             / 2);
 
         fitness = Math.Pow(fitness, 2); // Square the fitness score
-        chromosome.Fitness = fitness;
+        agent.Chromosome.Fitness = fitness;
 
         var agentLog = new AgentLog()
         {
-            Chromosome = ChromosomeLog.FromChromosome(chromosome), 
+            Chromosome = ChromosomeLog.FromChromosome(agent.Chromosome), 
             Fitness = fitness, 
             Generation = CurrentGeneration,
-            ChromosomeId = chromosome.GetStableHash()
+            ChromosomeId = agent.Chromosome.GetStableHash()
         };
 
         AgentCompleted?.Invoke(agentLog);

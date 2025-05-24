@@ -1,3 +1,4 @@
+using SolvitaireCore;
 using SolvitaireGenetics;
 
 namespace Test.Genetics;
@@ -49,9 +50,10 @@ public class QuadraticGeneticAlgorithmTests
         chromosome.SetWeight(QuadraticChromosome.B, 2.0);
         chromosome.SetWeight(QuadraticChromosome.C, 3.0);
         chromosome.SetWeight(QuadraticChromosome.YIntercept, 4.0);
+        var agent = new QuadraticRegressionAgent(chromosome);
 
         // Act
-        var fitness = algorithm.EvaluateFitness(chromosome);
+        var fitness = algorithm.EvaluateFitness(agent);
 
         // Assert
         Assert.That(fitness, Is.GreaterThanOrEqualTo(-1.0));
@@ -126,12 +128,12 @@ public class QuadraticGeneticAlgorithmTests
         correctChromosome.SetWeight(QuadraticChromosome.B, parameters.CorrectB);
         correctChromosome.SetWeight(QuadraticChromosome.C, parameters.CorrectC);
         correctChromosome.SetWeight(QuadraticChromosome.YIntercept, parameters.CorrectIntercept);
+        var agent = new QuadraticRegressionAgent(correctChromosome);
 
         // Act
-        var fitness = algorithm.EvaluateFitness(correctChromosome);
+        var fitness = algorithm.EvaluateFitness(agent);
 
         // Assert
         Assert.That(fitness, Is.EqualTo(1.0), "The fitness of the correct chromosome should be perfect (1.0).");
     }
-
 }

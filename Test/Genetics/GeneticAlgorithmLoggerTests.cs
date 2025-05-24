@@ -135,13 +135,13 @@ public class GeneticAlgorithmLoggerTests
         // Run a single round of evolution at a time
         Dictionary<int, List<QuadraticChromosome>> populationDictionary = new();
         algorithm.InitializePopulation();
-        populationDictionary.Add(0, algorithm.Population);
+        populationDictionary.Add(0, algorithm.Population.Select(p => p.Chromosome).ToList());
         for (int i = 1; i < 11; i++)
         {
             algorithm.RunEvolution(1);
 
             // Algorithm keeps consistent population size
-            populationDictionary.Add(i, algorithm.Population);
+            populationDictionary.Add(i, algorithm.Population.Select(p => p.Chromosome).ToList());
             Assert.That(populationDictionary[i].Count, Is.EqualTo(parameters.PopulationSize));
 
             // Generation was logged

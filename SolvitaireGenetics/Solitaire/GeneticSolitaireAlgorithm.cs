@@ -5,7 +5,7 @@ using System;
 
 namespace SolvitaireGenetics;
 
-public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, SolitaireGeneticAlgorithmParameters>
+public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, SolitaireGeneticAlgorithmParameters, SolitaireGeneticAgent>
 {
     private readonly List<StandardDeck> _predefinedDecks = new();
     private readonly IDeckFile? _deckFile;
@@ -44,10 +44,8 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         };
     }
 
-    public override double EvaluateFitness(SolitaireChromosome chromosome, CancellationToken? cancellationToken = null)
+    public override double EvaluateFitness(SolitaireGeneticAgent agent, CancellationToken? cancellationToken = null)
     {
-        var evaluator = new GeneticSolitaireEvaluator(chromosome);
-        var agent = new SolitaireGeneticAgent(chromosome, evaluator, 8);
         var gameState = new SolitaireGameState();
 
         int movesPlayed = 0;
@@ -137,10 +135,10 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
             GamesPlayed = gamesPlayed,
             MovesMade = movesPlayed,
             GamesWon = gamesWon,
-            Chromosome = ChromosomeLog.FromChromosome(chromosome)
+            Chromosome = ChromosomeLog.FromChromosome(agent.Chromosome)
         };
 
-        chromosome.Fitness = fitness;
+        agent.Chromosome.Fitness = fitness;
         AgentCompleted?.Invoke(agentLog);
         return fitness;
     }

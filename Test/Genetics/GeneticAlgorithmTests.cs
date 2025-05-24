@@ -163,7 +163,7 @@ public class GeneticAlgorithmTests
         var avgChromosome = population.Average(c => c.Fitness);
 
 
-        var tournamentSelection = new TournamentSelectionStrategy<QuadraticChromosome>();
+        var tournamentSelection = new TournamentSelectionStrategy<QuadraticRegressionAgent, QuadraticChromosome>();
         var selectedChromosome = tournamentSelection.Select(population, 1, parameters, Random.Shared);
 
         // Assert
@@ -186,7 +186,7 @@ public class GeneticAlgorithmTests
         var population = algorithm.InitializePopulation();
         var bestChromosome = population.OrderByDescending(c => c.Fitness).First();
 
-        var tournamentSelection = new TournamentSelectionStrategy<QuadraticChromosome>();
+        var tournamentSelection = new TournamentSelectionStrategy<QuadraticRegressionAgent, QuadraticChromosome>();
         var selectedChromosome = tournamentSelection.Select(population, 1, parameters, Random.Shared);
 
         // Assert
@@ -238,10 +238,10 @@ public class GeneticAlgorithmTests
             var og = lastGeneration[index];
             var loaded = population[index];
 
-            Assert.That(og.MutableStatsByName[QuadraticChromosome.A], Is.EqualTo(loaded.MutableStatsByName[QuadraticChromosome.A]));
-            Assert.That(og.MutableStatsByName[QuadraticChromosome.B], Is.EqualTo(loaded.MutableStatsByName[QuadraticChromosome.B]));
-            Assert.That(og.MutableStatsByName[QuadraticChromosome.C], Is.EqualTo(loaded.MutableStatsByName[QuadraticChromosome.C]));
-            Assert.That(og.MutableStatsByName[QuadraticChromosome.YIntercept], Is.EqualTo(loaded.MutableStatsByName[QuadraticChromosome.YIntercept]));
+            Assert.That(og.MutableStatsByName[QuadraticChromosome.A], Is.EqualTo(loaded.Chromosome.MutableStatsByName[QuadraticChromosome.A]));
+            Assert.That(og.MutableStatsByName[QuadraticChromosome.B], Is.EqualTo(loaded.Chromosome.MutableStatsByName[QuadraticChromosome.B]));
+            Assert.That(og.MutableStatsByName[QuadraticChromosome.C], Is.EqualTo(loaded.Chromosome.MutableStatsByName[QuadraticChromosome.C]));
+            Assert.That(og.MutableStatsByName[QuadraticChromosome.YIntercept], Is.EqualTo(loaded.Chromosome.MutableStatsByName[QuadraticChromosome.YIntercept]));
         }
     }
 
@@ -273,7 +273,7 @@ public class GeneticAlgorithmTests
 
         // Assert
         Assert.That(population.Count, Is.EqualTo(parameters.PopulationSize));
-        var mutatedTemplateCount = population.Count(c => Math.Abs(c.GetWeight(QuadraticChromosome.A) - 1.0) < 0.000001);
+        var mutatedTemplateCount = population.Count(c => Math.Abs(c.Chromosome.GetWeight(QuadraticChromosome.A) - 1.0) < 0.000001);
 
         int expectedCount = (parameters.PopulationSize / 10) + (int)(parameters.PopulationSize * 0.9 / 2);
 
@@ -364,7 +364,7 @@ public class GeneticAlgorithmTests
 
         // Act
 
-        var tournamentSelection = new TournamentSelectionStrategy<QuadraticChromosome>();
+        var tournamentSelection = new TournamentSelectionStrategy<QuadraticRegressionAgent, QuadraticChromosome>();
         var selectedParents = tournamentSelection.Select(population, 30, parameters, Random.Shared);
 
 

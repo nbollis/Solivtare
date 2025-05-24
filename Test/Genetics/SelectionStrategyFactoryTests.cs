@@ -5,10 +5,10 @@ namespace Test.Genetics;
 [TestFixture]
 public class SelectionStrategyFactoryTests
 {
-    private List<TestChromosome> GeneratePopulation(int size, Random random)
+    private List<TestGeneticAgent> GeneratePopulation(int size, Random random)
     {
         return Enumerable.Range(0, size)
-            .Select(i => new TestChromosome() {Fitness = random.NextDouble() * 100 })
+            .Select(i => new TestGeneticAgent(new TestChromosome() {Fitness = random.NextDouble() * 100 }))
             .ToList();
     }
 
@@ -30,7 +30,7 @@ public class SelectionStrategyFactoryTests
             TournamentSize = 3
         };
 
-        var selectionStrategy = SelectionStrategyFactory.Create<TestChromosome>(strategy);
+        var selectionStrategy = SelectionStrategyFactory.Create<TestGeneticAgent, TestChromosome>(strategy);
 
         var population = GeneratePopulation(populationSize, random);
 
@@ -61,7 +61,7 @@ public class SelectionStrategyFactoryTests
             TournamentSize = 3
         };
 
-        var selectionStrategy = SelectionStrategyFactory.Create<TestChromosome>(strategy);
+        var selectionStrategy = SelectionStrategyFactory.Create<TestGeneticAgent, TestChromosome>(strategy);
         var population = GeneratePopulation(populationSize, random);
 
         // Act  

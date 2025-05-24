@@ -7,9 +7,10 @@ using SolvitaireIO.Database.Models;
 
 namespace SolvitaireGenetics;
 
-public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgorithm
+public abstract class GeneticAlgorithm<TChromosome, TParameters, TAgent> : IGeneticAlgorithm
     where TChromosome : Chromosome, new() 
     where TParameters : GeneticAlgorithmParameters
+    where TAgent : IGeneticAgent<TChromosome>
 {
     public event Action<int, GenerationLog>? GenerationCompleted;
     public virtual event Action<AgentLog>? AgentCompleted;
@@ -20,11 +21,11 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
     protected readonly TChromosome? ChromosomeTemplate;
     protected readonly Random Random = new();
     protected double CrossOverRate = 0.5; // Default crossover rate
-    protected ISelectionStrategy<TChromosome> SelectionStrategy;
-    protected IReproductionStrategy<TChromosome> ReproductionStrategy;
+    protected ISelectionStrategy<TAgent, TChromosome> SelectionStrategy;
+    protected IReproductionStrategy<TAgent, TChromosome> ReproductionStrategy;
 
     public int CurrentGeneration { get; protected set; }
-    public List<TChromosome> Population { get; protected set; } = [];
+    public List<TAgent> Population { get; protected set; } = [];
     public GeneticAlgorithmLogger Logger { get; }
 
     // Fitness cache
@@ -38,8 +39,8 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             ChromosomeTemplate = template;
 
 
-        SelectionStrategy = SelectionStrategyFactory.Create<TChromosome>(parameters.SelectionStrategy);
-        ReproductionStrategy = ReproductionStrategyFactory.Create<TChromosome>(parameters.ReproductionStrategy);
+        SelectionStrategy = SelectionStrategyFactory.Create<TAgent, TChromosome>(parameters.SelectionStrategy);
+        ReproductionStrategy = ReproductionStrategyFactory.Create<TAgent, TChromosome>(parameters.ReproductionStrategy);
 
         Logger = parameters.LoggingType switch
         {
@@ -50,8 +51,13 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         Logger.SubscribeToAlgorithm(this);
     }
 
-    public abstract double EvaluateFitness(TChromosome chromosome, CancellationToken? cancellationToken = null);
-    private double GetFitness(TChromosome chromosome, CancellationToken? cancellationToken = null)
+    public virtual TAgent CreateFromChromosome(TChromosome chromosome)
+    {
+        return (TAgent)Activator.CreateInstance(typeof(TAgent), chromosome)!;
+    }
+
+    public abstract double EvaluateFitness(TAgent agent, CancellationToken? cancellationToken = null);
+    private double GetFitness(TAgent chromosome, CancellationToken? cancellationToken = null)
     {
         // Serialize the chromosome to use as a cache key
         string chromosomeKey = chromosome.GetStableHash();
@@ -119,21 +125,22 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         _loggingTask.Wait();
 
         // Return the best chromosome from the last generation
-        var bestChromosome = Population[0];
-        bestChromosome.Fitness = GetFitness(bestChromosome, cancellationToken);
-        return bestChromosome;
+        var bestAgent = Population[0];
+        bestAgent.Fitness = GetFitness(bestAgent, cancellationToken);
+        return bestAgent.Chromosome;
     }
 
     /// <summary>
     /// Creates a random population of chromosomes with random weights.
     /// </summary>
     /// <returns></returns>
-    public List<TChromosome> InitializePopulation(CancellationToken? cancellationToken = null)
+    public List<TAgent> InitializePopulation(CancellationToken? cancellationToken = null)
     {
         // Check if we have a last generation to load
         var lastGeneration = Logger.LoadLastGeneration(out int generationNumber)
             .Select(p => p.Chromosome.Chromosome as TChromosome)
             .Where(p => p != null)
+            .Select(p => CreateFromChromosome(p!))
             .ToList();
 
         if (lastGeneration.Count == Parameters.PopulationSize)
@@ -143,7 +150,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
             return Population = lastGeneration;
         }
 
-        List<TChromosome> population;
+        List<TAgent> population;
 
         // If we have a chromosome template, use it to create 10% of the population and mutate them
         // The other 90% will be random chromosomes crossed over with the template. 
@@ -157,6 +164,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
                 .Select(_ => Chromosome.CreateRandom<TChromosome>(Random)
                         .CrossOver(ChromosomeTemplate) // Temporary? Cross over with best.
                 ).Concat(best)
+                .Select(CreateFromChromosome)
                 .ToList();
         }
         // If we don't have a last generation or a template, create a new random population
@@ -164,6 +172,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         {
             population = Enumerable.Range(0, Parameters.PopulationSize)
                 .Select(_ => Chromosome.CreateRandom<TChromosome>(Random))
+                .Select(CreateFromChromosome)
                 .ToList();
         }
 
@@ -180,29 +189,30 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters> : IGeneticAlgor
         return Population = population;
     }
 
-    private async Task LogPopulationAsync(List<TChromosome> population, int generation)
+    private async Task LogPopulationAsync(List<TAgent> population, int generation)
     {
         // Create ChromosomeLogs for best, average, and std chromosomes
-        var bestChromosome = ChromosomeLog.FromChromosome(population[0]);
-        var averageChromosome = ChromosomeLog.FromChromosome(Chromosome.GetAverageChromosome(population));
-        var stdChromosome = ChromosomeLog.FromChromosome(Chromosome.GetStandardDeviationChromosome(population));
+        var bestChromosome = ChromosomeLog.FromChromosome(population[0].Chromosome);
+        var averageChromosome = ChromosomeLog.FromChromosome(population.GetAverageChromosome<TAgent, TChromosome>());
+        var stdChromosome = ChromosomeLog.FromChromosome(population.GetStandardDeviationChromosome<TAgent, TChromosome>());
 
         // Flush agent logs asynchronously
         await Task.Run(() =>
         {
-            Logger.FlushAgentLogs(generation, population);
+            Logger.FlushAgentLogs(generation, population.Select(p => p.Chromosome).ToList());
         });
 
+        // TODO: Make many of these method operate on agent instead of chromosome.
         // Create the GenerationLog
-        var species = Chromosome.KMeansSpeciationElbow(population);
+        var species = Chromosome.KMeansSpeciationElbow(population.Select(p => p.Chromosome).ToList());
         var generationLog = new GenerationLog
         {
             Generation = generation,
             BestFitness = population.Max(c => c.Fitness),
             AverageFitness = population.Average(c => c.Fitness),
             StdFitness = population.Select(c => c.Fitness).StandardDeviation(),
-            AveragePairwiseDiversity = Chromosome.AveragePairwiseDiversity(population),
-            VarianceFromAverageChromosome = Chromosome.VarianceFromCentroid(population),
+            AveragePairwiseDiversity = Chromosome.AveragePairwiseDiversity(population.Select(p => p.Chromosome).ToList()),
+            VarianceFromAverageChromosome = Chromosome.VarianceFromCentroid(population.Select(p => p.Chromosome).ToList()),
             SpeciesCount = species.Count,
             IntraSpeciesDiversity = Chromosome.IntraSpeciesDiversity(species),
             InterSpeciesDiversity = Chromosome.InterSpeciesDiversity(species),
