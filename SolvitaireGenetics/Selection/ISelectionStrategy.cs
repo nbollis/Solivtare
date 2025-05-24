@@ -2,8 +2,9 @@
 
 namespace SolvitaireGenetics;
 
-public interface ISelectionStrategy<TChromosome>
+public interface ISelectionStrategy<TAgent, TChromosome>
     where TChromosome : Chromosome
+    where TAgent : IGeneticAgent<TChromosome>
 {
-    List<TChromosome> Select(List<TChromosome> population, int numberOfParents, GeneticAlgorithmParameters parameters, Random random);
+    List<TAgent> Select(List<TAgent> population, int numberOfParents, GeneticAlgorithmParameters parameters, Random random);
 }

@@ -2,8 +2,9 @@
 
 namespace SolvitaireGenetics;
 
-public interface IReproductionStrategy<TChromosome>
+public interface IReproductionStrategy<TAgent, TChromosome>
     where TChromosome : Chromosome
+    where TAgent : IGeneticAgent<TChromosome>
 {
-    List<TChromosome> Reproduce(List<TChromosome> parents, int targetPopulation, double crossoverRate, double mutationRate, Random random);
+    List<TAgent> Reproduce(List<TAgent> parents, int targetPopulation, double crossoverRate, double mutationRate, Random random);
 }
