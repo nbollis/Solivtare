@@ -4,12 +4,12 @@ namespace SolvitaireGUI;
 
     public class MoveViewModel : BaseViewModel
     {
-        public SolitaireMove Move { get; }
+        public IMove Move { get; }
         public string MoveString { get; set; }
         public double Evaluation { get; set; }
 
 
-        public MoveViewModel(SolitaireMove move, double eval)
+        public MoveViewModel(IMove move, double eval)
         {
             Move = move;
             MoveString = move.ToString();

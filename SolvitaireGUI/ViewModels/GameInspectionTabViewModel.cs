@@ -7,7 +7,7 @@ namespace SolvitaireGUI;
 
 public class GameInspectionTabViewModel : BaseViewModel
 {
-    private GameStateViewModel _gameStateViewModel;
+    private SolitaireGameStateViewModel _solitaireGameStateViewModel;
     private string _gameStateJson;
     private int _deckSeed;
     private int _deckShuffles;
@@ -18,7 +18,7 @@ public class GameInspectionTabViewModel : BaseViewModel
         deck.Shuffle();
         var gameState = new SolitaireGameState();
         gameState.DealCards(deck);
-        GameStateViewModel = new GameStateViewModel(gameState);
+        SolitaireGameStateViewModel = new SolitaireGameStateViewModel(gameState);
         GameStateJson = GameStateSerializer.Serialize(gameState);
 
         DeckSeed = deck.Seed;
@@ -28,13 +28,13 @@ public class GameInspectionTabViewModel : BaseViewModel
         LoadDeckCommand = new RelayCommand(LoadDeck);
     }
 
-    public GameStateViewModel GameStateViewModel
+    public SolitaireGameStateViewModel SolitaireGameStateViewModel
     {
-        get => _gameStateViewModel;
+        get => _solitaireGameStateViewModel;
         set
         {
-            _gameStateViewModel = value;
-            OnPropertyChanged(nameof(GameStateViewModel));
+            _solitaireGameStateViewModel = value;
+            OnPropertyChanged(nameof(SolitaireGameStateViewModel));
         }
     }
 
@@ -81,7 +81,7 @@ public class GameInspectionTabViewModel : BaseViewModel
                 MessageBox.Show("Invalid JSON format.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            GameStateViewModel = new GameStateViewModel(state);
+            SolitaireGameStateViewModel = new SolitaireGameStateViewModel(state);
         }
         catch (Exception e)
         {
@@ -102,7 +102,7 @@ public class GameInspectionTabViewModel : BaseViewModel
 
             var gameState = new SolitaireGameState();
             gameState.DealCards(deck);
-            GameStateViewModel = new GameStateViewModel(gameState);
+            SolitaireGameStateViewModel = new SolitaireGameStateViewModel(gameState);
         }
         catch (Exception e)
         {

@@ -7,15 +7,15 @@ namespace SolvitaireGUI;
 public class AgentPlayingViewModel : BaseViewModel
 {
     private readonly Stack<SolitaireMove> _previousMoves;
-    private GameStateViewModel _gameStateViewModel;
+    private SolitaireGameStateViewModel _solitaireGameStateViewModel;
     private readonly StandardDeck _deck;
-    public GameStateViewModel GameStateViewModel
+    public SolitaireGameStateViewModel SolitaireGameStateViewModel
     {
-        get => _gameStateViewModel;
+        get => _solitaireGameStateViewModel;
         set
         {
-            _gameStateViewModel = value;
-            OnPropertyChanged(nameof(GameStateViewModel));
+            _solitaireGameStateViewModel = value;
+            OnPropertyChanged(nameof(SolitaireGameStateViewModel));
         }
     }
 
@@ -28,7 +28,7 @@ public class AgentPlayingViewModel : BaseViewModel
 
         var gameState = new SolitaireGameState();
         gameState.DealCards(_deck);
-        GameStateViewModel = new GameStateViewModel(gameState);
+        SolitaireGameStateViewModel = new SolitaireGameStateViewModel(gameState);
         LegalMoves = new();
         Agent = new RandomSolitaireAgent();
         AllAgents = new()
@@ -37,7 +37,7 @@ public class AgentPlayingViewModel : BaseViewModel
             new MaximizingSolitaireAgent(_evaluator, 5),
         };
 
-        _shadowGameState = (SolitaireGameState)GameStateViewModel.BaseGameState.Clone();
+        _shadowGameState = (SolitaireGameState)SolitaireGameStateViewModel.BaseGameState.Clone();
 
         ResetGameCommand = new RelayCommand(ResetGame);
         MakeMoveCommand = new RelayCommand(AgentMakeMove);
@@ -109,7 +109,7 @@ public class AgentPlayingViewModel : BaseViewModel
         try
         {
             
-            while (!GameStateViewModel.IsGameWon && !token.IsCancellationRequested)
+            while (!SolitaireGameStateViewModel.IsGameWon && !token.IsCancellationRequested)
             {
                 // Use the shadow game state for the agent's search
                 var decision = await Task.Run(() => Agent.GetNextAction(_shadowGameState), token);
@@ -204,7 +204,7 @@ public class AgentPlayingViewModel : BaseViewModel
         switch (moveObject)
         {
             case MoveViewModel vm:
-                move = vm.Move;
+                move = vm.Move as SolitaireMove;
                 break;
             case SolitaireMove { IsTerminatingMove: false } mo:
                 move = mo;
@@ -217,7 +217,7 @@ public class AgentPlayingViewModel : BaseViewModel
         }
 
         MovesMade++;
-        GameStateViewModel.ApplyMove(move);
+        SolitaireGameStateViewModel.ApplyMove(move);
         _shadowGameState.ExecuteMove(move);
         _previousMoves.Push(move);
         Refresh();
@@ -228,7 +228,7 @@ public class AgentPlayingViewModel : BaseViewModel
         if (!_previousMoves.TryPop(out var move))
             return;
         MovesMade--;
-        GameStateViewModel.UndoMove(move);
+        SolitaireGameStateViewModel.UndoMove(move);
         _shadowGameState.UndoMove(move);
         Refresh();
     }
@@ -248,7 +248,7 @@ public class AgentPlayingViewModel : BaseViewModel
         gameState.DealCards(_deck!);
         Agent.ResetState();
 
-        GameStateViewModel = new(gameState);
+        SolitaireGameStateViewModel = new(gameState);
         _shadowGameState = (SolitaireGameState)gameState.Clone(); // Sync the shadow state
         Refresh();
     }
@@ -264,7 +264,7 @@ public class AgentPlayingViewModel : BaseViewModel
     public void Refresh()
     {
         LegalMoves.Clear();
-        foreach (var move in GameStateViewModel.GetLegalMoves())
+        foreach (var move in SolitaireGameStateViewModel.GetLegalMoves())
         {
             _shadowGameState.ExecuteMove(move);
             double eval = _evaluator.EvaluateState(_shadowGameState);
@@ -273,7 +273,7 @@ public class AgentPlayingViewModel : BaseViewModel
         }
 
         Evaluation = _evaluator.EvaluateState(_shadowGameState);
-        OnPropertyChanged(nameof(GameStateViewModel));
+        OnPropertyChanged(nameof(SolitaireGameStateViewModel));
         OnPropertyChanged(nameof(Agent));
     }
 }

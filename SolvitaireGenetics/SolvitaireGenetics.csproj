@@ -18,8 +18,4 @@
     <ProjectReference Include="..\SolvitaireIO\SolvitaireIO.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="NewFolder\" />
-  </ItemGroup>
-
 </Project>

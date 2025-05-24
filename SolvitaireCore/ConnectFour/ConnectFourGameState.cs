@@ -8,6 +8,8 @@ namespace SolvitaireCore.ConnectFour;
 
 public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquatable<ConnectFourGameState>
 {
+    private readonly List<ConnectFourMove> _moveHistory = new();
+
     public const int Rows = 6;
 
     public const int Columns = 7;
@@ -33,6 +35,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
         CurrentPlayer = 1;
         MovesMade = 0;
         IsGameWon = false;
+        _moveHistory.Clear();
     }
 
     public List<ConnectFourMove> GetLegalMoves()
@@ -54,6 +57,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
             {
                 Board[row, move.Column] = CurrentPlayer;
                 MovesMade++;
+                _moveHistory.Add(move);
                 if (CheckWin(row, move.Column))
                 {
                     IsGameWon = true;
@@ -75,12 +79,22 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
                 Board[row, move.Column] = 0;
                 MovesMade--;
                 CurrentPlayer = 3 - CurrentPlayer;
-                IsGameWon = false;
+                IsGameWon = false; 
+                if (_moveHistory.Count > 0)
+                    _moveHistory.RemoveAt(_moveHistory.Count - 1);
+
                 return;
             }
         }
         throw new InvalidOperationException("Invalid undo: column empty");
     }
+
+    public string GetMoveHistoryString()
+    {
+        return string.Join(",", _moveHistory.Select(m => m.Column));
+    }
+
+    public IReadOnlyList<ConnectFourMove> GetMoveHistory() => _moveHistory.AsReadOnly();
 
     public IGameState<ConnectFourMove> Clone()
     {
@@ -90,7 +104,8 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
             CurrentPlayer = CurrentPlayer,
             MovesMade = MovesMade,
             IsGameWon = IsGameWon
-        };
+        }; 
+        clone._moveHistory.AddRange(_moveHistory);
         return clone;
     }
 

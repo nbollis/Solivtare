@@ -7,7 +7,7 @@ using SolvitaireIO;
 
 namespace SolvitaireGUI;
 
-public class GameStateViewModel : BaseViewModel
+public class SolitaireGameStateViewModel : BaseViewModel
 {
     public SolitaireGameState BaseGameState { get; }
 
@@ -22,7 +22,7 @@ public class GameStateViewModel : BaseViewModel
 
     public ICommand CopyGameStateAsJsonCommand { get; }
 
-    public GameStateViewModel(SolitaireGameState gameState)
+    public SolitaireGameStateViewModel(SolitaireGameState gameState)
     {
         BaseGameState = gameState;
         Sync();
@@ -141,12 +141,12 @@ public class GameStateViewModel : BaseViewModel
     }
 }
 
-public class GameStateModel : GameStateViewModel
+public class SolitaireGameStateModel : SolitaireGameStateViewModel
 {
     private static SolitaireGameState _solitaireGameState;
-    public static GameStateModel Instance => new();
+    public static SolitaireGameStateModel Instance => new();
 
-    static GameStateModel()
+    static SolitaireGameStateModel()
     {
         _solitaireGameState = new SolitaireGameState();
         var deck = new ObservableStandardDeck();
@@ -154,7 +154,7 @@ public class GameStateModel : GameStateViewModel
         _solitaireGameState.DealCards(deck);
     }
 
-    public GameStateModel() : base(_solitaireGameState)
+    public SolitaireGameStateModel() : base(_solitaireGameState)
     {
         Sync();
     }

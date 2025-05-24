@@ -141,4 +141,8 @@
     <Resource Include="Resources\Icons\snap.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ViewModels\NewFolder\" />
+  </ItemGroup>
+
 </Project>
