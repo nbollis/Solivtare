@@ -15,10 +15,3 @@ public class MoveViewModel : BaseViewModel
         Evaluation = eval;
     }
 }
-
-public class AgentPanelModel : AgentPanelViewModel
-{
-    public static AgentPanelModel Instance => new AgentPanelModel();
-
-    public AgentPanelModel() : base("", [], null) { }
-}

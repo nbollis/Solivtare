@@ -4,10 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SolvitaireGUI"
-             d:DataContext="{x:Static local:AgentPlayingModel.Instance}"
+             d:DataContext="{x:Static local:AgentPanelModel.Instance}"
              mc:Ignorable="d" 
              d:DesignHeight="350" d:DesignWidth="200">
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <local:PlayerTypeAgentModeToVisibilityConverter x:Key="PlayerTypeAgentModeToVisibilityConverter" />
         <local:PlayerTypeHumanModeToVisibilityConverter x:Key="PlayerTypeHumanModeToVisibilityConverter" />
     </UserControl.Resources>
@@ -23,10 +24,24 @@
                     Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
             <Button Content="Switch to Agent" Command="{Binding SwitchToAgentCommand}" 
                     Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeHumanModeToVisibilityConverter}}"/>
+            
             <Button Content="Make Move" Command="{Binding MakeMoveCommand}" 
                     Margin="0,10,0,0"
                     Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
-            <!-- Additional agent settings can go here -->
+            <Button Content="Start Agent" Command="{Binding StartAgentCommand}" 
+                    Margin="0,2,0,0"
+                    Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
+            <Button Content="Stop Agent" Command="{Binding StopAgentCommand}" 
+                    Margin="0,2,0,0"
+                    Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
+
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Center"
+                        ToolTip="Max Depth for the lookahead search"
+                        Visibility="{Binding IsSearchAgent, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock  Text="Max Depth: " />
+                <local:IntegerTexBoxControl Text="{Binding MaxDepth, UpdateSourceTrigger=PropertyChanged}"
+                                            Margin="5,0,0,0" Width="60"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>

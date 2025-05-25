@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace SolvitaireGUI;
 
-public class ConnectFourConverters : BaseValueConverter<ConnectFourConverters>
+public class PlayerToBrushConverter : BaseValueConverter<PlayerToBrushConverter>
 {
     public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

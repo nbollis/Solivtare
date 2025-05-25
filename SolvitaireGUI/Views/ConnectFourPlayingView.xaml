@@ -9,12 +9,8 @@
             d:DesignHeight="450" d:DesignWidth="800">
    <UserControl.Resources>
         <local:PlayerToBrushConverter x:Key="PlayerToBrushConverter" />
-        <local:PreviewTokenVisibilityConverter x:Key="PreviewTokenVisibilityConverter" />
-        <local:PlayerTypeAgentModeToVisibilityConverter x:Key="PlayerTypeAgentModeToVisibilityConverter" />
-        <local:PlayerTypeHumanModeToVisibilityConverter x:Key="PlayerTypeHumanModeToVisibilityConverter" />
         <local:FlatIndexToColumnConverter x:Key="FlatIndexToColumnConverter" />
         <local:WinningCellToBrushConverter x:Key="WinningCellToBrushConverter"/>
-
     </UserControl.Resources>
 
     <Grid >

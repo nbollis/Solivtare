@@ -4,13 +4,13 @@
 /// Picks the move which maximizes the score of the game state.
 /// Best for one player games. 
 /// </summary>
-public class MaximizingAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>
+public class MaximizingAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISearchAgent<TGameState, TMove>
     where TGameState : IGameState<TMove>
     where TMove : IMove
 {
     protected readonly StateEvaluator<TGameState, TMove> Evaluator;
-    protected readonly int MaxDepth;
     protected readonly Random Rand;
+    public int MaxDepth { get; set; }
 
     public MaximizingAgent(StateEvaluator<TGameState, TMove> evaluator, int maxDepth = 3)
     {

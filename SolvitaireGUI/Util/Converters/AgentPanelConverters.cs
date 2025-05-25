@@ -3,7 +3,7 @@ using System.Windows;
 
 namespace SolvitaireGUI;
 
-public class AgentPanelConverters : BaseValueConverter<AgentPanelConverters>
+public class PlayerTypeAgentModeToVisibilityConverter : BaseValueConverter<PlayerTypeAgentModeToVisibilityConverter>
 {
 
     public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)

@@ -4,11 +4,7 @@ using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
 namespace SolvitaireGUI;
 
-public enum PlayerType { Human, Agent }
-
-
-
-
+// TODO: Generalize this to a two player game view model. 
 public class ConnectFourPlayingViewModel : BaseViewModel
 {
     #region Agent Handling
@@ -17,7 +13,6 @@ public class ConnectFourPlayingViewModel : BaseViewModel
     public AgentPanelViewModel Player1Panel { get; } 
     public AgentPanelViewModel Player2Panel { get; }
 
-    public ObservableCollection<IAgent<ConnectFourGameState, ConnectFourMove>> AvailableAgents { get; } // Populate with agent instances
     public ICommand SwapPlayersCommand { get; }
     private void SwapPlayers()
     {
@@ -66,50 +61,6 @@ public class ConnectFourPlayingViewModel : BaseViewModel
         if (GameStateViewModel.GameState.GetLegalMoves().Any(m => m.Column == column))
         {
             GameStateViewModel.ApplyMove(move);
-            if (GameStateViewModel.GameState is { IsGameWon: false, IsGameDraw: false })
-                StartAgentTurnIfNeeded();
-        }
-    }
-
-    /// <summary>
-    /// Starts the agent's turn if it's their turn. This is called recursively until a human player is encountered or the game ends.
-    /// </summary>
-    private void StartAgentTurnIfNeeded()
-    {
-        var currentPlayer = GameStateViewModel.GameState.CurrentPlayer;
-        if ((currentPlayer == 1 && Player1Panel.PlayerType == PlayerType.Agent && Player1Panel.SelectedAgent != null))
-        {
-            var move = Player1Panel.SelectedAgent.GetNextAction(GameStateViewModel.GameState);
-            GameStateViewModel.ApplyMove(move);
-            // If next turn is also an agent, continue
-            if (!GameStateViewModel.GameState.IsGameWon && !GameStateViewModel.GameState.IsGameDraw)
-                StartAgentTurnIfNeeded();
-        }
-        else if (currentPlayer == 2 && Player2Panel.PlayerType == PlayerType.Agent && Player2Panel.SelectedAgent != null)
-        {
-            var move = Player2Panel.SelectedAgent.GetNextAction(GameStateViewModel.GameState);
-            GameStateViewModel.ApplyMove(move);
-            if (!GameStateViewModel.GameState.IsGameWon && !GameStateViewModel.GameState.IsGameDraw)
-                StartAgentTurnIfNeeded();
-        }
-        // else: wait for human input
-    }
-
-    /// <summary>
-    /// Starts the agent play loop. This will run until the game is won, drawn, or the agent is stopped.
-    /// </summary>
-    private async void StartAgentPlay()
-    {
-        _agentCts = new CancellationTokenSource();
-        while (!GameStateViewModel.GameState.IsGameWon && !GameStateViewModel.GameState.IsGameDraw && !_agentCts.IsCancellationRequested)
-        {
-            StartAgentTurnIfNeeded();
-            await Task.Delay(100);
-            // If it's a human's turn, break the loop
-            var currentPlayer = GameStateViewModel.GameState.CurrentPlayer;
-            if ((currentPlayer == 1 && Player1Panel.PlayerType == PlayerType.Human) ||
-                (currentPlayer == 2 && Player2Panel.PlayerType == PlayerType.Human))
-                break;
         }
     }
 
@@ -124,23 +75,12 @@ public class ConnectFourPlayingViewModel : BaseViewModel
         {
             var move = agent.GetNextAction(GameStateViewModel.GameState);
             GameStateViewModel.ApplyMove(move);
-            if (!GameStateViewModel.GameState.IsGameWon && !GameStateViewModel.GameState.IsGameDraw)
-                StartAgentTurnIfNeeded();
         }
     }
 
-
-
-
     #endregion
 
-
-
-
-
     public ICommand MakeMoveCommand { get; }
-    public ICommand StartAgentPlayCommand { get; }
-    public ICommand StopAgentPlayCommand { get; }
     public ICommand ResetGameCommand { get; }
 
     public ConnectFourPlayingViewModel()
@@ -150,32 +90,44 @@ public class ConnectFourPlayingViewModel : BaseViewModel
         // Gameplay
         GameStateViewModel = new ConnectFourGameStateViewModel(gameState);
         MakeMoveCommand = new DelegateCommand((o) => MakeHumanMove((int)o)); // int = column
-        StartAgentPlayCommand = new RelayCommand(StartAgentPlay);
-        StopAgentPlayCommand = new RelayCommand(StopAgentPlay);
         ResetGameCommand = new RelayCommand(ResetGame);
 
         // Agents
-        AvailableAgents = new ObservableCollection<IAgent<ConnectFourGameState, ConnectFourMove>>
+        var availableAgents = new ObservableCollection<IAgent<ConnectFourGameState, ConnectFourMove>>
         {
             new RandomAgent<ConnectFourGameState, ConnectFourMove>(),
             new MinimaxAgent<ConnectFourGameState, ConnectFourMove>(new ConnectFourHeuristicEvaluator(), 5),
         };
-        Player1Panel = new AgentPanelViewModel("Player 1", AvailableAgents, () => MakeAgentMove(1));
-        Player2Panel = new AgentPanelViewModel("Player 2", AvailableAgents, () => MakeAgentMove(2));
+
+        Player1Panel = new AgentPanelViewModel(
+            "Player 1",
+            availableAgents,
+            () => MakeAgentMove(1),
+            () => GameStateViewModel.GameState.CurrentPlayer == 1,
+            () => !GameStateViewModel.GameState.IsGameWon && !GameStateViewModel.GameState.IsGameDraw
+        );
+
+        Player2Panel = new AgentPanelViewModel(
+            "Player 2",
+            availableAgents,
+            () => MakeAgentMove(2),
+            () => GameStateViewModel.GameState.CurrentPlayer == 2,
+            () => !GameStateViewModel.GameState.IsGameWon && !GameStateViewModel.GameState.IsGameDraw
+        );
 
         SwapPlayersCommand = new RelayCommand(SwapPlayers);
     }
-
-
 
     private void ResetGame()
     {
         GameStateViewModel.GameState.Reset();
         GameStateViewModel.UpdateBoard();
 
-        // If both are agents, start play
-        if (Player1Panel.PlayerType == PlayerType.Agent && Player2Panel.PlayerType == PlayerType.Agent)
-            StartAgentPlay();
+        // Restart agent auto-play if it was running before reset
+        if (Player1Panel.IsAgentRunning)
+            Player1Panel.StartAgentCommand.Execute(null);
+        if (Player2Panel.IsAgentRunning)
+            Player2Panel.StartAgentCommand.Execute(null);
     }
 }
 

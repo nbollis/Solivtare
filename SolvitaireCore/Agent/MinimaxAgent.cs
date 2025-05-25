@@ -1,13 +1,13 @@
 namespace SolvitaireCore;
 
-public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>
+public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISearchAgent<TGameState, TMove>
     where TGameState : ITwoPlayerGameState<TMove>
     where TMove : IMove
 {
     protected readonly StateEvaluator<TGameState, TMove> Evaluator;
-    protected readonly int MaxDepth;
     protected readonly Random Rand;
 
+    public int MaxDepth { get; set; }
     public MinimaxAgent(StateEvaluator<TGameState, TMove> evaluator, int maxDepth = 6)
     {
         Evaluator = evaluator;
