@@ -23,7 +23,7 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
     public PlayerType PlayerType
     {
         get => _playerType;
-        set { _playerType = value; OnPropertyChanged(nameof(PlayerType)); }
+        set { _playerType = value; OnPropertyChanged(nameof(PlayerType)); OnPropertyChanged(nameof(IsSearchAgent)); }
     }
     public ObservableCollection<TAgent> AvailableAgents { get; }
 
@@ -104,13 +104,33 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
         StartAgentCommand = new RelayCommand(StartAgent);
         StopAgentCommand = new RelayCommand(StopAgent);
         MakeSpecificMoveCommand = new RelayCommand(MakeSpecificMove);
+
+        OnPropertyChanged(nameof(IsAgentRunning));
     }
 
     #region Agent Play Control
 
     // Delegate to check if it's this agent's turn and to apply a move
     internal CancellationTokenSource? AgentRunningCancellationTokenSource;
-    public bool IsAgentRunning { get; private set; }
+
+    public bool CanStartAgent => !IsAgentRunning;
+    public bool CanStopAgent => IsAgentRunning;
+
+    private bool _isAgentRunning;
+    public bool IsAgentRunning
+    {
+        get => _isAgentRunning;
+        private set
+        {
+            if (_isAgentRunning != value)
+            {
+                _isAgentRunning = value;
+                OnPropertyChanged(nameof(IsAgentRunning));
+                OnPropertyChanged(nameof(CanStartAgent));
+                OnPropertyChanged(nameof(CanStopAgent));
+            }
+        }
+    }
 
     public async void StartAgent()
     {
@@ -158,6 +178,7 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
     private void MakeAgentMove()
     {
         _controller.ApplyAgentMove(_playerNumber);
+        MovesMade = _controller.CurrentGameState.MovesMade;
         RefreshLegalMoves();
     }
 
@@ -166,6 +187,7 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
         if (SelectedMove != null && _controller.CurrentPlayer == _playerNumber)
         {
             _controller.ApplyMove(SelectedMove.Move);
+            MovesMade = _controller.CurrentGameState.MovesMade;
             RefreshLegalMoves();
         }
     }
@@ -183,6 +205,28 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
         {
             _selectedMove = value;
             OnPropertyChanged(nameof(SelectedMove));
+        }
+    }
+
+    private double _evaluation;
+    public double Evaluation
+    {
+        get => _evaluation;
+        set
+        {
+            _evaluation = value;
+            OnPropertyChanged(nameof(Evaluation));
+        }
+    }
+
+    private int _movesMade;
+    public int MovesMade
+    {
+        get => _movesMade;
+        set
+        {
+            _movesMade = value;
+            OnPropertyChanged(nameof(MovesMade));
         }
     }
 

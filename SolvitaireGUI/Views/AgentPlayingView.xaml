@@ -106,7 +106,7 @@
         </Grid>
 
         <ContentControl Grid.Column="1">
-            <local:GameStateView DataContext="{Binding SolitaireGameStateViewModel}"/>
+            <local:SolitaireBoardView DataContext="{Binding SolitaireGameStateViewModel}"/>
         </ContentControl>
     </Grid>
 </UserControl>

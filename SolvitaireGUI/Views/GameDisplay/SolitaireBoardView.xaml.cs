@@ -3,11 +3,11 @@
 namespace SolvitaireGUI
 {
     /// <summary>
-    /// Interaction logic for GameStateView.xaml
+    /// Interaction logic for SolitaireBoardView.xaml
     /// </summary>
-    public partial class GameStateView : UserControl
+    public partial class SolitaireBoardView : UserControl
     {
-        public GameStateView()
+        public SolitaireBoardView()
         {
             InitializeComponent();
         }

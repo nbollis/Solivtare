@@ -1,17 +1,17 @@
 ﻿using SolvitaireCore;
 using System.Collections.ObjectModel;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
 using SolvitaireIO;
 
 namespace SolvitaireGUI;
 
-public class SolitaireGameStateViewModel : BaseViewModel
+public class SolitaireGameStateViewModel : GameStateViewModel<SolitaireGameState, SolitaireMove>
 {
     public SolitaireGameState BaseGameState { get; }
 
     public bool IsGameWon => BaseGameState.IsGameWon;
+
     public bool IsGameLost => BaseGameState.IsGameLost;
 
 
@@ -22,7 +22,7 @@ public class SolitaireGameStateViewModel : BaseViewModel
 
     public ICommand CopyGameStateAsJsonCommand { get; }
 
-    public SolitaireGameStateViewModel(SolitaireGameState gameState)
+    public SolitaireGameStateViewModel(SolitaireGameState gameState) : base(gameState)  
     {
         BaseGameState = gameState;
         Sync();
@@ -30,13 +30,13 @@ public class SolitaireGameStateViewModel : BaseViewModel
         CopyGameStateAsJsonCommand = new RelayCommand(CopyGameStateAsJson);
     }
 
-    public void ApplyMove(SolitaireMove move)
+    public override void ApplyMove(SolitaireMove move)
     {
         BaseGameState.ExecuteMove(move);
         Sync(move);
     }
 
-    public void UndoMove(SolitaireMove move)
+    public override void UndoMove(SolitaireMove move)
     {
         BaseGameState.UndoMove(move);
         Sync(move);
@@ -49,6 +49,11 @@ public class SolitaireGameStateViewModel : BaseViewModel
     }
 
     private CancellationTokenSource? _syncDebounceToken;
+
+    public override void UpdateBoard()
+    {
+        Sync();
+    }
 
     public async void Sync(SolitaireMove? move = null)
     {
@@ -88,6 +93,9 @@ public class SolitaireGameStateViewModel : BaseViewModel
         {
             // Ignore cancellation
         }
+
+        OnPropertyChanged(nameof(IsGameWon));
+        OnPropertyChanged(nameof(GameState));
     }
 
     public void UpdateStockAndWaste()

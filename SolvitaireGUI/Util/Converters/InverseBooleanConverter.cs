@@ -3,16 +3,10 @@ using System.Windows.Data;
 
 namespace SolvitaireGUI;
 
-public class InverseBooleanConverter : BaseValueConverter<InverseBooleanConverter>
+public class InverseBooleanConverter : IValueConverter
 {
-
-    public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return !(bool)value;
-    }
-
-    public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return (bool)value;
-    }
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is bool b ? !b : value;
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is bool b ? !b : value;
 }

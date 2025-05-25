@@ -64,7 +64,7 @@
         </Grid>
 
         <ContentControl Grid.Column="1" MinWidth="640">
-            <local:GameStateView DataContext="{Binding SolitaireGameStateViewModel}"/>
+            <local:SolitaireBoardView DataContext="{Binding SolitaireGameStateViewModel}"/>
         </ContentControl>
     </Grid>
 </UserControl>

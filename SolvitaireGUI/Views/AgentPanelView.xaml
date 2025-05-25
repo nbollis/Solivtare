@@ -12,55 +12,97 @@
         <local:PlayerTypeAgentModeToVisibilityConverter x:Key="PlayerTypeAgentModeToVisibilityConverter" />
         <local:PlayerTypeHumanModeToVisibilityConverter x:Key="PlayerTypeHumanModeToVisibilityConverter" />
         <local:NullToBoolConverter x:Key="NullToBoolConverter" />
+        <local:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
     </UserControl.Resources>
-    <Grid>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="{Binding PlayerLabel}" FontWeight="Bold" FontSize="18" Margin="0,0,0,10"/>
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" 
+                   Text="{Binding PlayerLabel}" 
+                   FontWeight="Bold" 
+                   FontSize="16" 
+                   VerticalAlignment="Center"
+                   Margin="5"/>
+
+        <!-- Agent Selection and Start/Stop -->
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top">
             <ComboBox ItemsSource="{Binding AvailableAgents}" 
-                      SelectedItem="{Binding SelectedAgent}" 
-                      DisplayMemberPath="Name"
-                      Margin="0,0,0,10"
-                      Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
+                  SelectedItem="{Binding SelectedAgent}" 
+                  DisplayMemberPath="Name"
+                  Width="120"
+                  Margin="0,0,8,0"
+                  Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
+        </StackPanel>
+
+        <!-- Switch to Human/Agent -->
+        <StackPanel Grid.Row="1" Grid.Column="1"  Orientation="Horizontal"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" >
             <Button Content="Switch to Human" Command="{Binding SwitchToHumanCommand}" 
+                    Style="{StaticResource RoundedButtonStyle}" 
                     Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
             <Button Content="Switch to Agent" Command="{Binding SwitchToAgentCommand}" 
+                    Style="{StaticResource RoundedButtonStyle}" 
                     Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeHumanModeToVisibilityConverter}}"/>
-            
+        </StackPanel>
+
+        <!-- Start and Stop Buttons -->
+        <Button Content="Start Agent" Grid.Row="2" Grid.Column="0"
+                Command="{Binding StartAgentCommand}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Style="{StaticResource RoundedButtonStyle}" Width="80" Margin="10"
+                Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"
+                IsEnabled="{Binding CanStartAgent}"/>
+        <Button Content="Stop Agent" Grid.Row="2" Grid.Column="1"
+                Command="{Binding StopAgentCommand}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Style="{StaticResource RoundedButtonStyle}" Width="80"
+                IsEnabled="{Binding CanStopAgent}"
+                Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
+
+
+
+        <!-- Max Depth (Search Agent) -->
+        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0"
+                ToolTip="Max Depth for the lookahead search"
+                Visibility="{Binding IsSearchAgent, Converter={StaticResource BoolToVisibilityConverter}}">
+            <TextBlock Text="Max Depth:" VerticalAlignment="Center"/>
+            <local:IntegerTexBoxControl Text="{Binding MaxDepth, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="5,0,0,0" Width="60"/>
+        </StackPanel>
+
+        <!-- Legal Moves List -->
+        <ListView Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+              ItemsSource="{Binding LegalMoves}"
+              SelectedItem="{Binding SelectedMove, Mode=TwoWay}"
+               Margin="0,8,0,0">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel>
+                        <TextBlock Text="{Binding Evaluation, StringFormat={}{0:F3}}" Width="50" DockPanel.Dock="Left"/>
+                        <TextBlock Text="{Binding MoveString}" />
+                    </DockPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- Bottom Buttons -->
+        <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
             <Button Content="Make Move" Command="{Binding MakeMoveCommand}" 
-                    Margin="0,10,0,0"
-                    Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
-            <Button Content="Start Agent" Command="{Binding StartAgentCommand}" 
-                    Margin="0,2,0,0"
-                    Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
-            <Button Content="Stop Agent" Command="{Binding StopAgentCommand}" 
-                    Margin="0,2,0,0"
-                    Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
-
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Center"
-                        ToolTip="Max Depth for the lookahead search"
-                        Visibility="{Binding IsSearchAgent, Converter={StaticResource BoolToVisibilityConverter}}">
-                <TextBlock  Text="Max Depth: " />
-                <local:IntegerTexBoxControl Text="{Binding MaxDepth, UpdateSourceTrigger=PropertyChanged}"
-                                            Margin="5,0,0,0" Width="60"/>
-            </StackPanel>
-
+                Style="{StaticResource RoundedButtonStyle}" Width="100" Margin="0,0,8,0"
+                Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
             <Button Content="Play Selected Move"
-                    Command="{Binding MakeSpecificMoveCommand}"
-                    IsEnabled="{Binding SelectedMove, Converter={StaticResource NullToBoolConverter}}"
-                    Margin="0,10,0,0"/>
-
-            <ListView ItemsSource="{Binding LegalMoves}"
-                      SelectedItem="{Binding SelectedMove, Mode=TwoWay}"
-                      Height="180" Margin="0,5,0,0">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <DockPanel>
-                            <TextBlock Text="{Binding Evaluation, StringFormat={}{0:F3}}" Width="50" DockPanel.Dock="Left"/>
-                            <TextBlock Text="{Binding MoveString}" />
-                        </DockPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                Command="{Binding MakeSpecificMoveCommand}"
+                Style="{StaticResource RoundedButtonStyle}" Width="130"
+                IsEnabled="{Binding SelectedMove, Converter={StaticResource NullToBoolConverter}}"/>
         </StackPanel>
     </Grid>
 </UserControl>
