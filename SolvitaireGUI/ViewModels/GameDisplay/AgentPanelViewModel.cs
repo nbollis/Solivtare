@@ -104,8 +104,6 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
         StartAgentCommand = new RelayCommand(StartAgent);
         StopAgentCommand = new RelayCommand(StopAgent);
         MakeSpecificMoveCommand = new RelayCommand(MakeSpecificMove);
-
-        RefreshLegalMoves();
     }
 
     #region Agent Play Control
@@ -177,7 +175,17 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
     #region Gui Display
 
     protected StateEvaluator<TGameState, TMove> Evaluator;
-    public MoveViewModel<TMove>? SelectedMove { get; set; }
+    private MoveViewModel<TMove>? _selectedMove;
+    public MoveViewModel<TMove>? SelectedMove
+    {
+        get => _selectedMove;
+        set
+        {
+            _selectedMove = value;
+            OnPropertyChanged(nameof(SelectedMove));
+        }
+    }
+
     public ObservableCollection<MoveViewModel<TMove>> LegalMoves { get; } = new();
     public void RefreshLegalMoves()
     {
@@ -185,9 +193,14 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
         if (!_controller.IsGameActive)
             return;
 
+        var clone = (TGameState)_controller.CurrentGameState.Clone();
+
         foreach (var move in _controller.GetLegalMoves())
         {
-            double eval = Evaluator.EvaluateMove(_controller.CurrentGameState, move);
+            clone.ExecuteMove(move);
+            double eval = Evaluator.EvaluateState(clone, _playerNumber);
+            clone.UndoMove(move);
+
             LegalMoves.Add(new MoveViewModel<TMove>(move, eval));
         }
     }
@@ -195,7 +208,7 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
     #endregion
 }
 
-public class AgentPanelModel : AgentPanelViewModel<ConnectFourGameState, ConnectFourMove, ConnectFourAgent>
+public class AgentPanelModel : AgentPanelViewModel<ConnectFourGameState, ConnectFourMove, MinimaxAgent<ConnectFourGameState, ConnectFourMove>>
 {
     public static AgentPanelModel Instance => new AgentPanelModel();
 

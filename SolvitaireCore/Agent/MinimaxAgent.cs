@@ -33,11 +33,12 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
 
             foreach (var move in legalMoves)
             {
-                var clone = (TGameState)gameState.Clone();
-                clone.ExecuteMove(move);
+                //var clone = (TGameState)gameState.Clone();
+                gameState.ExecuteMove(move);
 
                 // Assume the agent is always maximizing at the root
-                double score = Minimax(clone, depth - 1, double.NegativeInfinity, double.PositiveInfinity, false, maximizingPlayer);
+                double score = Minimax(gameState, depth - 1, double.NegativeInfinity, double.PositiveInfinity, false, maximizingPlayer);
+                gameState.UndoMove(move);
 
                 if (score > bestScore)
                 {
@@ -100,10 +101,10 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
         double bestScore = maximizingPlayer ? double.NegativeInfinity : double.PositiveInfinity;
         foreach (var move in moves)
         {
-            var clone = (TGameState)state.Clone();
-            clone.ExecuteMove(move);
-
-            double score = Minimax(clone, depth - 1, alpha, beta, !maximizingPlayer, maximizingPlayerId);
+            //var clone = (TGameState)state.Clone();
+            state.ExecuteMove(move);
+            double score = Minimax(state, depth - 1, alpha, beta, !maximizingPlayer, maximizingPlayerId);
+            state.UndoMove(move);
 
             if (maximizingPlayer)
             {

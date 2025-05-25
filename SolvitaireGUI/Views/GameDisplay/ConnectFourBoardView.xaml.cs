@@ -39,6 +39,9 @@ namespace SolvitaireGUI
                     return;
                 }
 
+                if (parentVm.GameStateViewModel.GameState.Board[0, column] != 0)
+                    return;
+
                 var move = new ConnectFourMove(column);
                 parentVm.ApplyMove(move);
             }

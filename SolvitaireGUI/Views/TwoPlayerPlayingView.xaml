@@ -30,18 +30,25 @@
         <Grid Grid.Row="0" Grid.Column="1"  >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
-            
-            <Button Grid.Row="0" Content="⇄ Swap Players" Style="{StaticResource RoundedButtonStyle}"
+
+            <Button Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Content="⇄ Swap Players" Style="{StaticResource RoundedButtonStyle}"
                     Command="{Binding SwapPlayersCommand}" 
                     HorizontalAlignment="Center" Width="120" Margin ="5"/>
 
-            <Button Grid.Row="1"  Content="Reset Game" Style="{StaticResource RoundedButtonStyle}"
+            <Button Grid.Row="1" Grid.Column="1" Content="Reset Game" Style="{StaticResource RoundedButtonStyle}"
                     Command="{Binding ResetGameCommand}" 
+                    HorizontalAlignment="Center" Width="80" Margin ="5"/>
+
+            <Button Grid.Row="1" Grid.Column="2"  Content="Undo Move" Style="{StaticResource RoundedButtonStyle}"
+                    Command="{Binding UndoMoveCommand}" 
                     HorizontalAlignment="Center" Width="80" Margin ="5"/> 
         </Grid>
 

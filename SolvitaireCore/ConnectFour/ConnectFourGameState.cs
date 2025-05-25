@@ -78,6 +78,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
                 CurrentPlayer = 3 - CurrentPlayer;
                 IsGameWon = false;
                 WinningPlayer = null;
+                WinningCells.Clear();
                 if (_moveHistory.Count > 0)
                     _moveHistory.RemoveAt(_moveHistory.Count - 1);
 

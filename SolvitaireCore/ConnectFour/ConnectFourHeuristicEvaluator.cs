@@ -2,6 +2,14 @@
 
 public class ConnectFourHeuristicEvaluator : StateEvaluator<ConnectFourGameState, ConnectFourMove>
 {
+    public override double EvaluateMove(ConnectFourGameState state, ConnectFourMove move)
+    {
+        state.ExecuteMove(move);
+        double score = EvaluateState(state, 3 - state.CurrentPlayer);
+        state.UndoMove(move);
+        return score;
+    }
+
     public override double EvaluateState(ConnectFourGameState state, int? maximixingPlayerId = null)
     {
         maximixingPlayerId ??= state.CurrentPlayer;
@@ -10,7 +18,7 @@ public class ConnectFourHeuristicEvaluator : StateEvaluator<ConnectFourGameState
         if (state.IsPlayerLoss(maximixingPlayerId.Value))
             return -1000;
 
-        return EvaluateHeuristic(state, state.CurrentPlayer) - EvaluateHeuristic(state, 3 - state.CurrentPlayer);
+        return EvaluateHeuristic(state, maximixingPlayerId.Value) - EvaluateHeuristic(state, 3 - maximixingPlayerId.Value);
     }
 
     private int EvaluateHeuristic(ConnectFourGameState state, int player)

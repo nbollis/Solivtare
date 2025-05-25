@@ -11,5 +11,5 @@ public class ConnectFourMove(int column) : IMove<ConnectFourGameState>
         return gameState.Board[0, Column] == 0;
     }
 
-    public override string ToString() => $"{Column}";
+    public override string ToString() => $"Column {Column+1}";
 }

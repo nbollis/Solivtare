@@ -38,22 +38,66 @@ public class TwoPlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
 
     public TGameState CurrentGameState => GameStateViewModel.GameState;
     public TwoPlayerGameStateViewModel<TGameState, TMove> GameStateViewModel { get; }
-
     public List<TMove> GetLegalMoves() => GameStateViewModel.GameState.GetLegalMoves();
+
+    public ICommand ResetGameCommand { get; }
+    public ICommand UndoMoveCommand { get; set; }
+
+    private void ResetGame()
+    {
+        GameStateViewModel.GameState.Reset();
+        GameStateViewModel.UpdateBoard();
+
+        // Restart agent auto-play if it was running before reset
+        if (Player1Panel.IsAgentRunning)
+            Player1Panel.StartAgentCommand.Execute(null);
+        if (Player2Panel.IsAgentRunning)
+            Player2Panel.StartAgentCommand.Execute(null);
+    }
+
+    public void UndoMove()
+    {
+        if (!_previousMoves.TryPop(out var move))
+            return;
+
+        // Check if the move was made by an automatically running agent  
+        var otherPlayerPanel = CurrentPlayer == 1 ? Player2Panel : Player1Panel;
+
+        if (otherPlayerPanel.IsAgentRunning)
+        {
+            // Undo the agent's move and the opponent's move  
+            GameStateViewModel.UndoMove(move);
+            if (_previousMoves.TryPop(out var opponentMove))
+            {
+                GameStateViewModel.UndoMove(opponentMove);
+            }
+        }
+        else
+        {
+            // Undo a single move  
+            GameStateViewModel.UndoMove(move);
+        }
+
+        Player1Panel.RefreshLegalMoves();
+        Player2Panel.RefreshLegalMoves();
+    }
 
     #endregion
 
     #region Game Interactions with Agents
 
+    private readonly Stack<TMove> _previousMoves = new();
+
     /// <summary>
-    /// Handles the human player's move. This method is called when a human player clicks on a column to make a move.
+    /// This method is called by agents and when a human player clicks on a column to make a move.
     /// </summary>
     public void ApplyMove(TMove move)
     {
         if (GameStateViewModel.IsGameWon || GameStateViewModel.IsGameDraw)
             return;
 
-        GameStateViewModel.ApplyMove(move);
+        GameStateViewModel.ApplyMove(move); 
+        _previousMoves.Push(move);
 
         Player1Panel.RefreshLegalMoves();
         Player2Panel.RefreshLegalMoves();
@@ -75,39 +119,25 @@ public class TwoPlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
     #endregion
 
     public ICommand MakeMoveCommand { get; }
-    public ICommand ResetGameCommand { get; }
 
     public TwoPlayerGameViewModel(TGameState gameState)
     {
         // Gameplay
         GameStateViewModel = gameState.ToTwoPlayerViewModel<TGameState, TMove>();
-        MakeMoveCommand = new DelegateCommand((m)=>ApplyMove((TMove)m)); // int = column
+        MakeMoveCommand = new DelegateCommand((m) => ApplyMove((TMove)m)); 
         ResetGameCommand = new RelayCommand(ResetGame);
+        UndoMoveCommand = new RelayCommand(UndoMove);
+        SwapPlayersCommand = new RelayCommand(SwapPlayers);
 
         // Agents
-        var availableAgents =
-            new ObservableCollection<TAgent>(gameState.GetPossibleAgents<TGameState, TMove, TAgent>());
-
-        Player1Panel = new AgentPanelViewModel<TGameState, TMove, TAgent>("Player 1", 1, availableAgents, this);
-        Player2Panel = new AgentPanelViewModel<TGameState, TMove, TAgent>("Player 2", 2, availableAgents, this);
-
-        SwapPlayersCommand = new RelayCommand(SwapPlayers);
-    }
-
-    private void ResetGame()
-    {
-        GameStateViewModel.GameState.Reset();
-        GameStateViewModel.UpdateBoard();
-
-        // Restart agent auto-play if it was running before reset
-        if (Player1Panel.IsAgentRunning)
-            Player1Panel.StartAgentCommand.Execute(null);
-        if (Player2Panel.IsAgentRunning)
-            Player2Panel.StartAgentCommand.Execute(null);
+        Player1Panel = new AgentPanelViewModel<TGameState, TMove, TAgent>("Player 1", 1, new ObservableCollection<TAgent>(gameState.GetPossibleAgents<TGameState, TMove, TAgent>()), this);
+        Player2Panel = new AgentPanelViewModel<TGameState, TMove, TAgent>("Player 2", 2, new ObservableCollection<TAgent>(gameState.GetPossibleAgents<TGameState, TMove, TAgent>()), this);
+        Player1Panel.RefreshLegalMoves();
+        Player2Panel.RefreshLegalMoves();
     }
 }
 
-public class TwoPlayerGameModel : TwoPlayerGameViewModel<ConnectFourGameState, ConnectFourMove, ConnectFourAgent>
+public class TwoPlayerGameModel : TwoPlayerGameViewModel<ConnectFourGameState, ConnectFourMove, MinimaxAgent<ConnectFourGameState, ConnectFourMove>>
 {
     public static TwoPlayerGameModel Instance => new TwoPlayerGameModel();
 
