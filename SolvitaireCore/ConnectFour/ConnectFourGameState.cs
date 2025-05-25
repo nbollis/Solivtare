@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SolvitaireCore.ConnectFour;
+﻿namespace SolvitaireCore.ConnectFour;
 
 public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquatable<ConnectFourGameState>
 {
@@ -27,7 +21,6 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
 
     public bool IsPlayerWin(int player) => IsGameWon && WinningPlayer == player;
     public bool IsPlayerLoss(int player) => IsGameWon && WinningPlayer != player;
-
 
     public void Reset()
     {

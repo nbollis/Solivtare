@@ -1,11 +1,10 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
-using System.Windows;
 using System.Windows.Media;
 
 namespace SolvitaireGUI;
 
-public class PlayerToBrushConverter : BaseValueConverter<PlayerToBrushConverter>
+public class ConnectFourConverters : BaseValueConverter<ConnectFourConverters>
 {
     public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
@@ -43,8 +42,6 @@ public class WinningCellToBrushConverter : IMultiValueConverter
         throw new NotImplementedException();
     }
 }
-
-
 public class FlatIndexToColumnConverter : BaseValueConverter<FlatIndexToColumnConverter>
 {
     public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -60,48 +57,3 @@ public class FlatIndexToColumnConverter : BaseValueConverter<FlatIndexToColumnCo
     }
 }
 
-public class PreviewTokenVisibilityConverter : IMultiValueConverter
-{
-    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-    {
-        int hovered = (int)values[0];
-        int column = (int)values[1];
-        return hovered == column ? Visibility.Visible : Visibility.Collapsed;
-    }
-    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) => throw new NotImplementedException();
-}
-
-public class PlayerTypeAgentModeToVisibilityConverter : BaseValueConverter<PlayerTypeAgentModeToVisibilityConverter>
-{
-
-    public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is PlayerType mode)
-        {
-            return mode == PlayerType.Agent ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        return Visibility.Collapsed; // Default visibility if not a valid mode
-    }
-
-    public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class PlayerTypeHumanModeToVisibilityConverter : BaseValueConverter<PlayerTypeHumanModeToVisibilityConverter>
-{
-    public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is PlayerType mode)
-        {
-            return mode == PlayerType.Human ? Visibility.Visible : Visibility.Collapsed;
-        }
-        return Visibility.Collapsed; // Default visibility if not a valid mode
-    }
-    public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
