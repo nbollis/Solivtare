@@ -4,6 +4,7 @@ public class ConnectFourHeuristicEvaluator : StateEvaluator<ConnectFourGameState
 {
     public override double EvaluateState(ConnectFourGameState state, int? maximixingPlayerId = null)
     {
+        maximixingPlayerId ??= state.CurrentPlayer;
         if (state.IsPlayerWin(maximixingPlayerId!.Value))
             return 1000;
         if (state.IsPlayerLoss(maximixingPlayerId.Value))

@@ -18,13 +18,13 @@ public class MainWindowViewModel : BaseViewModel
 
     public GameInspectionTabViewModel GameInspectionTabViewModel { get; set; }
     public GeneticAlgorithmTabViewModel GeneticAlgorithmTabViewModel { get; set; }
-    public ConnectFourPlayingViewModel ConnectFourPlayingViewModel { get; set; }
+    public GameHostViewModel GameHostViewModel { get; set; }
 
     public MainWindowViewModel()
     {
         AgentPlayingViewModel = new AgentPlayingViewModel();
         GameInspectionTabViewModel = new();
-        ConnectFourPlayingViewModel = new ConnectFourPlayingViewModel();
+        GameHostViewModel = new GameHostViewModel();
         GeneticAlgorithmTabViewModel = new(new SolitaireGeneticAlgorithmParameters());
     }
 }

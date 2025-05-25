@@ -35,6 +35,9 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
     public List<ConnectFourMove> GetLegalMoves()
     {
         var moves = new List<ConnectFourMove>();
+        if (IsGameWon)
+            return moves;
+
         for (int col = 0; col < Columns; col++)
         {
             if (Board[0, col] == 0)
@@ -73,7 +76,8 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
                 Board[row, move.Column] = 0;
                 MovesMade--;
                 CurrentPlayer = 3 - CurrentPlayer;
-                IsGameWon = false; 
+                IsGameWon = false;
+                WinningPlayer = null;
                 if (_moveHistory.Count > 0)
                     _moveHistory.RemoveAt(_moveHistory.Count - 1);
 

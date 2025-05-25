@@ -4,10 +4,9 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
     where TGameState : ITwoPlayerGameState<TMove>
     where TMove : IMove
 {
-    protected readonly StateEvaluator<TGameState, TMove> Evaluator;
     protected readonly Random Rand;
-
     public int MaxDepth { get; set; }
+    public StateEvaluator<TGameState, TMove> Evaluator { get; init; }
     public MinimaxAgent(StateEvaluator<TGameState, TMove> evaluator, int maxDepth = 6)
     {
         Evaluator = evaluator;

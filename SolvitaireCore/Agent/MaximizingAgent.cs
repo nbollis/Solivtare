@@ -8,9 +8,9 @@ public class MaximizingAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, 
     where TGameState : IGameState<TMove>
     where TMove : IMove
 {
-    protected readonly StateEvaluator<TGameState, TMove> Evaluator;
     protected readonly Random Rand;
     public int MaxDepth { get; set; }
+    public StateEvaluator<TGameState, TMove> Evaluator { get; init; }
 
     public MaximizingAgent(StateEvaluator<TGameState, TMove> evaluator, int maxDepth = 3)
     {

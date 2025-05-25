@@ -8,6 +8,21 @@
         Icon="Resources/Icons/ApplicationIcon.png"
         d:DataContext="{x:Static local:MainWindowModel.Instance}"
         Title="MainWindow" Height="500" Width="1100">
+    <Window.Resources>
+        <local:GameControllerTemplateSelector x:Key="GameControllerTemplateSelector">
+            <local:GameControllerTemplateSelector.ConnectFourTemplate>
+                <DataTemplate>
+                    <local:TwoPlayerPlayingView DataContext="{Binding}" />
+                </DataTemplate>
+            </local:GameControllerTemplateSelector.ConnectFourTemplate>
+            <local:GameControllerTemplateSelector.TicTacToeTemplate>
+                <DataTemplate>
+                    <local:TwoPlayerPlayingView DataContext="{Binding}" />
+                </DataTemplate>
+            </local:GameControllerTemplateSelector.TicTacToeTemplate>
+            <!-- Add more as needed -->
+        </local:GameControllerTemplateSelector>
+    </Window.Resources>
 
     <Grid>
         <TabControl SelectedIndex="2">
@@ -23,8 +38,20 @@
                 <local:GeneticAlgorithmTabView DataContext="{Binding }"/>
             </TabItem>
 
-            <TabItem Header="Play Connect Four" DataContext="{Binding ConnectFourPlayingViewModel}">
-                <local:ConnectFourPlayingView DataContext="{Binding }" />
+            <TabItem Header="Play Games" DataContext="{x:Static local:GameHostModel.Instance}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="5*"/>
+                    </Grid.RowDefinitions>
+
+                    <ComboBox Grid.Row="0" ItemsSource="{Binding AvailableGames}"
+                              HorizontalAlignment="Left" Height="30" VerticalAlignment="Top"
+                              SelectedItem="{Binding SelectedGame, Mode=TwoWay}"
+                              Width="150" Margin="10"/>
+                    <ContentControl Grid.Row="0" Grid.RowSpan="2" Content="{Binding GameControllerViewModel}"
+                                    ContentTemplateSelector="{StaticResource GameControllerTemplateSelector}" />
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>

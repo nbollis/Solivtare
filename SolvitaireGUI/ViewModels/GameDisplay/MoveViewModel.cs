@@ -15,3 +15,18 @@ public class MoveViewModel : BaseViewModel
         Evaluation = eval;
     }
 }
+
+public class MoveViewModel<TMove> : BaseViewModel
+{
+    public TMove Move { get; }
+    public string MoveString { get; set; }
+    public double Evaluation { get; set; }
+
+
+    public MoveViewModel(TMove move, double eval)
+    {
+        Move = move;
+        MoveString = move.ToString();
+        Evaluation = eval;
+    }
+}

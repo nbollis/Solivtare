@@ -18,3 +18,13 @@ public abstract class StateEvaluator<TGameState, TMove>
 
     public abstract double EvaluateState(TGameState state, int? moveCount = null);
 }
+
+public class AllEqualStateEvaluator<TGameState, TMove> : StateEvaluator<TGameState, TMove>
+    where TGameState : IGameState<TMove>
+    where TMove : IMove
+{
+    public override double EvaluateState(TGameState state, int? moveCount = null)
+    {
+        return 1;
+    }
+}

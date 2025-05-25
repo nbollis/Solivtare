@@ -141,4 +141,10 @@
     <Resource Include="Resources\Icons\snap.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Views\GameDisplay\TicTacToeBoardView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>

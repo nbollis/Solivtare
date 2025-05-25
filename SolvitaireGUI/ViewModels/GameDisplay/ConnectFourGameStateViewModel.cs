@@ -1,53 +1,54 @@
 using System.Collections.ObjectModel;
+using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
 namespace SolvitaireGUI;
 
-public class ConnectFourGameStateViewModel : BaseViewModel
+public class ConnectFourGameStateViewModel : TwoPlayerGameStateViewModel<ConnectFourGameState, ConnectFourMove>
 {
-    public ConnectFourGameState GameState { get; }
+    private int _hoveredColumnIndex = -1;
+    public int HoveredColumnIndex
+    {
+        get => _hoveredColumnIndex;
+        set { _hoveredColumnIndex = value; OnPropertyChanged(nameof(HoveredColumnIndex)); }
+    }
     public ObservableCollection<int> FlatBoardCells { get; }
     public HashSet<int> WinningCellIndices =>
-        new HashSet<int>(GameState.WinningCells.Select(cell => cell.Row * ConnectFourGameState.Columns + cell.Col));
+        [..GameState.WinningCells.Select(cell => cell.Row * ConnectFourGameState.Columns + cell.Col)];
 
-
-    public int CurrentPlayer => GameState.CurrentPlayer;
-    public bool IsGameWon => GameState.IsGameWon;
-    public bool IsGameDraw => GameState.IsGameDraw;
-    public int? WinningPlayer => GameState.WinningPlayer;
-
-    public ConnectFourGameStateViewModel(ConnectFourGameState gameState)
+    public ConnectFourGameStateViewModel(ConnectFourGameState gameState) : base(gameState)
     {
-        GameState = gameState;
         FlatBoardCells = new ObservableCollection<int>(
             Enumerable.Range(0, ConnectFourGameState.Rows * ConnectFourGameState.Columns)
                 .Select(i => gameState.Board[i / ConnectFourGameState.Columns, i % ConnectFourGameState.Columns])
         );
     }
 
-    public void ApplyMove(ConnectFourMove move)
-    {
-        GameState.ExecuteMove(move);
-        UpdateBoard();
-        OnPropertyChanged(nameof(CurrentPlayer));
-        OnPropertyChanged(nameof(IsGameWon));
-        OnPropertyChanged(nameof(IsGameDraw));
-        OnPropertyChanged(nameof(WinningPlayer));
-    }
-
-    public void UndoMove(ConnectFourMove move)
-    {
-        GameState.UndoMove(move);
-        UpdateBoard();
-        OnPropertyChanged(nameof(CurrentPlayer));
-        OnPropertyChanged(nameof(IsGameWon));
-        OnPropertyChanged(nameof(IsGameDraw));
-        OnPropertyChanged(nameof(WinningPlayer));
-    }
-
-    public void UpdateBoard()
+    public override void UpdateBoard()
     {
         for (int i = 0; i < FlatBoardCells.Count; i++)
             FlatBoardCells[i] = GameState.Board[i / ConnectFourGameState.Columns, i % ConnectFourGameState.Columns];
         OnPropertyChanged(nameof(WinningCellIndices));
+        OnPropertyChanged(nameof(FlatBoardCells));
+    }
+}
+
+public class ConnectFourGameStateModel : ConnectFourGameStateViewModel
+{
+    public static ConnectFourGameStateModel Instance { get; } = new();
+    public ConnectFourGameStateModel() : base(new())
+    {
+    }
+}
+
+
+public class TicTacToeGameStateViewModel : TwoPlayerGameStateViewModel<TicTacToeGameState, TicTacToeMove>
+{
+    public TicTacToeGameStateViewModel(TicTacToeGameState gameState) : base(gameState)
+    {
+    }
+
+    public override void UpdateBoard()
+    {
+        
     }
 }

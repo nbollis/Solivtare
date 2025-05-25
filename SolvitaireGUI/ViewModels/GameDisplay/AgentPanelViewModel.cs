@@ -7,8 +7,14 @@ namespace SolvitaireGUI;
 
 public enum PlayerType { Agent, Human }
 
-public class AgentPanelViewModel : BaseViewModel // TODO: Fully Generalize
+public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
+    where TGameState : ITwoPlayerGameState<TMove>
+    where TMove : IMove
+    where TAgent : IAgent<TGameState, TMove>
 {
+    private readonly IGameController<TGameState, TMove> _controller;
+    private readonly int _playerNumber;
+
     public string PlayerLabel { get; }
 
     #region Agent Selection and Setup
@@ -19,33 +25,40 @@ public class AgentPanelViewModel : BaseViewModel // TODO: Fully Generalize
         get => _playerType;
         set { _playerType = value; OnPropertyChanged(nameof(PlayerType)); }
     }
-    public ObservableCollection<IAgent<ConnectFourGameState, ConnectFourMove>> AvailableAgents { get; }
+    public ObservableCollection<TAgent> AvailableAgents { get; }
 
-    private IAgent<ConnectFourGameState, ConnectFourMove>? _selectedAgent;
-    public IAgent<ConnectFourGameState, ConnectFourMove>? SelectedAgent
+    private TAgent? _selectedAgent;
+    public TAgent? SelectedAgent
     {
         get => _selectedAgent;
         set
         {
-            if (_selectedAgent != value)
+            _selectedAgent = value;
+            if (_selectedAgent is ISearchAgent<TGameState, TMove> searchAgent)
             {
-                _selectedAgent = value;
-                OnPropertyChanged(nameof(SelectedAgent));
-                OnPropertyChanged(nameof(MaxDepth)); // Notify MaxDepth may have changed
-                OnPropertyChanged(nameof(IsSearchAgent));
+                Evaluator = searchAgent.Evaluator;
+                MaxDepth = searchAgent.MaxDepth;
             }
+            else
+            {
+                Evaluator = new AllEqualStateEvaluator<TGameState, TMove>();
+            }
+
+            OnPropertyChanged(nameof(SelectedAgent));
+            OnPropertyChanged(nameof(MaxDepth)); // Notify MaxDepth may have changed
+            OnPropertyChanged(nameof(IsSearchAgent));
         }
     }
 
-    public bool IsSearchAgent => PlayerType == PlayerType.Agent && SelectedAgent is ISearchAgent<ConnectFourGameState, ConnectFourMove>;
+    public bool IsSearchAgent => PlayerType == PlayerType.Agent && SelectedAgent is ISearchAgent<TGameState, TMove>;
     public int? MaxDepth
     {
-        get => SelectedAgent is ISearchAgent<ConnectFourGameState, ConnectFourMove> searchAgent
+        get => SelectedAgent is ISearchAgent<TGameState, TMove> searchAgent
             ? searchAgent.MaxDepth
             : null;
         set
         {
-            if (SelectedAgent is ISearchAgent<ConnectFourGameState, ConnectFourMove> searchAgent && value.HasValue)
+            if (SelectedAgent is ISearchAgent<TGameState, TMove> searchAgent && value.HasValue)
             {
                 searchAgent.MaxDepth = value.Value;
                 OnPropertyChanged(nameof(MaxDepth));
@@ -58,59 +71,69 @@ public class AgentPanelViewModel : BaseViewModel // TODO: Fully Generalize
     public ICommand SwitchToHumanCommand { get; }
     public ICommand SwitchToAgentCommand { get; }
     public ICommand MakeMoveCommand { get; }
+    public ICommand MakeSpecificMoveCommand { get; }
     public ICommand StartAgentCommand { get; }
     public ICommand StopAgentCommand { get; }
 
     public AgentPanelViewModel(
-        string playerLabel,
-        ObservableCollection<IAgent<ConnectFourGameState, ConnectFourMove>> availableAgents,
-        Action makeMoveAction,
-        Func<bool> isMyTurn,
-        Func<bool> isGameActive)
+        string playerLabel, 
+        int playerNumber,
+        ObservableCollection<TAgent> availableAgents,
+        IGameController<TGameState, TMove> controller)
     {
+        _playerNumber = playerNumber;
+        _controller = controller;
+
         PlayerLabel = playerLabel;
         AvailableAgents = availableAgents;
         SelectedAgent = availableAgents.Last();
+        PlayerType = PlayerType.Agent; // Default to agent
+        if (SelectedAgent is ISearchAgent<TGameState, TMove> searchAgent)
+        {
+            Evaluator = searchAgent.Evaluator;
+            MaxDepth = searchAgent.MaxDepth;
+        }
+        else
+        {
+            Evaluator = new AllEqualStateEvaluator<TGameState, TMove>();
+        }
+
         SwitchToHumanCommand = new RelayCommand(() => PlayerType = PlayerType.Human);
         SwitchToAgentCommand = new RelayCommand(() => PlayerType = PlayerType.Agent);
-        MakeMoveCommand = new RelayCommand(makeMoveAction);
+        MakeMoveCommand = new RelayCommand(MakeAgentMove);
         StartAgentCommand = new RelayCommand(StartAgent);
         StopAgentCommand = new RelayCommand(StopAgent);
+        MakeSpecificMoveCommand = new RelayCommand(MakeSpecificMove);
 
-        _makeAgentMove = makeMoveAction;
-        _isMyTurn = isMyTurn;
-        _isGameActive = isGameActive;
+        RefreshLegalMoves();
     }
 
     #region Agent Play Control
 
     // Delegate to check if it's this agent's turn and to apply a move
-    internal CancellationTokenSource? AgentCancelaCancellationTokenSource;
-    private readonly Func<bool> _isMyTurn;
-    private readonly Func<bool> _isGameActive;
-    private readonly Action _makeAgentMove;
+    internal CancellationTokenSource? AgentRunningCancellationTokenSource;
     public bool IsAgentRunning { get; private set; }
 
     public async void StartAgent()
     {
-        if (AgentCancelaCancellationTokenSource != null)
+        if (AgentRunningCancellationTokenSource != null)
             return;
         IsAgentRunning = true;
-        AgentCancelaCancellationTokenSource = new CancellationTokenSource();
-        var token = AgentCancelaCancellationTokenSource.Token;
+        AgentRunningCancellationTokenSource = new CancellationTokenSource();
+        var token = AgentRunningCancellationTokenSource.Token;
 
         try
         {
-            while (_isGameActive() && PlayerType == PlayerType.Agent && SelectedAgent != null &&
+            while (_controller.IsGameActive && PlayerType == PlayerType.Agent && SelectedAgent != null &&
                    !token.IsCancellationRequested)
             {
-                if (_isMyTurn())
+                if (_controller.CurrentPlayer == _playerNumber)
                 {
-                    _makeAgentMove();
+                    MakeAgentMove();
                 }
 
                 await Task.Delay(100, token);
-                if (!_isGameActive())
+                if (!_controller.IsGameActive)
                     break;
             }
         }
@@ -123,23 +146,58 @@ public class AgentPanelViewModel : BaseViewModel // TODO: Fully Generalize
         {
             // Leave agent running to true if not canceled, this allows the reset from the 
             // Game play controller (two player game view) to restart the agent loop. 
-            AgentCancelaCancellationTokenSource = null;
+            AgentRunningCancellationTokenSource = null;
         }
     }
 
     private void StopAgent()
     {
-        AgentCancelaCancellationTokenSource?.Cancel();
-        AgentCancelaCancellationTokenSource = null;
+        AgentRunningCancellationTokenSource?.Cancel();
+        AgentRunningCancellationTokenSource = null;
         IsAgentRunning = false;
+    }
+
+    private void MakeAgentMove()
+    {
+        _controller.ApplyAgentMove(_playerNumber);
+        RefreshLegalMoves();
+    }
+
+    private void MakeSpecificMove()
+    {
+        if (SelectedMove != null && _controller.CurrentPlayer == _playerNumber)
+        {
+            _controller.ApplyMove(SelectedMove.Move);
+            RefreshLegalMoves();
+        }
+    }
+
+    #endregion
+
+    #region Gui Display
+
+    protected StateEvaluator<TGameState, TMove> Evaluator;
+    public MoveViewModel<TMove>? SelectedMove { get; set; }
+    public ObservableCollection<MoveViewModel<TMove>> LegalMoves { get; } = new();
+    public void RefreshLegalMoves()
+    {
+        LegalMoves.Clear();
+        if (!_controller.IsGameActive)
+            return;
+
+        foreach (var move in _controller.GetLegalMoves())
+        {
+            double eval = Evaluator.EvaluateMove(_controller.CurrentGameState, move);
+            LegalMoves.Add(new MoveViewModel<TMove>(move, eval));
+        }
     }
 
     #endregion
 }
 
-public class AgentPanelModel : AgentPanelViewModel
+public class AgentPanelModel : AgentPanelViewModel<ConnectFourGameState, ConnectFourMove, ConnectFourAgent>
 {
     public static AgentPanelModel Instance => new AgentPanelModel();
 
-    public AgentPanelModel() : base("", [], null!, null!, null!) { }
+    public AgentPanelModel() : base("", 1, [], null!) { }
 }
