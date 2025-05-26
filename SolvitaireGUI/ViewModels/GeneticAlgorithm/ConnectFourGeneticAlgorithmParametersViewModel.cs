@@ -14,6 +14,16 @@ public class ConnectFourGeneticAlgorithmParametersViewModel(ConnectFourGeneticAl
             OnPropertyChanged(nameof(RandomAgentRatio));
         }
     }
+
+    public int GamesPerPairing
+    {
+        get => ((ConnectFourGeneticAlgorithmParameters)Parameters).GamesPerPairing;
+        set
+        {
+            ((ConnectFourGeneticAlgorithmParameters)Parameters).GamesPerPairing = value;
+            OnPropertyChanged(nameof(GamesPerPairing));
+        }
+    }
 }
 
 public class ConnectFourGeneticAlgorithmParametersModel : ConnectFourGeneticAlgorithmParametersViewModel

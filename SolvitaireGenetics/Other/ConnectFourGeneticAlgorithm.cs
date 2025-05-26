@@ -8,6 +8,7 @@ namespace SolvitaireGenetics;
 public class ConnectFourGeneticAlgorithmParameters : GeneticAlgorithmParameters
 {
     public double RandomAgentRatio { get; set; } = 0.4;
+    public int GamesPerPairing { get; set; } = 10;
     public override void SaveToFile(string filePath)
     {
         var json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
@@ -27,7 +28,7 @@ public class ConnectFourGeneticAlgorithm : GeneticAlgorithm<ConnectFourChromosom
         int totalPairings = Parameters.TournamentSize;
         int gamesAgainstRandomAgent = (int)(totalPairings * Parameters.RandomAgentRatio);
         int gamesAgainstOtherAgents = totalPairings - gamesAgainstRandomAgent;
-        int maxScore = totalPairings * 5; // 5 games per pairing  
+        int maxScore = totalPairings * Parameters.GamesPerPairing; // 5 games per pairing  
 
         Random random = new Random();
 
@@ -41,7 +42,7 @@ public class ConnectFourGeneticAlgorithm : GeneticAlgorithm<ConnectFourChromosom
             if (cancellationToken?.IsCancellationRequested == true)
                 break;
 
-            var result = PlayFiveGames(agent, randomAgent);
+            var result = PlayGames(agent, randomAgent);
             totalScore += result.Score;
             gamesWon += result.GamesWon;
             movesPlayed += result.MovesMade;
@@ -61,7 +62,7 @@ public class ConnectFourGeneticAlgorithm : GeneticAlgorithm<ConnectFourChromosom
                 continue;
             }
 
-            var result = PlayFiveGames(agent, opponent);
+            var result = PlayGames(agent, opponent);
             totalScore += result.Score;
             gamesWon += result.GamesWon;
             movesPlayed += result.MovesMade;
@@ -83,13 +84,13 @@ public class ConnectFourGeneticAlgorithm : GeneticAlgorithm<ConnectFourChromosom
         return fitness;
     }
 
-    private (double Score, int GamesWon, int MovesMade) PlayFiveGames(IAgent<ConnectFourGameState, ConnectFourMove> agent1, IAgent<ConnectFourGameState, ConnectFourMove> agent2)
+    private (double Score, int GamesWon, int MovesMade) PlayGames(IAgent<ConnectFourGameState, ConnectFourMove> agent1, IAgent<ConnectFourGameState, ConnectFourMove> agent2)
     {
         double score = 0;
         int gamesWon = 0;
         int movesPlayed = 0;
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < Parameters.GamesPerPairing; i++)
         {
             var gameState = new ConnectFourGameState();
             var currentAgent = agent1;

@@ -36,6 +36,13 @@ public static class ChromosomeExtensions
 
     public static void LoadGeneData(this Chromosome chromosome, string geneData)
     {
+        // Zero out all mutable stats first  
+        foreach (var key in chromosome.MutableStatsByName.Keys)
+        {
+            chromosome.MutableStatsByName[key] = 0;
+        }
+
+        // Parse and load new gene data  
         var pairs = geneData.Split(',');
         foreach (var pair in pairs)
         {

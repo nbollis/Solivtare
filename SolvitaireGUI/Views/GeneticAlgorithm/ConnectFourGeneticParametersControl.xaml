@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:SolvitaireGUI"
              d:DataContext="{x:Static local:ConnectFourGeneticAlgorithmParametersModel.Instance}"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="400">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
@@ -22,10 +22,9 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-
-        <!--<TextBlock Grid.Row="0" Grid.Column="0" Text="Pairings Per Generation:" VerticalAlignment="Center" Margin="5" />
-        <local:IntegerTexBoxControl Grid.Row="0" Grid.Column="1" Text="{Binding MaxPairingsPerEvaluation}" Margin="5"
-         Style="{StaticResource TextBoxStyle}" />-->
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Games Per Pairing:" VerticalAlignment="Center" Margin="5" />
+        <local:IntegerTexBoxControl Grid.Row="0" Grid.Column="1" Text="{Binding GamesPerPairing}" Margin="5"
+         Style="{StaticResource TextBoxStyle}" />
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Random Agent Ratio:" VerticalAlignment="Center" Margin="5" />
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding RandomAgentRatio}" Margin="5"
