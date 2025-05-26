@@ -11,7 +11,12 @@ public class TestChromosome : Chromosome
 
 public class TestGeneticAgent(TestChromosome chromie) : IGeneticAgent<TestChromosome>
 {
-    public TestChromosome Chromosome { get; } = chromie;
+    public TestChromosome Chromosome { get; init; } = chromie; 
+    public double Fitness
+    {
+        get => Chromosome.Fitness;
+        set => Chromosome.Fitness = value;
+    }
     public IGeneticAgent<TestChromosome> CrossOver(IGeneticAgent<TestChromosome> other, double crossoverRate = 0.5)
     {
         return new TestGeneticAgent(Chromosome.CrossOver(other.Chromosome, crossoverRate));

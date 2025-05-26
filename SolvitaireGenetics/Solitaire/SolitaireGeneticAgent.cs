@@ -2,18 +2,22 @@
 
 namespace SolvitaireGenetics;
 
-public class SolitaireGeneticAgent : MaximizingAgent<SolitaireGameState, SolitaireMove>, IGeneticAgent<SolitaireChromosome>
+public class SolitaireGeneticAgent(SolitaireChromosome chromosome, StateEvaluator<SolitaireGameState, SolitaireMove>? evaluator = null, int maxDepth = 3)
+    : MaximizingAgent<SolitaireGameState, SolitaireMove>(evaluator ?? new GeneticSolitaireEvaluator(chromosome), maxDepth), 
+        IGeneticAgent<SolitaireChromosome>
 {
     public override string Name => "Solitaire Genetic Agent";
-    public SolitaireChromosome Chromosome { get; init; }
+    public SolitaireChromosome Chromosome { get; init; } = chromosome;
+
     public SolitaireGeneticAgent(SolitaireChromosome chromosome)
         : this(chromosome, null, 3)
     {
     }
-    public SolitaireGeneticAgent(SolitaireChromosome chromosome, StateEvaluator<SolitaireGameState, SolitaireMove>? evaluator = null, int maxDepth = 3) 
-        : base(evaluator ?? new GeneticSolitaireEvaluator(chromosome), maxDepth)
+
+    public double Fitness
     {
-        Chromosome = chromosome;
+        get => Chromosome.Fitness;
+        set => Chromosome.Fitness = value;
     }
 
     public IGeneticAgent<SolitaireChromosome> CrossOver(IGeneticAgent<SolitaireChromosome> other, double crossoverRate = 0.5)

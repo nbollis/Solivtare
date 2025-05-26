@@ -2,7 +2,7 @@
 
 namespace SolvitaireGenetics;
 
-public class QuadraticRegressionAgent : IGeneticAgent<QuadraticChromosome>
+public class QuadraticRegressionAgent(QuadraticChromosome chromosome) : IGeneticAgent<QuadraticChromosome>
 {
     public double Fitness
     {
@@ -10,8 +10,8 @@ public class QuadraticRegressionAgent : IGeneticAgent<QuadraticChromosome>
         set => Chromosome.Fitness = value;
     }
 
-    public QuadraticChromosome Chromosome { get; }
-    public QuadraticRegressionAgent(QuadraticChromosome chromosome) { Chromosome = chromosome; }
+    public QuadraticChromosome Chromosome { get; init; } = chromosome;
+
     public IGeneticAgent<QuadraticChromosome> CrossOver(IGeneticAgent<QuadraticChromosome> other, double crossoverRate = 0.5)
         => new QuadraticRegressionAgent(Chromosome.CrossOver(other.Chromosome, crossoverRate));
 

@@ -3,16 +3,20 @@ using SolvitaireCore.ConnectFour;
 
 namespace SolvitaireGenetics;
 
-public class ConnectFourGeneticAgent : MinimaxAgent<ConnectFourGameState, ConnectFourMove>, IGeneticAgent<ConnectFourChromosome>
+public class ConnectFourGeneticAgent(ConnectFourChromosome chromosome, StateEvaluator<ConnectFourGameState, ConnectFourMove>? evaluator = null, int maxDepth = 3)
+    : MinimaxAgent<ConnectFourGameState, ConnectFourMove>(evaluator ?? new GeneticConnectFourEvaluator(chromosome), maxDepth), 
+        IGeneticAgent<ConnectFourChromosome>
 {
     public ConnectFourGeneticAgent(ConnectFourChromosome chromosome) : this(chromosome, null, 3) { }
-    public ConnectFourGeneticAgent(ConnectFourChromosome chromosome, StateEvaluator<ConnectFourGameState, ConnectFourMove>? evaluator = null, int maxDepth = 3) : base(evaluator ?? new GeneticConnectFourEvaluator(chromosome), maxDepth)
-    {
-        Chromosome = chromosome;
-    }
 
     public override string Name => "Genetic Agent";
-    public ConnectFourChromosome Chromosome { get; init; }
+    public ConnectFourChromosome Chromosome { get; init; } = chromosome;
+
+    public double Fitness 
+    {
+        get => Chromosome.Fitness;
+        set => Chromosome.Fitness = value;
+    }
 
     public IGeneticAgent<ConnectFourChromosome> CrossOver(IGeneticAgent<ConnectFourChromosome> other, double crossoverRate = 0.5)
         => new ConnectFourGeneticAgent(Chromosome.CrossOver(other.Chromosome, crossoverRate));
