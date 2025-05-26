@@ -1,5 +1,4 @@
-﻿using SolvitaireCore;
-using SolvitaireIO.Database.Models;
+﻿using SolvitaireIO.Database.Models;
 
 namespace SolvitaireGenetics;
 
@@ -24,7 +23,7 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
             {
                 // Second half of points from -5 to -1 and 1 to 5  
                 int adjustedIndex = i - _samplingSize / 2;
-                x = adjustedIndex < (_samplingSize / 4)
+                x = adjustedIndex < _samplingSize / 4
                     ? -5 + adjustedIndex * 4.0 / (_samplingSize / 4 - 1)
                     : 1 + (adjustedIndex - _samplingSize / 4) * 4.0 / (_samplingSize / 4 - 1);
             }
@@ -56,7 +55,7 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
             {
                 // Second half of points from -5 to -1 and 1 to 5  
                 int adjustedIndex = i - _samplingSize / 2;
-                x = adjustedIndex < (_samplingSize / 4)
+                x = adjustedIndex < _samplingSize / 4
                     ? -5 + adjustedIndex * 4.0 / (_samplingSize / 4 - 1)
                     : 1 + (adjustedIndex - _samplingSize / 4) * 4.0 / (_samplingSize / 4 - 1);
             }
@@ -65,17 +64,17 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
             chromosomeValues[i] = y;
         }
 
-        var fitness = 
-             ((NormalizedRMSE(CorrectLine, chromosomeValues) + CubicCurveSimilarityScore(CorrectLine, chromosomeValues))
-            / 2);
+        var fitness =
+             (NormalizedRMSE(CorrectLine, chromosomeValues) + CubicCurveSimilarityScore(CorrectLine, chromosomeValues))
+            / 2;
 
         fitness = Math.Pow(fitness, 2); // Square the fitness score
         agent.Chromosome.Fitness = fitness;
 
         var agentLog = new AgentLog()
         {
-            Chromosome = ChromosomeLog.FromChromosome(agent.Chromosome), 
-            Fitness = fitness, 
+            Chromosome = ChromosomeLog.FromChromosome(agent.Chromosome),
+            Fitness = fitness,
             Generation = CurrentGeneration,
             ChromosomeId = agent.Chromosome.GetStableHash()
         };
@@ -103,7 +102,7 @@ public class QuadraticRegressionGeneticAlgorithm : GeneticAlgorithm<QuadraticChr
             varPredicted += dp * dp;
         }
 
-        double correlation = (varActual == 0 || varPredicted == 0)
+        double correlation = varActual == 0 || varPredicted == 0
             ? 0
             : covariance / Math.Sqrt(varActual * varPredicted);
 

@@ -153,7 +153,7 @@ public class GeneticConnectFourEvaluator : StateEvaluator<ConnectFourGameState, 
                     }
 
                     // 2-with-gap and 3-with-gap (use 4-cell window, as before)
-                    int[] window = new int[4];
+                    Span<int> window = stackalloc int[4];
                     bool fullWindow = true;
                     int wr = row, wc = col;
                     for (int i = 0; i < 4; i++, wr += dr, wc += dc)
@@ -217,7 +217,7 @@ public class GeneticConnectFourEvaluator : StateEvaluator<ConnectFourGameState, 
     /// Checks for a gap in a 4-cell window: returns true if there are n pieces, 4-n empty,
     /// and the pieces are not all consecutive (i.e., there is at least one empty cell between them).
     /// </summary>
-    private static bool HasGapWindow(int[] window, int player, int n)
+    private static bool HasGapWindow(ReadOnlySpan<int> window, int player, int n)
     {
         int count = 0, empty = 0;
         for (int i = 0; i < 4; i++)

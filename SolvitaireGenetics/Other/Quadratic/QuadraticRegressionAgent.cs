@@ -19,5 +19,5 @@ public class QuadraticRegressionAgent : IGeneticAgent<QuadraticChromosome>
         => new QuadraticRegressionAgent(Chromosome.Mutate<QuadraticChromosome>(mutationRate));
 
     public IGeneticAgent<QuadraticChromosome> Clone()
-        => new QuadraticRegressionAgent(Chromosome.Clone<QuadraticChromosome>()); 
+        => new QuadraticRegressionAgent(Chromosome.Clone<QuadraticChromosome>());
 }
