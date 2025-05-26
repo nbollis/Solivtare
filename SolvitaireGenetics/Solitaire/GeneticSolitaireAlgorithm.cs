@@ -143,47 +143,4 @@ public class GeneticSolitaireAlgorithm : GeneticAlgorithm<SolitaireChromosome, S
         return fitness;
     }
 
-    public static SolitaireChromosome BestSoFar()
-    {
-        var best = new SolitaireChromosome(Random.Shared);
-
-        // Evaluating the Position 
-        best.MutableStatsByName[SolitaireChromosome.LegalMoveWeightName] = 1.0252;
-        best.MutableStatsByName[SolitaireChromosome.FoundationWeightName] = 6.8471;
-        best.MutableStatsByName[SolitaireChromosome.WasteWeightName] = -1.6529;
-        best.MutableStatsByName[SolitaireChromosome.StockWeightName] = -0.6287;
-        best.MutableStatsByName[SolitaireChromosome.CycleWeightName] = -0.0407;
-        best.MutableStatsByName[SolitaireChromosome.EmptyTableauWeightName] = 0.0713;
-        best.MutableStatsByName[SolitaireChromosome.FaceUpTableauWeightName] = 0.1376;
-        best.MutableStatsByName[SolitaireChromosome.FaceDownTableauWeightName] = 1.9865;
-        best.MutableStatsByName[SolitaireChromosome.ConsecutiveFaceUpTableauWeightName] = 4.7181;
-        best.MutableStatsByName[SolitaireChromosome.FaceUpBottomCardTableauWeightName] = 1.5819;
-        best.MutableStatsByName[SolitaireChromosome.KingIsBottomCardTableauWeightName] = 1.7532;
-        best.MutableStatsByName[SolitaireChromosome.AceInTableauWeightName] = -1.1593;
-        best.MutableStatsByName[SolitaireChromosome.FoundationRangeWeightName] = -0.4776;
-        best.MutableStatsByName[SolitaireChromosome.FoundationDeviationWeightName] = -1.1048;
-
-        // Evaluating Moves
-        best.MutableStatsByName[SolitaireChromosome.Move_FromTableauWeightName] = 0.0;
-        best.MutableStatsByName[SolitaireChromosome.Move_ToTableauWeightName] = 0.0;
-        best.MutableStatsByName[SolitaireChromosome.Move_ToFoundationWeightName] = 0.0;
-        best.MutableStatsByName[SolitaireChromosome.Move_FromFoundationWeightName] = 0.0;
-        best.MutableStatsByName[SolitaireChromosome.Move_FromWasteWeightName] = 0.0;
-        best.MutableStatsByName[SolitaireChromosome.Move_FromStockWeightName] = 0.0;
-        best.MutableStatsByName[SolitaireChromosome.Move_TableaToTableauWeightName] = 0.0;
-
-        // Skipping Games
-        best.MutableStatsByName[SolitaireChromosome.MoveCountScalarName] = -0.4904;
-        best.MutableStatsByName[SolitaireChromosome.Skip_FoundationCount] = -1.8681;
-        best.MutableStatsByName[SolitaireChromosome.Skip_LegalMoveCount] = -1.7573;
-        best.MutableStatsByName[SolitaireChromosome.Skip_ThresholdWeightName] = -1.6683;
-        best.MutableStatsByName[SolitaireChromosome.Skip_TopWasteIsUseful] = -0.0617;
-        best.MutableStatsByName[SolitaireChromosome.Skip_CycleWeight] = -0.3949;
-        best.MutableStatsByName[SolitaireChromosome.Skip_StockWeight] = -1.7414;
-        best.MutableStatsByName[SolitaireChromosome.Skip_WasteWeight] = 0.6467;
-        best.MutableStatsByName[SolitaireChromosome.Skip_EmptyTableauCount] = -2.0881;
-        best.MutableStatsByName[SolitaireChromosome.Skip_FaceUpTableauCount] = -0.2129;
-        best.MutableStatsByName[SolitaireChromosome.Skip_FaceDownTableauCount] = 1.079;
-        return best;
-    }
 }

@@ -10,7 +10,7 @@ public class SolitaireGeneticAlgorithmParameters : GeneticAlgorithmParameters
 
     public SolitaireGeneticAlgorithmParameters() : base()
     {
-        TemplateChromosome = GeneticSolitaireAlgorithm.BestSoFar();
+        TemplateChromosome = SolitaireChromosome.BestSoFar();
     }
 
 

@@ -27,9 +27,9 @@ public static class GeneticAlgorithmTypeExtensions
     {
         return type switch
         {
-            GeneticAlgorithmType.Solitaire => new ChromosomeViewModel(GeneticSolitaireAlgorithm.BestSoFar()),
+            GeneticAlgorithmType.Solitaire => new ChromosomeViewModel(SolitaireChromosome.BestSoFar()),
             GeneticAlgorithmType.Quadratic => new ChromosomeViewModel(new QuadraticChromosome(Random.Shared)),
-            GeneticAlgorithmType.ConnectFour => new ChromosomeViewModel(new ConnectFourChromosome(Random.Shared)),
+            GeneticAlgorithmType.ConnectFour => new ChromosomeViewModel(ConnectFourChromosome.BestSoFar()),
             _ => throw new ArgumentOutOfRangeException()
         };
     }

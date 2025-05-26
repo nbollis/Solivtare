@@ -19,7 +19,7 @@
                 <ItemsPanelTemplate>
                     <UniformGrid Rows="6" Columns="7"/>
                 </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+            </ItemsControl.ItemsPanel>S
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Border MouseEnter="Cell_MouseEnter"
@@ -28,7 +28,7 @@
                             Tag="{Binding (ItemsControl.AlternationIndex), 
                               RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
                               Converter={StaticResource FlatIndexToColumnConverter}}">
-                        <Ellipse Width="40" Height="40"
+                        <Ellipse Margin="12"
                                  Fill="{Binding ., Converter={StaticResource PlayerToBrushConverter}}"/>
                         <Border.Background>
                             <MultiBinding Converter="{StaticResource WinningCellToBrushConverter}">

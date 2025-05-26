@@ -5,6 +5,7 @@ namespace SolvitaireGenetics;
 
 public class GeneticConnectFourEvaluator : StateEvaluator<ConnectFourGameState, ConnectFourMove>
 {
+    private static readonly (int dr, int dc)[] Directions = new[] { (0, 1), (1, 0), (1, 1), (1, -1) };
     private readonly ConnectFourChromosome _chromosome;
 
     public GeneticConnectFourEvaluator(ConnectFourChromosome chromosome)
@@ -113,57 +114,85 @@ public class GeneticConnectFourEvaluator : StateEvaluator<ConnectFourGameState, 
     private int CountNInARow(ConnectFourGameState state, int player, int n, bool withGap)
     {
         int count = 0;
-        // Horizontal, vertical, and both diagonals
-        int[][] directions = new[] { new[] { 0, 1 }, new[] { 1, 0 }, new[] { 1, 1 }, new[] { 1, -1 } };
-        for (int row = 0; row < ConnectFourGameState.Rows; row++)
+        int rows = ConnectFourGameState.Rows;
+        int cols = ConnectFourGameState.Columns;
+        int[,] board = state.Board;
+        var directions = Directions;
+
+        for (int row = 0; row < rows; row++)
         {
-            for (int col = 0; col < ConnectFourGameState.Columns; col++)
+            for (int col = 0; col < cols; col++)
             {
-                foreach (var dir in directions)
+                foreach (var (dr, dc) in directions)
                 {
-                    int dr = dir[0], dc = dir[1];
                     int playerCount = 0, emptyCount = 0;
-                    for (int i = 0; i < 4; i++)
+                    int r = row, c = col;
+                    bool isBlocked = false;
+
+                    // Combine the two loops into one to reduce redundant iterations
+                    for (int i = 0; i < 4; i++, r += dr, c += dc)
                     {
-                        int nr = row + dr * i, nc = col + dc * i;
-                        if (nr < 0 || nr >= ConnectFourGameState.Rows || nc < 0 || nc >= ConnectFourGameState.Columns)
+                        if ((uint)r >= (uint)rows || (uint)c >= (uint)cols)
+                        {
+                            isBlocked = true;
                             break;
-                        if (state.Board[nr, nc] == player)
+                        }
+
+                        int cell = board[r, c];
+                        if (cell == player)
+                        {
                             playerCount++;
-                        else if (state.Board[nr, nc] == 0)
+                        }
+                        else if (cell == 0)
+                        {
                             emptyCount++;
+                        }
+                        else
+                        {
+                            isBlocked = true; // Opponent's piece, not a valid sequence
+                            break;
+                        }
                     }
-                    if (withGap)
+
+                    if (isBlocked || playerCount + emptyCount < 4) continue;
+
+                    if (playerCount == n && emptyCount == 4 - n)
                     {
-                        if (playerCount == n && emptyCount == 4 - n)
+                        if (withGap)
+                        {
                             count++;
-                    }
-                    else
-                    {
-                        if (playerCount == n && emptyCount == 4 - n && !HasGap(state, row, col, dr, dc, n, player))
-                            count++;
+                        }
+                        else if (n == 4)
+                        {
+                            count++; // Fast path for n == 4
+                        }
+                        else
+                        {
+                            // Check for gaps
+                            int consecutive = 0, maxConsecutive = 0;
+                            r = row; c = col;
+
+                            for (int i = 0; i < 4; i++, r += dr, c += dc)
+                            {
+                                if (board[r, c] == player)
+                                {
+                                    consecutive++;
+                                    maxConsecutive = Math.Max(maxConsecutive, consecutive);
+                                }
+                                else
+                                {
+                                    consecutive = 0;
+                                }
+                            }
+
+                            if (maxConsecutive == n)
+                                count++;
+                        }
                     }
                 }
             }
         }
         return count;
-    }
-
-    private bool HasGap(ConnectFourGameState state, int row, int col, int dr, int dc, int n, int player)
-    {
-        // Checks if the n-in-a-row is consecutive (no gap)
-        int consecutive = 0;
-        for (int i = 0; i < 4; i++)
-        {
-            int nr = row + dr * i, nc = col + dc * i;
-            if (nr < 0 || nr >= ConnectFourGameState.Rows || nc < 0 || nc >= ConnectFourGameState.Columns)
-                return true;
-            if (state.Board[nr, nc] == player)
-                consecutive++;
-            else if (consecutive > 0)
-                return true; // Found a gap
-        }
-        return false;
     }
 
     private int CountSurroundedPieces(ConnectFourGameState state, int player)

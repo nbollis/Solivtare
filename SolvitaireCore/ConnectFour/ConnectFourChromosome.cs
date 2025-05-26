@@ -54,4 +54,31 @@ public class ConnectFourChromosome : Chromosome
     }
 
     public ConnectFourChromosome() : this(Random.Shared) { }
+
+    public static ConnectFourChromosome BestSoFar()
+    {
+        var chromosome = new ConnectFourChromosome();
+        // Set weights to known good values  
+        chromosome.MutableStatsByName[SurroundedPieceWeight] = 0.08;
+        chromosome.MutableStatsByName[IsolatedPieceWeight] = -0.78;
+        chromosome.MutableStatsByName[TwoInARowWeight] = -2.80;
+        chromosome.MutableStatsByName[TwoWithOneGapWeight] = 2.67;
+        chromosome.MutableStatsByName[ThreeInARowWeight] = -0.12;
+        chromosome.MutableStatsByName[ThreeWithOneGapWeight] = 2.24;
+        chromosome.MutableStatsByName[ColumnOneWeight] = 2.11;
+        chromosome.MutableStatsByName[ColumnTwoWeight] = -1.24;
+        chromosome.MutableStatsByName[ColumnThreeWeight] = -0.09;
+        chromosome.MutableStatsByName[ColumnFourWeight] = 1.29;
+        chromosome.MutableStatsByName[ColumnFiveWeight] = 1.78;
+        chromosome.MutableStatsByName[ColumnSixWeight] = 1.91;
+        chromosome.MutableStatsByName[ColumnSevenWeight] = 1.43;
+        chromosome.MutableStatsByName[RowOneWeight] = 1.54;
+        chromosome.MutableStatsByName[RowTwoWeight] = 0.79;
+        chromosome.MutableStatsByName[RowThreeWeight] = -1.18;
+        chromosome.MutableStatsByName[RowFourWeight] = 3.22;
+        chromosome.MutableStatsByName[RowFiveWeight] = -0.48;
+        chromosome.MutableStatsByName[RowSixWeight] = -0.46;
+
+        return chromosome;
+    }
 }

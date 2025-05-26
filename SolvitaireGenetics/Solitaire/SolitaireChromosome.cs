@@ -84,4 +84,48 @@ public class SolitaireChromosome : Chromosome
     }
 
     public SolitaireChromosome() : this(Random.Shared) { }
+
+    public static SolitaireChromosome BestSoFar()
+    {
+        var best = new SolitaireChromosome(Random.Shared);
+
+        // Evaluating the Position 
+        best.MutableStatsByName[LegalMoveWeightName] = 1.0252;
+        best.MutableStatsByName[FoundationWeightName] = 6.8471;
+        best.MutableStatsByName[WasteWeightName] = -1.6529;
+        best.MutableStatsByName[StockWeightName] = -0.6287;
+        best.MutableStatsByName[CycleWeightName] = -0.0407;
+        best.MutableStatsByName[EmptyTableauWeightName] = 0.0713;
+        best.MutableStatsByName[FaceUpTableauWeightName] = 0.1376;
+        best.MutableStatsByName[FaceDownTableauWeightName] = 1.9865;
+        best.MutableStatsByName[ConsecutiveFaceUpTableauWeightName] = 4.7181;
+        best.MutableStatsByName[FaceUpBottomCardTableauWeightName] = 1.5819;
+        best.MutableStatsByName[KingIsBottomCardTableauWeightName] = 1.7532;
+        best.MutableStatsByName[AceInTableauWeightName] = -1.1593;
+        best.MutableStatsByName[FoundationRangeWeightName] = -0.4776;
+        best.MutableStatsByName[FoundationDeviationWeightName] = -1.1048;
+
+        // Evaluating Moves
+        best.MutableStatsByName[Move_FromTableauWeightName] = 0.0;
+        best.MutableStatsByName[Move_ToTableauWeightName] = 0.0;
+        best.MutableStatsByName[Move_ToFoundationWeightName] = 0.0;
+        best.MutableStatsByName[Move_FromFoundationWeightName] = 0.0;
+        best.MutableStatsByName[Move_FromWasteWeightName] = 0.0;
+        best.MutableStatsByName[Move_FromStockWeightName] = 0.0;
+        best.MutableStatsByName[Move_TableaToTableauWeightName] = 0.0;
+
+        // Skipping Games
+        best.MutableStatsByName[MoveCountScalarName] = -0.4904;
+        best.MutableStatsByName[Skip_FoundationCount] = -1.8681;
+        best.MutableStatsByName[Skip_LegalMoveCount] = -1.7573;
+        best.MutableStatsByName[Skip_ThresholdWeightName] = -1.6683;
+        best.MutableStatsByName[Skip_TopWasteIsUseful] = -0.0617;
+        best.MutableStatsByName[Skip_CycleWeight] = -0.3949;
+        best.MutableStatsByName[Skip_StockWeight] = -1.7414;
+        best.MutableStatsByName[Skip_WasteWeight] = 0.6467;
+        best.MutableStatsByName[Skip_EmptyTableauCount] = -2.0881;
+        best.MutableStatsByName[Skip_FaceUpTableauCount] = -0.2129;
+        best.MutableStatsByName[Skip_FaceDownTableauCount] = 1.079;
+        return best;
+    }
 }
