@@ -9,6 +9,7 @@ public class GameControllerTemplateSelector : DataTemplateSelector
 {
     public DataTemplate? ConnectFourTemplate { get; set; }
     public DataTemplate? TicTacToeTemplate { get; set; }
+    public DataTemplate? SolitaireTemplate { get; set; }
     // Add more as needed
 
     public override DataTemplate? SelectTemplate(object item, DependencyObject container)
@@ -17,7 +18,9 @@ public class GameControllerTemplateSelector : DataTemplateSelector
             return ConnectFourTemplate;
         if (item is TwoPlayerGameViewModel<TicTacToeGameState, TicTacToeMove, IAgent<TicTacToeGameState, TicTacToeMove>>)
             return TicTacToeTemplate;
-        // Add more as needed
+        if (item is SinglePlayerGameViewModel<SolitaireGameState, SolitaireMove, IAgent<SolitaireGameState, SolitaireMove>>)
+            return SolitaireTemplate;
+
         return base.SelectTemplate(item, container);
     }
 }

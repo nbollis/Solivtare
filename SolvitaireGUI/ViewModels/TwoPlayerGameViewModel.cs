@@ -118,13 +118,10 @@ public class TwoPlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
 
     #endregion
 
-    public ICommand MakeMoveCommand { get; }
-
     public TwoPlayerGameViewModel(TGameState gameState)
     {
         // Gameplay
         GameStateViewModel = gameState.ToTwoPlayerViewModel<TGameState, TMove>();
-        MakeMoveCommand = new DelegateCommand((m) => ApplyMove((TMove)m)); 
         ResetGameCommand = new RelayCommand(ResetGame);
         UndoMoveCommand = new RelayCommand(UndoMove);
         SwapPlayersCommand = new RelayCommand(SwapPlayers);

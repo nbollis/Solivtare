@@ -7,8 +7,8 @@ public class RandomSolitaireAgent : RandomAgent<SolitaireGameState, SolitaireMov
     public override SolitaireMove GetNextAction(SolitaireGameState gameState)
     {
         var moves = gameState.GetLegalMoves();
-        if (moves.Count == 0)
-            return new SkipGameMove();
+        if (moves.Count == 1)
+            return moves[0];
 
         var move = moves.Where(predicate => !predicate.IsTerminatingMove).ElementAt(_random.Next(moves.Count - 1));
         return move;

@@ -8,6 +8,11 @@ public interface IGameState
     void Reset();
 }
 
+public interface ICardGameState : IGameState
+{
+    void DealCards(StandardDeck deck);
+}
+
 public interface IGameState<TMove> : IGameState where TMove : IMove
 {
     List<TMove> GetLegalMoves();

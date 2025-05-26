@@ -1,7 +1,7 @@
 ﻿
 namespace SolvitaireCore;
 
-public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<SolitaireGameState>
+public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<SolitaireGameState>, ICardGameState
 {
     // This is the number of cards to move from stock to waste when cycling
     public readonly int CardsPerCycle;
@@ -21,7 +21,8 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     public bool IsGameLost => IsUnwinnable();
     public bool IsGameWon => GameWon();
 
-
+    // TODO: This is a bad way to get a parameterless constructor, fix. 
+    public SolitaireGameState() : this(3){}
     public SolitaireGameState(int cardsPerCycle = 3)
     {
         TableauPiles = new List<TableauPile>();

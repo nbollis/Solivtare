@@ -55,7 +55,7 @@ public class SolitaireGameStateViewModel : GameStateViewModel<SolitaireGameState
         Sync();
     }
 
-    public async void Sync(SolitaireMove? move = null)
+    public void Sync(SolitaireMove? move = null)
     {
         _syncDebounceToken?.Cancel();
         _syncDebounceToken = new CancellationTokenSource();
@@ -63,7 +63,7 @@ public class SolitaireGameStateViewModel : GameStateViewModel<SolitaireGameState
 
         try
         {
-            await Task.Delay(50, token); // Debounce delay
+            Task.Delay(50, token).Wait(token); // Debounce delay
             if (token.IsCancellationRequested) return;
 
             // Perform the sync logic
@@ -96,6 +96,7 @@ public class SolitaireGameStateViewModel : GameStateViewModel<SolitaireGameState
 
         OnPropertyChanged(nameof(IsGameWon));
         OnPropertyChanged(nameof(GameState));
+        OnPropertyChanged(nameof(IsGameLost));
     }
 
     public void UpdateStockAndWaste()
@@ -110,14 +111,12 @@ public class SolitaireGameStateViewModel : GameStateViewModel<SolitaireGameState
 
     public void UpdateTableau()
     {
-        while (TableauPiles.Count < BaseGameState.TableauPiles.Count)
+        TableauPiles.Clear();
+        foreach (var pile in BaseGameState.TableauPiles)
         {
-            TableauPiles.Add(new BindablePile());
-        }
-
-        for (int i = 0; i < BaseGameState.TableauPiles.Count; i++)
-        {
-            TableauPiles[i].UpdateFromPile(BaseGameState.TableauPiles[i]);
+            var bindable = new BindablePile();
+            bindable.UpdateFromPile(pile);
+            TableauPiles.Add(bindable);
         }
     }
 

@@ -8,7 +8,7 @@ namespace SolvitaireGUI;
 public enum PlayerType { Agent, Human }
 
 public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
-    where TGameState : ITwoPlayerGameState<TMove>
+    where TGameState : IGameState<TMove>
     where TMove : IMove
     where TAgent : IAgent<TGameState, TMove>
 {
@@ -27,8 +27,8 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
     }
     public ObservableCollection<TAgent> AvailableAgents { get; }
 
-    private TAgent? _selectedAgent;
-    public TAgent? SelectedAgent
+    private TAgent _selectedAgent;
+    public TAgent SelectedAgent
     {
         get => _selectedAgent;
         set

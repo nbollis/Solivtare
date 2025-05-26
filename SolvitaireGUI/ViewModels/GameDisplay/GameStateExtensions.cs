@@ -13,7 +13,7 @@ public static class GameStateExtensions
         {
             ConnectFourGameState connectFourGameState => (GameStateViewModel<TGameState, TMove>)(object)new ConnectFourGameStateViewModel(connectFourGameState),
             TicTacToeGameState ticTacToeGameState => (GameStateViewModel<TGameState, TMove>)(object)new TicTacToeGameStateViewModel(ticTacToeGameState),
-            //SolitaireGameState solitaireGameState => (GameControllerViewModel<TGameState, TMove>)(object)new SolitaireGameStateViewModel(solitaireGameState),
+            SolitaireGameState solitaireGameState => (GameStateViewModel<TGameState, TMove>)(object)new SolitaireGameStateViewModel(solitaireGameState),
             _ => throw new NotImplementedException($"No view model for {typeof(TGameState).Name}"),
         };
     }

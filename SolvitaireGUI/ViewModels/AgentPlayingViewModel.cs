@@ -8,7 +8,7 @@ public class AgentPlayingViewModel : BaseViewModel
 {
     private readonly Stack<SolitaireMove> _previousMoves;
     private SolitaireGameStateViewModel _solitaireGameStateViewModel;
-    private readonly StandardDeck _deck;
+    private readonly ObservableStandardDeck _deck;
     public SolitaireGameStateViewModel SolitaireGameStateViewModel
     {
         get => _solitaireGameStateViewModel;

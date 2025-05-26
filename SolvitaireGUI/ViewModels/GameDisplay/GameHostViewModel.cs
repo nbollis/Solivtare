@@ -53,7 +53,12 @@ public class GameHostViewModel : BaseViewModel
                     new TwoPlayerGameViewModel<TicTacToeGameState, TicTacToeMove,
                         IAgent<TicTacToeGameState, TicTacToeMove>>(new TicTacToeGameState());
                 break;
-                // Add more games as needed
+
+            case GameType.Solitaire:
+                // Assuming SolitaireGameState and its view model are implemented
+                GameControllerViewModel = new SinglePlayerCardGameViewModel<SolitaireGameState, SolitaireMove, IAgent<SolitaireGameState, SolitaireMove>>(new SolitaireGameStateViewModel(new SolitaireGameState()));
+                break;
+
         }
     }
 }

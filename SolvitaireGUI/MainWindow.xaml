@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Icon="Resources/Icons/ApplicationIcon.png"
         d:DataContext="{x:Static local:MainWindowModel.Instance}"
-        Title="MainWindow" Height="500" Width="1100">
+        Title="MainWindow" Height="540" Width="1100">
     <Window.Resources>
         <local:GameControllerTemplateSelector x:Key="GameControllerTemplateSelector">
             <local:GameControllerTemplateSelector.ConnectFourTemplate>
@@ -20,7 +20,11 @@
                     <local:TwoPlayerPlayingView DataContext="{Binding}" />
                 </DataTemplate>
             </local:GameControllerTemplateSelector.TicTacToeTemplate>
-            <!-- Add more as needed -->
+            <local:GameControllerTemplateSelector.SolitaireTemplate>
+                <DataTemplate>
+                    <local:OnePlayerPlayingView DataContext="{Binding}" />
+                </DataTemplate>
+            </local:GameControllerTemplateSelector.SolitaireTemplate >
         </local:GameControllerTemplateSelector>
     </Window.Resources>
 
