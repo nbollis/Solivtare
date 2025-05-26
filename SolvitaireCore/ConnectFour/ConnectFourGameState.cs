@@ -3,58 +3,71 @@
 public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquatable<ConnectFourGameState>
 {
     public const int Rows = 6;
-    public const int Columns = 7;
+    public const int Columns = 7; 
+    private static readonly (int dRow, int dCol)[] Directions = [(1, 0), (0, 1), (1, 1), (1, -1)];
 
     // Cacheing to reduce redundant calculations. 
     private int _cachedHash = 0;
-    private bool _hashDirty = true; 
-    private bool _winDirty = true;
+    private bool _hashDirty = true;
     private bool _cachedIsGameWon = false;
     private bool _cachedIsGameDraw = false;
     private (int Row, int Col)? _lastMove = null;
+    private int? _cachedWinningPlayer = null;
+    private readonly List<(int Row, int Col)> _cachedWinningCells = new();
     private int[] _topRow = Enumerable.Repeat(Rows - 1, Columns).ToArray();
-    private readonly List<ConnectFourMove> _moveHistory = new();
 
-    public List<(int Row, int Col)> WinningCells { get; } = new();
+    public bool IsGameWon => _cachedIsGameWon;
+    public bool IsGameDraw => _cachedIsGameDraw;
+    public bool IsGameLost => false; // Implement if you want to track explicit losses
+    public int? WinningPlayer => _cachedWinningPlayer;
+    public IReadOnlyList<(int Row, int Col)> WinningCells => _cachedWinningCells;
+
 
     // 0 = empty, 1 = player1, 2 = player2
     public int[,] Board { get; private set; } = new int[Rows, Columns];
     public int CurrentPlayer { get; private set; } = 1;
     public int MovesMade { get; private set; } = 0;
-
-    public int? WinningPlayer { get; private set; } = null;
-    public bool IsGameWon
-    {
-        get
-        {
-            if (_winDirty)
-                UpdateWinAndDrawCache();
-            return _cachedIsGameWon;
-        }
-    }
-
-    public bool IsGameDraw
-    {
-        get
-        {
-            if (_winDirty)
-                UpdateWinAndDrawCache();
-            return _cachedIsGameDraw;
-        }
-    }
-    public bool IsGameLost => false; // Implement if you want to track explicit losses
-
     public bool IsPlayerWin(int player) => IsGameWon && WinningPlayer == player;
     public bool IsPlayerLoss(int player) => IsGameWon && WinningPlayer != player;
+
+    public void ExecuteMove(ConnectFourMove move)
+    {
+        int row = _topRow[move.Column];
+        if (row < 0)
+            throw new InvalidOperationException("Invalid move: column full");
+        Board[row, move.Column] = CurrentPlayer;
+        MovesMade++;
+        _moveHistory.Add(move);
+        _lastMove = (row, move.Column);
+        CurrentPlayer = 3 - CurrentPlayer;
+        _topRow[move.Column]--;
+        UpdateWinAndDrawCache();
+    }
+
+    public void UndoMove(ConnectFourMove move)
+    {
+        int row = _topRow[move.Column] + 1;
+        if (row >= Rows || Board[row, move.Column] == 0)
+            throw new InvalidOperationException("Invalid undo: column empty");
+        Board[row, move.Column] = 0;
+        MovesMade--;
+        CurrentPlayer = 3 - CurrentPlayer;
+        if (_moveHistory.Count > 0)
+            _moveHistory.RemoveAt(_moveHistory.Count - 1);
+        _topRow[move.Column]++;
+        _lastMove = null;
+        UpdateWinAndDrawCache();
+    }
 
     public void Reset()
     {
         Board = new int[Rows, Columns];
         CurrentPlayer = 1;
         MovesMade = 0;
-        WinningCells.Clear();
         _moveHistory.Clear();
         _topRow = Enumerable.Repeat(Rows - 1, Columns).ToArray();
+        _lastMove = null;
+        UpdateWinAndDrawCache();
     }
 
     public List<ConnectFourMove> GetLegalMoves()
@@ -71,41 +84,16 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
         return moves;
     }
 
-    public void ExecuteMove(ConnectFourMove move)
-    {
-        int row = _topRow[move.Column];
-        if (row < 0)
-            throw new InvalidOperationException("Invalid move: column full");
-        Board[row, move.Column] = CurrentPlayer;
-        MovesMade++;
-        _moveHistory.Add(move);
-        _lastMove = (row, move.Column);
-        _winDirty = true;
-        CurrentPlayer = 3 - CurrentPlayer;
-        _topRow[move.Column]--;
-    }
+    #region Move History Tracking
 
-    public void UndoMove(ConnectFourMove move)
-    {
-        int row = _topRow[move.Column] + 1;
-        if (row >= Rows || Board[row, move.Column] == 0)
-            throw new InvalidOperationException("Invalid undo: column empty");
-        Board[row, move.Column] = 0;
-        MovesMade--;
-        CurrentPlayer = 3 - CurrentPlayer;
-        if (_moveHistory.Count > 0)
-            _moveHistory.RemoveAt(_moveHistory.Count - 1);
-        _topRow[move.Column]++;
-        _lastMove = null;
-        _winDirty = true;
-    }
-
+    private readonly List<ConnectFourMove> _moveHistory = new();
+    public IReadOnlyList<ConnectFourMove> GetMoveHistory() => _moveHistory.AsReadOnly();
     public string GetMoveHistoryString()
     {
         return string.Join(",", _moveHistory.Select(m => m.Column));
     }
 
-    public IReadOnlyList<ConnectFourMove> GetMoveHistory() => _moveHistory.AsReadOnly();
+    #endregion
 
     public IGameState<ConnectFourMove> Clone()
     {
@@ -124,22 +112,22 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
     {
         _cachedIsGameWon = false;
         _cachedIsGameDraw = false;
-        WinningPlayer = null;
-        WinningCells.Clear();
+        _cachedWinningPlayer = null;
+        _cachedWinningCells.Clear();
 
         if (_lastMove.HasValue)
         {
             int row = _lastMove.Value.Row;
             int col = _lastMove.Value.Col;
             int player = Board[row, col];
-            foreach (var (dRow, dCol) in new[] { (1, 0), (0, 1), (1, 1), (1, -1) })
+            foreach (var (dRow, dCol) in Directions)
             {
                 var cells = GetWinningCells(row, col, dRow, dCol, player);
                 if (cells.Count >= 4)
                 {
-                    WinningCells.Clear();
-                    WinningCells.AddRange(cells.Take(4));
-                    WinningPlayer = player;
+                    _cachedWinningCells.Clear();
+                    _cachedWinningCells.AddRange(cells.Take(4));
+                    _cachedWinningPlayer = player;
                     _cachedIsGameWon = true;
                     break;
                 }
@@ -149,10 +137,8 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
         if (!_cachedIsGameWon)
         {
             // Draw if no legal moves left
-            _cachedIsGameDraw = !_cachedIsGameWon && !GetLegalMoves().Any();
+            _cachedIsGameDraw = !GetLegalMoves().Any();
         }
-
-        _winDirty = false;
     }
 
     private List<(int Row, int Col)> GetWinningCells(int row, int col, int dRow, int dCol, int player)
@@ -218,6 +204,18 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
         if (board.GetLength(0) != Rows || board.GetLength(1) != Columns)
             throw new ArgumentException($"Board must be {Rows}x{Columns}.");
         Board = (int[,])board.Clone();
+
+        // Update _topRow based on the provided board  
+        for (int col = 0; col < Columns; col++)
+        {
+            int row = Rows - 1;
+            while (row >= 0 && Board[row, col] != 0)
+            {
+                row--;
+            }
+            _topRow[col] = row;
+        }
+        UpdateWinAndDrawCache();
     }
 
     public void SetCurrentPlayer(int player)

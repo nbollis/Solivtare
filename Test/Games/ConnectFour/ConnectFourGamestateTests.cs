@@ -123,10 +123,13 @@ public class ConnectFourGameStateTests
     public void IsGameDraw_WhenNoMovesLeftAndNoWin()
     {
         var state = new ConnectFourGameState();
+        var board = new int[ConnectFourGameState.Rows, ConnectFourGameState.Columns];
         // Fill the board without a win
         for (int col = 0; col < ConnectFourGameState.Columns; col++)
             for (int row = 0; row < ConnectFourGameState.Rows; row++)
-                state.Board[row, col] = (row + col) % 2 + 1;
+                board[row, col] = (row + col) % 2 + 1;
+        state.SetBoard(board);
+
         Assert.That(state.IsGameWon, Is.False);
         Assert.That(state.IsGameDraw, Is.True);
     }
