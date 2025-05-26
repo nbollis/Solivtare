@@ -10,7 +10,7 @@ namespace SolvitaireGenetics;
 public abstract class GeneticAlgorithm<TChromosome, TParameters, TAgent> : IGeneticAlgorithm
     where TChromosome : Chromosome, new() 
     where TParameters : GeneticAlgorithmParameters
-    where TAgent : IGeneticAgent<TChromosome>
+    where TAgent : class, IGeneticAgent<TChromosome>
 {
     public event Action<int, GenerationLog>? GenerationCompleted;
     public virtual event Action<AgentLog>? AgentCompleted;
@@ -66,6 +66,26 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters, TAgent> : IGene
         return _fitnessCache.GetOrAdd(chromosomeKey, _ => EvaluateFitness(chromosome, cancellationToken));
     }
 
+    public virtual void EvaluatePopulation(CancellationToken? cancellationToken = null)
+    {
+        var uniqueChromosomes = Population
+            .GroupBy(c => c.GetStableHash())
+            .Select(g => g.First())
+            .ToList();
+
+        Parallel.ForEach(uniqueChromosomes, chromosome =>
+        {
+            // This will cache the fitness for each unique chromosome
+            chromosome.Fitness = GetFitness(chromosome, cancellationToken);
+        });
+
+        // Assign cached fitness to all chromosomes in the population
+        foreach (var agent in Population)
+        {
+            agent.Fitness = GetFitness(agent, cancellationToken);
+        }
+    }
+
     public Chromosome RunEvolution(int generations, CancellationToken? cancellationToken = null)
     {
         if (Population.Count == 0)
@@ -87,23 +107,8 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters, TAgent> : IGene
 
             _loggingTask.Wait(); // Wait for the previous logging task to complete if it hasn't finished
 
-            // Step 3: EvaluateState fitness for unique chromosomes only
-            var uniqueChromosomes = Population
-                .GroupBy(c => c.GetStableHash())
-                .Select(g => g.First())
-                .ToList();
-
-            Parallel.ForEach(uniqueChromosomes, chromosome =>
-            {
-                // This will cache the fitness for each unique chromosome
-                chromosome.Fitness = GetFitness(chromosome, cancellationToken);
-            });
-
-            // Assign cached fitness to all chromosomes in the population
-            foreach (var chromosome in Population)
-            {
-                chromosome.Fitness = GetFitness(chromosome, cancellationToken);
-            }
+            // Step 3: Evaluate the fitness of the population
+            EvaluatePopulation(cancellationToken);
 
             // Step 4: Sort the new population by fitness (descending)
             Population = Population.OrderByDescending(chromosome => chromosome.Fitness).ToList();
@@ -177,10 +182,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters, TAgent> : IGene
         }
 
         Population = population;
-        Parallel.ForEach(population, chromosome =>
-               {
-                   chromosome.Fitness = GetFitness(chromosome, cancellationToken);
-               });
+        EvaluatePopulation(cancellationToken);
 
         // Sort the population by fitness (descending)
         population = population.OrderByDescending(chromosome => chromosome.Fitness).ToList();
