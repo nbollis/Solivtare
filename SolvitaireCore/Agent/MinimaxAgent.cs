@@ -31,13 +31,12 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
             double bestScore = double.NegativeInfinity;
             List<TMove> bestMoves = new();
 
-            foreach (var move in legalMoves)
+            // Order moves based on the evaluator to improve performance
+            foreach (var (move, moveScore) in Evaluator.OrderMoves(legalMoves, gameState, true))
             {
-                //var clone = (TGameState)gameState.Clone();
-                gameState.ExecuteMove(move);
-
                 // Assume the agent is always maximizing at the root
-                double score = Minimax(gameState, depth - 1, double.NegativeInfinity, double.PositiveInfinity, false, maximizingPlayer);
+                gameState.ExecuteMove(move);
+                double score = moveScore + Minimax(gameState, depth - 1, double.NegativeInfinity, double.PositiveInfinity, false, maximizingPlayer);
                 gameState.UndoMove(move);
 
                 if (score > bestScore)
@@ -84,26 +83,14 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
             return eval;
         }
 
-        var moves = state.GetLegalMoves();
-        if (moves.Count == 0)
-        {
-            double eval = Evaluator.EvaluateState(state, maximizingPlayerId);
-            TranspositionTable[stateHash] = new TranspositionTableEntry
-            {
-                Score = eval,
-                Depth = depth,
-                Alpha = alpha,
-                Beta = beta
-            };
-            return eval;
-        }
 
+        // Move ordering: speeds up alpha beta pruning.  
         double bestScore = maximizingPlayer ? double.NegativeInfinity : double.PositiveInfinity;
-        foreach (var move in moves)
+        var moves = state.GetLegalMoves();
+        foreach (var (move, moveScore) in Evaluator.OrderMoves(moves, state, maximizingPlayer))
         {
-            //var clone = (TGameState)state.Clone();
             state.ExecuteMove(move);
-            double score = Minimax(state, depth - 1, alpha, beta, !maximizingPlayer, maximizingPlayerId);
+            double score = moveScore + Minimax(state, depth - 1, alpha, beta, !maximizingPlayer, maximizingPlayerId);
             state.UndoMove(move);
 
             if (maximizingPlayer)

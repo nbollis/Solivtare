@@ -116,17 +116,11 @@ public class MaximizingAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, 
             var clone = (TGameState)state.Clone();
             clone.ExecuteMove(move);
 
-            double score;
-            if (move.IsTerminatingMove)
-            {
-                // Evaluate as a leaf node, do not recurse
-                score = Evaluator.EvaluateMove(state, move);
-            }
-            else
-            {
-                double moveScore = Evaluator.EvaluateMove(state, move);
-                score = moveScore + Maximize(clone, depth - 1);
-            }
+            double moveScore = Evaluator.EvaluateMove(state, move);
+            double score = moveScore;
+
+            if (!move.IsTerminatingMove)
+                score += Maximize(clone, depth - 1);
 
             if (score > bestScore)
                 bestScore = score;

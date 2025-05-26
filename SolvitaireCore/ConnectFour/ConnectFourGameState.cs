@@ -27,6 +27,20 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
     public int[,] Board { get; private set; } = new int[Rows, Columns];
     public int CurrentPlayer { get; private set; } = 1;
     public int MovesMade { get; private set; } = 0;
+    public bool BoardFull
+    {
+        get
+        {
+            for (var i = 0; i < _topRow.Length; i++)
+            {
+                var p = _topRow[i];
+                if (p >= 0)
+                    return false;
+            }
+
+            return true;
+        }
+    }
     public bool IsPlayerWin(int player) => IsGameWon && WinningPlayer == player;
     public bool IsPlayerLoss(int player) => IsGameWon && WinningPlayer != player;
 
@@ -72,14 +86,14 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
 
     public List<ConnectFourMove> GetLegalMoves()
     {
-        var moves = new List<ConnectFourMove>();
+        var moves = new List<ConnectFourMove>(Columns);
         if (IsGameWon)
             return moves;
 
         for (int col = 0; col < Columns; col++)
         {
             if (_topRow[col] >= 0)
-                moves.Add(new ConnectFourMove(col));
+                moves.Add(ConnectFourMove.AllMoves[col]);
         }
         return moves;
     }
@@ -95,19 +109,8 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
 
     #endregion
 
-    public IGameState<ConnectFourMove> Clone()
-    {
-        var clone = new ConnectFourGameState
-        {
-            Board = (int[,])Board.Clone(),
-            CurrentPlayer = CurrentPlayer,
-            MovesMade = MovesMade,
-            _topRow = (int[])_topRow.Clone()
-        };
-        clone._moveHistory.AddRange(_moveHistory);
-        return clone;
-    }
-
+    #region Board Parsing
+   
     private void UpdateWinAndDrawCache()
     {
         _cachedIsGameWon = false;
@@ -120,27 +123,64 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
             int row = _lastMove.Value.Row;
             int col = _lastMove.Value.Col;
             int player = Board[row, col];
-            foreach (var (dRow, dCol) in Directions)
+            if (HasWinningLine(row, col, player))
             {
-                var cells = GetWinningCells(row, col, dRow, dCol, player);
-                if (cells.Count >= 4)
+                _cachedWinningPlayer = player;
+                _cachedIsGameWon = true;
+                // Only now get the actual cells for display
+                foreach (var (dRow, dCol) in Directions)
                 {
-                    _cachedWinningCells.Clear();
-                    _cachedWinningCells.AddRange(cells.Take(4));
-                    _cachedWinningPlayer = player;
-                    _cachedIsGameWon = true;
-                    break;
+                    var cells = GetWinningCells(row, col, dRow, dCol, player);
+                    if (cells.Count >= 4)
+                    {
+                        _cachedWinningCells.Clear();
+                        _cachedWinningCells.AddRange(cells.Take(4));
+                        break;
+                    }
                 }
             }
         }
 
         if (!_cachedIsGameWon)
         {
-            // Draw if no legal moves left
-            _cachedIsGameDraw = !GetLegalMoves().Any();
+            // Draw if not win and board full. 
+            _cachedIsGameDraw = BoardFull; 
         }
     }
 
+    /// <summary>
+    /// Fast check for a winning line from the given cell.
+    /// </summary>
+    private bool HasWinningLine(int row, int col, int player)
+    {
+        foreach (var (dRow, dCol) in Directions)
+        {
+            int count = 1;
+            // Forward
+            int r = row + dRow, c = col + dCol;
+            while ((uint)r < (uint)Rows && (uint)c < (uint)Columns && Board[r, c] == player)
+            {
+                count++;
+                r += dRow;
+                c += dCol;
+            }
+            // Backward
+            r = row - dRow; c = col - dCol;
+            while ((uint)r < (uint)Rows && (uint)c < (uint)Columns && Board[r, c] == player)
+            {
+                count++;
+                r -= dRow;
+                c -= dCol;
+            }
+            if (count >= 4)
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Get the actual winning cells for a given line direction.
+    /// </summary>
     private List<(int Row, int Col)> GetWinningCells(int row, int col, int dRow, int dCol, int player)
     {
         Span<(int Row, int Col)> buffer = stackalloc (int Row, int Col)[7];
@@ -169,7 +209,22 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
         return result;
     }
 
+    #endregion
 
+    public IGameState<ConnectFourMove> Clone()
+    {
+        var clone = new ConnectFourGameState
+        {
+            Board = (int[,])Board.Clone(),
+            CurrentPlayer = CurrentPlayer,
+            MovesMade = MovesMade,
+            _topRow = (int[])_topRow.Clone()
+        };
+        clone._moveHistory.AddRange(_moveHistory);
+        return clone;
+    }
+
+    
     public bool Equals(ConnectFourGameState? other)
     {
         if (other == null) return false;

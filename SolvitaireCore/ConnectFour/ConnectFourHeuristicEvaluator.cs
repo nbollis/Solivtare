@@ -2,6 +2,21 @@
 
 public class ConnectFourHeuristicEvaluator : StateEvaluator<ConnectFourGameState, ConnectFourMove>
 {
+    public override IEnumerable<(ConnectFourMove Move, double MoveScore)> OrderMoves(List<ConnectFourMove> moves, ConnectFourGameState state, bool bestFirst)
+    {
+        var scoredMoves = moves.Select(move =>
+        {
+            double score = EvaluateMove(state, move);
+            int distanceFromCenter = Math.Abs(move.Column - 3);
+            double adjustedScore = score - (distanceFromCenter * 0.1); // Penalize moves farther from center  
+            return (Move: move, MoveScore: adjustedScore);
+        });
+
+        return bestFirst
+            ? scoredMoves.OrderByDescending(m => m.MoveScore)
+            : scoredMoves.OrderBy(m => m.MoveScore);
+    }
+
     public override double EvaluateMove(ConnectFourGameState state, ConnectFourMove move)
     {
         state.ExecuteMove(move);

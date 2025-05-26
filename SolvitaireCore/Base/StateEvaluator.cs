@@ -16,6 +16,18 @@ public abstract class StateEvaluator<TGameState, TMove>
         return score;
     }
 
+    public virtual IEnumerable<(TMove Move, double MoveScore)> OrderMoves(List<TMove> moves, TGameState state, bool bestFirst)
+    {
+        if (moves == null || moves.Count == 0)
+            return [];
+
+        var scoredMoves = moves.Select(move => (Move: move, MoveScore: EvaluateMove(state, move)));
+
+        return bestFirst
+            ? scoredMoves.OrderByDescending(m => m.MoveScore)
+            : scoredMoves.OrderBy(m => m.MoveScore);
+    }
+
     public abstract double EvaluateState(TGameState state, int? moveCount = null);
 }
 
