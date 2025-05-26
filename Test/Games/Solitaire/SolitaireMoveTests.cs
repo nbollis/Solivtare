@@ -1,7 +1,7 @@
 ﻿using SolvitaireCore;
 using SolvitaireIO;
 
-namespace Test.Solitaire
+namespace Test.Games.Solitaire
 {
     [TestFixture]
     public class SolitaireMoveTests
@@ -72,9 +72,9 @@ namespace Test.Solitaire
         {
             // Arrange
             var foundation = _gameState.FoundationPiles.First(p => p.Suit == Suit.Spades);
-            foundation.TryAddCard(new (Suit.Spades, Rank.Ace, true));
-            foundation.TryAddCard(new (Suit.Spades, Rank.Two, true));
-            foundation.TryAddCard(new (Suit.Spades, Rank.Three, true));
+            foundation.TryAddCard(new(Suit.Spades, Rank.Ace, true));
+            foundation.TryAddCard(new(Suit.Spades, Rank.Two, true));
+            foundation.TryAddCard(new(Suit.Spades, Rank.Three, true));
 
             var tableauPile = _gameState.TableauPiles[2];
             Assume.That(tableauPile, Is.Not.Null, "No valid tableau pile for a move to the foundation.");
@@ -107,7 +107,7 @@ namespace Test.Solitaire
             // Arrange
             var card = new Card(Suit.Hearts, Rank.Nine, true);
             var fromTableau = _gameState.TableauPiles[3];
-            fromTableau.TryAddCard(card); 
+            fromTableau.TryAddCard(card);
             Assume.That(fromTableau, Is.Not.Null, "No valid tableau pile to move from.");
 
 

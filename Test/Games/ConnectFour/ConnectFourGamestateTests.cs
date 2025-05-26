@@ -1,6 +1,6 @@
 ﻿using SolvitaireCore.ConnectFour;
 
-namespace Test.ConnectFour;
+namespace Test.Games.ConnectFour;
 
 [TestFixture]
 public class ConnectFourGameStateTests
@@ -125,8 +125,8 @@ public class ConnectFourGameStateTests
         var state = new ConnectFourGameState();
         // Fill the board without a win
         for (int col = 0; col < ConnectFourGameState.Columns; col++)
-        for (int row = 0; row < ConnectFourGameState.Rows; row++)
-            state.Board[row, col] = (row + col) % 2 + 1;
+            for (int row = 0; row < ConnectFourGameState.Rows; row++)
+                state.Board[row, col] = (row + col) % 2 + 1;
         Assert.That(state.IsGameWon, Is.False);
         Assert.That(state.IsGameDraw, Is.True);
     }

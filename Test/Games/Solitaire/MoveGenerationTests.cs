@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Test.Solitaire
+namespace Test.Games.Solitaire
 {
     [TestFixture]
     public class MoveGenerationTests

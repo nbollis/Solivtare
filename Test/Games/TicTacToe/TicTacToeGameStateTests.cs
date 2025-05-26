@@ -1,6 +1,6 @@
 using SolvitaireCore;
 
-namespace Test;
+namespace Test.Games.TicTacToe;
 
 [TestFixture]
 public class TicTacToeGameStateTests

@@ -1,5 +1,6 @@
 using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
+using System;
 
 namespace SolvitaireGenetics;
 
@@ -53,20 +54,199 @@ public class GeneticConnectFourEvaluator : StateEvaluator<ConnectFourGameState, 
         int player = maximizingPlayerId.Value;
         int opponent = 3 - player;
 
+        // Cache board and dimensions for efficiency
+        int[,] board = state.Board;
+        int rows = ConnectFourGameState.Rows;
+        int cols = ConnectFourGameState.Columns;
+
+        // Precompute all features in a single board scan
+        int playerIsolated = 0, opponentIsolated = 0;
+        int playerSurrounded = 0, opponentSurrounded = 0;
+        int playerTwo = 0, playerTwoGap = 0, playerThree = 0, playerThreeGap = 0;
+        int opponentTwo = 0, opponentTwoGap = 0, opponentThree = 0, opponentThreeGap = 0;
+        int playerTouching = 0, playerTouchingOpponent = 0;
+        int opponentTouching = 0, opponentTouchingPlayer = 0;
+
+        // Scan the board once, extracting all features for both players
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                int cell = board[row, col];
+                if (cell == 0) continue; // Skip empty cells
+
+                // --- Neighbor analysis for isolated, surrounded, and touching features ---
+                int sameNeighbors = 0, touchingOwn = 0, touchingOpponent = 0;
+                int totalNeighbors = 0, nonEmptyNeighbors = 0;
+
+                for (int dr = -1; dr <= 1; dr++)
+                {
+                    for (int dc = -1; dc <= 1; dc++)
+                    {
+                        if (dr == 0 && dc == 0) continue;
+                        int nr = row + dr, nc = col + dc;
+                        if ((uint)nr < (uint)rows && (uint)nc < (uint)cols)
+                        {
+                            int neighbor = board[nr, nc];
+                            totalNeighbors++;
+                            if (neighbor != 0) nonEmptyNeighbors++;
+                            if (neighbor == cell) { sameNeighbors++; touchingOwn++; }
+                            else if (neighbor != 0) touchingOpponent++;
+                        }
+                        else
+                        {
+                            // Edge of the board counts as non-empty for "surrounded"
+                            totalNeighbors++;
+                            nonEmptyNeighbors++;
+                        }
+                    }
+                }
+
+                // Count how many of your own and opponent pieces this piece is touching
+                if (cell == player)
+                {
+                    playerTouching += touchingOwn;
+                    playerTouchingOpponent += touchingOpponent;
+                }
+                else
+                {
+                    opponentTouching += touchingOwn;
+                    opponentTouchingPlayer += touchingOpponent;
+                }
+
+                // Isolated: no same-player neighbors
+                if (sameNeighbors == 0)
+                {
+                    if (cell == player) playerIsolated++;
+                    else opponentIsolated++;
+                }
+
+                // Surrounded: all adjacent cells (or edges) are non-empty
+                if (nonEmptyNeighbors == totalNeighbors)
+                {
+                    if (cell == player) playerSurrounded++;
+                    else opponentSurrounded++;
+                }
+
+                // --- N-in-a-row and N-with-gap feature extraction ---
+                foreach (var (dr, dc) in Directions)
+                {
+                    // 2-in-a-row: count all overlapping pairs
+                    int r1 = row + dr, c1 = col + dc;
+                    if ((uint)r1 < (uint)rows && (uint)c1 < (uint)cols)
+                    {
+                        if (cell == player && board[r1, c1] == player)
+                            playerTwo++;
+                        if (cell == opponent && board[r1, c1] == opponent)
+                            opponentTwo++;
+                    }
+
+                    // 3-in-a-row: count all overlapping triplets
+                    int r2 = row + 2 * dr, c2 = col + 2 * dc;
+                    if ((uint)r1 < (uint)rows && (uint)c1 < (uint)cols &&
+                        (uint)r2 < (uint)rows && (uint)c2 < (uint)cols)
+                    {
+                        if (cell == player && board[r1, c1] == player && board[r2, c2] == player)
+                            playerThree++;
+                        if (cell == opponent && board[r1, c1] == opponent && board[r2, c2] == opponent)
+                            opponentThree++;
+                    }
+
+                    // 2-with-gap and 3-with-gap (use 4-cell window, as before)
+                    int[] window = new int[4];
+                    bool fullWindow = true;
+                    int wr = row, wc = col;
+                    for (int i = 0; i < 4; i++, wr += dr, wc += dc)
+                    {
+                        if ((uint)wr >= (uint)rows || (uint)wc >= (uint)cols)
+                        {
+                            fullWindow = false;
+                            break;
+                        }
+                        window[i] = board[wr, wc];
+                    }
+                    if (fullWindow)
+                    {
+                        int playerCount = 0, opponentCount = 0, emptyCount = 0;
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (window[i] == player) playerCount++;
+                            else if (window[i] == opponent) opponentCount++;
+                            else if (window[i] == 0) emptyCount++;
+                        }
+                        // Player
+                        if (playerCount == 2 && opponentCount == 0 && emptyCount == 2 && HasGapWindow(window, player, 2))
+                            playerTwoGap++;
+                        if (playerCount == 3 && opponentCount == 0 && emptyCount == 1 && HasGapWindow(window, player, 3))
+                            playerThreeGap++;
+                        // Opponent
+                        if (opponentCount == 2 && playerCount == 0 && emptyCount == 2 && HasGapWindow(window, opponent, 2))
+                            opponentTwoGap++;
+                        if (opponentCount == 3 && playerCount == 0 && emptyCount == 1 && HasGapWindow(window, opponent, 3))
+                            opponentThreeGap++;
+                    }
+                }
+            }
+        }
+
+        // --- Weighted sum of all features for both players ---
+        // Player features are positive, opponent features are negative (adversarial)
         double score = 0;
+        score += _chromosome.GetWeight(ConnectFourChromosome.IsolatedPieceWeight) * playerIsolated;
+        score += _chromosome.GetWeight(ConnectFourChromosome.TwoInARowWeight) * playerTwo;
+        score += _chromosome.GetWeight(ConnectFourChromosome.TwoWithOneGapWeight) * playerTwoGap;
+        score += _chromosome.GetWeight(ConnectFourChromosome.ThreeInARowWeight) * playerThree;
+        score += _chromosome.GetWeight(ConnectFourChromosome.ThreeWithOneGapWeight) * playerThreeGap;
+        score += _chromosome.GetWeight(ConnectFourChromosome.SurroundedPieceWeight) * playerSurrounded;
+        score += _chromosome.GetWeight(ConnectFourChromosome.PlayerTouchingWeight) * playerTouching;
+        score += _chromosome.GetWeight(ConnectFourChromosome.OpponentTouchingWeight) * playerTouchingOpponent;
 
-        // Count features for the current player
-        score += _chromosome.GetWeight(ConnectFourChromosome.IsolatedPieceWeight) * CountIsolatedPieces(state, player);
-        score += _chromosome.GetWeight(ConnectFourChromosome.TwoInARowWeight) * CountNInARow(state, player, 2, false);
-        score += _chromosome.GetWeight(ConnectFourChromosome.TwoWithOneGapWeight) * CountNInARow(state, player, 2, true);
-        score += _chromosome.GetWeight(ConnectFourChromosome.ThreeInARowWeight) * CountNInARow(state, player, 3, false);
-        score += _chromosome.GetWeight(ConnectFourChromosome.ThreeWithOneGapWeight) * CountNInARow(state, player, 3, true);
-        score += _chromosome.GetWeight(ConnectFourChromosome.SurroundedPieceWeight) * CountSurroundedPieces(state, player);
+        score -= _chromosome.GetWeight(ConnectFourChromosome.IsolatedPieceWeight) * opponentIsolated;
+        score -= _chromosome.GetWeight(ConnectFourChromosome.TwoInARowWeight) * opponentTwo;
+        score -= _chromosome.GetWeight(ConnectFourChromosome.TwoWithOneGapWeight) * opponentTwoGap;
+        score -= _chromosome.GetWeight(ConnectFourChromosome.ThreeInARowWeight) * opponentThree;
+        score -= _chromosome.GetWeight(ConnectFourChromosome.ThreeWithOneGapWeight) * opponentThreeGap;
+        score -= _chromosome.GetWeight(ConnectFourChromosome.SurroundedPieceWeight) * opponentSurrounded;
+        score -= _chromosome.GetWeight(ConnectFourChromosome.PlayerTouchingWeight) * opponentTouching;
+        score -= _chromosome.GetWeight(ConnectFourChromosome.OpponentTouchingWeight) * opponentTouchingPlayer;
 
-        // Optionally, subtract opponent's features (for adversarial evaluation)
         return score;
     }
 
+    /// <summary>
+    /// Checks for a gap in a 4-cell window: returns true if there are n pieces, 4-n empty,
+    /// and the pieces are not all consecutive (i.e., there is at least one empty cell between them).
+    /// </summary>
+    private static bool HasGapWindow(int[] window, int player, int n)
+    {
+        int count = 0, empty = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            if (window[i] == player) count++;
+            else if (window[i] == 0) empty++;
+        }
+        if (count != n || empty != 4 - n) return false;
+
+        // Check for a gap: not all pieces consecutive
+        int maxConsecutive = 0, consecutive = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            if (window[i] == player)
+            {
+                consecutive++;
+                if (consecutive > maxConsecutive) maxConsecutive = consecutive;
+            }
+            else
+            {
+                consecutive = 0;
+            }
+        }
+        return maxConsecutive < n;
+    }
+
+    /// <summary>
+    /// Returns the row index where a piece would land if dropped in the given column.
+    /// </summary>
     private int GetLandingRow(ConnectFourGameState state, int column)
     {
         for (int row = ConnectFourGameState.Rows - 1; row >= 0; row--)
@@ -76,155 +256,4 @@ public class GeneticConnectFourEvaluator : StateEvaluator<ConnectFourGameState, 
         }
         return 0; // Should not happen if move is legal
     }
-
-    private int CountIsolatedPieces(ConnectFourGameState state, int player)
-    {
-        int count = 0;
-        for (int row = 0; row < ConnectFourGameState.Rows; row++)
-        {
-            for (int col = 0; col < ConnectFourGameState.Columns; col++)
-            {
-                if (state.Board[row, col] == player)
-                {
-                    bool isolated = true;
-                    for (int dr = -1; dr <= 1; dr++)
-                    {
-                        for (int dc = -1; dc <= 1; dc++)
-                        {
-                            if (dr == 0 && dc == 0) continue;
-                            int nr = row + dr, nc = col + dc;
-                            if (nr >= 0 && nr < ConnectFourGameState.Rows && nc >= 0 && nc < ConnectFourGameState.Columns)
-                            {
-                                if (state.Board[nr, nc] == player)
-                                {
-                                    isolated = false;
-                                    break;
-                                }
-                            }
-                        }
-                        if (!isolated) break;
-                    }
-                    if (isolated) count++;
-                }
-            }
-        }
-        return count;
-    }
-
-    private int CountNInARow(ConnectFourGameState state, int player, int n, bool withGap)
-    {
-        int count = 0;
-        int rows = ConnectFourGameState.Rows;
-        int cols = ConnectFourGameState.Columns;
-        int[,] board = state.Board;
-        var directions = Directions;
-
-        for (int row = 0; row < rows; row++)
-        {
-            for (int col = 0; col < cols; col++)
-            {
-                foreach (var (dr, dc) in directions)
-                {
-                    int playerCount = 0, emptyCount = 0;
-                    int r = row, c = col;
-                    bool isBlocked = false;
-
-                    // Combine the two loops into one to reduce redundant iterations
-                    for (int i = 0; i < 4; i++, r += dr, c += dc)
-                    {
-                        if ((uint)r >= (uint)rows || (uint)c >= (uint)cols)
-                        {
-                            isBlocked = true;
-                            break;
-                        }
-
-                        int cell = board[r, c];
-                        if (cell == player)
-                        {
-                            playerCount++;
-                        }
-                        else if (cell == 0)
-                        {
-                            emptyCount++;
-                        }
-                        else
-                        {
-                            isBlocked = true; // Opponent's piece, not a valid sequence
-                            break;
-                        }
-                    }
-
-                    if (isBlocked || playerCount + emptyCount < 4) continue;
-
-                    if (playerCount == n && emptyCount == 4 - n)
-                    {
-                        if (withGap)
-                        {
-                            count++;
-                        }
-                        else if (n == 4)
-                        {
-                            count++; // Fast path for n == 4
-                        }
-                        else
-                        {
-                            // Check for gaps
-                            int consecutive = 0, maxConsecutive = 0;
-                            r = row; c = col;
-
-                            for (int i = 0; i < 4; i++, r += dr, c += dc)
-                            {
-                                if (board[r, c] == player)
-                                {
-                                    consecutive++;
-                                    maxConsecutive = Math.Max(maxConsecutive, consecutive);
-                                }
-                                else
-                                {
-                                    consecutive = 0;
-                                }
-                            }
-
-                            if (maxConsecutive == n)
-                                count++;
-                        }
-                    }
-                }
-            }
-        }
-        return count;
-    }
-
-    private int CountSurroundedPieces(ConnectFourGameState state, int player)
-    {
-        int count = 0;
-        for (int row = 0; row < ConnectFourGameState.Rows; row++)
-        {
-            for (int col = 0; col < ConnectFourGameState.Columns; col++)
-            {
-                if (state.Board[row, col] == player)
-                {
-                    int neighborCount = 0;
-                    for (int dr = -1; dr <= 1; dr++)
-                    {
-                        for (int dc = -1; dc <= 1; dc++)
-                        {
-                            if (dr == 0 && dc == 0) continue;
-                            int nr = row + dr, nc = col + dc;
-                            if (nr >= 0 && nr < ConnectFourGameState.Rows && nc >= 0 && nc < ConnectFourGameState.Columns)
-                            {
-                                if (state.Board[nr, nc] != 0)
-                                    neighborCount++;
-                            }
-                        }
-                    }
-                    // You can adjust the threshold (e.g., 4 or more neighbors)
-                    if (neighborCount >= 4)
-                        count++;
-                }
-            }
-        }
-        return count;
-    }
-
 }

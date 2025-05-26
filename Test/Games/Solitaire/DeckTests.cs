@@ -2,7 +2,7 @@ using System.Text.Json;
 using SolvitaireCore;
 using SolvitaireIO;
 
-namespace Test.Solitaire;
+namespace Test.Games.Solitaire;
 
 [TestFixture]
 public class DeckTests

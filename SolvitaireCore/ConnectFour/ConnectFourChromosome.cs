@@ -8,7 +8,9 @@ public class ConnectFourChromosome : Chromosome
     public const string TwoInARowWeight = "TwoInARow";
     public const string TwoWithOneGapWeight = "TwoWithOneGap";
     public const string ThreeInARowWeight = "ThreeInARow";
-    public const string ThreeWithOneGapWeight = "ThreeWithOneGap";
+    public const string ThreeWithOneGapWeight = "ThreeWithOneGap"; 
+    public const string PlayerTouchingWeight = "PlayerTouching";
+    public const string OpponentTouchingWeight = "OpponentTouching";
 
     // Move Evaluations    
     public const string ColumnOneWeight = "Move_ColumnOne";
@@ -35,6 +37,8 @@ public class ConnectFourChromosome : Chromosome
         MutableStatsByName[TwoWithOneGapWeight] = GenerateRandomWeight();
         MutableStatsByName[ThreeInARowWeight] = GenerateRandomWeight();
         MutableStatsByName[ThreeWithOneGapWeight] = GenerateRandomWeight();
+        MutableStatsByName[PlayerTouchingWeight] = GenerateRandomWeight();
+        MutableStatsByName[OpponentTouchingWeight] = GenerateRandomWeight();
 
         // Move evaluation weights  
         MutableStatsByName[ColumnOneWeight] = GenerateRandomWeight();
@@ -65,6 +69,10 @@ public class ConnectFourChromosome : Chromosome
         chromosome.MutableStatsByName[TwoWithOneGapWeight] = 2.67;
         chromosome.MutableStatsByName[ThreeInARowWeight] = -0.12;
         chromosome.MutableStatsByName[ThreeWithOneGapWeight] = 2.24;
+        chromosome.MutableStatsByName[PlayerTouchingWeight] = 0.0;
+        chromosome.MutableStatsByName[OpponentTouchingWeight] = 0.0;
+
+
         chromosome.MutableStatsByName[ColumnOneWeight] = 2.11;
         chromosome.MutableStatsByName[ColumnTwoWeight] = -1.24;
         chromosome.MutableStatsByName[ColumnThreeWeight] = -0.09;

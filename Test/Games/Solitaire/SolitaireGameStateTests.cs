@@ -1,7 +1,7 @@
 using System.Security.Cryptography.X509Certificates;
 using SolvitaireCore;
 
-namespace Test.Solitaire;
+namespace Test.Games.Solitaire;
 
 [TestFixture]
 public class SolitaireGameStateTests
@@ -167,7 +167,7 @@ public class SolitaireGameStateTests
                 gameStates[i].ExecuteMove(moves[i]);
             }
         }
-        
+
     }
 
     [Test]

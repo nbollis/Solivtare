@@ -9,7 +9,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
     public const int Columns = 7;
 
     // 0 = empty, 1 = player1, 2 = player2
-    public int[,] Board { get; private set; } = new int[Rows, Columns]; 
+    public int[,] Board { get; private set; } = new int[Rows, Columns];
     public int CurrentPlayer { get; private set; } = 1;
     public int MovesMade { get; private set; } = 0;
 
@@ -103,7 +103,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
             CurrentPlayer = CurrentPlayer,
             MovesMade = MovesMade,
             IsGameWon = IsGameWon
-        }; 
+        };
         clone._moveHistory.AddRange(_moveHistory);
         return clone;
     }
@@ -168,5 +168,20 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
             hash = hash * 31 + cell.GetHashCode();
         hash = hash * 31 + CurrentPlayer;
         return hash;
+    }
+
+    // Add methods to allow controlled setting of Board and CurrentPlayer for testing purposes
+    public void SetBoard(int[,] board)
+    {
+        if (board.GetLength(0) != Rows || board.GetLength(1) != Columns)
+            throw new ArgumentException($"Board must be {Rows}x{Columns}.");
+        Board = (int[,])board.Clone();
+    }
+
+    public void SetCurrentPlayer(int player)
+    {
+        if (player != 1 && player != 2)
+            throw new ArgumentException("CurrentPlayer must be 1 or 2.");
+        CurrentPlayer = player;
     }
 }

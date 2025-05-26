@@ -1,7 +1,7 @@
 
 using SolvitaireCore;
 
-namespace Test.Solitaire;
+namespace Test.Games.Solitaire;
 
 [TestFixture]
 public class CardTests
