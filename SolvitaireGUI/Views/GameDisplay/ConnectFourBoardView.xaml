@@ -19,7 +19,7 @@
                 <ItemsPanelTemplate>
                     <UniformGrid Rows="6" Columns="7"/>
                 </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>S
+            </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Border MouseEnter="Cell_MouseEnter"
