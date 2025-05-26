@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using SolvitaireCore;
+using SolvitaireCore.ConnectFour;
 using SolvitaireGenetics.IO;
 using SolvitaireIO;
 
@@ -39,7 +40,13 @@ public class GeneticAlgorithmParameters
         {
             return JsonSerializer.Deserialize<QuadraticGeneticAlgorithmParameters>(json,
             new JsonSerializerOptions() { Converters = { new ChromosomeConverter<QuadraticChromosome>() } })
-                   ?? throw new InvalidOperationException("Failed to deserialize SolitaireGeneticAlgorithmParameters.");
+                   ?? throw new InvalidOperationException("Failed to deserialize QuadraticGeneticAlgorithmParameters.");
+        }    
+        if (json.Contains("\"RandomAgentRatio\"")) 
+        {
+            return JsonSerializer.Deserialize<ConnectFourGeneticAlgorithmParameters>(json,
+            new JsonSerializerOptions() { Converters = { new ChromosomeConverter<ConnectFourChromosome>() } })
+                   ?? throw new InvalidOperationException("Failed to deserialize ConnectFourAlgorithmParameters.");
         }
 
         throw new NotSupportedException("Unknown parameter type in the configuration file.");

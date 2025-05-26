@@ -274,6 +274,11 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
                 if (Parameters.OutputDirectory != null)
                     quad.SaveToFile(filePath!);
                 break;
+            case ConnectFourGeneticAlgorithmParameters conn:
+                algorithm = new ConnectFourGeneticAlgorithm(conn);
+                if (Parameters.OutputDirectory != null)
+                    conn.SaveToFile(filePath);
+                break;
         }
 
         return algorithm;

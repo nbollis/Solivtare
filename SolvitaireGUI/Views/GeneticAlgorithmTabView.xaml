@@ -256,6 +256,10 @@
                                         DataType="{x:Type local:QuadraticGeneticAlgorithmParametersViewModel}">
                                         <local:QuadraticGeneticParametersControl />
                                     </DataTemplate>
+                                    <DataTemplate
+                                        DataType="{x:Type local:ConnectFourGeneticAlgorithmParametersViewModel}">
+                                        <local:ConnectFourGeneticParametersControl />
+                                    </DataTemplate>
                                 </ContentControl.Resources>
                             </ContentControl>
                         </StackPanel>

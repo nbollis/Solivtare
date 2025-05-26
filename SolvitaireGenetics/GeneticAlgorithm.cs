@@ -176,6 +176,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters, TAgent> : IGene
                 .ToList();
         }
 
+        Population = population;
         Parallel.ForEach(population, chromosome =>
                {
                    chromosome.Fitness = GetFitness(chromosome, cancellationToken);

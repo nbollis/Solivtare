@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using SolvitaireCore;
 using SolvitaireGenetics;
 
 namespace SolvitaireGUI;

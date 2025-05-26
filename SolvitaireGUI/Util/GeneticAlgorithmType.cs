@@ -1,11 +1,13 @@
-﻿using SolvitaireGenetics;
+﻿using SolvitaireCore.ConnectFour;
+using SolvitaireGenetics;
 
 namespace SolvitaireGUI;
 
 public enum GeneticAlgorithmType
 {
     Solitaire,
-    Quadratic
+    Quadratic,
+    ConnectFour
 }
 
 public static class GeneticAlgorithmTypeExtensions
@@ -16,6 +18,7 @@ public static class GeneticAlgorithmTypeExtensions
         {
             GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParameters(),
             GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParameters(),
+            GeneticAlgorithmType.ConnectFour => new ConnectFourGeneticAlgorithmParameters(),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -26,6 +29,7 @@ public static class GeneticAlgorithmTypeExtensions
         {
             GeneticAlgorithmType.Solitaire => new ChromosomeViewModel(GeneticSolitaireAlgorithm.BestSoFar()),
             GeneticAlgorithmType.Quadratic => new ChromosomeViewModel(new QuadraticChromosome(Random.Shared)),
+            GeneticAlgorithmType.ConnectFour => new ChromosomeViewModel(new ConnectFourChromosome(Random.Shared)),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -36,6 +40,7 @@ public static class GeneticAlgorithmTypeExtensions
         {
             SolitaireGeneticAlgorithmParameters => GeneticAlgorithmType.Solitaire,
             QuadraticGeneticAlgorithmParameters => GeneticAlgorithmType.Quadratic,
+            ConnectFourGeneticAlgorithmParameters => GeneticAlgorithmType.ConnectFour,
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -46,6 +51,7 @@ public static class GeneticAlgorithmTypeExtensions
         {
             GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParametersViewModel(new SolitaireGeneticAlgorithmParameters()),
             GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParametersViewModel(new QuadraticGeneticAlgorithmParameters()),
+            GeneticAlgorithmType.ConnectFour => new ConnectFourGeneticAlgorithmParametersViewModel(new ConnectFourGeneticAlgorithmParameters()),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -56,6 +62,7 @@ public static class GeneticAlgorithmTypeExtensions
         {
             GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParametersViewModel((SolitaireGeneticAlgorithmParameters)parameters),
             GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParametersViewModel((QuadraticGeneticAlgorithmParameters)parameters),
+            GeneticAlgorithmType.ConnectFour => new ConnectFourGeneticAlgorithmParametersViewModel((ConnectFourGeneticAlgorithmParameters)parameters),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -66,6 +73,7 @@ public static class GeneticAlgorithmTypeExtensions
         {
             SolitaireGeneticAlgorithmParameters algorithmParameters => new SolitaireGeneticAlgorithmParametersViewModel(algorithmParameters),
             QuadraticGeneticAlgorithmParameters algorithmParameters => new QuadraticGeneticAlgorithmParametersViewModel(algorithmParameters),
+            ConnectFourGeneticAlgorithmParameters algorithmParameters => new ConnectFourGeneticAlgorithmParametersViewModel(algorithmParameters),
             _ => throw new ArgumentOutOfRangeException()
         };
     }

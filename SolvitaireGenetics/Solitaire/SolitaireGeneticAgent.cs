@@ -6,7 +6,10 @@ public class SolitaireGeneticAgent : MaximizingAgent<SolitaireGameState, Solitai
 {
     public override string Name => "Solitaire Genetic Agent";
     public SolitaireChromosome Chromosome { get; init; }
-
+    public SolitaireGeneticAgent(SolitaireChromosome chromosome)
+        : this(chromosome, null, 3)
+    {
+    }
     public SolitaireGeneticAgent(SolitaireChromosome chromosome, StateEvaluator<SolitaireGameState, SolitaireMove>? evaluator = null, int maxDepth = 3) 
         : base(evaluator ?? new GeneticSolitaireEvaluator(chromosome), maxDepth)
     {
