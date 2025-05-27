@@ -29,7 +29,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters, TAgent> : IGene
     public GeneticAlgorithmLogger Logger { get; }
 
     // Fitness cache
-    private readonly ConcurrentDictionary<string, double> _fitnessCache = new();
+    protected readonly ConcurrentDictionary<string, double> FitnessCache = new();
 
     protected GeneticAlgorithm(TParameters parameters)
     {
@@ -63,7 +63,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters, TAgent> : IGene
         string chromosomeKey = chromosome.GetStableHash();
 
         // Use GetOrAdd to ensure thread-safe access to the cache
-        return _fitnessCache.GetOrAdd(chromosomeKey, _ => EvaluateFitness(chromosome, cancellationToken));
+        return FitnessCache.GetOrAdd(chromosomeKey, _ => EvaluateFitness(chromosome, cancellationToken));
     }
 
     public virtual void EvaluatePopulation(CancellationToken? cancellationToken = null)
