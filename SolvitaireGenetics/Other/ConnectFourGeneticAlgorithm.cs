@@ -35,63 +35,6 @@ public class ConnectFourGeneticAlgorithm : GeneticAlgorithm<ConnectFourChromosom
     public override double EvaluateFitness(ConnectFourGeneticAgent agent, CancellationToken? cancellationToken = null)
     {
         throw new NotImplementedException("This should never be hit as EvaluatePopulation is used instead.");
-        //int totalPairings = Parameters.TournamentSize;
-        //int gamesAgainstRandomAgent = (int)(totalPairings * Parameters.RandomAgentRatio);
-        //int gamesAgainstOtherAgents = totalPairings - gamesAgainstRandomAgent;
-        //int maxScore = totalPairings * Parameters.GamesPerPairing; // 5 games per pairing  
-
-        //Random random = new Random();
-
-        //double totalScore = 0;
-        //int gamesWon = 0;
-        //int movesPlayed = 0;
-        //// Play games against RandomAgent  
-        //for (int i = 0; i < gamesAgainstRandomAgent; i++)
-        //{
-        //    var randomAgent = new RandomAgent<ConnectFourGameState, ConnectFourMove>();
-        //    if (cancellationToken?.IsCancellationRequested == true)
-        //        break;
-
-        //    var result = PlayGames(agent, randomAgent);
-        //    totalScore += result.Score;
-        //    gamesWon += result.GamesWon;
-        //    movesPlayed += result.MovesMade;
-        //}
-
-        //// Play games against other random agents from the population  
-        //for (int i = 0; i < gamesAgainstOtherAgents; i++)
-        //{
-        //    if (cancellationToken?.IsCancellationRequested == true)
-        //        break;
-
-        //    // Select a random agent from the population, ensuring it's not the same as the current agent
-        //    var opponent = (ConnectFourGeneticAgent)Population[random.Next(Population.Count)].Clone();
-        //    if (opponent == agent)  
-        //    {
-        //        i--;
-        //        continue;
-        //    }
-
-        //    var result = PlayGames(agent, opponent);
-        //    totalScore += result.Score;
-        //    gamesWon += result.GamesWon;
-        //    movesPlayed += result.MovesMade;
-        //}
-
-        //// Normalize fitness score  
-        //var fitness = totalScore / maxScore;
-
-        //AgentCompleted?.Invoke(new AgentLog
-        //{
-        //    Generation = CurrentGeneration,
-        //    Fitness = fitness,
-        //    GamesPlayed = maxScore,
-        //    MovesMade = movesPlayed,
-        //    GamesWon = gamesWon,
-        //    Chromosome = ChromosomeLog.FromChromosome(agent.Chromosome)
-        //});
-        //agent.Chromosome.Fitness = fitness; // Update the agent's chromosome fitness
-        //return fitness;
     }
 
 
@@ -154,6 +97,39 @@ public class ConnectFourGeneticAlgorithm : GeneticAlgorithm<ConnectFourChromosom
                 gamesWon[agent] += gamesWonCount;
             }
         }
+
+        // --- MinimaxAgent round ---  
+        int minimaxGames = gamesPerPairing * 2; // Magic Number: 
+        maxScore += minimaxGames; // Each agent gets minimaxGames more possible points  
+
+        Parallel.ForEach(Population, agent =>
+        {
+            var depths = new[] { 1, 3, 5 };
+            var localScores = new double[depths.Length];
+            var localMovesMade = new int[depths.Length];
+            var localGamesWon = new int[depths.Length];
+
+            Parallel.For(0, depths.Length, depthIndex =>
+            {
+                var depth = depths[depthIndex];
+                var minimaxAgent = new MinimaxAgent<ConnectFourGameState, ConnectFourMove>(
+                    new ConnectFourHeuristicEvaluator(), maxDepth: depth);
+
+                var result = PlayGames(agent, minimaxAgent, minimaxGames / depths.Length);
+
+                localScores[depthIndex] = result.ScoreA;
+                localMovesMade[depthIndex] = result.MovesMade;
+                localGamesWon[depthIndex] = result.GamesWonA;
+            });
+
+            lock (scores) // Dictionaries are not thread-safe for writes  
+            {
+                scores[agent] += localScores.Sum();
+                movesMade[agent] += localMovesMade.Sum();
+                gamesWon[agent] += localGamesWon.Sum();
+            }
+        });
+        // --- End MinimaxAgent round ---
 
         // Assign fitness
         foreach (var agent in Population)
@@ -251,6 +227,9 @@ public class ConnectFourGeneticAlgorithm : GeneticAlgorithm<ConnectFourChromosom
                 scoreA += 0.5;
                 scoreB += 0.5;
             }
+
+            agentA.ResetState();
+            agentB.ResetState();
         }
 
         // Divide by two because we tracked both players moves

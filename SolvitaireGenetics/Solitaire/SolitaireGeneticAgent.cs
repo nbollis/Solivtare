@@ -2,7 +2,7 @@
 
 namespace SolvitaireGenetics;
 
-public class SolitaireGeneticAgent(SolitaireChromosome chromosome, StateEvaluator<SolitaireGameState, SolitaireMove>? evaluator = null, int maxDepth = 3)
+public class SolitaireGeneticAgent(SolitaireChromosome chromosome, StateEvaluator<SolitaireGameState, SolitaireMove>? evaluator = null, int maxDepth = 5)
     : MaximizingAgent<SolitaireGameState, SolitaireMove>(evaluator ?? new GeneticSolitaireEvaluator(chromosome), maxDepth), 
         IGeneticAgent<SolitaireChromosome>
 {

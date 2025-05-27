@@ -3,11 +3,11 @@ using SolvitaireCore.ConnectFour;
 
 namespace SolvitaireGenetics;
 
-public class ConnectFourGeneticAgent(ConnectFourChromosome chromosome, StateEvaluator<ConnectFourGameState, ConnectFourMove>? evaluator = null, int maxDepth = 3)
+public class ConnectFourGeneticAgent(ConnectFourChromosome chromosome, StateEvaluator<ConnectFourGameState, ConnectFourMove>? evaluator = null, int maxDepth = 5)
     : MinimaxAgent<ConnectFourGameState, ConnectFourMove>(evaluator ?? new GeneticConnectFourEvaluator(chromosome), maxDepth), 
         IGeneticAgent<ConnectFourChromosome>
 {
-    public ConnectFourGeneticAgent(ConnectFourChromosome chromosome) : this(chromosome, null, 3) { }
+    public ConnectFourGeneticAgent(ConnectFourChromosome chromosome) : this(chromosome, null, 5) { }
 
     public override string Name { get; } = "Genetic Agent";
     public ConnectFourChromosome Chromosome { get; init; } = chromosome;
