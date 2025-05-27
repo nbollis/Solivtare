@@ -5,24 +5,7 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
     where TMove : IMove
 {
     protected readonly Random Rand; 
-    private static readonly ListPool<ScoredMove> ScoredMovePool = new(8);
-
-    private record struct ScoredMove
-    {
-        public TMove Move { get; }
-        public double MoveScore { get; }
-        public double MinimaxScore { get; set; }
-        public int WinDepth { get; set; }
-
-        public ScoredMove(TMove move, double moveScore)
-        {
-            Move = move;
-            MoveScore = moveScore;
-            MinimaxScore = 0;
-            WinDepth = int.MaxValue;
-        }
-    }
-
+    
     public int MaxDepth { get; set; }
     public StateEvaluator<TGameState, TMove> Evaluator { get; init; }
     public MinimaxAgent(StateEvaluator<TGameState, TMove> evaluator, int maxDepth = 6)
@@ -68,22 +51,22 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
 
                     scoredMoves.Add(new ScoredMove(moveInfo.Move, moveInfo.MoveScore)
                     {
-                        MinimaxScore = minimaxScore,
+                        SearchScore = minimaxScore,
                         WinDepth = winDepth
                     });
                 }
 
-                double maxScore = scoredMoves.Max(m => m.MinimaxScore);
-                double minScore = scoredMoves.Min(m => m.MinimaxScore);
+                double maxScore = scoredMoves.Max(m => m.SearchScore);
+                double minScore = scoredMoves.Min(m => m.SearchScore);
 
                 // If we found a winning move, return it immediately
                 if (Math.Abs(maxScore - Evaluator.MaximumScore) < 1e-8)
-                    return scoredMoves.First(m => Math.Abs(m.MinimaxScore - maxScore) < 1e-8).Move;
+                    return scoredMoves.First(m => Math.Abs(m.SearchScore - maxScore) < 1e-8).Move;
 
                 // We have losing moves in the pool, so we can ignore them in the next iteration
                 if (Math.Abs(minScore - (-Evaluator.MaximumScore)) < 1e-8)
                 {
-                    var worstMoves = scoredMoves.Where(m => Math.Abs(m.MinimaxScore - minScore) < 1e-8).ToList();
+                    var worstMoves = scoredMoves.Where(m => Math.Abs(m.SearchScore - minScore) < 1e-8).ToList();
 
                     // All moves lose, just pick one and get it over with. 
                     if (worstMoves.Count == scoredMoves.Count)
@@ -100,11 +83,11 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
                         return scoredMoves[0].Move;
                 }
 
-                // If we reach the maximum depth, we want to select the best move based on MinimaxScore, WinDepth, and MoveScore
+                // If we reach the maximum depth, we want to select the best move based on SearchScore, WinDepth, and MoveScore
                 if (depth == MaxDepth)
                 {
                     // Find the best minimax score  
-                    var bestMoves = scoredMoves.Where(m => Math.Abs(m.MinimaxScore - maxScore) < 1e-8).ToList();
+                    var bestMoves = scoredMoves.Where(m => Math.Abs(m.SearchScore - maxScore) < 1e-8).ToList();
 
                     // Tiebreak: prefer lowest winDepth (fastest win)
                     int bestDepth = bestMoves.Min(m => m.WinDepth);
@@ -125,15 +108,8 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
                 }                
 
                 // Otherwise prepare for the next, deeper, iteration. 
-                // Sort scored moves by MinimaxScore, then by WinDepth, then by MoveScore
-                scoredMoves.Sort((a, b) =>
-                {
-                    int scoreComparison = b.MinimaxScore.CompareTo(a.MinimaxScore);
-                    if (scoreComparison != 0) return scoreComparison;
-                    int depthComparison = a.WinDepth.CompareTo(b.WinDepth);
-                    if (depthComparison != 0) return depthComparison;
-                    return b.MoveScore.CompareTo(a.MoveScore);
-                });
+                // Sort scored moves by SearchScore, then by WinDepth, then by MoveScore
+                scoredMoves.Sort(MoveComparer);
 
                 // Update previousMoveOrder for the next depth
                 previousMoveOrder.Clear();

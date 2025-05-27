@@ -98,8 +98,6 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
     public SolitaireMove CycleMove => new MultiCardMove(StockIndex, WasteIndex,
         StockPile.Cards.TakeLast(Math.Min(CardsPerCycle, StockPile.Count)));
 
-    private bool _originalIsFaceUp;
-    private bool _originalPreviousIsFaceUp;
     protected override List<SolitaireMove> GenerateLegalMoves()
     {
         var moves = MoveGenerator.GenerateMoves(this).ToList();
@@ -109,6 +107,8 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
 
     protected override void ExecuteMoveInternal(SolitaireMove move)
     {
+        var undoInfo = new MoveUndoInfo();
+
         if (move.IsValid(this))
         {
             if (move.ToPileIndex == StockIndex)
@@ -119,12 +119,12 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
                 var fromPile = GetPileByIndex(move.FromPileIndex);
                 var toPile = GetPileByIndex(move.ToPileIndex);
 
-                _originalIsFaceUp = single.Card.IsFaceUp; // cache for undo
+                undoInfo.MovedCardWasFaceUp = single.Card.IsFaceUp;
                 fromPile.RemoveCard(single.Card);
                 toPile.AddCard(single.Card);
                 if (fromPile is TableauPile && fromPile.Count > 0)
                 {
-                    _originalPreviousIsFaceUp = fromPile.TopCard!.IsFaceUp;
+                    undoInfo.PreviousTopCardWasFaceUp = fromPile.TopCard!.IsFaceUp;
                     fromPile.TopCard.IsFaceUp = true;
                 }
             }
@@ -146,8 +146,8 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
                     {
                         var card = multi.Cards[i];
                         WastePile.RemoveCard(card);
-                        StockPile.AddCard(card);
                         card.IsFaceUp = false;
+                        StockPile.AddCard(card);
                     }
                 }
                 else if (multi.ToPileIndex <= TableauEndIndex && multi.FromPileIndex <= TableauEndIndex)
@@ -160,11 +160,12 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
 
                     if (fromPile.Count > 0)
                     {
-                        _originalPreviousIsFaceUp = fromPile.TopCard!.IsFaceUp;
+                        undoInfo.PreviousTopCardWasFaceUp = fromPile.TopCard!.IsFaceUp;
                         fromPile.TopCard.IsFaceUp = true;
                     }
                 }
             }
+            _undoStack.Push(undoInfo);
         }
         else
         {
@@ -174,6 +175,8 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
 
     protected override void UndoMoveInternal(SolitaireMove move)
     {
+        var undoInfo = _undoStack.Pop();
+
         if (move.ToPileIndex == StockIndex && move.FromPileIndex == WasteIndex)
             CycleCount--;
         if (move is SingleCardMove single)
@@ -193,10 +196,12 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
             var toPile = GetPileByIndex(move.ToPileIndex);
 
             toPile.RemoveCard(single.Card);
-            single.Card.IsFaceUp = _originalIsFaceUp; // Restore the original face-up state
+            single.Card.IsFaceUp = undoInfo.MovedCardWasFaceUp ?? single.Card.IsFaceUp;
+
+            // From tableau, pile currently still has cards, restore the previous face up state of the top card excluding the cards we are moving back. 
             if (single.FromPileIndex <= TableauEndIndex && fromPile.Count > 0)
             {
-                fromPile.TopCard.IsFaceUp = _originalPreviousIsFaceUp;
+                fromPile.TopCard!.IsFaceUp = undoInfo.PreviousTopCardWasFaceUp ?? fromPile.TopCard.IsFaceUp;
             }
             fromPile.AddCard(single.Card);
         }
@@ -225,9 +230,10 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
                 var toPile = TableauPiles[multi.ToPileIndex];
                 var fromPile = TableauPiles[multi.FromPileIndex];
 
+                // From tableau, pile currently still has cards, restore the previous face up state of the top card excluding the cards we are moving back. 
                 if (fromPile.Count > 0)
                 {
-                    fromPile.TopCard!.IsFaceUp = _originalPreviousIsFaceUp;
+                    fromPile.TopCard!.IsFaceUp = undoInfo.PreviousTopCardWasFaceUp ?? fromPile.TopCard.IsFaceUp;
                 }
 
                 fromPile.Cards.AddRange(multi.Cards);
@@ -235,6 +241,16 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
                 toPile.RemoveCards(multi.Cards);
             }
         }
+    }
+
+    // Track face up state of moved cards for undo functionality
+    // currently assumes sequential operations (which is reasonable for solitaire)
+    // To support non-sequential operations, we would need to track the state of each card individually or map the move undo info to the specific move or card moved.
+    private readonly Stack<MoveUndoInfo> _undoStack = new();
+    private class MoveUndoInfo
+    {
+        public bool? MovedCardWasFaceUp { get; set; }
+        public bool? PreviousTopCardWasFaceUp { get; set; }
     }
 
     #endregion

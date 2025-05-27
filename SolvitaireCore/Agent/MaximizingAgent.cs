@@ -26,62 +26,120 @@ public class MaximizingAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, 
         if (legalMoves.Count == 0)
             throw new InvalidOperationException("No legal moves available.");
 
-        TMove bestMove = legalMoves[0];
-        //var debugInfo = new List<(TMove Move, double Score, int Depth)>(); // Store moves and evaluations for debugging  
+        List<ScoredMove> scoredMoves = ScoredMovePool.Get();
+        List<ScoredMove> previousMoveOrder = ScoredMovePool.Get();
 
-        // Iterative deepening: search from depth 1 up to MaxDepth  
-        for (int depth = 1; depth <= MaxDepth; depth++)
+        try
         {
-            double bestScore = double.NegativeInfinity;
-            List<TMove> bestMoves = new();
-
-            foreach (var move in legalMoves)
+            // Iterative deepening: search from depth 1 up to MaxDepth  
+            for (int depth = 1; depth <= MaxDepth; depth++)
             {
-                var clone = (TGameState)gameState.Clone();
-                clone.ExecuteMove(move);
+                scoredMoves.Clear();
 
-                double score;
-                if (move.IsTerminatingMove)
+                // Order moves based on static evaluation for depth 1, or use previous order for deeper searches
+                List<ScoredMove> moveInfos = depth == 1
+                    ? legalMoves
+                        .Select(move => new ScoredMove(move, Evaluator.EvaluateMove(gameState, move)))
+                        .OrderByDescending(m => m.MoveScore)
+                        .ToList()
+                    : previousMoveOrder;
+
+                foreach (var moveInfo in moveInfos)
                 {
-                    // Evaluate as a leaf node, do not recurse
-                    score = Evaluator.EvaluateMove(gameState, move);
-                }
-                else
-                {
-                    score = Maximize(clone, depth - 1);
+                    double score;
+                    if (moveInfo.Move.IsTerminatingMove) // Evaluate as a leaf node, do not recurse
+                    {
+                        score = Evaluator.EvaluateMove(gameState, moveInfo.Move);
+                    }
+                    else // Recurse to evaluate the move
+                    {
+                        gameState.ExecuteMove(moveInfo.Move);
+                        score = Maximize(gameState, depth - 1);
+                        gameState.UndoMove(moveInfo.Move);
+                    }
+
+                    scoredMoves.Add(new ScoredMove(moveInfo.Move, moveInfo.MoveScore)
+                    {
+                        SearchScore = score,
+                        WinDepth = depth
+                    });
                 }
 
-                //debugInfo.Add((move, score, depth)); // Add move, score, and depth to debug info  
+                double maxScore = scoredMoves.Max(m => m.SearchScore);
+                double minScore = scoredMoves.Min(m => m.SearchScore);
 
-                if (score > bestScore)
+                // If we found a winning move, return it immediately
+                if (Math.Abs(maxScore - Evaluator.MaximumScore) < 1e-8)
+                    return scoredMoves.First(m => Math.Abs(m.SearchScore - maxScore) < 1e-8).Move;
+                
+                // We have losing moves in the pool, so we can ignore them in the next iteration
+                if (Math.Abs(minScore - (-Evaluator.MaximumScore)) < 1e-8)
                 {
-                    bestScore = score;
-                    bestMoves.Clear();
-                    bestMoves.Add(move);
+                    var worstMoves = scoredMoves.Where(m => Math.Abs(m.SearchScore - minScore) < 1e-8).ToList();
+
+                    // All moves lose, just pick one and get it over with. 
+                    if (worstMoves.Count == scoredMoves.Count)
+                        return scoredMoves[Rand.Next(scoredMoves.Count)].Move;
+
+                    int slowestLoss = worstMoves.Max(m => m.WinDepth);
+                    worstMoves = worstMoves.Where(m => m.WinDepth == slowestLoss).ToList();
+
+                    // Remove the worst moves from consideration for the next rounds  
+                    scoredMoves.RemoveAll(m => worstMoves.Contains(m));
+
+                    // After removing all losing moves, only one remained, send it. 
+                    if (scoredMoves.Count == 1)
+                        return scoredMoves[0].Move;
                 }
-                else if (Math.Abs(score - bestScore) < 1e-8)
+
+                // If we reach the maximum depth, we want to select the best move based on SearchScore, WinDepth, and MoveScore
+                if (depth == MaxDepth)
                 {
-                    bestMoves.Add(move);
+                    // Find the best minimax score  
+                    var bestMoves = scoredMoves.Where(m => Math.Abs(m.SearchScore - maxScore) < 1e-8).ToList();
+
+                    // Tiebreak: prefer lowest winDepth (fastest win)
+                    int bestDepth = bestMoves.Min(m => m.WinDepth);
+                    bestMoves = bestMoves.Where(m => m.WinDepth == bestDepth).ToList();
+
+                    // Further tiebreak: moveScore
+                    if (bestMoves.Count > 1)
+                    {
+                        double bestMoveScore = bestMoves.Max(m => m.MoveScore);
+                        bestMoves = bestMoves.Where(m => Math.Abs(m.MoveScore - bestMoveScore) < 1e-8).ToList();
+                    }
+
+                    if (bestMoves.Count == 1)
+                        return bestMoves[0].Move;
+
+                    // If there's still a tie, randomly select one of the best moves
+                    return bestMoves[Rand.Next(bestMoves.Count)].Move;
                 }
+
+                // Otherwise prepare for the next, deeper, iteration. 
+                // Sort scored moves by SearchScore, then by WinDepth, then by MoveScore
+                scoredMoves.Sort(MoveComparer);
+
+                // Update previousMoveOrder for the next depth
+                previousMoveOrder.Clear();
+                previousMoveOrder.AddRange(scoredMoves);
             }
 
-            if (bestMoves.Count > 0)
-                bestMove = bestMoves[Rand.Next(bestMoves.Count)];
+            // Fallback in case no move is selected  
+            return legalMoves[0];
         }
-
-        //debugInfo = debugInfo.OrderBy(p => p.Move.ToString()).ThenBy(p => p.Depth).ToList();
-        // Debugging: Place a breakpoint here to inspect debugInfo  
-        return bestMove;
+        finally
+        {
+            ScoredMovePool.Return(scoredMoves);
+            ScoredMovePool.Return(previousMoveOrder);
+        }
     }
 
     public override double EvaluateMoveWithAgent(TGameState gameState, TMove move, int? perspectivePlayer = null)
     {
-        // Clone state to avoid mutating the real game
-        var clone = (TGameState)gameState.Clone();
-        clone.ExecuteMove(move);
-
-        // Use the same depth as the agent's current setting
-        var score = Maximize(clone, MaxDepth);
+        gameState.ExecuteMove(move);
+        double score = Maximize(gameState, MaxDepth - 1);
+        gameState.UndoMove(move);
         return score;
     }
 
@@ -124,14 +182,9 @@ public class MaximizingAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, 
         double bestScore = double.NegativeInfinity;
         foreach (var move in moves)
         {
-            var clone = (TGameState)state.Clone();
-            clone.ExecuteMove(move);
-
-            double moveScore = Evaluator.EvaluateMove(state, move);
-            double score = moveScore;
-
-            if (!move.IsTerminatingMove)
-                score += Maximize(clone, depth - 1);
+            state.ExecuteMove(move);
+            double score = Maximize(state, depth - 1);
+            state.UndoMove(move); 
 
             if (score > bestScore)
                 bestScore = score;

@@ -10,8 +10,12 @@ public abstract class SolitaireEvaluator : StateEvaluator<SolitaireGameState, So
             return EvaluateSkipScore(state);
         }
 
-        double score = 0;
+        state.ExecuteMove(move);
+        if (state.IsGameWon) 
+            return MaximumScore; // If the game is won, return the maximum score
+        state.UndoMove(move);
 
+        double score = 0; 
         // to foundation
         if (move.ToPileIndex == SolitaireGameState.FoundationStartIndex) score += 5;
 
