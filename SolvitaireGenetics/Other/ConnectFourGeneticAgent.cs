@@ -9,7 +9,7 @@ public class ConnectFourGeneticAgent(ConnectFourChromosome chromosome, StateEval
 {
     public ConnectFourGeneticAgent(ConnectFourChromosome chromosome) : this(chromosome, null, 3) { }
 
-    public override string Name => "Genetic Agent";
+    public override string Name { get; } = "Genetic Agent";
     public ConnectFourChromosome Chromosome { get; init; } = chromosome;
 
     public double Fitness 

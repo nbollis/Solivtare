@@ -6,7 +6,7 @@ namespace SolvitaireGUI;
 public class SinglePlayerCardGameViewModel<TGameState, TMove, TAgent> : SinglePlayerGameViewModel<TGameState, TMove, TAgent> 
 where TGameState : ICardGameState, IGameState<TMove>, new()
 where TMove : IMove
-where TAgent : IAgent<TGameState, TMove>
+where TAgent : class, IAgent<TGameState, TMove>
 {
     private readonly StandardDeck _deck;
 
@@ -54,7 +54,7 @@ where TAgent : IAgent<TGameState, TMove>
 public class SinglePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGameController<TGameState, TMove>
     where TGameState : IGameState<TMove>
     where TMove : IMove
-    where TAgent : IAgent<TGameState, TMove>
+    where TAgent : class, IAgent<TGameState, TMove>
 {
     protected TGameState ShadowGameState { get; set; }
     public AgentPanelViewModel<TGameState, TMove, TAgent> AgentPanel { get; }

@@ -15,7 +15,7 @@ namespace SolvitaireGUI;
 public class TwoPlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGameController<TGameState, TMove>
     where TGameState : ITwoPlayerGameState<TMove>
     where TMove : IMove
-    where TAgent : IAgent<TGameState, TMove>
+    where TAgent : class, IAgent<TGameState, TMove>
 {
     public bool IsGameActive => GameStateViewModel.IsGameActive;
     public int CurrentPlayer => GameStateViewModel.CurrentPlayer;

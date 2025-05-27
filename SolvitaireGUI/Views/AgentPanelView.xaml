@@ -6,7 +6,10 @@
              xmlns:local="clr-namespace:SolvitaireGUI"
              d:DataContext="{x:Static local:AgentPanelModel.Instance}"
              mc:Ignorable="d" 
-             d:DesignHeight="350" d:DesignWidth="300">
+             d:DesignHeight="350" d:DesignWidth="300"
+             AllowDrop="True"
+             Drop="OnDropGenerationLog"
+             DragOver="OnDragOverGenerationLog">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <local:PlayerTypeAgentModeToVisibilityConverter x:Key="PlayerTypeAgentModeToVisibilityConverter" />
@@ -14,95 +17,156 @@
         <local:NullToBoolConverter x:Key="NullToBoolConverter" />
         <local:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
     </UserControl.Resources>
-    <Grid Margin="8">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <!-- Spacer row for whitespace -->
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" 
+            <TextBlock Grid.Row="0" Grid.Column="0" 
                    Text="{Binding PlayerLabel}" 
                    FontWeight="Bold" 
                    FontSize="16" 
                    VerticalAlignment="Center"
                    Margin="5"/>
 
-        <!-- Agent Selection and Start/Stop -->
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top">
-            <ComboBox ItemsSource="{Binding AvailableAgents}" 
+            <!-- Agent Selection and Human/Agent -->
+            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Top">
+                <ComboBox ItemsSource="{Binding AvailableAgents}" 
                   SelectedItem="{Binding SelectedAgent}" 
                   DisplayMemberPath="Name"
                   Width="120"
                   Margin="0,0,8,0"
                   Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
-        </StackPanel>
 
-        <!-- Switch to Human/Agent -->
-        <StackPanel Grid.Row="1" Grid.Column="1"  Orientation="Horizontal"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" >
-            <Button Content="Switch to Human" Command="{Binding SwitchToHumanCommand}" 
-                    Style="{StaticResource RoundedButtonStyle}" 
-                    Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
-            <Button Content="Switch to Agent" Command="{Binding SwitchToAgentCommand}" 
-                    Style="{StaticResource RoundedButtonStyle}" 
-                    Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeHumanModeToVisibilityConverter}}"/>
-        </StackPanel>
+                <!-- Switch to Human/Agent -->
+                <Button Content="Switch to Human" Command="{Binding SwitchToHumanCommand}" 
+                        Style="{StaticResource RoundedButtonStyle}" 
+                        Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
+                <Button Content="Switch to Agent" Command="{Binding SwitchToAgentCommand}" 
+                        Style="{StaticResource RoundedButtonStyle}" 
+                        Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeHumanModeToVisibilityConverter}}"/>
+            </StackPanel>
 
-        <!-- Start and Stop Buttons -->
-        <Button Content="Start Agent" Grid.Row="2" Grid.Column="0"
-                Command="{Binding StartAgentCommand}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                Style="{StaticResource RoundedButtonStyle}" Width="80" Margin="10"
-                Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"
-                IsEnabled="{Binding CanStartAgent}"/>
-        <Button Content="Stop Agent" Grid.Row="2" Grid.Column="1"
-                Command="{Binding StopAgentCommand}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                Style="{StaticResource RoundedButtonStyle}" Width="80"
-                IsEnabled="{Binding CanStopAgent}"
-                Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
+            
+
+            <!-- Start and Stop Buttons -->
+            <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Start Agent" Margin="0 10 5 0"
+                        Command="{Binding StartAgentCommand}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Style="{StaticResource RoundedButtonStyle}" Width="80" 
+                        Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"
+                        IsEnabled="{Binding CanStartAgent}"/>
+                <Button Content="Stop Agent" Margin="0 10 5 0"
+                        Command="{Binding StopAgentCommand}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Style="{StaticResource RoundedButtonStyle}" Width="80"
+                        IsEnabled="{Binding CanStopAgent}"
+                        Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
+
+                <!-- Max Depth (Search Agent) -->
+                <StackPanel Orientation="Horizontal" Margin="0 12 0 0" HorizontalAlignment="Right"
+                            ToolTip="Max Depth for the lookahead search" VerticalAlignment="Center"
+                            Visibility="{Binding IsSearchAgent, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock Text="Max Depth:" />
+                    <local:IntegerTexBoxControl Text="{Binding MaxDepth, UpdateSourceTrigger=PropertyChanged}"
+                                                Margin="2,0,0,0" Width="28" />
+                </StackPanel>
+            </StackPanel>
 
 
-
-        <!-- Max Depth (Search Agent) -->
-        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0"
-                ToolTip="Max Depth for the lookahead search"
-                Visibility="{Binding IsSearchAgent, Converter={StaticResource BoolToVisibilityConverter}}">
-            <TextBlock Text="Max Depth:" VerticalAlignment="Center"/>
-            <local:IntegerTexBoxControl Text="{Binding MaxDepth, UpdateSourceTrigger=PropertyChanged}"
-                                    Margin="5,0,0,0" Width="60"/>
-        </StackPanel>
-
-        <!-- Legal Moves List -->
-        <ListView Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+            <!-- Legal Moves List -->
+            <ListView Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
               ItemsSource="{Binding LegalMoves}"
               SelectedItem="{Binding SelectedMove, Mode=TwoWay}"
                Margin="0,8,0,0">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <DockPanel>
-                        <TextBlock Text="{Binding Evaluation, StringFormat={}{0:F3}}" Width="50" DockPanel.Dock="Left"/>
-                        <TextBlock Text="{Binding MoveString}" />
-                    </DockPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel>
+                            <TextBlock Text="{Binding Evaluation, StringFormat={}{0:F3}}" Width="50" DockPanel.Dock="Left"/>
+                            <TextBlock Text="{Binding MoveString}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
 
-        <!-- Bottom Buttons -->
-        <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
-            <Button Content="Make Move" Command="{Binding MakeMoveCommand}" 
-                Style="{StaticResource RoundedButtonStyle}" Width="100" Margin="0,0,8,0"
-                Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"/>
-            <Button Content="Play Selected Move"
-                Command="{Binding MakeSpecificMoveCommand}"
-                Style="{StaticResource RoundedButtonStyle}" Width="130"
-                IsEnabled="{Binding SelectedMove, Converter={StaticResource NullToBoolConverter}}"/>
-        </StackPanel>
-    </Grid>
+            <!-- Spacer row for whitespace (Row 5) -->
+
+            <!-- Generation Log Slider and Chromosome Expander -->
+            <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" 
+                    Visibility="{Binding IsGenerationLogLoaded, Converter={StaticResource BoolToVisibilityConverter}}"
+                    HorizontalAlignment="Stretch" Margin="0,8,0,0">
+
+                <!-- Slider and Text Box -->
+                <Grid HorizontalAlignment="Stretch" Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Generation:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <Slider Grid.Column="1"
+                            Minimum="{Binding MinGeneration}" Maximum="{Binding MaxGeneration}" 
+                            Value="{Binding SelectedGeneration, Mode=TwoWay}" 
+                            TickFrequency="1" IsSnapToTickEnabled="True"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Stretch"
+                            Margin="0"/>
+                    <local:IntegerTexBoxControl Grid.Column="2" Text="{Binding SelectedGeneration}" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </Grid>
+
+                <Expander Header="Chromosome Weights"
+                          IsExpanded="True"
+                          Visibility="{Binding IsGeneticAgentSelected, Converter={StaticResource BoolToVisibilityConverter}}"
+                          Margin="0,0,0,0"
+                          HorizontalAlignment="Stretch">
+                    <StackPanel HorizontalAlignment="Stretch">
+                        <TextBlock Text="Chromosome:" FontWeight="Bold" Margin="0,0,0,4"/>
+                        <ItemsControl ItemsSource="{Binding SelectedAgentChromosomeViewModel.Weights}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="5" HorizontalAlignment="Stretch" MinWidth="200">
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                        <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Style="{StaticResource TextBoxStyle}"
+                                                 Width="80" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Expander>
+
+            </StackPanel>
+
+            <!-- Bottom Buttons -->
+            <StackPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+
+                <Button Content="Make Move" Command="{Binding MakeMoveCommand}" 
+                        Style="{StaticResource RoundedButtonStyle}" Width="100" Margin="0,0,8,0"
+                        Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeAgentModeToVisibilityConverter}}"
+                        IsEnabled="{Binding IsMyTurn}"/>
+                <Button Content="Play Selected Move"
+                    Command="{Binding MakeSpecificMoveCommand}"
+                    Style="{StaticResource RoundedButtonStyle}" Width="130"
+                    IsEnabled="{Binding SelectedMove, Converter={StaticResource NullToBoolConverter}}"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

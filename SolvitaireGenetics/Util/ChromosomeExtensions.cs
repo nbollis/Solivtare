@@ -1,4 +1,5 @@
 ﻿using SolvitaireCore;
+using SolvitaireCore.ConnectFour;
 
 namespace SolvitaireGenetics;
 
@@ -11,22 +12,35 @@ public static class ChromosomeExtensions
         return (TAgent)Activator.CreateInstance(typeof(TAgent), chromosome)!;
     }
 
-    public static IGeneticAgent<Chromosome> ToGeneticAgent(this Chromosome chromosome, string? name = null)
+    public static TAgent ToGeneticAgent<TAgent>(this Chromosome chromosome, string? name = null)
+        where TAgent : class
     {
-        var agentType = typeof(IGeneticAgent<>).MakeGenericType(chromosome.GetType());
-        var agent = (IGeneticAgent<Chromosome>)Activator.CreateInstance(agentType, chromosome)!;
+        object? agent = chromosome switch
+        {
+            SolitaireChromosome solitaireChromosome => new SolitaireGeneticAgent(solitaireChromosome),
+            ConnectFourChromosome connectFourChromosome => new ConnectFourGeneticAgent(connectFourChromosome),
+            QuadraticChromosome quadraticChromosome => new QuadraticRegressionAgent(quadraticChromosome),
+            _ => throw new ArgumentException($"Unsupported chromosome type: {chromosome.GetType().Name}")
+        };
+
+        if (agent is not TAgent typedAgent)
+            throw new InvalidCastException($"Failed to cast the created agent to type {typeof(TAgent).Name}.");
 
         if (name != null)
         {
-            var nameProperty = agentType.GetProperty("Name", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-            if (nameProperty != null && nameProperty.CanWrite == false)
+            var nameProperty = agent.GetType().GetProperty("Name", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            if (nameProperty != null && nameProperty.CanWrite)
             {
-                var backingField = agentType.GetField("<Name>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                nameProperty.SetValue(agent, name);
+            }
+            else
+            {
+                var backingField = agent.GetType().GetField("<Name>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 backingField?.SetValue(agent, name);
             }
         }
 
-        return agent;
+        return typedAgent;
     }
 }
 

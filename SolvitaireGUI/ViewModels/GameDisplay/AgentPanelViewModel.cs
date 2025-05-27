@@ -2,15 +2,17 @@
 using System.Windows.Input;
 using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
+using SolvitaireGenetics;
+using SolvitaireIO.Database.Models;
 
 namespace SolvitaireGUI;
 
 public enum PlayerType { Agent, Human }
 
-public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
+public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGenerationLogConsumer
     where TGameState : IGameState<TMove>
     where TMove : IMove
-    where TAgent : IAgent<TGameState, TMove>
+    where TAgent : class, IAgent<TGameState, TMove>
 {
     private readonly IGameController<TGameState, TMove> _controller;
     private readonly int _playerNumber;
@@ -44,13 +46,25 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
                 Evaluator = new AllEqualStateEvaluator<TGameState, TMove>();
             }
 
+            if (_selectedAgent == _bestByGenAgent)
+            {
+                SelectedAgentChromosomeViewModel = new ChromosomeViewModel(_bestChromosome!);
+            }
+            else if (_selectedAgent == _avgByGenAgent)
+            {
+                SelectedAgentChromosomeViewModel = new ChromosomeViewModel(_avgChromosome!);
+            }
+
             OnPropertyChanged(nameof(SelectedAgent));
             OnPropertyChanged(nameof(MaxDepth)); // Notify MaxDepth may have changed
             OnPropertyChanged(nameof(IsSearchAgent));
+            OnPropertyChanged(nameof(IsGeneticAgentSelected));
         }
     }
 
     public bool IsSearchAgent => PlayerType == PlayerType.Agent && SelectedAgent is ISearchAgent<TGameState, TMove>;
+    public bool IsGeneticAgentSelected => SelectedAgent?.GetType().Name.Contains("GeneticAgent") ?? false;
+
     public int? MaxDepth
     {
         get => SelectedAgent is ISearchAgent<TGameState, TMove> searchAgent
@@ -86,7 +100,7 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
 
         PlayerLabel = playerLabel;
         AvailableAgents = availableAgents;
-        SelectedAgent = availableAgents.Last();
+        SelectedAgent = availableAgents.First();
         PlayerType = PlayerType.Agent; // Default to agent
         if (SelectedAgent is ISearchAgent<TGameState, TMove> searchAgent)
         {
@@ -115,6 +129,8 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
 
     public bool CanStartAgent => !IsAgentRunning;
     public bool CanStopAgent => IsAgentRunning;
+    public bool IsMyTurn =>
+        _controller.IsGameActive && _controller.CurrentPlayer == _playerNumber && PlayerType == PlayerType.Agent;
 
     private bool _isAgentRunning;
     public bool IsAgentRunning
@@ -247,6 +263,107 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel
 
             LegalMoves.Add(new MoveViewModel<TMove>(move, eval));
         }
+        OnPropertyChanged(nameof(IsMyTurn));
+    }
+
+    #endregion
+
+    #region Generation Log Control
+
+    // Holds all loaded generations
+    private List<GenerationLog>? _loadedGenerations;
+    public bool IsGenerationLogLoaded => _loadedGenerations != null && _loadedGenerations.Count > 0;
+
+    // For slider binding
+    public int MinGeneration => IsGenerationLogLoaded ? _loadedGenerations!.Min(g => g.Generation) : 0;
+    public int MaxGeneration => IsGenerationLogLoaded ? _loadedGenerations!.Max(g => g.Generation) : 0;
+
+    private int _selectedGeneration;
+    public int SelectedGeneration
+    {
+        get => _selectedGeneration;
+        set
+        {
+            if (_selectedGeneration != value)
+            {
+                _selectedGeneration = value;
+                OnPropertyChanged(nameof(SelectedGeneration));
+                UpdateSpecialAgents();
+            }
+        }
+    }
+
+    private ChromosomeViewModel? _selectedAgentChromsoome;
+    public ChromosomeViewModel? SelectedAgentChromosomeViewModel
+    {
+        get => _selectedAgentChromsoome;
+        set
+        {
+            _selectedAgentChromsoome = value;
+            OnPropertyChanged(nameof(SelectedAgentChromosomeViewModel));
+        }
+    }
+
+    // Special agent placeholders
+    private const string BestByGenName = "Best by Generation";
+    private const string AvgByGenName = "Average by Generation";
+    private TAgent? _bestByGenAgent;
+    private TAgent? _avgByGenAgent;
+    private Chromosome? _bestChromosome;
+    private Chromosome? _avgChromosome;
+
+    public void LoadGenerationLogs(IEnumerable<GenerationLog> logs)
+    {
+        _loadedGenerations = logs.OrderBy(g => g.Generation).ToList();
+        _selectedGeneration = _loadedGenerations.First().Generation;
+        OnPropertyChanged(nameof(IsGenerationLogLoaded));
+        OnPropertyChanged(nameof(MinGeneration));
+        OnPropertyChanged(nameof(MaxGeneration));
+        OnPropertyChanged(nameof(SelectedGeneration));
+        UpdateSpecialAgents();
+    }
+
+    private void UpdateSpecialAgents()
+    {
+        // Remove old special agents if present
+        bool wasBestByGenSelected = _bestByGenAgent != null && SelectedAgent == _bestByGenAgent;
+        bool wasAvgByGenSelected = _avgByGenAgent != null && SelectedAgent == _avgByGenAgent;
+        if (_bestByGenAgent != null) AvailableAgents.Remove(_bestByGenAgent);
+        if (_avgByGenAgent != null) AvailableAgents.Remove(_avgByGenAgent);
+
+        if (!IsGenerationLogLoaded)
+            return;
+
+        var gen = _loadedGenerations!.FirstOrDefault(g => g.Generation == SelectedGeneration);
+        if (gen == null) return;
+
+        // Create agents from chromosomes  
+        if (gen.BestChromosome != null)
+        {
+            var bestChromosome = gen.BestChromosome.Create();
+            _bestChromosome = bestChromosome;
+            _bestByGenAgent = bestChromosome.ToGeneticAgent<TAgent>(BestByGenName);
+            AvailableAgents.Add(_bestByGenAgent);
+        }
+        if (gen.AverageChromosome != null)
+        {
+            var avgChromosome = gen.AverageChromosome.Create();
+            _avgChromosome = avgChromosome;
+            _avgByGenAgent = avgChromosome.ToGeneticAgent<TAgent>(AvgByGenName);
+            AvailableAgents.Add(_avgByGenAgent);
+        }
+
+        // Re-select the replacement special agent if it was previously selected  
+        if (wasBestByGenSelected && _bestByGenAgent != null)
+        {
+            SelectedAgent = _bestByGenAgent;
+        }
+        else if (wasAvgByGenSelected && _avgByGenAgent != null)
+        {
+            SelectedAgent = _avgByGenAgent;
+        }
+
+        OnPropertyChanged(nameof(AvailableAgents));
     }
 
     #endregion

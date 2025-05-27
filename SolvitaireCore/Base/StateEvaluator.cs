@@ -4,6 +4,8 @@ public abstract class StateEvaluator<TGameState, TMove>
     where TGameState : IGameState<TMove>
     where TMove : IMove
 {
+    public double MaximumScore { get; protected set; } = 1000;
+
     /// <summary>
     /// Default implementation is to make the move and return the evaluation of the state. 
     /// </summary>

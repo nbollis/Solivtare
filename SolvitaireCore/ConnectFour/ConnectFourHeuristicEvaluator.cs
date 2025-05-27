@@ -4,13 +4,7 @@ public class ConnectFourHeuristicEvaluator : StateEvaluator<ConnectFourGameState
 {
     public override IEnumerable<(ConnectFourMove Move, double MoveScore)> OrderMoves(List<ConnectFourMove> moves, ConnectFourGameState state, bool bestFirst)
     {
-        var scoredMoves = moves.Select(move =>
-        {
-            double score = EvaluateMove(state, move);
-            int distanceFromCenter = Math.Abs(move.Column - 3);
-            double adjustedScore = score - (distanceFromCenter * 0.1); // Penalize moves farther from center  
-            return (Move: move, MoveScore: adjustedScore);
-        });
+        var scoredMoves = moves.Select(move => (Move: move, MoveScore: EvaluateMove(state, move)));
 
         return bestFirst
             ? scoredMoves.OrderByDescending(m => m.MoveScore)
@@ -19,8 +13,19 @@ public class ConnectFourHeuristicEvaluator : StateEvaluator<ConnectFourGameState
 
     public override double EvaluateMove(ConnectFourGameState state, ConnectFourMove move)
     {
+        int currentPlayer = state.CurrentPlayer;
         state.ExecuteMove(move);
-        double score = EvaluateState(state, 3 - state.CurrentPlayer);
+
+        double score;
+        if (state.IsPlayerWin(currentPlayer))
+            score = MaximumScore; // Immediate win
+        else if (state.IsPlayerLoss(currentPlayer))
+            score = -MaximumScore; // Immediate loss (should block)
+        else if (state.IsGameDraw)
+            score = 0;
+        else
+            score = EvaluateState(state, currentPlayer);
+
         state.UndoMove(move);
         return score;
     }
@@ -28,12 +33,17 @@ public class ConnectFourHeuristicEvaluator : StateEvaluator<ConnectFourGameState
     public override double EvaluateState(ConnectFourGameState state, int? maximixingPlayerId = null)
     {
         maximixingPlayerId ??= state.CurrentPlayer;
-        if (state.IsPlayerWin(maximixingPlayerId!.Value))
-            return 1000;
-        if (state.IsPlayerLoss(maximixingPlayerId.Value))
-            return -1000;
+        int minimizingPlayerId = 3 - maximixingPlayerId.Value;
 
-        return EvaluateHeuristic(state, maximixingPlayerId.Value) - EvaluateHeuristic(state, 3 - maximixingPlayerId.Value);
+        if (state.IsPlayerWin(maximixingPlayerId.Value))
+            return MaximumScore;
+        if (state.IsPlayerLoss(maximixingPlayerId.Value))
+            return -MaximumScore;
+
+        double maximizingScore = EvaluateHeuristic(state, maximixingPlayerId.Value);
+        double minimizingScore = EvaluateHeuristic(state, minimizingPlayerId);
+
+        return Math.Clamp(maximizingScore - minimizingScore, -MaximumScore, MaximumScore);
     }
 
     private int EvaluateHeuristic(ConnectFourGameState state, int player)
@@ -88,6 +98,7 @@ public class ConnectFourHeuristicEvaluator : StateEvaluator<ConnectFourGameState
 
         if (count == 2) return 2;
         if (count == 3) return 5;
+        if (count == 4) return 100;
         return 0;
     }
 }

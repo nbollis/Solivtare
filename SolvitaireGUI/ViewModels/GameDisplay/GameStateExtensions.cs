@@ -27,18 +27,18 @@ public static class GameStateExtensions
         switch (gameState)
         {
             case ConnectFourGameState connectFourGameState:
-                yield return (TAgent)(IAgent<TGameState, TMove>)new RandomAgent<TGameState, TMove>();
                 yield return (TAgent)(IAgent<TGameState, TMove>)new MinimaxAgent<ConnectFourGameState, ConnectFourMove>(new ConnectFourHeuristicEvaluator(), 5);
+                yield return (TAgent)(IAgent<TGameState, TMove>)new RandomAgent<TGameState, TMove>(); 
                 yield return (TAgent)(IAgent<TGameState, TMove>)new ConnectFourGeneticAgent(ConnectFourChromosome.BestSoFar(), null, 5);
                 break;
             case SolitaireGameState solitaireGameState:
+                yield return (TAgent)(IAgent<TGameState, TMove>)new MaximizingAgent<SolitaireGameState, SolitaireMove>(new SecondSolitaireEvaluator(), 5);
                 yield return (TAgent)(IAgent<TGameState, TMove>)new RandomSolitaireAgent();
-                yield return (TAgent)(IAgent<TGameState, TMove>)new MaximizingAgent<SolitaireGameState, SolitaireMove>(new SecondSolitaireEvaluator(), 5); 
                 yield return (TAgent)(IAgent<TGameState, TMove>)new SolitaireGeneticAgent(SolitaireChromosome.BestSoFar(), null, 5);
                 break;
             case TicTacToeGameState ticTacToe:
+                yield return (TAgent)(IAgent<TGameState, TMove>)new MinimaxAgent<TicTacToeGameState, TicTacToeMove>(new AllEqualStateEvaluator<TicTacToeGameState, TicTacToeMove>(), 5);
                 yield return (TAgent)(IAgent<TGameState, TMove>)new RandomAgent<TGameState, TMove>();
-                yield return (TAgent)(IAgent<TGameState, TMove>)new MinimaxAgent<TicTacToeGameState, TicTacToeMove>(/*new TicTacToeHeuristicEvaluator()*/ new AllEqualStateEvaluator<TicTacToeGameState, TicTacToeMove>(), 5);
                 break;
         }
     }

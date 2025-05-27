@@ -4,7 +4,25 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
     where TGameState : ITwoPlayerGameState<TMove>
     where TMove : IMove
 {
-    protected readonly Random Rand;
+    protected readonly Random Rand; 
+    private static readonly ListPool<ScoredMove> ScoredMovePool = new(8);
+
+    private struct ScoredMove
+    {
+        public TMove Move { get; }
+        public double MoveScore { get; }
+        public double MinimaxScore { get; set; }
+        public int WinDepth { get; set; }
+
+        public ScoredMove(TMove move, double moveScore)
+        {
+            Move = move;
+            MoveScore = moveScore;
+            MinimaxScore = 0;
+            WinDepth = int.MaxValue;
+        }
+    }
+
     public int MaxDepth { get; set; }
     public StateEvaluator<TGameState, TMove> Evaluator { get; init; }
     public MinimaxAgent(StateEvaluator<TGameState, TMove> evaluator, int maxDepth = 6)
@@ -22,44 +40,104 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
         if (legalMoves.Count == 0)
             throw new InvalidOperationException("No legal moves available.");
 
-        TMove bestMove = legalMoves[0]; 
         int maximizingPlayer = gameState.CurrentPlayer; // Capture the player of interest
+        List<ScoredMove> scoredMoves = ScoredMovePool.Get();
+        List<ScoredMove> previousMoveOrder = ScoredMovePool.Get();
 
-        // Iterative deepening: search from depth 1 up to MaxDepth
-        for (int depth = 1; depth <= MaxDepth; depth++)
+        try
         {
-            double bestScore = double.NegativeInfinity;
-            List<TMove> bestMoves = new();
-
-            // Order moves based on the evaluator to improve performance
-            foreach (var (move, moveScore) in Evaluator.OrderMoves(legalMoves, gameState, true))
+            // Iterative deepening: search from depth 1 up to MaxDepth  
+            for (int depth = 1; depth <= MaxDepth; depth++)
             {
-                // Assume the agent is always maximizing at the root
-                gameState.ExecuteMove(move);
-                double score = moveScore + Minimax(gameState, depth - 1, double.NegativeInfinity, double.PositiveInfinity, false, maximizingPlayer);
-                gameState.UndoMove(move);
+                scoredMoves.Clear();
 
-                if (score > bestScore)
+                // Order moves based on static evaluation for depth 1, or use previous order for deeper searches
+                List<ScoredMove> moveInfos = depth == 1
+                    ? legalMoves
+                        .Select(move => new ScoredMove(move, Evaluator.EvaluateMove(gameState, move)))
+                        .OrderByDescending(m => m.MoveScore)
+                        .ToList()
+                    : previousMoveOrder;
+
+                foreach (var moveInfo in moveInfos)
                 {
-                    bestScore = score;
-                    bestMoves.Clear();
-                    bestMoves.Add(move);
+                    gameState.ExecuteMove(moveInfo.Move);
+                    var (minimaxScore, winDepth) = Minimax(gameState, depth - 1, double.NegativeInfinity, double.PositiveInfinity, true, maximizingPlayer, 1);
+                    gameState.UndoMove(moveInfo.Move);
+
+                    scoredMoves.Add(new ScoredMove(moveInfo.Move, moveInfo.MoveScore)
+                    {
+                        MinimaxScore = minimaxScore,
+                        WinDepth = winDepth
+                    });
                 }
-                else if (Math.Abs(score - bestScore) < 1e-8)
+
+                // If we found a winning move, return it immediately
+                if (Math.Abs(scoredMoves.First().MinimaxScore - Evaluator.MaximumScore) < 1e-8)
+                    return scoredMoves.First().Move;
+                // If we reach the maximum depth, we want to select the best move based on MinimaxScore, WinDepth, and MoveScore
+                else if (depth == MaxDepth)
                 {
-                    bestMoves.Add(move);
+                    // Find the best minimax score  
+                    double bestScore = scoredMoves.Max(m => m.MinimaxScore);
+                    var bestMoves = scoredMoves.Where(m => Math.Abs(m.MinimaxScore - bestScore) < 1e-8).ToList();
+
+                    // Tiebreak: prefer lowest winDepth (fastest win)
+                    int bestDepth = bestMoves.Min(m => m.WinDepth);
+                    bestMoves = bestMoves.Where(m => m.WinDepth == bestDepth).ToList();
+
+                    // Further tiebreak: moveScore
+                    if (bestMoves.Count > 1)
+                    {
+                        double bestMoveScore = bestMoves.Max(m => m.MoveScore);
+                        bestMoves = bestMoves.Where(m => Math.Abs(m.MoveScore - bestMoveScore) < 1e-8).ToList();
+                    }
+
+                    // If there's still a tie, randomly select one of the best moves
+                    return bestMoves[Rand.Next(bestMoves.Count)].Move;
+                }
+                // Otherwise prepare for the next, deeper, iteration. 
+                else
+                {
+                    // Sort scored moves by MinimaxScore, then by WinDepth, then by MoveScore
+                    scoredMoves.Sort((a, b) =>
+                    {
+                        int scoreComparison = b.MinimaxScore.CompareTo(a.MinimaxScore);
+                        if (scoreComparison != 0) return scoreComparison;
+                        int depthComparison = a.WinDepth.CompareTo(b.WinDepth);
+                        if (depthComparison != 0) return depthComparison;
+                        return b.MoveScore.CompareTo(a.MoveScore);
+                    });
+
+                    // Update previousMoveOrder for the next depth
+                    previousMoveOrder.Clear();
+                    previousMoveOrder.AddRange(scoredMoves);
                 }
             }
 
-            if (bestMoves.Count > 0)
-                bestMove = bestMoves[Rand.Next(bestMoves.Count)];
+            // Fallback in case no move is selected  
+            return legalMoves[0];
         }
-
-        return bestMove;
+        finally
+        {
+            ScoredMovePool.Return(scoredMoves);
+            ScoredMovePool.Return(previousMoveOrder);
+        }
     }
 
-    private double Minimax(TGameState state, int depth, double alpha, double beta, bool maximizingPlayer,
-        int maximizingPlayerId)
+    /// <summary>
+    /// Minimax algorithm with alpha-beta pruning and transposition table.
+    /// </summary>
+    /// <param name="state"></param>
+    /// <param name="depth"></param>
+    /// <param name="alpha"></param>
+    /// <param name="beta"></param>
+    /// <param name="maximizingPlayer"></param>
+    /// <param name="maximizingPlayerId"></param>
+    /// <param name="plies">Number of half moves made</param>
+    /// <returns></returns>
+    private (double Score, int Depth) Minimax(TGameState state, int depth, double alpha, double beta, bool maximizingPlayer,
+        int maximizingPlayerId, int plies)
     {
         int stateHash = state.GetHashCode();
 
@@ -67,7 +145,7 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
         if (TranspositionTable.TryGetValue(stateHash, out var entry))
         {
             if (entry.Depth >= depth && entry.Alpha <= alpha && entry.Beta >= beta)
-                return entry.Score;
+                return (entry.Score, plies);
         }
 
         if (depth == 0 || state.IsGameWon || state.IsGameLost || state.IsGameDraw)
@@ -80,30 +158,37 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
                 Alpha = alpha,
                 Beta = beta
             };
-            return eval;
+            return (eval, plies);
         }
 
-
         // Move ordering: speeds up alpha beta pruning.  
-        double bestScore = maximizingPlayer ? double.NegativeInfinity : double.PositiveInfinity;
+        double bestScore = maximizingPlayer ? double.NegativeInfinity : double.PositiveInfinity; 
+        int bestDepth = int.MaxValue;
         var moves = state.GetLegalMoves();
-        foreach (var (move, moveScore) in Evaluator.OrderMoves(moves, state, maximizingPlayer))
+        foreach (var (move, _) in Evaluator.OrderMoves(moves, state, maximizingPlayer))
         {
             state.ExecuteMove(move);
-            double score = moveScore + Minimax(state, depth - 1, alpha, beta, !maximizingPlayer, maximizingPlayerId);
+            var (score, winDepth) = Minimax(state, depth - 1, alpha, beta, !maximizingPlayer, maximizingPlayerId, plies + 1);
             state.UndoMove(move);
 
+            // At each node, if two moves have the same score, the one with the lower winDepth is preferred.
             if (maximizingPlayer)
             {
-                if (score > bestScore)
+                if (score > bestScore || (Math.Abs(score - bestScore) < 1e-8 && winDepth < bestDepth))
+                {
                     bestScore = score;
+                    bestDepth = winDepth;
+                }
                 if (bestScore > alpha)
                     alpha = bestScore;
             }
             else
             {
-                if (score < bestScore)
+                if (score < bestScore || (Math.Abs(score - bestScore) < 1e-8 && winDepth < bestDepth))
+                {
                     bestScore = score;
+                    bestDepth = winDepth;
+                }
                 if (bestScore < beta)
                     beta = bestScore;
             }
@@ -121,6 +206,6 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
             Beta = beta
         };
 
-        return bestScore;
+        return (bestScore, bestDepth);
     }
 }
