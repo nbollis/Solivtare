@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
+
 namespace SolvitaireGUI;
 
 public class ConnectFourGameStateViewModel : TwoPlayerGameStateViewModel<ConnectFourGameState, ConnectFourMove>
@@ -13,7 +14,7 @@ public class ConnectFourGameStateViewModel : TwoPlayerGameStateViewModel<Connect
     }
     public ObservableCollection<int> FlatBoardCells { get; }
     public HashSet<int> WinningCellIndices =>
-        [..GameState.WinningCells.Select(cell => cell.Row * ConnectFourGameState.Columns + cell.Col)];
+        [.. GameState.WinningCells.Select(cell => cell.Row * ConnectFourGameState.Columns + cell.Col)];
 
     public ConnectFourGameStateViewModel(ConnectFourGameState gameState) : base(gameState)
     {
@@ -37,18 +38,5 @@ public class ConnectFourGameStateModel : ConnectFourGameStateViewModel
     public static ConnectFourGameStateModel Instance { get; } = new();
     public ConnectFourGameStateModel() : base(new())
     {
-    }
-}
-
-
-public class TicTacToeGameStateViewModel : TwoPlayerGameStateViewModel<TicTacToeGameState, TicTacToeMove>
-{
-    public TicTacToeGameStateViewModel(TicTacToeGameState gameState) : base(gameState)
-    {
-    }
-
-    public override void UpdateBoard()
-    {
-        
     }
 }

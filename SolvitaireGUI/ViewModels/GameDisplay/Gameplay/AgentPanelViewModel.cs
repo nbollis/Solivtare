@@ -91,7 +91,7 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
     public ICommand StopAgentCommand { get; }
 
     public AgentPanelViewModel(
-        string playerLabel, 
+        string playerLabel,
         int playerNumber,
         ObservableCollection<TAgent> availableAgents,
         IGameController<TGameState, TMove> controller)

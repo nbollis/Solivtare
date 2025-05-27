@@ -1,7 +1,7 @@
-﻿using SolvitaireCore;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
+using SolvitaireCore;
 using SolvitaireIO;
 
 namespace SolvitaireGUI;
@@ -22,7 +22,7 @@ public class SolitaireGameStateViewModel : GameStateViewModel<SolitaireGameState
 
     public ICommand CopyGameStateAsJsonCommand { get; }
 
-    public SolitaireGameStateViewModel(SolitaireGameState gameState) : base(gameState)  
+    public SolitaireGameStateViewModel(SolitaireGameState gameState) : base(gameState)
     {
         BaseGameState = gameState;
         Sync();
@@ -44,7 +44,7 @@ public class SolitaireGameStateViewModel : GameStateViewModel<SolitaireGameState
 
     public IEnumerable<SolitaireMove> GetLegalMoves()
     {
-        var moves =  BaseGameState.GetLegalMoves();
+        var moves = BaseGameState.GetLegalMoves();
         return moves;
     }
 

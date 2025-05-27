@@ -91,7 +91,7 @@ public class TwoPlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
         if (GameStateViewModel.IsGameWon || GameStateViewModel.IsGameDraw)
             return;
 
-        GameStateViewModel.ApplyMove(move); 
+        GameStateViewModel.ApplyMove(move);
         _previousMoves.Push(move);
 
         Player1Panel.RefreshLegalMoves();

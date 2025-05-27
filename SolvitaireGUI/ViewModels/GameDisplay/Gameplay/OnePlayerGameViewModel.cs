@@ -3,7 +3,7 @@ using SolvitaireCore;
 
 namespace SolvitaireGUI;
 
-public class OnePlayerCardGameViewModel<TGameState, TMove, TAgent> : OnePlayerGameViewModel<TGameState, TMove, TAgent> 
+public class OnePlayerCardGameViewModel<TGameState, TMove, TAgent> : OnePlayerGameViewModel<TGameState, TMove, TAgent>
 where TGameState : ICardGameState, IGameState<TMove>, new()
 where TMove : IMove
 where TAgent : class, IAgent<TGameState, TMove>
@@ -25,7 +25,7 @@ where TAgent : class, IAgent<TGameState, TMove>
 
         NewGameCommand = new RelayCommand(NewGame);
         ResetGameCommand = new RelayCommand(ResetGame);
-        this.ResetGame();
+        ResetGame();
     }
 
     protected override void ResetGame()
@@ -95,7 +95,7 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
         if (GameStateViewModel.GameState.IsGameWon)
             return;
         GameStateViewModel.ApplyMove(move);
-        ShadowGameState.ExecuteMove(move);  
+        ShadowGameState.ExecuteMove(move);
         AgentPanel.RefreshLegalMoves();
         PreviousMoves.Push(move);
     }
@@ -123,7 +123,7 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
     protected virtual void ResetGame()
     {
         GameStateViewModel.GameState.Reset();
-        ShadowGameState = (TGameState)GameStateViewModel.GameState.Clone();   
+        ShadowGameState = (TGameState)GameStateViewModel.GameState.Clone();
         GameStateViewModel.UpdateBoard();
         AgentPanel.RefreshLegalMoves();
     }

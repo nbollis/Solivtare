@@ -1,8 +1,4 @@
-using SolvitaireCore;
-using SolvitaireCore.ConnectFour;
-using System;
-
-namespace SolvitaireGenetics;
+namespace SolvitaireCore.ConnectFour;
 
 public class GeneticConnectFourEvaluator : StateEvaluator<ConnectFourGameState, ConnectFourMove>
 {

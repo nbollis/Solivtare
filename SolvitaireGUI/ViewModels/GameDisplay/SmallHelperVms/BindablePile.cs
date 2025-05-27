@@ -9,14 +9,14 @@ public class BindablePile : ObservableCollection<BindableCard>
     {
         //this.CollectionChanged -= OnCollectionChanged;
 
-        while (this.Count < pile.Cards.Count)
+        while (Count < pile.Cards.Count)
         {
-            this.Add(new BindableCard(pile.Cards[this.Count]));
+            Add(new BindableCard(pile.Cards[Count]));
         }
 
-        while (this.Count > pile.Cards.Count)
+        while (Count > pile.Cards.Count)
         {
-            this.RemoveAt(this.Count - 1);
+            RemoveAt(Count - 1);
         }
 
         for (int i = 0; i < pile.Cards.Count; i++)
@@ -30,5 +30,5 @@ public class BindablePile : ObservableCollection<BindableCard>
         //this.CollectionChanged += OnCollectionChanged;
     }
 
-    public BindableCard? TopCard => this.Count > 0 ? this.Last() : null;
+    public BindableCard? TopCard => Count > 0 ? this.Last() : null;
 }
