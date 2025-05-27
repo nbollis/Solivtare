@@ -6,8 +6,10 @@ public abstract class BaseAgent<TGameState, TMove> : IAgent<TGameState, TMove>
     where TGameState : IGameState<TMove>
     where TMove : IMove
 {
+    protected static readonly double ScoreTolerance = 1e-8; // Tolerance for score comparisons to handle floating point precision issues
+    protected static readonly Random Rand = new();
     public abstract string Name { get; }
-    public abstract TMove GetNextAction(TGameState gameState);
+    public abstract TMove GetNextAction(TGameState gameState, CancellationToken? cancellationToken = null);
     public abstract double EvaluateMoveWithAgent(TGameState gameState, TMove move, int? perspectivePlayer = null);
 
     /// <summary>
@@ -18,6 +20,30 @@ public abstract class BaseAgent<TGameState, TMove> : IAgent<TGameState, TMove>
     public virtual void ResetState()
     {
         TranspositionTable.Clear();
+    }
+
+    protected static ScoredMove GetBest(List<ScoredMove> moves)
+    {
+        // Find the best score
+        double maxScore = moves.Max(m => m.SearchScore);
+        var bestMoves = moves.Where(m => Math.Abs(m.SearchScore - maxScore) < ScoreTolerance).ToList();
+
+        // Tiebreak: prefer lowest winDepth (fastest win)
+        int bestDepth = bestMoves.Min(m => m.WinDepth);
+        bestMoves = bestMoves.Where(m => m.WinDepth == bestDepth).ToList();
+
+        // Further tiebreak: moveScore
+        if (bestMoves.Count > 1)
+        {
+            double bestMoveScore = bestMoves.Max(m => m.MoveScore);
+            bestMoves = bestMoves.Where(m => Math.Abs(m.MoveScore - bestMoveScore) < ScoreTolerance).ToList();
+        }
+
+        if (bestMoves.Count == 1)
+            return moves[0];
+
+        // If there's still a tie, randomly select one of the best moves
+        return bestMoves[Rand.Next(bestMoves.Count)];
     }
 
     protected static readonly ListPool<ScoredMove> ScoredMovePool = new(8);

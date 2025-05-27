@@ -17,7 +17,7 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
 
     public override string Name => "Minimax Agent";
 
-    public override TMove GetNextAction(TGameState gameState)
+    public override TMove GetNextAction(TGameState gameState, CancellationToken? cancellationToken = null)
     {
         var legalMoves = gameState.GetLegalMoves();
         if (legalMoves.Count == 0)
@@ -32,6 +32,8 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
             // Iterative deepening: search from depth 1 up to MaxDepth  
             for (int depth = 1; depth <= MaxDepth; depth++)
             {
+                if (cancellationToken is { IsCancellationRequested: false })
+                    break;
                 scoredMoves.Clear();
 
                 // Order moves based on static evaluation for depth 1, or use previous order for deeper searches
@@ -44,6 +46,9 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
 
                 foreach (var moveInfo in moveInfos)
                 {
+                    if (cancellationToken is { IsCancellationRequested: true })
+                        break;
+
                     // first move is made from perspective of maximizing player, always
                     gameState.ExecuteMove(moveInfo.Move);
                     var (minimaxScore, winDepth) = Minimax(gameState, depth - 1, double.NegativeInfinity, double.PositiveInfinity, false, maximizingPlayer, 1);
@@ -56,16 +61,21 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
                     });
                 }
 
-                double maxScore = scoredMoves.Max(m => m.SearchScore);
-                double minScore = scoredMoves.Min(m => m.SearchScore);
+                // If cancellation is requested, break out of the loop
+                if (scoredMoves.Count == 0)
+                    break;
 
-                // If we found a winning move, return it immediately
-                if (Math.Abs(maxScore - Evaluator.MaximumScore) < 1e-8)
-                    return scoredMoves.First(m => Math.Abs(m.SearchScore - maxScore) < 1e-8).Move;
+                // Sort so the best move is always first
+                scoredMoves.Sort(MoveComparer);
+
+                // Early exit if a winning move is found
+                if (Math.Abs(scoredMoves[0].SearchScore - Evaluator.MaximumScore) < 1e-8)
+                    return scoredMoves[0].Move;
 
                 // We have losing moves in the pool, so we can ignore them in the next iteration
-                if (Math.Abs(minScore - (-Evaluator.MaximumScore)) < 1e-8)
+                if (Math.Abs(scoredMoves[^1].SearchScore - (-Evaluator.MaximumScore)) < 1e-8)
                 {
+                    double minScore = scoredMoves.Min(m => m.SearchScore);
                     var worstMoves = scoredMoves.Where(m => Math.Abs(m.SearchScore - minScore) < 1e-8).ToList();
 
                     // All moves lose, just pick one and get it over with. 
@@ -83,30 +93,6 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
                         return scoredMoves[0].Move;
                 }
 
-                // If we reach the maximum depth, we want to select the best move based on SearchScore, WinDepth, and MoveScore
-                if (depth == MaxDepth)
-                {
-                    // Find the best minimax score  
-                    var bestMoves = scoredMoves.Where(m => Math.Abs(m.SearchScore - maxScore) < 1e-8).ToList();
-
-                    // Tiebreak: prefer lowest winDepth (fastest win)
-                    int bestDepth = bestMoves.Min(m => m.WinDepth);
-                    bestMoves = bestMoves.Where(m => m.WinDepth == bestDepth).ToList();
-
-                    // Further tiebreak: moveScore
-                    if (bestMoves.Count > 1)
-                    {
-                        double bestMoveScore = bestMoves.Max(m => m.MoveScore);
-                        bestMoves = bestMoves.Where(m => Math.Abs(m.MoveScore - bestMoveScore) < 1e-8).ToList();
-                    }
-
-                    if (bestMoves.Count == 1)
-                        return bestMoves[0].Move;
-
-                    // If there's still a tie, randomly select one of the best moves
-                    return bestMoves[Rand.Next(bestMoves.Count)].Move;
-                }                
-
                 // Otherwise prepare for the next, deeper, iteration. 
                 // Sort scored moves by SearchScore, then by WinDepth, then by MoveScore
                 scoredMoves.Sort(MoveComparer);
@@ -115,6 +101,10 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
                 previousMoveOrder.Clear();
                 previousMoveOrder.AddRange(scoredMoves);
             }
+
+            // After cancellation or completion, return the best move found so far
+            if (previousMoveOrder.Count > 0)
+                return GetBest(previousMoveOrder).Move;
 
             // Fallback in case no move is selected  
             return legalMoves[0];

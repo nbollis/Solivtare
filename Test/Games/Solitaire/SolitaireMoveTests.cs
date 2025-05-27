@@ -180,5 +180,26 @@ namespace Test.Games.Solitaire
             Assert.That(afterMoveFaceUp, Is.False, "Stock pile top card should be face down after the move.");
             Assert.That(afterUndoFaceUp, Is.True, "Waste pile top card should be face up after undoing the move.");
         }
+
+        [Test]
+        public void MaximizingAgent_CancelsGracefully_ReturnsBestMoveSoFar()
+        {
+            // Arrange
+            var gameState = new SolitaireGameState();
+            gameState.DealCards(new StandardDeck());
+            var agent = new MaximizingAgent<SolitaireGameState, SolitaireMove>(new SecondSolitaireEvaluator(), maxDepth: 20);
+
+            var cts = new CancellationTokenSource();
+            // Cancel after a short delay (simulate user cancel)
+            Task.Run(() => { Thread.Sleep(50); cts.Cancel(); });
+
+            // Act
+            SolitaireMove move = agent.GetNextAction(gameState, cts.Token);
+
+            // Assert
+            Assert.NotNull(move); // Should return a move, not throw
+            Assert.Contains(move, gameState.GetLegalMoves());
+            Assert.That(move.IsValid(gameState), Is.True, "The move returned by the agent should be valid.");
+        }
     }
 }

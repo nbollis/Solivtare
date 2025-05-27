@@ -4,7 +4,7 @@ public class RandomSolitaireAgent : RandomAgent<SolitaireGameState, SolitaireMov
 {
     private readonly Random _random = new Random();
 
-    public override SolitaireMove GetNextAction(SolitaireGameState gameState)
+    public override SolitaireMove GetNextAction(SolitaireGameState gameState, CancellationToken? cancellationToken = null)
     {
         var moves = gameState.GetLegalMoves();
         if (moves.Count == 1)

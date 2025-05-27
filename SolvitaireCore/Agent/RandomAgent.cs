@@ -10,7 +10,7 @@ public class RandomAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>
     private readonly Random _random = new Random();
     public override string Name => "Random Agent";
 
-    public override TMove GetNextAction(TGameState gameState)
+    public override TMove GetNextAction(TGameState gameState, CancellationToken? cancellationToken = null)
     {
         var moves = gameState.GetLegalMoves();
 

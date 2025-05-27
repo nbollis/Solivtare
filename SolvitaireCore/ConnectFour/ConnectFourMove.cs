@@ -1,6 +1,6 @@
 ﻿namespace SolvitaireCore.ConnectFour;
 
-public class ConnectFourMove(int column) : IMove<ConnectFourGameState>
+public class ConnectFourMove(int column) : IMove<ConnectFourGameState>, IEquatable<ConnectFourMove>
 {
     public bool IsTerminatingMove => false;
     public int Column { get; } = column;
@@ -17,4 +17,24 @@ public class ConnectFourMove(int column) : IMove<ConnectFourGameState>
     }
 
     public override string ToString() => $"Column {Column+1}";
+
+    public bool Equals(ConnectFourMove? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Column == other.Column;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ConnectFourMove)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Column;
+    }
 }
