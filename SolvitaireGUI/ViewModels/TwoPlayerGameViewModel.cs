@@ -47,12 +47,8 @@ public class TwoPlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
     {
         GameStateViewModel.GameState.Reset();
         GameStateViewModel.UpdateBoard();
-
-        // Restart agent auto-play if it was running before reset
-        if (Player1Panel.IsAgentRunning)
-            Player1Panel.StartAgentCommand.Execute(null);
-        if (Player2Panel.IsAgentRunning)
-            Player2Panel.StartAgentCommand.Execute(null);
+        Player1Panel.SelectedAgent.ResetState();
+        Player2Panel.SelectedAgent.ResetState();
     }
 
     public void UndoMove()

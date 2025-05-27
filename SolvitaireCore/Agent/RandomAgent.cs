@@ -17,4 +17,7 @@ public class RandomAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>
         var move = moves[_random.Next(moves.Count)];
         return move;
     }
+
+    // Random agent does not evaluate moves, so return a neutral score
+    public override double EvaluateMoveWithAgent(TGameState gameState, TMove move, int? perspectivePlayer = null) => 0.0;
 }

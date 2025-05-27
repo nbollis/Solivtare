@@ -8,6 +8,7 @@ public abstract class BaseAgent<TGameState, TMove> : IAgent<TGameState, TMove>
 {
     public abstract string Name { get; }
     public abstract TMove GetNextAction(TGameState gameState);
+    public abstract double EvaluateMoveWithAgent(TGameState gameState, TMove move, int? perspectivePlayer = null);
 
     /// <summary>
     /// Transposition table for memoization where the Key is the hash of the game state and the Value is the score.

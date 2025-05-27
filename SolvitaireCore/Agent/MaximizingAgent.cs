@@ -74,6 +74,17 @@ public class MaximizingAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, 
         return bestMove;
     }
 
+    public override double EvaluateMoveWithAgent(TGameState gameState, TMove move, int? perspectivePlayer = null)
+    {
+        // Clone state to avoid mutating the real game
+        var clone = (TGameState)gameState.Clone();
+        clone.ExecuteMove(move);
+
+        // Use the same depth as the agent's current setting
+        var score = Maximize(clone, MaxDepth);
+        return score;
+    }
+
     private double Maximize(TGameState state, int depth)
     {
         int stateHash = state.GetHashCode();

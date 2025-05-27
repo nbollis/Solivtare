@@ -77,6 +77,7 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
                 searchAgent.MaxDepth = value.Value;
                 OnPropertyChanged(nameof(MaxDepth));
             }
+            RefreshLegalMoves();
         }
     }
 
@@ -158,28 +159,25 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
 
         try
         {
-            while (_controller.IsGameActive && PlayerType == PlayerType.Agent && SelectedAgent != null &&
+            while (PlayerType == PlayerType.Agent && SelectedAgent != null &&
                    !token.IsCancellationRequested)
             {
-                if (_controller.CurrentPlayer == _playerNumber)
+                if (!_controller.IsGameActive)
+                {
+                    await Task.Delay(500, token);
+                }
+                else if (_controller.CurrentPlayer == _playerNumber)
                 {
                     MakeAgentMove();
                 }
 
                 await Task.Delay(100, token);
-                if (!_controller.IsGameActive)
-                    break;
             }
         }
         catch (TaskCanceledException)
         {
             // If canceled, Agent should not continue on next game. 
             IsAgentRunning = false;
-        }
-        finally
-        {
-            // Leave agent running to true if not canceled, this allows the reset from the 
-            // Game play controller (two player game view) to restart the agent loop. 
             AgentRunningCancellationTokenSource = null;
         }
     }
@@ -253,13 +251,10 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
         if (!_controller.IsGameActive)
             return;
 
-        var clone = (TGameState)_controller.CurrentGameState.Clone();
-
+        var state = (TGameState)_controller.CurrentGameState.Clone();
         foreach (var move in _controller.GetLegalMoves())
         {
-            clone.ExecuteMove(move);
-            double eval = Evaluator.EvaluateState(clone, _playerNumber);
-            clone.UndoMove(move);
+            double eval = SelectedAgent.EvaluateMoveWithAgent(state, move, _playerNumber);
 
             LegalMoves.Add(new MoveViewModel<TMove>(move, eval));
         }
@@ -294,7 +289,7 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
     }
 
     private ChromosomeViewModel? _selectedAgentChromsoome;
-    public ChromosomeViewModel? SelectedAgentChromosomeViewModel
+    public ChromosomeViewModel? SelectedAgentChromosomeViewModel // Updated whenever a genetic agent is selected
     {
         get => _selectedAgentChromsoome;
         set
