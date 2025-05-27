@@ -1,6 +1,7 @@
 ﻿namespace SolvitaireCore.ConnectFour;
 
-public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquatable<ConnectFourGameState>
+public class ConnectFourGameState : BaseGameState<ConnectFourMove>, 
+    ITwoPlayerGameState<ConnectFourMove>, IEquatable<ConnectFourGameState>
 {
     public const int Rows = 6;
     public const int Columns = 7; 
@@ -16,9 +17,9 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
     private readonly List<(int Row, int Col)> _cachedWinningCells = new();
     private int[] _topRow = Enumerable.Repeat(Rows - 1, Columns).ToArray();
 
-    public bool IsGameWon => _cachedIsGameWon;
+    public override bool IsGameWon => _cachedIsGameWon;
     public bool IsGameDraw => _cachedIsGameDraw;
-    public bool IsGameLost => false; // Implement if you want to track explicit losses
+    public override bool IsGameLost => false; // Implement if you want to track explicit losses
     public int? WinningPlayer => _cachedWinningPlayer;
     public IReadOnlyList<(int Row, int Col)> WinningCells => _cachedWinningCells;
 
@@ -26,7 +27,6 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
     // 0 = empty, 1 = player1, 2 = player2
     public int[,] Board { get; private set; } = new int[Rows, Columns];
     public int CurrentPlayer { get; private set; } = 1;
-    public int MovesMade { get; private set; } = 0;
     public bool BoardFull
     {
         get
@@ -44,7 +44,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
     public bool IsPlayerWin(int player) => IsGameWon && WinningPlayer == player;
     public bool IsPlayerLoss(int player) => IsGameWon && WinningPlayer != player;
 
-    public void ExecuteMove(ConnectFourMove move)
+    public override void ExecuteMove(ConnectFourMove move)
     {
         int row = _topRow[move.Column];
         if (row < 0)
@@ -58,7 +58,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
         UpdateWinAndDrawCache();
     }
 
-    public void UndoMove(ConnectFourMove move)
+    public override void UndoMove(ConnectFourMove move)
     {
         int row = _topRow[move.Column] + 1;
         if (row >= Rows || Board[row, move.Column] == 0)
@@ -73,7 +73,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
         UpdateWinAndDrawCache();
     }
 
-    public void Reset()
+    public override void Reset()
     {
         Board = new int[Rows, Columns];
         CurrentPlayer = 1;
@@ -84,7 +84,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
         UpdateWinAndDrawCache();
     }
 
-    public List<ConnectFourMove> GetLegalMoves()
+    public override List<ConnectFourMove> GetLegalMoves()
     {
         var moves = new List<ConnectFourMove>(Columns);
         if (IsGameWon)
@@ -98,6 +98,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
         return moves;
     }
 
+    // TODO: Move this to base
     #region Move History Tracking
 
     private readonly List<ConnectFourMove> _moveHistory = new();
@@ -211,7 +212,7 @@ public class ConnectFourGameState : ITwoPlayerGameState<ConnectFourMove>, IEquat
 
     #endregion
 
-    public IGameState<ConnectFourMove> Clone()
+    public override IGameState<ConnectFourMove> Clone()
     {
         var clone = new ConnectFourGameState
         {

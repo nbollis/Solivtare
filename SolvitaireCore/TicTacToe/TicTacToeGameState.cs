@@ -1,19 +1,19 @@
 ﻿namespace SolvitaireCore;
 
-public class TicTacToeGameState : ITwoPlayerGameState<TicTacToeMove>, IEquatable<TicTacToeGameState>
+public class TicTacToeGameState : BaseGameState<TicTacToeMove>,
+    ITwoPlayerGameState<TicTacToeMove>, IEquatable<TicTacToeGameState>
 {
     public const int Size = 3;
     public int[,] Board { get; private set; } = new int[Size, Size]; // 0 = empty, 1 = player1, 2 = player2
     public int CurrentPlayer { get; private set; } = 1;
-    public int MovesMade { get; private set; } = 0;
     public int? WinningPlayer { get; private set; } = null;
-    public bool IsGameWon { get; private set; }
+    public override bool IsGameWon { get; protected set; }
     public bool IsGameDraw => !IsGameWon && MovesMade == Size * Size;
-    public bool IsGameLost => false; // Not typically used in TicTacToe
+    public override bool IsGameLost => false; // Not typically used in TicTacToe
     public List<(int Row, int Col)> WinningCells { get; } = new();
     private readonly List<TicTacToeMove> _moveHistory = new();
 
-    public void Reset()
+    public override void Reset()
     {
         Board = new int[Size, Size];
         CurrentPlayer = 1;
@@ -24,7 +24,7 @@ public class TicTacToeGameState : ITwoPlayerGameState<TicTacToeMove>, IEquatable
         _moveHistory.Clear();
     }
 
-    public List<TicTacToeMove> GetLegalMoves()
+    public override List<TicTacToeMove> GetLegalMoves()
     {
         var moves = new List<TicTacToeMove>();
         for (int row = 0; row < Size; row++)
@@ -34,7 +34,7 @@ public class TicTacToeGameState : ITwoPlayerGameState<TicTacToeMove>, IEquatable
         return moves;
     }
 
-    public void ExecuteMove(TicTacToeMove move)
+    public override void ExecuteMove(TicTacToeMove move)
     {
         if (Board[move.Row, move.Col] != 0)
             throw new InvalidOperationException("Cell already occupied.");
@@ -51,7 +51,7 @@ public class TicTacToeGameState : ITwoPlayerGameState<TicTacToeMove>, IEquatable
         CurrentPlayer = 3 - CurrentPlayer; // Toggle between 1 and 2
     }
 
-    public void UndoMove(TicTacToeMove move)
+    public override void UndoMove(TicTacToeMove move)
     {
         if (Board[move.Row, move.Col] == 0)
             throw new InvalidOperationException("Cell already empty.");
@@ -73,7 +73,7 @@ public class TicTacToeGameState : ITwoPlayerGameState<TicTacToeMove>, IEquatable
 
     public IReadOnlyList<TicTacToeMove> GetMoveHistory() => _moveHistory.AsReadOnly();
 
-    public IGameState<TicTacToeMove> Clone()
+    public override IGameState<TicTacToeMove> Clone()
     {
         var clone = new TicTacToeGameState
         {

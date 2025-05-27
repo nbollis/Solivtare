@@ -1,13 +1,12 @@
 ﻿
 namespace SolvitaireCore;
 
-public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<SolitaireGameState>, ICardGameState
+public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<SolitaireGameState>, ICardGameState
 {
     // This is the number of cards to move from stock to waste when cycling
     public readonly int CardsPerCycle;
     public readonly int MaximumCycles = int.MaxValue;
     public int CycleCount = 0;
-    public int MovesMade { get; set; } = 0;
 
     public List<TableauPile> TableauPiles { get; set; }
 
@@ -18,8 +17,8 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
     public WastePile WastePile { get; set; }
 
     // TODO: Find more lose conditions: Those that involve an infinite loop
-    public bool IsGameLost => IsUnwinnable();
-    public bool IsGameWon => GameWon();
+    public override bool IsGameLost => IsUnwinnable();
+    public override bool IsGameWon => GameWon();
 
     // TODO: This is a bad way to get a parameterless constructor, fix. 
     public SolitaireGameState() : this(3){}
@@ -72,9 +71,9 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
         }
     }
 
-    public void Reset()
+    public override void Reset()
     {
-        _isDirty = true;
+        MoveCacheIsDirty = true;
         CycleCount = 0;
         MovesMade = 0;
 
@@ -104,24 +103,22 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
 
     private bool _originalIsFaceUp;
     private bool _originalPreviousIsFaceUp;
-    private bool _isDirty = true; // true if the moves have changed since last call
-    private List<SolitaireMove>? _cachedMoves; // cached moves to avoid recalculating them
-    public List<SolitaireMove> GetLegalMoves()
+   public override List<SolitaireMove> GetLegalMoves()
     {
-        if (_cachedMoves is null || _isDirty)
+        if (CachedMoves is null || MoveCacheIsDirty)
         {
-            _cachedMoves = MoveGenerator.GenerateMoves(this).ToList(); 
-            _cachedMoves.Add(new SkipGameMove()); // ← Add SkipMove
-            _isDirty = false;
+            CachedMoves = MoveGenerator.GenerateMoves(this).ToList();
+            CachedMoves.Add(new SkipGameMove()); // ← Add SkipMove
+            MoveCacheIsDirty = false;
         }
-        return _cachedMoves;
+        return CachedMoves;
     }
 
-    public void ExecuteMove(SolitaireMove move)
+    public override void ExecuteMove(SolitaireMove move)
     {
         if (move.IsValid(this))
         {
-            _isDirty = true;
+            MoveCacheIsDirty = true;
 
             if (move.ToPileIndex == StockIndex)
                 CycleCount++;
@@ -186,9 +183,9 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
         }
     }
 
-    public void UndoMove(SolitaireMove move)
+    public override void UndoMove(SolitaireMove move)
     {
-        _isDirty = true;
+        MoveCacheIsDirty = true;
         if (move.ToPileIndex == StockIndex && move.FromPileIndex == WasteIndex)
             CycleCount--;
         if (move is SingleCardMove single)
@@ -429,7 +426,7 @@ public class SolitaireGameState : IGameState<SolitaireMove>, IEquatable<Solitair
         }
     }
 
-    public IGameState<SolitaireMove> Clone()
+    public override IGameState<SolitaireMove> Clone()
     {
         var clone = new SolitaireGameState(CardsPerCycle)
         {
