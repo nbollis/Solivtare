@@ -252,12 +252,20 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
             return;
 
         var state = (TGameState)_controller.CurrentGameState.Clone();
+        var moves = new List<MoveViewModel<TMove>>();
         foreach (var move in _controller.GetLegalMoves())
         {
             double eval = SelectedAgent.EvaluateMoveWithAgent(state, move, _playerNumber);
 
-            LegalMoves.Add(new MoveViewModel<TMove>(move, eval));
+            moves.Add(new MoveViewModel<TMove>(move, eval));
         }
+
+        // add them in descending order of eval
+        foreach (var moveVm in moves.OrderByDescending(p => p.Evaluation))
+        {
+            LegalMoves.Add(moveVm);
+        }
+
         OnPropertyChanged(nameof(IsMyTurn));
     }
 

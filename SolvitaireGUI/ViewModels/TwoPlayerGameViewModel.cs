@@ -5,7 +5,6 @@ using SolvitaireCore.ConnectFour;
 
 namespace SolvitaireGUI;
 
-// TODO: Generalize this to a two player game view model. 
 /// <summary>
 /// Class that handles interactions between agents and the game state.
 /// </summary>

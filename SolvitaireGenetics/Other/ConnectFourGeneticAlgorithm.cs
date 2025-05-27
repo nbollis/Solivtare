@@ -102,32 +102,30 @@ public class ConnectFourGeneticAlgorithm : GeneticAlgorithm<ConnectFourChromosom
         int minimaxGames = gamesPerPairing * 2; // Magic Number: 
         maxScore += minimaxGames; // Each agent gets minimaxGames more possible points  
 
+        // Guarantee each agent is only accessed in one thread at a time
         Parallel.ForEach(Population, agent =>
         {
             var depths = new[] { 1, 3, 5 };
-            var localScores = new double[depths.Length];
-            var localMovesMade = new int[depths.Length];
-            var localGamesWon = new int[depths.Length];
+            double totalScore = 0;
+            int totalMovesMade = 0;
+            int totalGamesWon = 0;
 
-            Parallel.For(0, depths.Length, depthIndex =>
+            foreach (var depth in depths)
             {
-                var depth = depths[depthIndex];
                 var minimaxAgent = new MinimaxAgent<ConnectFourGameState, ConnectFourMove>(
                     new ConnectFourHeuristicEvaluator(), maxDepth: depth);
 
                 var result = PlayGames(agent, minimaxAgent, minimaxGames / depths.Length);
 
-                localScores[depthIndex] = result.ScoreA;
-                localMovesMade[depthIndex] = result.MovesMade;
-                localGamesWon[depthIndex] = result.GamesWonA;
-            });
-
-            lock (scores) // Dictionaries are not thread-safe for writes  
-            {
-                scores[agent] += localScores.Sum();
-                movesMade[agent] += localMovesMade.Sum();
-                gamesWon[agent] += localGamesWon.Sum();
+                totalScore += result.ScoreA;
+                totalMovesMade += result.MovesMade;
+                totalGamesWon += result.GamesWonA;
             }
+
+            // No lock needed: each agent is only updated by its own thread
+            scores[agent] += totalScore;
+            movesMade[agent] += totalMovesMade;
+            gamesWon[agent] += totalGamesWon;
         });
         // --- End MinimaxAgent round ---
 

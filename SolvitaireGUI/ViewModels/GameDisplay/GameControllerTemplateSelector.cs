@@ -18,7 +18,7 @@ public class GameControllerTemplateSelector : DataTemplateSelector
             return ConnectFourTemplate;
         if (item is TwoPlayerGameViewModel<TicTacToeGameState, TicTacToeMove, IAgent<TicTacToeGameState, TicTacToeMove>>)
             return TicTacToeTemplate;
-        if (item is SinglePlayerGameViewModel<SolitaireGameState, SolitaireMove, IAgent<SolitaireGameState, SolitaireMove>>)
+        if (item is OnePlayerGameViewModel<SolitaireGameState, SolitaireMove, IAgent<SolitaireGameState, SolitaireMove>>)
             return SolitaireTemplate;
 
         return base.SelectTemplate(item, container);

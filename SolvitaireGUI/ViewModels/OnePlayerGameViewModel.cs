@@ -3,7 +3,7 @@ using SolvitaireCore;
 
 namespace SolvitaireGUI;
 
-public class SinglePlayerCardGameViewModel<TGameState, TMove, TAgent> : SinglePlayerGameViewModel<TGameState, TMove, TAgent> 
+public class OnePlayerCardGameViewModel<TGameState, TMove, TAgent> : OnePlayerGameViewModel<TGameState, TMove, TAgent> 
 where TGameState : ICardGameState, IGameState<TMove>, new()
 where TMove : IMove
 where TAgent : class, IAgent<TGameState, TMove>
@@ -12,8 +12,8 @@ where TAgent : class, IAgent<TGameState, TMove>
 
     public override ICommand ResetGameCommand { get; }
     public override ICommand NewGameCommand { get; }
-    public SinglePlayerCardGameViewModel(TGameState gameState) : this(gameState.ToViewModel<TGameState, TMove>()) { }
-    public SinglePlayerCardGameViewModel(GameStateViewModel<TGameState, TMove> gameStateViewModel) : base(gameStateViewModel)
+    public OnePlayerCardGameViewModel(TGameState gameState) : this(gameState.ToViewModel<TGameState, TMove>()) { }
+    public OnePlayerCardGameViewModel(GameStateViewModel<TGameState, TMove> gameStateViewModel) : base(gameStateViewModel)
     {
         _deck ??= new ObservableStandardDeck(23);
         _deck.Shuffle();
@@ -51,7 +51,7 @@ where TAgent : class, IAgent<TGameState, TMove>
     }
 }
 
-public class SinglePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGameController<TGameState, TMove>
+public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGameController<TGameState, TMove>
     where TGameState : IGameState<TMove>
     where TMove : IMove
     where TAgent : class, IAgent<TGameState, TMove>
@@ -69,9 +69,9 @@ public class SinglePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewMode
     public bool IsGameActive => !GameStateViewModel.IsGameWon;
     public int CurrentPlayer => 1; // Single player
 
-    public SinglePlayerGameViewModel(TGameState gameState) : this(gameState.ToViewModel<TGameState, TMove>()) { }
+    public OnePlayerGameViewModel(TGameState gameState) : this(gameState.ToViewModel<TGameState, TMove>()) { }
 
-    public SinglePlayerGameViewModel(GameStateViewModel<TGameState, TMove> gameStateViewModel)
+    public OnePlayerGameViewModel(GameStateViewModel<TGameState, TMove> gameStateViewModel)
     {
         GameStateViewModel = gameStateViewModel;
         ShadowGameState = (TGameState)CurrentGameState.Clone();
@@ -85,7 +85,10 @@ public class SinglePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewMode
         AgentPanel.RefreshLegalMoves();
     }
 
-    public List<TMove> GetLegalMoves() => GameStateViewModel.GameState.GetLegalMoves();
+    public List<TMove> GetLegalMoves() =>
+        GameStateViewModel.GameState.GetLegalMoves()
+            .Where(p => !p.IsTerminatingMove).ToList(); // Temporary bypassing of the skip game move
+
     protected readonly Stack<TMove> PreviousMoves = new();
     public void ApplyMove(TMove move)
     {
@@ -126,9 +129,9 @@ public class SinglePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewMode
     }
 }
 
-public class SinglePlayerGameModel : SinglePlayerGameViewModel<SolitaireGameState, SolitaireMove, IAgent<SolitaireGameState, SolitaireMove>>
+public class OnePlayerGameModel : OnePlayerGameViewModel<SolitaireGameState, SolitaireMove, IAgent<SolitaireGameState, SolitaireMove>>
 {
-    public static SinglePlayerGameModel Instance => new SinglePlayerGameModel();
+    public static OnePlayerGameModel Instance => new OnePlayerGameModel();
 
-    public SinglePlayerGameModel() : base(new SolitaireGameStateModel()) { }
+    public OnePlayerGameModel() : base(new SolitaireGameStateModel()) { }
 }

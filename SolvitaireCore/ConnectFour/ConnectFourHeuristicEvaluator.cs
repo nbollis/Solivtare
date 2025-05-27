@@ -9,7 +9,7 @@ public class ConnectFourHeuristicEvaluator : StateEvaluator<ConnectFourGameState
     private const int TwoInARowWeight = 10;
     private const int TwoWithGapWeight = 6;
     private const int ThreeInARowWeight = 50;
-    private const int ThreeWithGapWeight = 30;
+    private const int ThreeWithGapWeight = 45;
     private const int IsolatedWeight = -4;
     private const int SurroundedWeight = -8;
     private const int TouchingOwnWeight = 2;
