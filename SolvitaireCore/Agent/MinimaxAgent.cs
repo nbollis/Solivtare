@@ -61,8 +61,9 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
 
                 foreach (var moveInfo in moveInfos)
                 {
+                    // first move is made from perspective of maximizing player, always
                     gameState.ExecuteMove(moveInfo.Move);
-                    var (minimaxScore, winDepth) = Minimax(gameState, depth - 1, double.NegativeInfinity, double.PositiveInfinity, true, maximizingPlayer, 1);
+                    var (minimaxScore, winDepth) = Minimax(gameState, depth - 1, double.NegativeInfinity, double.PositiveInfinity, false, maximizingPlayer, 1);
                     gameState.UndoMove(moveInfo.Move);
 
                     scoredMoves.Add(new ScoredMove(moveInfo.Move, moveInfo.MoveScore)

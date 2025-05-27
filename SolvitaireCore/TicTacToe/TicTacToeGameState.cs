@@ -11,20 +11,17 @@ public class TicTacToeGameState : BaseGameState<TicTacToeMove>,
     public bool IsGameDraw => !IsGameWon && MovesMade == Size * Size;
     public override bool IsGameLost => false; // Not typically used in TicTacToe
     public List<(int Row, int Col)> WinningCells { get; } = new();
-    private readonly List<TicTacToeMove> _moveHistory = new();
 
-    public override void Reset()
+    protected override void ResetInternal()
     {
         Board = new int[Size, Size];
         CurrentPlayer = 1;
-        MovesMade = 0;
         IsGameWon = false;
         WinningPlayer = null;
         WinningCells.Clear();
-        _moveHistory.Clear();
     }
 
-    public override List<TicTacToeMove> GetLegalMoves()
+    protected override List<TicTacToeMove> GenerateLegalMoves()
     {
         var moves = new List<TicTacToeMove>();
         for (int row = 0; row < Size; row++)
@@ -34,14 +31,12 @@ public class TicTacToeGameState : BaseGameState<TicTacToeMove>,
         return moves;
     }
 
-    public override void ExecuteMove(TicTacToeMove move)
+    protected override void ExecuteMoveInternal(TicTacToeMove move)
     {
         if (Board[move.Row, move.Col] != 0)
             throw new InvalidOperationException("Cell already occupied.");
 
         Board[move.Row, move.Col] = CurrentPlayer;
-        MovesMade++;
-        _moveHistory.Add(move);
 
         if (CheckWin(move.Row, move.Col))
         {
@@ -51,29 +46,19 @@ public class TicTacToeGameState : BaseGameState<TicTacToeMove>,
         CurrentPlayer = 3 - CurrentPlayer; // Toggle between 1 and 2
     }
 
-    public override void UndoMove(TicTacToeMove move)
+    protected override void UndoMoveInternal(TicTacToeMove move)
     {
         if (Board[move.Row, move.Col] == 0)
             throw new InvalidOperationException("Cell already empty.");
 
         Board[move.Row, move.Col] = 0;
-        MovesMade--;
         CurrentPlayer = 3 - CurrentPlayer;
         IsGameWon = false;
         WinningPlayer = null;
         WinningCells.Clear();
-        if (_moveHistory.Count > 0)
-            _moveHistory.RemoveAt(_moveHistory.Count - 1);
     }
 
-    public string GetMoveHistoryString()
-    {
-        return string.Join(",", _moveHistory.Select(m => $"{m.Row}{m.Col}"));
-    }
-
-    public IReadOnlyList<TicTacToeMove> GetMoveHistory() => _moveHistory.AsReadOnly();
-
-    public override IGameState<TicTacToeMove> Clone()
+    protected override IGameState<TicTacToeMove> CloneInternal()
     {
         var clone = new TicTacToeGameState
         {
@@ -84,7 +69,6 @@ public class TicTacToeGameState : BaseGameState<TicTacToeMove>,
             WinningPlayer = WinningPlayer
         };
         clone.WinningCells.AddRange(WinningCells);
-        clone._moveHistory.AddRange(_moveHistory.Select(m => new TicTacToeMove(m.Row, m.Col)));
         return clone;
     }
 
@@ -136,7 +120,7 @@ public class TicTacToeGameState : BaseGameState<TicTacToeMove>,
         return true;
     }
 
-    public override int GetHashCode()
+    protected override int GenerateHashCode()
     {
         int hash = 17;
         foreach (var cell in Board)

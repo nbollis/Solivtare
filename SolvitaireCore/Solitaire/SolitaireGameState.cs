@@ -71,12 +71,9 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
         }
     }
 
-    public override void Reset()
+    protected override void ResetInternal()
     {
-        MoveCacheIsDirty = true;
         CycleCount = 0;
-        MovesMade = 0;
-
         foreach (var pile in FoundationPiles)
         {
             pile.Cards.Clear();
@@ -103,23 +100,17 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
 
     private bool _originalIsFaceUp;
     private bool _originalPreviousIsFaceUp;
-   public override List<SolitaireMove> GetLegalMoves()
+    protected override List<SolitaireMove> GenerateLegalMoves()
     {
-        if (CachedMoves is null || MoveCacheIsDirty)
-        {
-            CachedMoves = MoveGenerator.GenerateMoves(this).ToList();
-            CachedMoves.Add(new SkipGameMove()); // ← Add SkipMove
-            MoveCacheIsDirty = false;
-        }
-        return CachedMoves;
+        var moves = MoveGenerator.GenerateMoves(this).ToList();
+        moves.Add(new SkipGameMove()); // ← Add SkipMove
+        return moves;
     }
 
-    public override void ExecuteMove(SolitaireMove move)
+    protected override void ExecuteMoveInternal(SolitaireMove move)
     {
         if (move.IsValid(this))
         {
-            MoveCacheIsDirty = true;
-
             if (move.ToPileIndex == StockIndex)
                 CycleCount++;
 
@@ -174,8 +165,6 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
                     }
                 }
             }
-
-            MovesMade++;
         }
         else
         {
@@ -183,9 +172,8 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
         }
     }
 
-    public override void UndoMove(SolitaireMove move)
+    protected override void UndoMoveInternal(SolitaireMove move)
     {
-        MoveCacheIsDirty = true;
         if (move.ToPileIndex == StockIndex && move.FromPileIndex == WasteIndex)
             CycleCount--;
         if (move is SingleCardMove single)
@@ -247,7 +235,6 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
                 toPile.RemoveCards(multi.Cards);
             }
         }
-        MovesMade--;
     }
 
     #endregion
@@ -382,7 +369,7 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
         return true;
     }
 
-    public override int GetHashCode()
+    protected override int GenerateHashCode()
     {
         unchecked
         {
@@ -426,7 +413,7 @@ public class SolitaireGameState : BaseGameState<SolitaireMove>, IEquatable<Solit
         }
     }
 
-    public override IGameState<SolitaireMove> Clone()
+    protected override IGameState<SolitaireMove> CloneInternal()
     {
         var clone = new SolitaireGameState(CardsPerCycle)
         {

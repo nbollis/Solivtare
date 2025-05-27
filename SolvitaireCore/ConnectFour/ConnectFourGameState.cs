@@ -8,8 +8,6 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
     private static readonly (int dRow, int dCol)[] Directions = [(1, 0), (0, 1), (1, 1), (1, -1)];
 
     // Cacheing to reduce redundant calculations. 
-    private int _cachedHash = 0;
-    private bool _hashDirty = true;
     private bool _cachedIsGameWon = false;
     private bool _cachedIsGameDraw = false;
     private (int Row, int Col)? _lastMove = null;
@@ -44,47 +42,43 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
     public bool IsPlayerWin(int player) => IsGameWon && WinningPlayer == player;
     public bool IsPlayerLoss(int player) => IsGameWon && WinningPlayer != player;
 
-    public override void ExecuteMove(ConnectFourMove move)
+    protected override void ExecuteMoveInternal(ConnectFourMove move)
     {
         int row = _topRow[move.Column];
         if (row < 0)
             throw new InvalidOperationException("Invalid move: column full");
         Board[row, move.Column] = CurrentPlayer;
-        MovesMade++;
-        _moveHistory.Add(move);
+
         _lastMove = (row, move.Column);
         CurrentPlayer = 3 - CurrentPlayer;
         _topRow[move.Column]--;
         UpdateWinAndDrawCache();
     }
 
-    public override void UndoMove(ConnectFourMove move)
+    protected override void UndoMoveInternal(ConnectFourMove move)
     {
         int row = _topRow[move.Column] + 1;
         if (row >= Rows || Board[row, move.Column] == 0)
             throw new InvalidOperationException("Invalid undo: column empty");
         Board[row, move.Column] = 0;
-        MovesMade--;
         CurrentPlayer = 3 - CurrentPlayer;
-        if (_moveHistory.Count > 0)
-            _moveHistory.RemoveAt(_moveHistory.Count - 1);
+
         _topRow[move.Column]++;
         _lastMove = null;
         UpdateWinAndDrawCache();
     }
 
-    public override void Reset()
+    protected override void ResetInternal()
     {
         Board = new int[Rows, Columns];
         CurrentPlayer = 1;
         MovesMade = 0;
-        _moveHistory.Clear();
         _topRow = Enumerable.Repeat(Rows - 1, Columns).ToArray();
         _lastMove = null;
         UpdateWinAndDrawCache();
     }
 
-    public override List<ConnectFourMove> GetLegalMoves()
+    protected override List<ConnectFourMove> GenerateLegalMoves()
     {
         var moves = new List<ConnectFourMove>(Columns);
         if (IsGameWon)
@@ -98,17 +92,6 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
         return moves;
     }
 
-    // TODO: Move this to base
-    #region Move History Tracking
-
-    private readonly List<ConnectFourMove> _moveHistory = new();
-    public IReadOnlyList<ConnectFourMove> GetMoveHistory() => _moveHistory.AsReadOnly();
-    public string GetMoveHistoryString()
-    {
-        return string.Join(",", _moveHistory.Select(m => m.Column));
-    }
-
-    #endregion
 
     #region Board Parsing
    
@@ -212,7 +195,7 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
 
     #endregion
 
-    public override IGameState<ConnectFourMove> Clone()
+    protected override IGameState<ConnectFourMove> CloneInternal()
     {
         var clone = new ConnectFourGameState
         {
@@ -221,7 +204,6 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
             MovesMade = MovesMade,
             _topRow = (int[])_topRow.Clone()
         };
-        clone._moveHistory.AddRange(_moveHistory);
         return clone;
     }
 
@@ -239,18 +221,13 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
         return true;
     }
 
-    public override int GetHashCode()
+    protected override int GenerateHashCode()
     {
-        if (!_hashDirty) 
-            return _cachedHash;
-
         int hash = 17;
         foreach (var cell in Board)
             hash = hash * 31 + cell;
         hash = hash * 31 + CurrentPlayer;
 
-        _cachedHash = hash;
-        _hashDirty = false;
         return hash;
     }
 
