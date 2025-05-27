@@ -53,7 +53,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters, TAgent> : IGene
 
     public virtual TAgent CreateFromChromosome(TChromosome chromosome)
     {
-        return (TAgent)Activator.CreateInstance(typeof(TAgent), chromosome)!;
+        return chromosome.ToGeneticAgent<TChromosome, TAgent>();
     }
 
     public abstract double EvaluateFitness(TAgent agent, CancellationToken? cancellationToken = null);
@@ -145,7 +145,7 @@ public abstract class GeneticAlgorithm<TChromosome, TParameters, TAgent> : IGene
         var lastGeneration = Logger.LoadLastGeneration(out int generationNumber)
             .Select(p => p.Chromosome.Chromosome as TChromosome)
             .Where(p => p != null)
-            .Select(p => CreateFromChromosome(p!))
+            .Select(CreateFromChromosome!)
             .ToList();
 
         if (lastGeneration.Count == Parameters.PopulationSize)
