@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
+using SolvitaireCore.TicTacToe;
 
 namespace SolvitaireGUI;
 

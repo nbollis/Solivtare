@@ -1,4 +1,4 @@
-﻿namespace SolvitaireCore;
+﻿namespace SolvitaireCore.TicTacToe;
 
 public class TicTacToeGameState : BaseGameState<TicTacToeMove>,
     ITwoPlayerGameState<TicTacToeMove>, IEquatable<TicTacToeGameState>

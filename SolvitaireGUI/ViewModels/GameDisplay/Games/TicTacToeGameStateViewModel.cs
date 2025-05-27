@@ -1,4 +1,4 @@
-﻿using SolvitaireCore;
+﻿using SolvitaireCore.TicTacToe;
 
 namespace SolvitaireGUI;
 public class TicTacToeGameStateViewModel : TwoPlayerGameStateViewModel<TicTacToeGameState, TicTacToeMove>

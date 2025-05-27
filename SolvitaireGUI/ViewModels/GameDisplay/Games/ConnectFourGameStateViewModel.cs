@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
 
 namespace SolvitaireGUI;

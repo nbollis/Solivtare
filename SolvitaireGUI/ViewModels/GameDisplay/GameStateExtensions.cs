@@ -1,5 +1,6 @@
 ﻿using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
+using SolvitaireCore.TicTacToe;
 using SolvitaireGenetics;
 
 namespace SolvitaireGUI;

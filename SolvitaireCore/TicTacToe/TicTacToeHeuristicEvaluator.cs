@@ -1,4 +1,4 @@
-﻿namespace SolvitaireCore;
+﻿namespace SolvitaireCore.TicTacToe;
 
 /// <summary>
 /// Heuristic evaluator for TicTacToe game states.

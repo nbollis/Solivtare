@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
+using SolvitaireCore.TicTacToe;
 
 namespace SolvitaireGUI;
 

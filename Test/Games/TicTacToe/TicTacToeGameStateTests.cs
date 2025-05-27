@@ -1,4 +1,4 @@
-using SolvitaireCore;
+using SolvitaireCore.TicTacToe;
 
 namespace Test.Games.TicTacToe;
 
