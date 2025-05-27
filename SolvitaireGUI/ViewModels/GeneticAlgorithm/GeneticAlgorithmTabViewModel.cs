@@ -6,9 +6,7 @@ using System.Windows.Input;
 using ScottPlot.WPF;
 using SolvitairePlotting;
 using ScottPlot;
-using System.Security.Cryptography;
 using SolvitaireCore;
-using SolvitaireGenetics.IO;
 using SolvitaireIO.Database.Models;
 
 namespace SolvitaireGUI;

@@ -142,13 +142,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\GameDisplay\TicTacToeBoardView.xaml.cs">
+    <Compile Update="Views\GameDisplay\Games\TicTacToeBoardView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\GeneticAlgorithm\ConnectFourGeneticParametersControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\OnePlayerPlayingView.xaml.cs">
+    <Compile Update="Views\GameDisplay\Gameplay\OnePlayerPlayingView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

@@ -1,5 +1,4 @@
 using ScottPlot.WPF;
-using SolvitaireGenetics;
 using SolvitaireIO.Database.Models;
 using SolvitairePlotting;
 

@@ -1,10 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using SolvitaireIO.Database.Repositories;
-using SolvitaireIO.Database;
-using System.Configuration;
-using System.Data;
-using System.Windows;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Windows;
 
 namespace SolvitaireGUI
 {

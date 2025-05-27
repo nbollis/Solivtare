@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.Design;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using SolvitaireGenetics;
 using SolvitaireGenetics.IO;
