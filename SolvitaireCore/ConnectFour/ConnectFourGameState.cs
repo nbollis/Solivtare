@@ -223,12 +223,12 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
 
     protected override int GenerateHashCode()
     {
-        int hash = 17;
-        foreach (var cell in Board)
-            hash = hash * 31 + cell;
-        hash = hash * 31 + CurrentPlayer;
-
-        return hash;
+        var hash = new HashCode();
+        for (int r = 0; r < Rows; r++)
+        for (int c = 0; c < Columns; c++)
+            hash.Add(Board[r, c]);
+        hash.Add(CurrentPlayer);
+        return hash.ToHashCode();
     }
 
     // Methods to allow controlled setting of Board and CurrentPlayer for testing purposes

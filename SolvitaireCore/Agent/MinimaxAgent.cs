@@ -173,9 +173,9 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
             state.ExecuteMove(move);
 
             // Inline the recursive call to avoid unnecessary tuple creation
-            (double score, int winDepth) minimaxResult = Minimax(state, depth - 1, alpha, beta, !maximizingPlayer, maximizingPlayerId, plies + 1);
-            double score = minimaxResult.score;
-            int winDepth = minimaxResult.winDepth;
+            var minimaxResult = Minimax(state, depth - 1, alpha, beta, !maximizingPlayer, maximizingPlayerId, plies + 1);
+            double score = minimaxResult.Score;
+            int winDepth = minimaxResult.Depth;
 
             state.UndoMove(move);
 

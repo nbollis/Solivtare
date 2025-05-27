@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace SolvitaireCore.ConnectFour;
 
 public class GeneticConnectFourEvaluator : StateEvaluator<ConnectFourGameState, ConnectFourMove>
@@ -5,42 +7,65 @@ public class GeneticConnectFourEvaluator : StateEvaluator<ConnectFourGameState, 
     private static readonly (int dr, int dc)[] Directions = new[] { (0, 1), (1, 0), (1, 1), (1, -1) };
     private readonly ConnectFourChromosome _chromosome;
 
+    // Cache weights as readonly fields  
+    private readonly double _isolatedPieceWeight;
+    private readonly double _twoInARowWeight;
+    private readonly double _twoWithOneGapWeight;
+    private readonly double _threeInARowWeight;
+    private readonly double _threeWithOneGapWeight;
+    private readonly double _surroundedPieceWeight;
+    private readonly double _playerTouchingWeight;
+    private readonly double _opponentTouchingWeight;
+
+    // Move weights  
+    private readonly double[] _columnWeights;
+    private readonly double[] _rowWeights;
+
     public GeneticConnectFourEvaluator(ConnectFourChromosome chromosome)
     {
         _chromosome = chromosome;
+        _isolatedPieceWeight = chromosome.GetWeight(ConnectFourChromosome.IsolatedPieceWeight);
+        _twoInARowWeight = chromosome.GetWeight(ConnectFourChromosome.TwoInARowWeight);
+        _twoWithOneGapWeight = chromosome.GetWeight(ConnectFourChromosome.TwoWithOneGapWeight);
+        _threeInARowWeight = chromosome.GetWeight(ConnectFourChromosome.ThreeInARowWeight);
+        _threeWithOneGapWeight = chromosome.GetWeight(ConnectFourChromosome.ThreeWithOneGapWeight);
+        _surroundedPieceWeight = chromosome.GetWeight(ConnectFourChromosome.SurroundedPieceWeight);
+        _playerTouchingWeight = chromosome.GetWeight(ConnectFourChromosome.PlayerTouchingWeight);
+        _opponentTouchingWeight = chromosome.GetWeight(ConnectFourChromosome.OpponentTouchingWeight);
+
+        // Cache column weights  
+        _columnWeights = new double[ConnectFourGameState.Columns];
+        _columnWeights[0] = chromosome.GetWeight(ConnectFourChromosome.ColumnOneWeight);
+        _columnWeights[1] = chromosome.GetWeight(ConnectFourChromosome.ColumnTwoWeight);
+        _columnWeights[2] = chromosome.GetWeight(ConnectFourChromosome.ColumnThreeWeight);
+        _columnWeights[3] = chromosome.GetWeight(ConnectFourChromosome.ColumnFourWeight);
+        _columnWeights[4] = chromosome.GetWeight(ConnectFourChromosome.ColumnFiveWeight);
+        _columnWeights[5] = chromosome.GetWeight(ConnectFourChromosome.ColumnSixWeight);
+        _columnWeights[6] = chromosome.GetWeight(ConnectFourChromosome.ColumnSevenWeight);
+
+        // Cache row weights  
+        _rowWeights = new double[ConnectFourGameState.Rows];
+        _rowWeights[0] = chromosome.GetWeight(ConnectFourChromosome.RowOneWeight);
+        _rowWeights[1] = chromosome.GetWeight(ConnectFourChromosome.RowTwoWeight);
+        _rowWeights[2] = chromosome.GetWeight(ConnectFourChromosome.RowThreeWeight);
+        _rowWeights[3] = chromosome.GetWeight(ConnectFourChromosome.RowFourWeight);
+        _rowWeights[4] = chromosome.GetWeight(ConnectFourChromosome.RowFiveWeight);
+        _rowWeights[5] = chromosome.GetWeight(ConnectFourChromosome.RowSixWeight);
     }
 
     public override double EvaluateMove(ConnectFourGameState state, ConnectFourMove move)
     {
-        // Evaluate the move based on the column and row it would land in
+        // Evaluate the move based on the column and row it would land in  
         int row = GetLandingRow(state, move.Column);
         double score = 0;
 
-        // Column-based weights
-        switch (move.Column)
-        {
-            case 0: score += _chromosome.GetWeight(ConnectFourChromosome.ColumnOneWeight); break;
-            case 1: score += _chromosome.GetWeight(ConnectFourChromosome.ColumnTwoWeight); break;
-            case 2: score += _chromosome.GetWeight(ConnectFourChromosome.ColumnThreeWeight); break;
-            case 3: score += _chromosome.GetWeight(ConnectFourChromosome.ColumnFourWeight); break;
-            case 4: score += _chromosome.GetWeight(ConnectFourChromosome.ColumnFiveWeight); break;
-            case 5: score += _chromosome.GetWeight(ConnectFourChromosome.ColumnSixWeight); break;
-            case 6: score += _chromosome.GetWeight(ConnectFourChromosome.ColumnSevenWeight); break;
-        }
+        // Column-based weights  
+        score += _columnWeights[move.Column];
 
-        // Row-based weights
-        switch (row)
-        {
-            case 0: score += _chromosome.GetWeight(ConnectFourChromosome.RowOneWeight); break;
-            case 1: score += _chromosome.GetWeight(ConnectFourChromosome.RowTwoWeight); break;
-            case 2: score += _chromosome.GetWeight(ConnectFourChromosome.RowThreeWeight); break;
-            case 3: score += _chromosome.GetWeight(ConnectFourChromosome.RowFourWeight); break;
-            case 4: score += _chromosome.GetWeight(ConnectFourChromosome.RowFiveWeight); break;
-            case 5: score += _chromosome.GetWeight(ConnectFourChromosome.RowSixWeight); break;
-        }
+        // Row-based weights  
+        score += _rowWeights[row];
 
-        // Optionally, you can add more move-based features here
-
+        // Add more move-based features here
         return score;
     }
 
@@ -159,7 +184,7 @@ public class GeneticConnectFourEvaluator : StateEvaluator<ConnectFourGameState, 
                             fullWindow = false;
                             break;
                         }
-                        window[i] = board[wr, wc];
+                        window[i] = Unsafe.Add(ref board[wr, wc], 0);
                     }
                     if (fullWindow)
                     {
@@ -188,23 +213,23 @@ public class GeneticConnectFourEvaluator : StateEvaluator<ConnectFourGameState, 
         // --- Weighted sum of all features for both players ---
         // Player features are positive, opponent features are negative (adversarial)
         double score = 0;
-        score += _chromosome.GetWeight(ConnectFourChromosome.IsolatedPieceWeight) * playerIsolated;
-        score += _chromosome.GetWeight(ConnectFourChromosome.TwoInARowWeight) * playerTwo;
-        score += _chromosome.GetWeight(ConnectFourChromosome.TwoWithOneGapWeight) * playerTwoGap;
-        score += _chromosome.GetWeight(ConnectFourChromosome.ThreeInARowWeight) * playerThree;
-        score += _chromosome.GetWeight(ConnectFourChromosome.ThreeWithOneGapWeight) * playerThreeGap;
-        score += _chromosome.GetWeight(ConnectFourChromosome.SurroundedPieceWeight) * playerSurrounded;
-        score += _chromosome.GetWeight(ConnectFourChromosome.PlayerTouchingWeight) * playerTouching;
-        score += _chromosome.GetWeight(ConnectFourChromosome.OpponentTouchingWeight) * playerTouchingOpponent;
+        score += _isolatedPieceWeight * playerIsolated;
+        score += _twoInARowWeight * playerTwo;
+        score += _twoWithOneGapWeight * playerTwoGap;
+        score += _threeInARowWeight * playerThree;
+        score += _threeWithOneGapWeight * playerThreeGap;
+        score += _surroundedPieceWeight * playerSurrounded;
+        score += _playerTouchingWeight * playerTouching;
+        score += _opponentTouchingWeight * playerTouchingOpponent;
 
-        score -= _chromosome.GetWeight(ConnectFourChromosome.IsolatedPieceWeight) * opponentIsolated;
-        score -= _chromosome.GetWeight(ConnectFourChromosome.TwoInARowWeight) * opponentTwo;
-        score -= _chromosome.GetWeight(ConnectFourChromosome.TwoWithOneGapWeight) * opponentTwoGap;
-        score -= _chromosome.GetWeight(ConnectFourChromosome.ThreeInARowWeight) * opponentThree;
-        score -= _chromosome.GetWeight(ConnectFourChromosome.ThreeWithOneGapWeight) * opponentThreeGap;
-        score -= _chromosome.GetWeight(ConnectFourChromosome.SurroundedPieceWeight) * opponentSurrounded;
-        score -= _chromosome.GetWeight(ConnectFourChromosome.PlayerTouchingWeight) * opponentTouching;
-        score -= _chromosome.GetWeight(ConnectFourChromosome.OpponentTouchingWeight) * opponentTouchingPlayer;
+        score -= _isolatedPieceWeight * opponentIsolated;
+        score -= _twoInARowWeight * opponentTwo;
+        score -= _twoWithOneGapWeight * opponentTwoGap;
+        score -= _threeInARowWeight * opponentThree;
+        score -= _threeWithOneGapWeight * opponentThreeGap;
+        score -= _surroundedPieceWeight * opponentSurrounded;
+        score -= _playerTouchingWeight * opponentTouching;
+        score -= _opponentTouchingWeight * opponentTouchingPlayer;
 
         return score;
     }

@@ -133,4 +133,42 @@ public class ConnectFourGameStateTests
         Assert.That(state.IsGameWon, Is.False);
         Assert.That(state.IsGameDraw, Is.True);
     }
+
+    [Test]
+    public void DifferentStates_HaveDifferentHashCodes()
+    {
+        var state1 = new ConnectFourGameState();
+        var state2 = new ConnectFourGameState();
+
+        // Make a move in state2 using SetBoard  
+        var board = new int[ConnectFourGameState.Rows, ConnectFourGameState.Columns];
+        board[5, 0] = 1; // Player 1 drops in column 0  
+        state2.SetBoard(board);
+
+        // Hash codes should differ  
+        Assert.That(state1.GetHashCode(), Is.Not.EqualTo(state2.GetHashCode()));
+
+        // Change player in state2  
+        board[5, 0] = 0;
+        state2.SetBoard(board);
+        state2.SetCurrentPlayer(2);
+
+        // Hash codes should differ again  
+        Assert.That(state1.GetHashCode(), Is.Not.EqualTo(state2.GetHashCode()));
+    }
+
+    [Test]
+    public void IdenticalStates_HaveSameHashCode()
+    {
+        var state1 = new ConnectFourGameState();
+        var state2 = new ConnectFourGameState();
+
+        // Both are initial states
+        Assert.That(state1.GetHashCode(), Is.EqualTo(state2.GetHashCode()));
+
+        // Make the same move in both
+        state1.Board[5, 0] = 1;
+        state2.Board[5, 0] = 1;
+        Assert.That(state1.GetHashCode(), Is.EqualTo(state2.GetHashCode()));
+    }
 }
