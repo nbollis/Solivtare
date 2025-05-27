@@ -1,11 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using SolvitaireCore.ConnectFour;
 using SolvitaireCore.TicTacToe;
 
 namespace SolvitaireGUI;
 public class TicTacToeGameStateViewModel : TwoPlayerGameStateViewModel<TicTacToeGameState, TicTacToeMove>
 {
+    public int BoardSize => TicTacToeGameState.Size;
+    public int BoardCellCount => BoardSize * BoardSize;
+
     private int _hoveredColumnIndex = -1;
     public int HoveredColumnIndex
     {
@@ -34,7 +36,7 @@ public class TicTacToeGameStateViewModel : TwoPlayerGameStateViewModel<TicTacToe
     public override void UpdateBoard()
     {
         for (int i = 0; i < FlatBoardCells.Count; i++)
-            FlatBoardCells[i] = GameState.Board[i / ConnectFourGameState.Columns, i % ConnectFourGameState.Columns];
+            FlatBoardCells[i] = GameState.Board[i / TicTacToeGameState.Size, i % TicTacToeGameState.Size];
         OnPropertyChanged(nameof(WinningCellIndices));
         OnPropertyChanged(nameof(FlatBoardCells));
     }
@@ -46,5 +48,13 @@ public class TicTacToeGameStateModel : TicTacToeGameStateViewModel
     public static TicTacToeGameStateModel Instance { get; } = new();
     public TicTacToeGameStateModel() : base(new())
     {
+        var move = new TicTacToeMove(1, 1);
+        ApplyMove(move);
+        move = new TicTacToeMove(0, 0);
+        ApplyMove(move);
+        move = new TicTacToeMove(2, 2);
+        ApplyMove(move);
+        move = new TicTacToeMove(0, 1);
+        ApplyMove(move);
     }
 }
