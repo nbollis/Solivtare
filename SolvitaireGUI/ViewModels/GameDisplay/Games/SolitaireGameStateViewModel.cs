@@ -22,7 +22,8 @@ public class SolitaireGameStateViewModel : GameStateViewModel<SolitaireGameState
 
     public ICommand CopyGameStateAsJsonCommand { get; }
 
-    public SolitaireGameStateViewModel(SolitaireGameState gameState) : base(gameState)
+    public SolitaireGameStateViewModel(SolitaireGameState gameState, IGameController<SolitaireGameState, SolitaireMove>? controller = null) 
+        : base(gameState, controller)
     {
         BaseGameState = gameState;
         Sync();
@@ -161,7 +162,7 @@ public class SolitaireGameStateModel : SolitaireGameStateViewModel
         _solitaireGameState.DealCards(deck);
     }
 
-    public SolitaireGameStateModel() : base(_solitaireGameState)
+    public SolitaireGameStateModel() : base(_solitaireGameState, null!)
     {
         Sync();
     }

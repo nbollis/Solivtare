@@ -72,5 +72,14 @@
                 <!-- Add more as needed -->
             </ContentControl.Resources>
         </ContentControl>
+
+        <!-- Top Right Panel: Fine Controls -->
+        <Grid Grid.Row="0" Grid.Column="4">
+            
+            <CheckBox IsChecked="{Binding EnableAnimations}" Content="Enable Animations?" 
+                      HorizontalAlignment="Right" 
+                      HorizontalContentAlignment="Center"
+                      VerticalContentAlignment="Center"/>
+        </Grid>
     </Grid>
 </UserControl>

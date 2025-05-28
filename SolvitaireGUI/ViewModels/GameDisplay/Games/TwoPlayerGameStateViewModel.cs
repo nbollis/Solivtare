@@ -14,7 +14,8 @@ public abstract class TwoPlayerGameStateViewModel<TGameState, TMove> : GameState
     public bool IsGameDraw => GameState.IsGameDraw;
     public int? WinningPlayer => GameState.WinningPlayer;
 
-    protected TwoPlayerGameStateViewModel(TGameState gameState) : base(gameState)
+    protected TwoPlayerGameStateViewModel(TGameState gameState, IGameController<TGameState, TMove>? controller = null) 
+        : base(gameState, controller)
     {
     }
 

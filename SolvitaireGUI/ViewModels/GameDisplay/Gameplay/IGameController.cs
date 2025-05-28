@@ -13,4 +13,5 @@ public interface IGameController<out TGameState, TMove>
     void UndoMove();
     void ApplyAgentMove(int playerNumber);
     List<TMove> GetLegalMoves();
+    bool EnableAnimations { get; set; }
 }

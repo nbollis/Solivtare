@@ -12,32 +12,13 @@ public class PlayerToBrushMultiConverter : IMultiValueConverter
     public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
     {
         // value 0 is player number, 1 is player 1 color, 2 is player 2 color, 3 is background color (optional)
-
-        if (values.Length < 3) return Brushes.Black;
-        int player = values[0] is int p ? p : 0;
-        var player1Color = values[1] as Color? ?? Colors.Blue;
-        var player2Color = values[2] as Color? ?? Colors.Red;
-
-        // Bind default background color to App.xaml resource  
-        var backgroundBrush = values.Length > 3
-            ? values[3] switch
-            {
-                Brush brush => brush,
-                Color color => new SolidColorBrush(color),
-                _ => Application.Current.Resources["BackgroundColor"] as Brush
-            }
-            : Application.Current.Resources["BackgroundColor"] as Brush;
-
-        var player1Brush = new SolidColorBrush(player1Color);
-        var player2Brush = new SolidColorBrush(player2Color);
-
-        return player switch
-        {
-            0 => backgroundBrush,
-            1 => player1Brush,
-            2 => player2Brush,
-            _ => Brushes.Black
-        } ?? Brushes.Black;
+        if (values.Length < 3 || values[0] is not int value)
+            return Brushes.Transparent;
+        if (value == 1 && values[1] is Color p1)
+            return new SolidColorBrush(p1);
+        if (value == 2 && values[2] is Color p2)
+            return new SolidColorBrush(p2);
+        return Brushes.Transparent; // Empty slot
     }
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

@@ -5,31 +5,27 @@ using System.Windows.Media;
 
 namespace SolvitaireGUI;
 
-public class FlatIndexToRowConverter : IValueConverter
-{
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        int flatIndex = (int)value;
-        int boardSize = parameter is int n ? n : 3;
-        return flatIndex / boardSize;
-    }
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
-}
-
 public class FlatIndexToColConverter : IValueConverter
 {
+    public int Columns { get; set; } = 3;
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        int flatIndex = (int)value;
-        int boardSize = parameter is int n ? n : 3;
-        return flatIndex % boardSize;
-    }
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
+        => value is int i ? i % Columns : 0;
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
+public class FlatIndexToRowConverter : IValueConverter
+{
+    public int Rows { get; set; } = 3;
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is int i ? i / Rows : 0;
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
 }
 
 public class PlayerToSymbolConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         return value switch
         {
@@ -38,7 +34,7 @@ public class PlayerToSymbolConverter : IValueConverter
             _ => ""
         };
     }
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
 }
 
 public class CellBorderThicknessConverter : IMultiValueConverter

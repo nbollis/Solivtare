@@ -12,8 +12,7 @@ where TAgent : class, IAgent<TGameState, TMove>
 
     public override ICommand ResetGameCommand { get; }
     public override ICommand NewGameCommand { get; }
-    public OnePlayerCardGameViewModel(TGameState gameState) : this(gameState.ToViewModel<TGameState, TMove>()) { }
-    public OnePlayerCardGameViewModel(GameStateViewModel<TGameState, TMove> gameStateViewModel) : base(gameStateViewModel)
+    public OnePlayerCardGameViewModel(TGameState gameState) : base(gameState)
     {
         _deck ??= new ObservableStandardDeck(23);
         _deck.Shuffle();
@@ -36,7 +35,7 @@ where TAgent : class, IAgent<TGameState, TMove>
         var newGameState = new TGameState();
         newGameState.DealCards(_deck);
 
-        GameStateViewModel = newGameState.ToViewModel<TGameState, TMove>();
+        GameStateViewModel = newGameState.ToViewModel(this);
         ShadowGameState = (TGameState)CurrentGameState.Clone();
         GameStateViewModel.UpdateBoard();
 
@@ -69,13 +68,11 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
     public bool IsGameActive => !GameStateViewModel.IsGameWon;
     public int CurrentPlayer => 1; // Single player
 
-    public OnePlayerGameViewModel(TGameState gameState) : this(gameState.ToViewModel<TGameState, TMove>()) { }
-
-    public OnePlayerGameViewModel(GameStateViewModel<TGameState, TMove> gameStateViewModel)
+    public OnePlayerGameViewModel(TGameState gameState)
     {
-        GameStateViewModel = gameStateViewModel;
+        GameStateViewModel = gameState.ToViewModel(this);
         ShadowGameState = (TGameState)CurrentGameState.Clone();
-        var possibleAgents = gameStateViewModel.GameState.GetPossibleAgents<TGameState, TMove, TAgent>();
+        var possibleAgents = gameState.GetPossibleAgents<TGameState, TMove, TAgent>();
         AgentPanel = new AgentPanelViewModel<TGameState, TMove, TAgent>("Agent", 1, [.. possibleAgents], this);
 
         ResetGameCommand = new RelayCommand(ResetGame);
@@ -127,11 +124,29 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
         GameStateViewModel.UpdateBoard();
         AgentPanel.RefreshLegalMoves();
     }
+
+    #region Gui Control
+
+    private bool _enableAnimations = true;
+    public bool EnableAnimations
+    {
+        get => _enableAnimations;
+        set
+        {
+            if (_enableAnimations != value)
+            {
+                _enableAnimations = value;
+                OnPropertyChanged(nameof(EnableAnimations));
+            }
+        }
+    }
+
+    #endregion
 }
 
-public class OnePlayerGameModel : OnePlayerGameViewModel<SolitaireGameState, SolitaireMove, IAgent<SolitaireGameState, SolitaireMove>>
+public class OnePlayerGameModel()
+    : OnePlayerGameViewModel<SolitaireGameState, SolitaireMove, IAgent<SolitaireGameState, SolitaireMove>>(
+        new SolitaireGameState())
 {
     public static OnePlayerGameModel Instance => new OnePlayerGameModel();
-
-    public OnePlayerGameModel() : base(new SolitaireGameStateModel()) { }
 }

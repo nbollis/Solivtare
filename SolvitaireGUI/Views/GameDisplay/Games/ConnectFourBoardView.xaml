@@ -8,80 +8,95 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <local:PlayerToBrushMultiConverter x:Key="PlayerToBrushMultiConverter" />
-        <local:FlatIndexToColumnConverter x:Key="FlatIndexToColumnConverter" />
+        <local:FlatIndexToColConverter x:Key="FlatIndexToColConverter" Columns="7"/>
         <local:WinningCellToBrushConverter x:Key="WinningCellToBrushConverter"/>
         <local:IsLastMoveCellConverter x:Key="IsLastMoveCellConverter"/>
-        <local:ItemToIndexConverter x:Key="ItemToIndexConverter"/>
+
     </UserControl.Resources>
     <Grid>
         <Border Background="{StaticResource DarkBorderColor}" CornerRadius="18" Padding="12" BorderBrush="Black" BorderThickness="3">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="10" ShadowDepth="4" Opacity="0.4"/>
             </Border.Effect>
-            <ItemsControl ItemsSource="{Binding FlatBoardCells}" AlternationCount="42">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Rows="6" Columns="7"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border MouseEnter="Cell_MouseEnter"
-                                MouseLeave="Cell_MouseLeave"
-                                MouseLeftButtonUp="Cell_MouseLeftButtonUp"
-                                Tag="{Binding (ItemsControl.AlternationIndex), 
-                                  RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
-                                  Converter={StaticResource FlatIndexToColumnConverter}}">
-                            <Ellipse Margin="6" Stroke="White" StrokeThickness="2">
-                                <Ellipse.RenderTransform>
-                                    <TranslateTransform x:Name="DiscTranslateTransform" Y="0"/>
-                                </Ellipse.RenderTransform>
-                                <Ellipse.Fill>
-                                    <MultiBinding Converter="{StaticResource PlayerToBrushMultiConverter}">
-                                        <Binding Path="." />
-                                        <Binding Path="DataContext.Player1Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
-                                        <Binding Path="DataContext.Player2Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
-                                        <!--<Binding Path="" Source="{StaticResource DarkBorderColor}" />-->
-                                    </MultiBinding>
-                                </Ellipse.Fill>
-                                <Ellipse.Effect>
-                                    <DropShadowEffect BlurRadius="10" ShadowDepth="4" Opacity="0.4"/>
-                                </Ellipse.Effect>
-                            </Ellipse>
+            <Border Background="Blue" 
+                    CornerRadius="18" Padding="12" BorderBrush="{StaticResource DarkBorderColor}" 
+                    BorderThickness="3">
 
-                            <Border.Background>
-                                <MultiBinding Converter="{StaticResource WinningCellToBrushConverter}">
-                                    <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}" Path="(ItemsControl.AlternationIndex)"/>
-                                    <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" Path="DataContext.WinningCellIndices"/>
-                                </MultiBinding>
-                            </Border.Background>
-                        </Border>
-                        <DataTemplate.Triggers>
-                            <DataTrigger Value="True">
-                                <DataTrigger.Binding>
-                                    <MultiBinding Converter="{StaticResource IsLastMoveCellConverter}">
-                                        <Binding Path="." />
-                                        <Binding Path="DataContext.FlatBoardCells" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
-                                        <Binding Path="DataContext.LastMoveFlatIndex" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                <ItemsControl ItemsSource="{Binding BoardCells}" 
+                              AlternationCount="42">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="6" Columns="7"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border MouseEnter="Cell_MouseEnter"
+                                    MouseLeave="Cell_MouseLeave"
+                                    MouseLeftButtonUp="Cell_MouseLeftButtonUp"
+                                    Tag="{Binding (ItemsControl.AlternationIndex), 
+                                      RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
+                                      Converter={StaticResource FlatIndexToColConverter}}">
+                                <Border.Background>
+                                    <MultiBinding Converter="{StaticResource WinningCellToBrushConverter}">
+                                        <Binding Path="(ItemsControl.AlternationIndex)" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}" />
+                                        <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" Path="DataContext.WinningCellIndices"/>
                                     </MultiBinding>
-                                </DataTrigger.Binding>
-                                <DataTrigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="DiscTranslateTransform"
-                                                Storyboard.TargetProperty="Y"
-                                                From="-800" To="0" Duration="0:0:0.4" 
-                                                AccelerationRatio="0.3" DecelerationRatio="0.7"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </DataTrigger.EnterActions>
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
+                                </Border.Background>
 
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                                <Grid>
+                                    <!-- White rim (for the hole) -->
+                                    <Ellipse Stroke="White" StrokeThickness="2" Fill="Transparent" Margin="4"/>
+                                    <!-- Background ellipse (the "hole" fill) -->
+                                    <Ellipse Fill="{StaticResource BackgroundColor}" Margin="6"/>
+
+                                    <!-- Token ellipse (animated) -->
+                                    <Ellipse Margin="8" Stroke="White" StrokeThickness="0">
+                                        <Ellipse.RenderTransform>
+                                            <TranslateTransform x:Name="DiscTranslateTransform" Y="0"/>
+                                        </Ellipse.RenderTransform>
+                                        <Ellipse.Fill>
+                                            <MultiBinding Converter="{StaticResource PlayerToBrushMultiConverter}">
+                                                <Binding Path="Value"/>
+                                                <Binding Path="DataContext.Player1Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                                                <Binding Path="DataContext.Player2Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                                                 <!--<Binding Path="" Source="{StaticResource DarkBorderColor}" />-->
+                                            </MultiBinding>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Effect>
+                                            <DropShadowEffect BlurRadius="10" ShadowDepth="4" Opacity="0.4"/>
+                                        </Ellipse.Effect>
+                                    </Ellipse>
+                                </Grid>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Value="True">
+                                    <DataTrigger.Binding>
+                                        <MultiBinding Converter="{StaticResource IsLastMoveCellConverter}">
+                                            <Binding Path="Row"/>
+                                            <Binding Path="Col"/>
+                                            <Binding Path="DataContext.LastMove" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                                            <Binding Path="DataContext.EnableAnimations" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                                        </MultiBinding>
+                                    </DataTrigger.Binding>
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation
+                                                    Storyboard.TargetName="DiscTranslateTransform"
+                                                    Storyboard.TargetProperty="Y"
+                                                    From="-400" To="0" Duration="0:0:0.5" 
+                                                    AccelerationRatio="0.3" DecelerationRatio="0.7"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
         </Border>
     </Grid>
 </UserControl>

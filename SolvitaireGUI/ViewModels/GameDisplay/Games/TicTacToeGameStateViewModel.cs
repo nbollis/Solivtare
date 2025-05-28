@@ -28,7 +28,8 @@ public class TicTacToeGameStateViewModel : TwoPlayerGameStateViewModel<TicTacToe
     public HashSet<int> WinningCellIndices =>
         [..GameState.WinningCells.Select(cell => cell.Row * TicTacToeGameState.Size + cell.Col)];
 
-    public TicTacToeGameStateViewModel(TicTacToeGameState gameState) : base(gameState)
+    public TicTacToeGameStateViewModel(TicTacToeGameState gameState, IGameController<TicTacToeGameState, TicTacToeMove>? controller = null) 
+        : base(gameState, controller)
     {
         for (int i = 0; i < TicTacToeGameState.Size * TicTacToeGameState.Size; i++)
             FlatBoardCells[i] = gameState.Board[i / TicTacToeGameState.Size, i % TicTacToeGameState.Size];
@@ -49,7 +50,7 @@ public class TicTacToeGameStateViewModel : TwoPlayerGameStateViewModel<TicTacToe
 public class TicTacToeGameStateModel : TicTacToeGameStateViewModel
 {
     public static TicTacToeGameStateModel Instance { get; } = new();
-    public TicTacToeGameStateModel() : base(new())
+    public TicTacToeGameStateModel() : base(new(), null!)
     {
         var move = new TicTacToeMove(1, 1);
         ApplyMove(move);

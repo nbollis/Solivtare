@@ -6,12 +6,15 @@ public abstract class GameStateViewModel<TGameState, TMove> : BaseViewModel
     where TGameState : IGameState<TMove>
     where TMove : IMove
 {
+    protected IGameController<TGameState, TMove>? GameController { get; set; }
     public TGameState GameState { get; }
     public bool IsGameWon => GameState.IsGameWon;
+    public bool EnableAnimations => GameController?.EnableAnimations ?? true;
 
-    protected GameStateViewModel(TGameState gameState)
+    protected GameStateViewModel(TGameState gameState, IGameController<TGameState, TMove>? controller)
     {
         GameState = gameState;
+        GameController= controller;
     }
 
     public virtual void ApplyMove(TMove move)

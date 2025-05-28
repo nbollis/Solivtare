@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 
@@ -43,56 +42,20 @@ public class WinningCellToBrushConverter : IMultiValueConverter
         throw new NotImplementedException();
     }
 }
-public class FlatIndexToColumnConverter : BaseValueConverter<FlatIndexToColumnConverter>
-{
-    public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-            if (value is int index)
-                return index % 7; // 7 columns
-            return 0;
-    }
-
-    public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-public class ItemToIndexConverter : IMultiValueConverter
-{
-    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-    {
-        var item = values[0];
-        var collection = values[1] as IEnumerable;
-        if (collection == null) return -1;
-        int index = 0;
-        foreach (var obj in collection)
-        {
-            if (Equals(obj, item)) return index;
-            index++;
-        }
-        return -1;
-    }
-
-    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        => throw new NotImplementedException();
-}
-
 public class IsLastMoveCellConverter : IMultiValueConverter
 {
+
     public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
     {
-        // values[0] = item, values[1] = collection, values[2] = LastMoveFlatIndex
-        if (values.Length < 3) return false;
-        var item = values[0];
-        var collection = values[1] as IEnumerable;
-        if (collection == null || values[2] is not int lastMoveIndex) return false;
-        int index = 0;
-        foreach (var obj in collection)
-        {
-            if (Equals(obj, item))
-                return index == lastMoveIndex;
-            index++;
-        }
+        if (values.Length < 4) return false;
+        if (values[0] is not int cellRow ||
+            values[1] is not int cellCol ||
+            values[2] is not (int lastMoveRow, int lastMoveCol) ||
+            values[3] is not true)
+            return false;
+
+        if (cellRow == lastMoveRow && cellCol == lastMoveCol)
+            return true;
         return false;
     }
 

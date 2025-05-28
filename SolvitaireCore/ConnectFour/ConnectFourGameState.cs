@@ -10,7 +10,7 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
     // Cacheing to reduce redundant calculations. 
     private bool _cachedIsGameWon = false;
     private bool _cachedIsGameDraw = false;
-    private (int Row, int Col)? _lastMove = null;
+    public (int Row, int Col)? LastMove = null;
     private int? _cachedWinningPlayer = null;
     private readonly List<(int Row, int Col)> _cachedWinningCells = new();
     private int[] _topRow = Enumerable.Repeat(Rows - 1, Columns).ToArray();
@@ -49,7 +49,7 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
             throw new InvalidOperationException("Invalid move: column full");
         Board[row, move.Column] = CurrentPlayer;
 
-        _lastMove = (row, move.Column);
+        LastMove = (row, move.Column);
         CurrentPlayer = 3 - CurrentPlayer;
         _topRow[move.Column]--;
         UpdateWinAndDrawCache();
@@ -64,7 +64,7 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
         CurrentPlayer = 3 - CurrentPlayer;
 
         _topRow[move.Column]++;
-        _lastMove = null;
+        LastMove = null;
         UpdateWinAndDrawCache();
     }
 
@@ -74,7 +74,7 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
         CurrentPlayer = 1;
         MovesMade = 0;
         _topRow = Enumerable.Repeat(Rows - 1, Columns).ToArray();
-        _lastMove = null;
+        LastMove = null;
         UpdateWinAndDrawCache();
     }
 
@@ -108,10 +108,10 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
         _cachedWinningPlayer = null;
         _cachedWinningCells.Clear();
 
-        if (_lastMove.HasValue)
+        if (LastMove.HasValue)
         {
-            int row = _lastMove.Value.Row;
-            int col = _lastMove.Value.Col;
+            int row = LastMove.Value.Row;
+            int col = LastMove.Value.Col;
             int player = Board[row, col];
             if (HasWinningLine(row, col, player))
             {

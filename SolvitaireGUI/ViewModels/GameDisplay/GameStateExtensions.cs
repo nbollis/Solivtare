@@ -7,15 +7,22 @@ namespace SolvitaireGUI;
 
 public static class GameStateExtensions
 {
-    public static GameStateViewModel<TGameState, TMove> ToViewModel<TGameState, TMove>(this TGameState gameState)
+    public static GameStateViewModel<TGameState, TMove> ToViewModel<TGameState, TMove>(this TGameState gameState,
+        IGameController<TGameState, TMove>? controller = null)
         where TGameState : IGameState<TMove>
         where TMove : IMove
     {
         return gameState switch
         {
-            ConnectFourGameState connectFourGameState => (GameStateViewModel<TGameState, TMove>)(object)new ConnectFourGameStateViewModel(connectFourGameState),
-            TicTacToeGameState ticTacToeGameState => (GameStateViewModel<TGameState, TMove>)(object)new TicTacToeGameStateViewModel(ticTacToeGameState),
-            SolitaireGameState solitaireGameState => (GameStateViewModel<TGameState, TMove>)(object)new SolitaireGameStateViewModel(solitaireGameState),
+            ConnectFourGameState connectFourGameState => (GameStateViewModel<TGameState, TMove>)
+                (object)new ConnectFourGameStateViewModel(connectFourGameState,
+                    (IGameController<ConnectFourGameState, ConnectFourMove>)controller!),
+            TicTacToeGameState ticTacToeGameState => (GameStateViewModel<TGameState, TMove>)
+                (object)new TicTacToeGameStateViewModel(ticTacToeGameState,
+                    (IGameController<TicTacToeGameState, TicTacToeMove>)controller!),
+            SolitaireGameState solitaireGameState => (GameStateViewModel<TGameState, TMove>)
+                (object)new SolitaireGameStateViewModel(solitaireGameState,
+                    (IGameController<SolitaireGameState, SolitaireMove>)controller!),
             _ => throw new NotImplementedException($"No view model for {typeof(TGameState).Name}"),
         };
     }
@@ -44,14 +51,18 @@ public static class GameStateExtensions
         }
     }
 
-    public static TwoPlayerGameStateViewModel<TGameState, TMove> ToTwoPlayerViewModel<TGameState, TMove>(this TGameState gameState)
+    public static TwoPlayerGameStateViewModel<TGameState, TMove> ToTwoPlayerViewModel<TGameState, TMove>(this TGameState gameState, IGameController<TGameState, TMove>? controller = null)
         where TGameState : ITwoPlayerGameState<TMove>
         where TMove : IMove
     {
         return gameState switch
         {
-            ConnectFourGameState connectFourGameState => (TwoPlayerGameStateViewModel<TGameState, TMove>)(object)new ConnectFourGameStateViewModel(connectFourGameState),
-            TicTacToeGameState ticTacToeGameState => (TwoPlayerGameStateViewModel<TGameState, TMove>)(object)new TicTacToeGameStateViewModel(ticTacToeGameState),
+            ConnectFourGameState connectFourGameState => (TwoPlayerGameStateViewModel<TGameState, TMove>)
+                (object)new ConnectFourGameStateViewModel(connectFourGameState,
+                    (IGameController<ConnectFourGameState, ConnectFourMove>)controller!),
+            TicTacToeGameState ticTacToeGameState => (TwoPlayerGameStateViewModel<TGameState, TMove>)
+                (object)new TicTacToeGameStateViewModel(ticTacToeGameState,
+                    (IGameController<TicTacToeGameState, TicTacToeMove>)controller!),
             _ => throw new NotImplementedException($"No view model for {typeof(TGameState).Name}"),
         };
     }

@@ -57,7 +57,8 @@ public class GameHostViewModel : BaseViewModel
 
             case GameType.Solitaire:
                 // Assuming SolitaireGameState and its view model are implemented
-                GameControllerViewModel = new OnePlayerCardGameViewModel<SolitaireGameState, SolitaireMove, IAgent<SolitaireGameState, SolitaireMove>>(new SolitaireGameStateViewModel(new SolitaireGameState()));
+                GameControllerViewModel = new OnePlayerCardGameViewModel<SolitaireGameState, SolitaireMove, 
+                    IAgent<SolitaireGameState, SolitaireMove>>(new SolitaireGameState());
                 break;
 
         }

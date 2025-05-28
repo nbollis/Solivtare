@@ -60,3 +60,20 @@ public abstract class BaseValueConverter<T> : MarkupExtension, IValueConverter
     #endregion
 }
 
+public class DivideIntConverter : IValueConverter
+{
+    public int Divisor { get; set; }
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is int i ? i / Divisor : 0;
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
+public class ModIntConverter : IValueConverter
+{
+    public int Modulus { get; set; }
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is int i ? i % Modulus : 0;
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}

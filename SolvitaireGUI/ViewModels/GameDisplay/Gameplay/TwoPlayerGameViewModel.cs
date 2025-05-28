@@ -3,7 +3,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
-using Color = System.Windows.Media.Color;
 
 namespace SolvitaireGUI;
 
@@ -115,10 +114,28 @@ public class TwoPlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
 
     #endregion
 
+    #region Gui Control
+
+    private bool _enableAnimations = true;
+    public bool EnableAnimations
+    {
+        get => _enableAnimations;
+        set
+        {
+            if (_enableAnimations != value)
+            {
+                _enableAnimations = value;
+                OnPropertyChanged(nameof(EnableAnimations));
+            }
+        }
+    }
+
+    #endregion
+
     public TwoPlayerGameViewModel(TGameState gameState)
     {
         // Gameplay
-        GameStateViewModel = gameState.ToTwoPlayerViewModel<TGameState, TMove>();
+        GameStateViewModel = gameState.ToTwoPlayerViewModel(this);
         ResetGameCommand = new RelayCommand(ResetGame);
         UndoMoveCommand = new RelayCommand(UndoMove);
         SwapPlayersCommand = new RelayCommand(SwapPlayers);
