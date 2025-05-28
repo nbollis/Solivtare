@@ -21,7 +21,7 @@
             Padding="4"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-            Background="{StaticResource BackgroundColor}">
+            Background="{StaticResource BackgroundDarkColor}">
             <ItemsControl ItemsSource="{Binding FlatBoardCells}" AlternationCount="{Binding BoardCellCount}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -48,7 +48,7 @@
                                 </MultiBinding>
                             </Border.Background>
                         <TextBlock Text="{Binding ., Converter={StaticResource PlayerToSymbolConverter}}"
-                                   FontSize="48"
+                                   FontSize="92"
                                    FontWeight="Bold"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center">

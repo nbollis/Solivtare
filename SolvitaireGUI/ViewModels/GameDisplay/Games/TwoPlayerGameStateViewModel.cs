@@ -1,4 +1,6 @@
+using System.Windows.Media;
 using SolvitaireCore;
+using Color = System.Windows.Media.Color;
 
 namespace SolvitaireGUI;
 
@@ -37,4 +39,21 @@ public abstract class TwoPlayerGameStateViewModel<TGameState, TMove> : GameState
         OnPropertyChanged(nameof(WinningPlayer));
         OnPropertyChanged(nameof(MovesMade));
     }
+
+
+    #region Player Colors
+    public Color Player1Color { get; set; } = Colors.Red;
+    public Color Player2Color { get; set; } = Colors.Yellow;
+
+    public void SetPlayerColor(int player, Color color)
+    {
+        if (player == 1)
+            Player1Color = color;
+        else if (player == 2)
+            Player2Color = color;
+        OnPropertyChanged(nameof(Player1Color));
+        OnPropertyChanged(nameof(Player2Color));
+    }
+
+    #endregion
 }

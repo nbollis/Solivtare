@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Windows.Media;
 using SolvitaireCore.TicTacToe;
 
 namespace SolvitaireGUI;
@@ -31,6 +32,8 @@ public class TicTacToeGameStateViewModel : TwoPlayerGameStateViewModel<TicTacToe
     {
         for (int i = 0; i < TicTacToeGameState.Size * TicTacToeGameState.Size; i++)
             FlatBoardCells[i] = gameState.Board[i / TicTacToeGameState.Size, i % TicTacToeGameState.Size];
+        SetPlayerColor(1, Colors.Maroon);
+        SetPlayerColor(2, Colors.BlueViolet);
     }
 
     public override void UpdateBoard()

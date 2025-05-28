@@ -5,10 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SolvitaireGUI"
              mc:Ignorable="d" d:DataContext="{x:Static local:ConnectFourGameStateModel.Instance}"
-
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <local:PlayerToBrushConverter x:Key="PlayerToBrushConverter" />
+        <local:PlayerToBrushMultiConverter x:Key="PlayerToBrushMultiConverter" />
         <local:FlatIndexToColumnConverter x:Key="FlatIndexToColumnConverter" />
         <local:WinningCellToBrushConverter x:Key="WinningCellToBrushConverter"/>
     </UserControl.Resources>
@@ -28,8 +27,15 @@
                             Tag="{Binding (ItemsControl.AlternationIndex), 
                               RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
                               Converter={StaticResource FlatIndexToColumnConverter}}">
-                        <Ellipse Margin="12"
-                                 Fill="{Binding ., Converter={StaticResource PlayerToBrushConverter}}"/>
+                        <Ellipse Margin="12">
+                            <Ellipse.Fill>
+                                <MultiBinding Converter="{StaticResource PlayerToBrushMultiConverter}">
+                                    <Binding Path="." />
+                                    <Binding Path="DataContext.Player1Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                                    <Binding Path="DataContext.Player2Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                                </MultiBinding>
+                            </Ellipse.Fill>
+                        </Ellipse>
                         <Border.Background>
                             <MultiBinding Converter="{StaticResource WinningCellToBrushConverter}">
                                 <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}" Path="(ItemsControl.AlternationIndex)"/>

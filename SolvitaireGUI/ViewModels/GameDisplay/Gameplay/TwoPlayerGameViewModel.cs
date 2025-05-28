@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using System.Windows.Media;
 using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
+using Color = System.Windows.Media.Color;
 
 namespace SolvitaireGUI;
 
@@ -126,6 +128,11 @@ public class TwoPlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
         Player2Panel = new AgentPanelViewModel<TGameState, TMove, TAgent>("Player 2", 2, new ObservableCollection<TAgent>(gameState.GetPossibleAgents<TGameState, TMove, TAgent>()), this);
         Player1Panel.RefreshLegalMoves();
         Player2Panel.RefreshLegalMoves();
+
+        Player1Panel.PlayerColor = GameStateViewModel.Player1Color;
+        Player2Panel.PlayerColor = GameStateViewModel.Player2Color;
+        Player1Panel.SetPlayerColorCallback = (player, color) => GameStateViewModel.SetPlayerColor(player, color);
+        Player2Panel.SetPlayerColorCallback = (player, color) => GameStateViewModel.SetPlayerColor(player, color);
     }
 }
 

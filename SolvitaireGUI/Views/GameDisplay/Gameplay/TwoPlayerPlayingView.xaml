@@ -11,11 +11,11 @@
     </UserControl.Resources>
     <Grid Background="{StaticResource BackgroundColor}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2.5*"/>
+            <ColumnDefinition Width="2.8*"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="5*"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="2.5*"/>
+            <ColumnDefinition Width="2.8*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="80"/>

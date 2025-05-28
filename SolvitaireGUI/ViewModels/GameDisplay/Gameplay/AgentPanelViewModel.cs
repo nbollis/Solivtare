@@ -1,9 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
+using System.Windows.Media;
 using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
 using SolvitaireGenetics;
 using SolvitaireIO.Database.Models;
+using Color = System.Windows.Media.Color;
 
 namespace SolvitaireGUI;
 
@@ -267,6 +269,22 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
         }
 
         OnPropertyChanged(nameof(IsMyTurn));
+    }
+    public Action<int, Color>? SetPlayerColorCallback { get; set; }
+
+    private Color _playerColor;
+    public Color PlayerColor
+    {
+        get => _playerColor;
+        set
+        {
+            if (_playerColor != value)
+            {
+                _playerColor = value;
+                OnPropertyChanged(nameof(PlayerColor));
+                SetPlayerColorCallback?.Invoke(_playerNumber, _playerColor);
+            }
+        }
     }
 
     #endregion

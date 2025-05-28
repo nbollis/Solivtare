@@ -69,7 +69,7 @@ public class WinningCellToBrushTicTacConverter : IMultiValueConverter
     {
         if (values.Length == 2 && values[0] is int index && values[1] is HashSet<int> winningIndices)
         {
-            return winningIndices.Contains(index) ? Brushes.Gold : Brushes.Transparent;
+            return winningIndices.Contains(index) ? Brushes.Khaki : Brushes.Transparent;
         }
         return Brushes.Transparent; // Default brush if inputs are invalid  
     }

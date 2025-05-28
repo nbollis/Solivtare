@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SolvitaireGUI"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              d:DataContext="{x:Static local:AgentPanelModel.Instance}"
              mc:Ignorable="d" 
              d:DesignHeight="350" d:DesignWidth="300"
@@ -15,7 +16,7 @@
         <local:PlayerTypeAgentModeToVisibilityConverter x:Key="PlayerTypeAgentModeToVisibilityConverter" />
         <local:PlayerTypeHumanModeToVisibilityConverter x:Key="PlayerTypeHumanModeToVisibilityConverter" />
         <local:NullToBoolConverter x:Key="NullToBoolConverter" />
-        <local:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <local:ColorToBrushConverter x:Key="ColorToBrushConverter" />
     </UserControl.Resources>
 
     <GroupBox Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}">
@@ -62,6 +63,11 @@
                     <Button Content="Switch to Agent" Command="{Binding SwitchToAgentCommand}"
                             Style="{StaticResource RoundedButtonStyle}"
                             Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeHumanModeToVisibilityConverter}}" />
+
+                    <xctk:ColorPicker SelectedColor="{Binding PlayerColor, Mode=TwoWay}" 
+                                      Margin="8,0,0,0"
+                                      ShowDropDownButton="False" BorderThickness="1"
+                                      Width="24" Height="24"/>
                 </StackPanel>
 
                 <!-- Start and Stop Buttons -->
