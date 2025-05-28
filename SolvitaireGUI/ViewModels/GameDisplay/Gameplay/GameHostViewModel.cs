@@ -5,7 +5,7 @@ using SolvitaireCore.TicTacToe;
 
 namespace SolvitaireGUI;
 
-public enum GameType { ConnectFour, TicTacToe, Solitaire }
+public enum GameType { Solitaire, ConnectFour, TicTacToe }
 
 public class GameHostViewModel : BaseViewModel
 {

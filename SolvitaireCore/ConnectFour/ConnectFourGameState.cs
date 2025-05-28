@@ -94,7 +94,13 @@ public class ConnectFourGameState : BaseGameState<ConnectFourMove>,
 
 
     #region Board Parsing
-   
+
+    public int GetRowIndexOnDrop(int column)
+    {
+        int row = _topRow[column] + 1;
+        return row;
+    }
+
     private void UpdateWinAndDrawCache()
     {
         _cachedIsGameWon = false;

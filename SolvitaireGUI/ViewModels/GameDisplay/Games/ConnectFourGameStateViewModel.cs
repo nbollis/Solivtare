@@ -24,8 +24,33 @@ public class ConnectFourGameStateViewModel : TwoPlayerGameStateViewModel<Connect
                 .Select(i => gameState.Board[i / ConnectFourGameState.Columns, i % ConnectFourGameState.Columns])
         );
 
-        SetPlayerColor(1, Colors.Red);
-        SetPlayerColor(2, Colors.Yellow);
+        SetPlayerColor(1, Colors.Firebrick);
+        SetPlayerColor(2, Colors.Gold);
+    }
+
+    public int? LastMoveRow { get; set; }
+    public int? LastMoveCol { get; set; }
+    public int LastMoveFlatIndex => LastMoveRow.HasValue && LastMoveCol.HasValue
+        ? LastMoveRow.Value * 7 + LastMoveCol.Value
+        : -1;
+    public override void ApplyMove(ConnectFourMove move)
+    {
+        int row = GameState.GetRowIndexOnDrop(move.Column);
+
+        // Reset first to force trigger
+        LastMoveRow = null;
+        LastMoveCol = null;
+        OnPropertyChanged(nameof(LastMoveRow));
+        OnPropertyChanged(nameof(LastMoveCol));
+        OnPropertyChanged(nameof(LastMoveFlatIndex));
+
+        base.ApplyMove(move);
+
+        LastMoveRow = row;
+        LastMoveCol = move.Column;
+        OnPropertyChanged(nameof(LastMoveRow));
+        OnPropertyChanged(nameof(LastMoveCol));
+        OnPropertyChanged(nameof(LastMoveFlatIndex));
     }
 
     public override void UpdateBoard()

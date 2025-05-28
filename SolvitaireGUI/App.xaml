@@ -14,7 +14,10 @@
         <SolidColorBrush x:Key="BackgroundColor" Color="#edede9" />
         <SolidColorBrush x:Key="BackgroundDarkColor" Color="#e3d5ca" />
         <SolidColorBrush x:Key="BorderColor" Color="#8d99ae" />
+        <SolidColorBrush x:Key="DarkBorderColor" Color="#1E3A5C" />
         <SolidColorBrush x:Key="ForegroundColor" Color="#adc178" />
+        <SolidColorBrush x:Key="TransparentColor" Color="#00FFFFFF" />
+
 
         <SolidColorBrush x:Key="GreenAccentColor" Color="#aaf683" />
         <SolidColorBrush x:Key="BlueAccentColor" Color="#4ba3c3" />

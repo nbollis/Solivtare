@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections;
+using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 
@@ -56,4 +57,45 @@ public class FlatIndexToColumnConverter : BaseValueConverter<FlatIndexToColumnCo
         throw new NotImplementedException();
     }
 }
+public class ItemToIndexConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        var item = values[0];
+        var collection = values[1] as IEnumerable;
+        if (collection == null) return -1;
+        int index = 0;
+        foreach (var obj in collection)
+        {
+            if (Equals(obj, item)) return index;
+            index++;
+        }
+        return -1;
+    }
 
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
+public class IsLastMoveCellConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        // values[0] = item, values[1] = collection, values[2] = LastMoveFlatIndex
+        if (values.Length < 3) return false;
+        var item = values[0];
+        var collection = values[1] as IEnumerable;
+        if (collection == null || values[2] is not int lastMoveIndex) return false;
+        int index = 0;
+        foreach (var obj in collection)
+        {
+            if (Equals(obj, item))
+                return index == lastMoveIndex;
+            index++;
+        }
+        return false;
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}

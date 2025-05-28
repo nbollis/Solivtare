@@ -16,7 +16,7 @@
         <local:PlayerTypeAgentModeToVisibilityConverter x:Key="PlayerTypeAgentModeToVisibilityConverter" />
         <local:PlayerTypeHumanModeToVisibilityConverter x:Key="PlayerTypeHumanModeToVisibilityConverter" />
         <local:NullToBoolConverter x:Key="NullToBoolConverter" />
-        <local:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+        <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
     </UserControl.Resources>
 
     <GroupBox Background="{StaticResource BackgroundColor}" BorderBrush="{StaticResource BorderColor}">
@@ -65,6 +65,7 @@
                             Visibility="{Binding PlayerType, Converter={StaticResource PlayerTypeHumanModeToVisibilityConverter}}" />
 
                     <xctk:ColorPicker SelectedColor="{Binding PlayerColor, Mode=TwoWay}" 
+                                      Visibility="{Binding SetPlayerColorCallback, Converter={StaticResource NullToVisibilityConverter}}"
                                       Margin="8,0,0,0"
                                       ShowDropDownButton="False" BorderThickness="1"
                                       Width="24" Height="24"/>

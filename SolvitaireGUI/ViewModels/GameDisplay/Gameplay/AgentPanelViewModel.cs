@@ -115,6 +115,14 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
             Evaluator = new AllEqualStateEvaluator<TGameState, TMove>();
         }
 
+        // If we are in a single player game, no need to set colors. Picker visibility will be bound to this. 
+        if (controller.CurrentGameState is not ITwoPlayerGameState<TMove>)
+        {
+            SetPlayerColorCallback = null;
+        }
+
+        
+
         SwitchToHumanCommand = new RelayCommand(() => PlayerType = PlayerType.Human);
         SwitchToAgentCommand = new RelayCommand(() => PlayerType = PlayerType.Agent);
         MakeMoveCommand = new RelayCommand(MakeAgentMove);
