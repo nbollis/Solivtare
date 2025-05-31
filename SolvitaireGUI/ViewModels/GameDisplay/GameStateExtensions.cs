@@ -1,5 +1,6 @@
 ﻿using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
+using SolvitaireCore.Gomoku;
 using SolvitaireCore.TicTacToe;
 using SolvitaireGenetics;
 
@@ -23,6 +24,9 @@ public static class GameStateExtensions
             SolitaireGameState solitaireGameState => (GameStateViewModel<TGameState, TMove>)
                 (object)new SolitaireGameStateViewModel(solitaireGameState,
                     (IGameController<SolitaireGameState, SolitaireMove>)controller!),
+            GomokuGameState gomokuGameState => (GameStateViewModel<TGameState, TMove>)
+                    (object)new GomokuGameStateViewModel(gomokuGameState,
+                    (IGameController<GomokuGameState, GomokuMove>)controller!),
             _ => throw new NotImplementedException($"No view model for {typeof(TGameState).Name}"),
         };
     }
@@ -48,6 +52,14 @@ public static class GameStateExtensions
                 yield return (TAgent)(IAgent<TGameState, TMove>)new MinimaxAgent<TicTacToeGameState, TicTacToeMove>(new TicTacToeHeuristicEvaluator(), 5);
                 yield return (TAgent)(IAgent<TGameState, TMove>)new RandomAgent<TGameState, TMove>();
                 break;
+
+            case GomokuGameState:
+                yield return (TAgent)(IAgent<TGameState, TMove>)new MinimaxAgent<GomokuGameState, GomokuMove>(new GomokuHeuristicEvaluator(), 1);
+                yield return (TAgent)(IAgent<TGameState, TMove>)new RandomAgent<TGameState, TMove>();
+                //yield return (TAgent)(IAgent<TGameState, TMove>)new GomokuGeneticAgent(GomokuChromosome.BestSoFar(), null, 5);
+                break;
+
+
         }
     }
 
@@ -63,6 +75,9 @@ public static class GameStateExtensions
             TicTacToeGameState ticTacToeGameState => (TwoPlayerGameStateViewModel<TGameState, TMove>)
                 (object)new TicTacToeGameStateViewModel(ticTacToeGameState,
                     (IGameController<TicTacToeGameState, TicTacToeMove>)controller!),
+            GomokuGameState gomokuGameState => (TwoPlayerGameStateViewModel<TGameState, TMove>)
+                    (object)new GomokuGameStateViewModel(gomokuGameState,
+                    (IGameController<GomokuGameState, GomokuMove>)controller!),
             _ => throw new NotImplementedException($"No view model for {typeof(TGameState).Name}"),
         };
     }

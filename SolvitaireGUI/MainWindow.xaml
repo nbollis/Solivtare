@@ -10,6 +10,8 @@
         Title="MainWindow" Height="540" Width="1120">
     <Window.Resources>
         <local:GameControllerTemplateSelector x:Key="GameControllerTemplateSelector">
+
+            <!-- Two Player Games -->
             <local:GameControllerTemplateSelector.ConnectFourTemplate>
                 <DataTemplate>
                     <local:TwoPlayerPlayingView DataContext="{Binding}" />
@@ -20,6 +22,13 @@
                     <local:TwoPlayerPlayingView DataContext="{Binding}" />
                 </DataTemplate>
             </local:GameControllerTemplateSelector.TicTacToeTemplate>
+            <local:GameControllerTemplateSelector.GomokuTemplate>
+                <DataTemplate>
+                    <local:TwoPlayerPlayingView DataContext="{Binding}" />
+                </DataTemplate>
+            </local:GameControllerTemplateSelector.GomokuTemplate>
+
+            <!-- One Player Games -->
             <local:GameControllerTemplateSelector.SolitaireTemplate>
                 <DataTemplate>
                     <local:OnePlayerPlayingView DataContext="{Binding}" />

@@ -69,6 +69,9 @@
                 <DataTemplate DataType="{x:Type local:TicTacToeGameStateViewModel}">
                     <local:TicTacToeBoardView DataContext="{Binding}" />
                 </DataTemplate>
+                <DataTemplate DataType="{x:Type local:GomokuGameStateViewModel}">
+                    <local:GomokuBoardView DataContext="{Binding}" />
+                </DataTemplate>
                 <!-- Add more as needed -->
             </ContentControl.Resources>
         </ContentControl>

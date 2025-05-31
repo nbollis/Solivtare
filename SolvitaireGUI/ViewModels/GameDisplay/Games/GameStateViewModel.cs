@@ -14,7 +14,7 @@ public abstract class GameStateViewModel<TGameState, TMove> : BaseViewModel
     protected GameStateViewModel(TGameState gameState, IGameController<TGameState, TMove>? controller)
     {
         GameState = gameState;
-        GameController= controller;
+        GameController = controller;
     }
 
     public virtual void ApplyMove(TMove move)

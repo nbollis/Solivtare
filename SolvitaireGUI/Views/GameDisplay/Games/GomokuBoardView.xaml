@@ -1,0 +1,66 @@
+﻿<UserControl x:Class="SolvitaireGUI.GomokuBoardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SolvitaireGUI"
+             mc:Ignorable="d" d:DataContext="{x:Static local:GomokuGameStateModel.Instance}"
+             d:DesignHeight="600" d:DesignWidth="600">
+    <UserControl.Resources>
+        <local:PlayerToSymbolConverter x:Key="PlayerToSymbolConverter" />
+        <local:WinningCellToBrushTicTacConverter x:Key="WinningCellToBrushConverter"/>
+        <local:CellBorderThicknessConverter x:Key="CellBorderThicknessConverter" />
+        <local:PlayerToBrushMultiConverter x:Key="PlayerToBrushMultiConverter" />
+    </UserControl.Resources>
+    <Border 
+        BorderBrush="Black"
+        BorderThickness="6"
+        CornerRadius="12"
+        Padding="4"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Background="{StaticResource BackgroundDarkColor}">
+        <ItemsControl ItemsSource="{Binding FlatBoardCells}" AlternationCount="{Binding BoardCellCount}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="{Binding BoardSize}" Columns="{Binding BoardSize}"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border MouseEnter="Cell_MouseEnter"
+                            MouseLeave="Cell_MouseLeave"
+                            MouseLeftButtonUp="Cell_MouseLeftButtonUp"
+                            Tag="{Binding (ItemsControl.AlternationIndex), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}}"
+                            BorderBrush="Black">
+                        <Border.BorderThickness>
+                            <MultiBinding Converter="{StaticResource CellBorderThicknessConverter}">
+                                <Binding Path="(ItemsControl.AlternationIndex)" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}" />
+                                <Binding Path="DataContext.BoardSize" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                            </MultiBinding>
+                        </Border.BorderThickness>
+                        <Border.Background>
+                            <MultiBinding Converter="{StaticResource WinningCellToBrushConverter}">
+                                <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}" Path="(ItemsControl.AlternationIndex)" />
+                                <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" Path="DataContext.WinningCellIndices" />
+                            </MultiBinding>
+                        </Border.Background>
+                        <TextBlock Text="{Binding ., Converter={StaticResource PlayerToSymbolConverter}}"
+                                   FontSize="32"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center">
+                            <TextBlock.Foreground>
+                                <MultiBinding Converter="{StaticResource PlayerToBrushMultiConverter}">
+                                    <Binding Path="." />
+                                    <Binding Path="DataContext.Player1Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                                    <Binding Path="DataContext.Player2Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                                </MultiBinding>
+                            </TextBlock.Foreground>
+                        </TextBlock>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Border>
+</UserControl>

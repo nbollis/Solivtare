@@ -1,11 +1,12 @@
 using System.Collections.ObjectModel;
 using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
+using SolvitaireCore.Gomoku;
 using SolvitaireCore.TicTacToe;
 
 namespace SolvitaireGUI;
 
-public enum GameType { Solitaire, ConnectFour, TicTacToe }
+public enum GameType { Solitaire, ConnectFour, TicTacToe, Gomoku }
 
 public class GameHostViewModel : BaseViewModel
 {
@@ -56,9 +57,13 @@ public class GameHostViewModel : BaseViewModel
                 break;
 
             case GameType.Solitaire:
-                // Assuming SolitaireGameState and its view model are implemented
                 GameControllerViewModel = new OnePlayerCardGameViewModel<SolitaireGameState, SolitaireMove, 
                     IAgent<SolitaireGameState, SolitaireMove>>(new SolitaireGameState());
+                break;
+
+            case GameType.Gomoku:
+                GameControllerViewModel = new TwoPlayerGameViewModel<GomokuGameState, GomokuMove,
+                    IAgent<GomokuGameState, GomokuMove>>(new GomokuGameState());
                 break;
 
         }
