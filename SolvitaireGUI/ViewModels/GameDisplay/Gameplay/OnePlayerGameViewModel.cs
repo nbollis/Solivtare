@@ -137,6 +137,7 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
             if (_enableAnimations != value)
             {
                 _enableAnimations = value;
+                GameStateViewModel.OnPropertyChanged(nameof(EnableAnimations));
                 OnPropertyChanged(nameof(EnableAnimations));
             }
         }

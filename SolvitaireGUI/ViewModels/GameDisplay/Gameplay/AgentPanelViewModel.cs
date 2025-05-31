@@ -37,7 +37,13 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
         get => _selectedAgent;
         set
         {
+            // Null occurs when we remove an agent from the available list, but it was the one that was selected. 
+            if (_selectedAgent == value || value == null) 
+                return; // Avoid redundant updates  
+
             _selectedAgent = value;
+
+            // Ensure Evaluator and MaxDepth are set before triggering property changes  
             if (_selectedAgent is ISearchAgent<TGameState, TMove> searchAgent)
             {
                 Evaluator = searchAgent.Evaluator;
@@ -46,26 +52,47 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
             else
             {
                 Evaluator = new AllEqualStateEvaluator<TGameState, TMove>();
+                MaxDepth = null; // Reset MaxDepth for non-search agents  
             }
 
-            if (_selectedAgent == _bestByGenAgent)
+            // Handle genetic agent-specific logic  
+            if (_selectedAgent != null && _selectedAgent.GetType().GetInterfaces()
+                .Where(i => i.IsGenericType)
+                .Any(i => i.GetGenericTypeDefinition() == typeof(IGeneticAgent<>)))
             {
-                SelectedAgentChromosomeViewModel = new ChromosomeViewModel(_bestChromosome!);
+                var chromosomeProperty = _selectedAgent.GetType().GetProperty("Chromosome");
+                if (chromosomeProperty != null)
+                {
+                    var chromosome = chromosomeProperty.GetValue(_selectedAgent) as Chromosome;
+                    if (chromosome != null)
+                    {
+                        SelectedAgentChromosomeViewModel = new ChromosomeViewModel(chromosome);
+                    }
+                    else
+                    {
+                        SelectedAgentChromosomeViewModel = null; // Reset if chromosome is null  
+                    }
+                }
             }
-            else if (_selectedAgent == _avgByGenAgent)
+            else
             {
-                SelectedAgentChromosomeViewModel = new ChromosomeViewModel(_avgChromosome!);
+                SelectedAgentChromosomeViewModel = null; // Reset for non-genetic agents  
             }
 
+            // Trigger property change notifications after all updates  
             OnPropertyChanged(nameof(SelectedAgent));
-            OnPropertyChanged(nameof(MaxDepth)); // Notify MaxDepth may have changed
+            OnPropertyChanged(nameof(MaxDepth)); // Notify MaxDepth may have changed  
             OnPropertyChanged(nameof(IsSearchAgent));
             OnPropertyChanged(nameof(IsGeneticAgentSelected));
         }
     }
 
     public bool IsSearchAgent => PlayerType == PlayerType.Agent && SelectedAgent is ISearchAgent<TGameState, TMove>;
-    public bool IsGeneticAgentSelected => SelectedAgent?.GetType().Name.Contains("GeneticAgent") ?? false;
+
+    public bool IsGeneticAgentSelected => _selectedAgent.GetType().GetInterfaces()
+        .Where(i => i.IsGenericType)
+        .Any(i => i.GetGenericTypeDefinition() == typeof(IGeneticAgent<>));
+
 
     public int? MaxDepth
     {
@@ -338,8 +365,6 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
     private const string AvgByGenName = "Average by Generation";
     private TAgent? _bestByGenAgent;
     private TAgent? _avgByGenAgent;
-    private Chromosome? _bestChromosome;
-    private Chromosome? _avgChromosome;
 
     public void LoadGenerationLogs(IEnumerable<GenerationLog> logs)
     {
@@ -370,14 +395,12 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
         if (gen.BestChromosome != null)
         {
             var bestChromosome = gen.BestChromosome.Create();
-            _bestChromosome = bestChromosome;
             _bestByGenAgent = bestChromosome.ToGeneticAgent<TAgent>(BestByGenName);
             AvailableAgents.Add(_bestByGenAgent);
         }
         if (gen.AverageChromosome != null)
         {
             var avgChromosome = gen.AverageChromosome.Create();
-            _avgChromosome = avgChromosome;
             _avgByGenAgent = avgChromosome.ToGeneticAgent<TAgent>(AvgByGenName);
             AvailableAgents.Add(_avgByGenAgent);
         }

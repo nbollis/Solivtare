@@ -57,7 +57,7 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
                     gameState.UndoMove(moveInfo.Move);
 
                     double score = UseMoveScoreAtRootNode
-                        ? minimaxScore + moveInfo.MoveScore
+                        ? minimaxScore /*+ moveInfo.MoveScore*/
                         : minimaxScore;
 
                     scoredMoves.Add(new ScoredMove(moveInfo.Move, score)
