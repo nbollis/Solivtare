@@ -56,38 +56,25 @@ public class ConnectFourGeneticAlgorithm : GeneticAlgorithm<ConnectFourChromosom
             localResults.Clear();
             pairings.Clear();
 
-            if (round == 0)
+
+            // Swiss pairing for subsequent rounds
+            var sorted = Population.OrderByDescending(a => scores[a]).ToList();
+            for (int i = 0; i < sorted.Count - 1; i += 2)
             {
-                // First round: each agent plays against a random agent
-                Parallel.ForEach(Population, agent =>
-                {
-                    var randomAgent = new RandomAgent<ConnectFourGameState, ConnectFourMove>();
-                    var result = PlayGames(agent, randomAgent, gamesPerPairing);
-
-                    localResults.Add((agent, result.ScoreA, result.GamesWonA, result.MovesMade));
-                    // No need to log the random agent's stats
-                });
+                var agentA = sorted[i];
+                var agentB = sorted[i + 1];
+                pairings.Add((agentA, agentB, i, i + 1));
             }
-            else
+
+            Parallel.ForEach(pairings, pairing =>
             {
-                // Swiss pairing for subsequent rounds
-                var sorted = Population.OrderByDescending(a => scores[a]).ToList();
-                for (int i = 0; i < sorted.Count - 1; i += 2)
-                {
-                    var agentA = sorted[i];
-                    var agentB = sorted[i + 1];
-                    pairings.Add((agentA, agentB, i, i + 1));
-                }
+                var (agentA, agentB, _, _) = pairing;
+                var result = PlayGames(agentA, agentB, gamesPerPairing);
 
-                Parallel.ForEach(pairings, pairing =>
-                {
-                    var (agentA, agentB, _, _) = pairing;
-                    var result = PlayGames(agentA, agentB, gamesPerPairing);
-
-                    localResults.Add((agentA, result.ScoreA, result.GamesWonA, result.MovesMade));
-                    localResults.Add((agentB, result.ScoreB, result.GamesWonB, result.MovesMade));
-                });
-            }
+                localResults.Add((agentA, result.ScoreA, result.GamesWonA, result.MovesMade));
+                localResults.Add((agentB, result.ScoreB, result.GamesWonB, result.MovesMade));
+            });
+            
 
             // Aggregate results
             foreach (var (agent, score, gamesWonCount, moves) in localResults)

@@ -105,7 +105,7 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
             faceDownTableauCount += faceDownCount;
         }
 
-        // Now combine everything using the chromosome weights:
+        // Now combine everything using the chromosome weights: 
         double score = 0.0;
         score += chromosome.GetWeight(SolitaireChromosome.LegalMoveWeightName) * legalMoveCount;
         score += chromosome.GetWeight(SolitaireChromosome.FoundationWeightName) * foundationCount;
@@ -153,8 +153,8 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
         score += chromosome.GetWeight(SolitaireChromosome.Skip_FaceUpTableauCount) * faceUpTableauCount;
         score += chromosome.GetWeight(SolitaireChromosome.Skip_FaceDownTableauCount) * faceDownTableauCount;
 
-        // Multiply by the number of moves made so far and its weight
-        score *= chromosome.GetWeight(SolitaireChromosome.MoveCountScalarName) * state.MovesMade;
+        //// Multiply by the number of moves made so far and its weight
+        //score *= chromosome.GetWeight(SolitaireChromosome.MoveCountScalarName) * state.MovesMade;
         return score;
     }
 }

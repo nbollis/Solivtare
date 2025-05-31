@@ -85,7 +85,7 @@
                                                 <DoubleAnimation
                                                     Storyboard.TargetName="DiscTranslateTransform"
                                                     Storyboard.TargetProperty="Y"
-                                                    From="-400" To="0" Duration="0:0:0.5" 
+                                                    From="-600" To="0" Duration="0:0:0.5" 
                                                     AccelerationRatio="0.3" DecelerationRatio="0.7"/>
                                             </Storyboard>
                                         </BeginStoryboard>

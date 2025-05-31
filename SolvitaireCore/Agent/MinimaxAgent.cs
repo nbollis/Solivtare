@@ -4,15 +4,17 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
     where TGameState : ITwoPlayerGameState<TMove>
     where TMove : IMove
 {
+    protected readonly bool UseMoveScoreAtRootNode;
     protected readonly Random Rand; 
     
     public int MaxDepth { get; set; }
     public StateEvaluator<TGameState, TMove> Evaluator { get; init; }
-    public MinimaxAgent(StateEvaluator<TGameState, TMove> evaluator, int maxDepth = 6)
+    public MinimaxAgent(StateEvaluator<TGameState, TMove> evaluator, int maxDepth = 6, bool moveScoreAtRootNode = true)
     {
         Evaluator = evaluator;
         MaxDepth = maxDepth;
         Rand = new();
+        UseMoveScoreAtRootNode = moveScoreAtRootNode;
     }
 
     public override string Name => "Minimax Agent";
@@ -54,7 +56,11 @@ public class MinimaxAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, ISe
                     var (minimaxScore, winDepth) = Minimax(gameState, depth - 1, double.NegativeInfinity, double.PositiveInfinity, false, maximizingPlayer, 1);
                     gameState.UndoMove(moveInfo.Move);
 
-                    scoredMoves.Add(new ScoredMove(moveInfo.Move, moveInfo.MoveScore)
+                    double score = UseMoveScoreAtRootNode
+                        ? minimaxScore + moveInfo.MoveScore
+                        : minimaxScore;
+
+                    scoredMoves.Add(new ScoredMove(moveInfo.Move, score)
                     {
                         SearchScore = minimaxScore,
                         WinDepth = winDepth

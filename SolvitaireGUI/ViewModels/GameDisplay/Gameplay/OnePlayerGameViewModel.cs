@@ -84,7 +84,8 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
 
     public List<TMove> GetLegalMoves() =>
         GameStateViewModel.GameState.GetLegalMoves()
-            .Where(p => !p.IsTerminatingMove).ToList(); // Temporary bypassing of the skip game move
+            //.Where(p => !p.IsTerminatingMove)
+            .ToList(); // Temporary bypassing of the skip game move
 
     protected readonly Stack<TMove> PreviousMoves = new();
     public void ApplyMove(TMove move)
