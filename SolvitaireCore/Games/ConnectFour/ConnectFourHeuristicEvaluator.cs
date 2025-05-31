@@ -2,8 +2,6 @@
 
 public class ConnectFourHeuristicEvaluator : StateEvaluator<ConnectFourGameState, ConnectFourMove>
 {
-    private static readonly (int dr, int dc)[] Directions = new[] { (0, 1), (1, 0), (1, 1), (1, -1) };
-
     // Heuristic weights (tune as needed)
     private const int CenterWeight = 3;
     private const int TwoInARowWeight = 10;
@@ -148,7 +146,7 @@ public class ConnectFourHeuristicEvaluator : StateEvaluator<ConnectFourGameState
                 }
 
                 // N-in-a-row and N-with-gap
-                foreach (var (dr, dc) in Directions)
+                foreach (var (dr, dc) in GridDirections)
                 {
                     // 2-in-a-row
                     int r1 = row + dr, c1 = col + dc;

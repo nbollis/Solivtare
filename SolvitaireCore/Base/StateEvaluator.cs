@@ -4,6 +4,8 @@ public abstract class StateEvaluator<TGameState, TMove>
     where TGameState : IGameState<TMove>
     where TMove : IMove
 {
+    protected static readonly (int dRow, int dCol)[] GridDirections = [(1, 0), (0, 1), (1, 1), (1, -1)];
+
     public double MaximumScore { get; protected set; } = 1000;
 
     /// <summary>
