@@ -44,6 +44,8 @@ public class GeneticSolitaireEvaluator(SolitaireChromosome chromosome) : Solitai
 
     public override double EvaluateState(SolitaireGameState state, int? moveCount = null)
     {
+        if (state.IsGameWon)
+            return MaximumScore;
         int legalMoveCount = moveCount ?? state.GetLegalMoves().Count;
         int foundationCount = state.FoundationPiles.Sum(pile => pile.Count);
         double foundationRange = state.FoundationPiles.Max(pile => pile.Count) - state.FoundationPiles.Min(pile => pile.Count);

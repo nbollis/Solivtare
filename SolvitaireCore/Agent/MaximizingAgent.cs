@@ -121,9 +121,17 @@ public class MaximizingAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, 
 
     public override double EvaluateMoveWithAgent(TGameState gameState, TMove move, int? perspectivePlayer = null)
     {
-        gameState.ExecuteMove(move);
-        double score = Maximize(gameState, MaxDepth - 1);
-        gameState.UndoMove(move);
+        double score;
+        if (move.IsTerminatingMove) // Evaluate as a leaf node, do not recurse
+        {
+            score = Evaluator.EvaluateMove(gameState, move);
+        }
+        else // Recurse to evaluate the move
+        {
+            gameState.ExecuteMove(move);
+            score = Maximize(gameState, MaxDepth - 1);
+            gameState.UndoMove(move);
+        }
         return score;
     }
 

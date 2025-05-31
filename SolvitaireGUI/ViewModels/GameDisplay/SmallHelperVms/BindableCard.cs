@@ -3,15 +3,13 @@ using System.ComponentModel;
 
 namespace SolvitaireGUI;
 
-public class BindableCard : INotifyPropertyChanged
+public class BindableCard : Card, INotifyPropertyChanged
 {
     private readonly Card _card;
-    public Suit Suit => _card.Suit;
-    public Rank Rank => _card.Rank;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public BindableCard(Card card)
+    public BindableCard(Card card) : base(card.Suit, card.Rank, card.IsFaceUp)
     {
         _card = card;
         if (card is ObservableCard observableCard)
@@ -24,7 +22,7 @@ public class BindableCard : INotifyPropertyChanged
         }
     }
 
-    public bool IsFaceUp
+    public override bool IsFaceUp
     {
         get => _card.IsFaceUp;
         set
