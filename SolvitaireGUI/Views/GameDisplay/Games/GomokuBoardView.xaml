@@ -12,7 +12,19 @@
         <local:CellBorderThicknessConverter x:Key="CellBorderThicknessConverter" />
         <local:PlayerToBrushMultiConverter x:Key="PlayerToBrushMultiConverter" />
     </UserControl.Resources>
-    <Border 
+    <StackPanel>
+        <!-- Board Size Slider -->
+        <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,0,0,8" Background="#FFF8">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Board Size:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <Slider Minimum="5" Maximum="15" TickFrequency="2" IsSnapToTickEnabled="True"
+                    Value="{Binding BoardSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Width="180" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding BoardSize}" VerticalAlignment="Center" FontWeight="Bold"/>
+            </StackPanel>
+        </Border>
+        <!-- Main Board Border -->
+        <Border 
         BorderBrush="Black"
         BorderThickness="6"
         CornerRadius="12"
@@ -20,47 +32,51 @@
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         Background="{StaticResource BackgroundDarkColor}">
-        <ItemsControl ItemsSource="{Binding FlatBoardCells}" AlternationCount="{Binding BoardCellCount}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid Rows="{Binding BoardSize}" Columns="{Binding BoardSize}"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border MouseEnter="Cell_MouseEnter"
-                            MouseLeave="Cell_MouseLeave"
-                            MouseLeftButtonUp="Cell_MouseLeftButtonUp"
-                            Tag="{Binding (ItemsControl.AlternationIndex), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}}"
-                            BorderBrush="Black">
-                        <Border.BorderThickness>
-                            <MultiBinding Converter="{StaticResource CellBorderThicknessConverter}">
-                                <Binding Path="(ItemsControl.AlternationIndex)" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}" />
-                                <Binding Path="DataContext.BoardSize" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
-                            </MultiBinding>
-                        </Border.BorderThickness>
-                        <Border.Background>
-                            <MultiBinding Converter="{StaticResource WinningCellToBrushConverter}">
-                                <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}" Path="(ItemsControl.AlternationIndex)" />
-                                <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" Path="DataContext.WinningCellIndices" />
-                            </MultiBinding>
-                        </Border.Background>
-                        <TextBlock Text="{Binding ., Converter={StaticResource PlayerToSymbolConverter}}"
-                                   FontSize="32"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center">
-                            <TextBlock.Foreground>
-                                <MultiBinding Converter="{StaticResource PlayerToBrushMultiConverter}">
-                                    <Binding Path="." />
-                                    <Binding Path="DataContext.Player1Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
-                                    <Binding Path="DataContext.Player2Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
-                                </MultiBinding>
-                            </TextBlock.Foreground>
-                        </TextBlock>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </Border>
+            <Grid>
+                <ItemsControl ItemsSource="{Binding FlatBoardCells}" AlternationCount="{Binding BoardCellCount}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="{Binding BoardSize}" Columns="{Binding BoardSize}"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border MouseEnter="Cell_MouseEnter"
+                                MouseLeave="Cell_MouseLeave"
+                                MouseLeftButtonUp="Cell_MouseLeftButtonUp"
+                                Tag="{Binding (ItemsControl.AlternationIndex), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}}"
+                                BorderBrush="Black">
+                                <Border.BorderThickness>
+                                    <MultiBinding Converter="{StaticResource CellBorderThicknessConverter}">
+                                        <Binding Path="(ItemsControl.AlternationIndex)" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}" />
+                                        <Binding Path="DataContext.BoardSize" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                                    </MultiBinding>
+                                </Border.BorderThickness>
+                                <Border.Background>
+                                    <MultiBinding Converter="{StaticResource WinningCellToBrushConverter}">
+                                        <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}" Path="(ItemsControl.AlternationIndex)" />
+                                        <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" Path="DataContext.WinningCellIndices" />
+                                    </MultiBinding>
+                                </Border.Background>
+                                <TextBlock Text="{Binding ., Converter={StaticResource PlayerToSymbolConverter}}"
+                                       FontSize="32"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center">
+                                    <TextBlock.Foreground>
+                                        <MultiBinding Converter="{StaticResource PlayerToBrushMultiConverter}">
+                                            <Binding Path="." />
+                                            <Binding Path="DataContext.Player1Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                                            <Binding Path="DataContext.Player2Color" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                                        </MultiBinding>
+                                    </TextBlock.Foreground>
+                                </TextBlock>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Border>
+    </StackPanel>
+
 </UserControl>

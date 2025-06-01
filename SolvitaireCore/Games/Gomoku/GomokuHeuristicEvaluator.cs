@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.Drawing;
+using System.Xml.Serialization;
 
 namespace SolvitaireCore.Gomoku;
 
@@ -47,12 +48,31 @@ public class GomokuHeuristicEvaluator : StateEvaluator<GomokuGameState, GomokuMo
 
     public override double EvaluateMove(GomokuGameState state, GomokuMove move)
     {
-        state.ExecuteMove(move);
-        double score = EvaluateState(state);
-        state.UndoMove(move);
-        return score;
+        int size = state.BoardSize;
+        var board = state.Board;
+        int center = size / 2;
+
+        int r = move.Row, c = move.Col;
+        int adjacent = 0;
+        for (int dr = -1; dr <= 1; dr++)
+        {
+            for (int dc = -1; dc <= 1; dc++)
+            {
+                if (dr == 0 && dc == 0) continue;
+                int nr = r + dr, nc = c + dc;
+                if (nr >= 0 && nr < size && nc >= 0 && nc < size)
+                {
+                    if (board[nr, nc] != 0)
+                        adjacent++;
+                }
+            }
+        }
+        // Optionally, prefer moves closer to the center early in the game
+        double distToCenter = Math.Sqrt((r - center) * (r - center) + (c - center) * (c - center));
+        return adjacent * 100 - distToCenter;
     }
 
+    private HashSetPool<(int, int)> _hasSetPool = new HashSetPool<(int, int)>(32);
     private double EvaluateForPlayer(GomokuGameState state, int player)
     {
         double score = 0;
@@ -61,44 +81,51 @@ public class GomokuHeuristicEvaluator : StateEvaluator<GomokuGameState, GomokuMo
 
         var counted = new bool[size, size, 4]; // Prevent double-counting for open lines
 
-        int liberty = 0;
+        int liberties = 0;
         int touchingOwn = 0, touchingOpponent = 0;
         int two = 0, three = 0, four = 0;
         int twoGap = 0, threeGap = 0, fourGap = 0;
 
-        // Neighbor analysis and unique liberties
-        var uniqueLiberties = new HashSet<(int, int)>();
-
-        for (int r = 0; r < size; r++)
+        // --- Neighbor analysis and unique liberties in one pass ---
+        var uniqueLiberties = _hasSetPool.Get();
+        try
         {
-            for (int c = 0; c < size; c++)
+            for (int r = 0; r < size; r++)
             {
-                if (board[r, c] != player)
-                    continue;
-
-                for (int dr = -1; dr <= 1; dr++)
+                for (int c = 0; c < size; c++)
                 {
-                    for (int dc = -1; dc <= 1; dc++)
+                    if (board[r, c] != player)
+                        continue;
+
+                    for (int dr = -1; dr <= 1; dr++)
                     {
-                        if (dr == 0 && dc == 0) continue;
-                        int nr = r + dr, nc = c + dc;
-                        if (nr >= 0 && nr < size && nc >= 0 && nc < size)
+                        for (int dc = -1; dc <= 1; dc++)
                         {
-                            int neighbor = board[nr, nc];
-                            if (neighbor == 0)
-                                uniqueLiberties.Add((nr, nc));
-                            else if (neighbor == player)
-                                touchingOwn++;
-                            else
-                                touchingOpponent++;
+                            if (dr == 0 && dc == 0) continue;
+                            int nr = r + dr, nc = c + dc;
+                            if ((uint)nr < (uint)size && (uint)nc < (uint)size)
+                            {
+                                int neighbor = board[nr, nc];
+                                if (neighbor == 0)
+                                    uniqueLiberties.Add((nr, nc));
+                                else if (neighbor == player)
+                                    touchingOwn++;
+                                else
+                                    touchingOpponent++;
+                            }
                         }
                     }
                 }
             }
+            
         }
-        liberty = uniqueLiberties.Count;
+        finally
+        {
+            liberties = uniqueLiberties.Count;
+            _hasSetPool.Return(uniqueLiberties);
+        }
 
-        // Open lines but only if this cell is a player's stone
+        // --- Open lines (2, 3, 4 in a row with open ends) ---
         for (int dir = 0; dir < GridDirections.Length; dir++)
         {
             var (dr, dc) = GridDirections[dir];
@@ -116,7 +143,7 @@ public class GomokuHeuristicEvaluator : StateEvaluator<GomokuGameState, GomokuMo
                         while (true)
                         {
                             int nr = r + dr * i, nc = c + dc * i;
-                            if (nr < 0 || nr >= size || nc < 0 || nc >= size)
+                            if ((uint)nr >= (uint)size || (uint)nc >= (uint)size)
                                 break;
                             if (board[nr, nc] == player)
                             {
@@ -136,7 +163,7 @@ public class GomokuHeuristicEvaluator : StateEvaluator<GomokuGameState, GomokuMo
                         while (true)
                         {
                             int nr = r - dr * i, nc = c - dc * i;
-                            if (nr < 0 || nr >= size || nc < 0 || nc >= size)
+                            if ((uint)nr >= (uint)size || (uint)nc >= (uint)size)
                                 break;
                             if (board[nr, nc] == player)
                             {
@@ -163,7 +190,7 @@ public class GomokuHeuristicEvaluator : StateEvaluator<GomokuGameState, GomokuMo
             }
         }
 
-        // --- Lines with gaps: use sliding window, only count canonical windows ---
+        // --- Lines with gaps: sliding window, only canonical windows ---
         for (int dir = 0; dir < GridDirections.Length; dir++)
         {
             var (dr, dc) = GridDirections[dir];
@@ -173,32 +200,15 @@ public class GomokuHeuristicEvaluator : StateEvaluator<GomokuGameState, GomokuMo
             {
                 for (int c = 0; c < size; c++)
                 {
-                    int[] windowR = new int[3];
-                    int[] windowC = new int[3];
-                    bool inBounds = true;
-                    for (int i = 0; i < 3; i++)
+                    int r0 = r, c0 = c, r1 = r + dr, c1 = c + dc, r2 = r + dr * 2, c2 = c + dc * 2;
+                    if ((uint)r2 >= (uint)size || (uint)c2 >= (uint)size)
+                        continue;
+                    if (board[r0, c0] == player && board[r1, c1] == 0 && board[r2, c2] == player)
                     {
-                        int nr = r + dr * i, nc = c + dc * i;
-                        windowR[i] = nr;
-                        windowC[i] = nc;
-                        if (nr < 0 || nr >= size || nc < 0 || nc >= size)
-                        {
-                            inBounds = false;
-                            break;
-                        }
-                    }
-                    if (!inBounds) continue;
-
-                    // Only count X . X (gap in the middle)
-                    if (board[windowR[0], windowC[0]] == player &&
-                        board[windowR[1], windowC[1]] == 0 &&
-                        board[windowR[2], windowC[2]] == player)
-                    {
-                        // Only count if not part of a longer line
                         int beforeR = r - dr, beforeC = c - dc;
                         int afterR = r + dr * 3, afterC = c + dc * 3;
-                        bool beforeOnBoard = beforeR >= 0 && beforeR < size && beforeC >= 0 && beforeC < size;
-                        bool afterOnBoard = afterR >= 0 && afterR < size && afterC >= 0 && afterC < size;
+                        bool beforeOnBoard = (uint)beforeR < (uint)size && (uint)beforeC < (uint)size;
+                        bool afterOnBoard = (uint)afterR < (uint)size && (uint)afterC < (uint)size;
                         bool beforeIsPlayer = beforeOnBoard && board[beforeR, beforeC] == player;
                         bool afterIsPlayer = afterOnBoard && board[afterR, afterC] == player;
                         if (!beforeIsPlayer && !afterIsPlayer)
@@ -207,52 +217,33 @@ public class GomokuHeuristicEvaluator : StateEvaluator<GomokuGameState, GomokuMo
                 }
             }
 
-            // 3-gap: window size 4 (X X . X, X . X X, X X X .)
+            // 3-gap: window size 4 (X X . X, X . X X)
             for (int r = 0; r < size; r++)
             {
                 for (int c = 0; c < size; c++)
                 {
-                    int[] windowR = new int[4];
-                    int[] windowC = new int[4];
-                    bool inBounds = true;
-                    for (int i = 0; i < 4; i++)
-                    {
-                        int nr = r + dr * i, nc = c + dc * i;
-                        windowR[i] = nr;
-                        windowC[i] = nc;
-                        if (nr < 0 || nr >= size || nc < 0 || nc >= size)
-                        {
-                            inBounds = false;
-                            break;
-                        }
-                    }
-                    if (!inBounds) continue;
-
-                    // Only count if exactly 3 stones, 1 empty, no opponent, and not all consecutive
+                    int[] rr = { r, r + dr, r + dr * 2, r + dr * 3 };
+                    int[] cc = { c, c + dc, c + dc * 2, c + dc * 3 };
+                    if ((uint)rr[3] >= (uint)size || (uint)cc[3] >= (uint)size)
+                        continue;
                     int playerCount = 0, emptyCount = 0, oppCount = 0, emptyIdx = -1;
                     for (int i = 0; i < 4; i++)
                     {
-                        int cell = board[windowR[i], windowC[i]];
+                        int cell = board[rr[i], cc[i]];
                         if (cell == player) playerCount++;
                         else if (cell == 0) { emptyCount++; emptyIdx = i; }
                         else oppCount++;
                     }
-                    if (playerCount == 3 && emptyCount == 1 && oppCount == 0)
+                    if (playerCount == 3 && emptyCount == 1 && oppCount == 0 && (emptyIdx == 1 || emptyIdx == 2))
                     {
-                        // Only count if the empty is at the leftmost possible position for this pattern
-                        // (i.e., only count if emptyIdx == 1, so X . X X, or emptyIdx == 2, so X X . X)
-                        // This avoids double-counting for overlapping windows
-                        if (emptyIdx == 1 || emptyIdx == 2)
-                        {
-                            int beforeR = r - dr, beforeC = c - dc;
-                            int afterR = r + dr * 4, afterC = c + dc * 4;
-                            bool beforeOnBoard = beforeR >= 0 && beforeR < size && beforeC >= 0 && beforeC < size;
-                            bool afterOnBoard = afterR >= 0 && afterR < size && afterC >= 0 && afterC < size;
-                            bool beforeIsPlayer = beforeOnBoard && board[beforeR, beforeC] == player;
-                            bool afterIsPlayer = afterOnBoard && board[afterR, afterC] == player;
-                            if (!beforeIsPlayer && !afterIsPlayer)
-                                threeGap++;
-                        }
+                        int beforeR = r - dr, beforeC = c - dc;
+                        int afterR = r + dr * 4, afterC = c + dc * 4;
+                        bool beforeOnBoard = (uint)beforeR < (uint)size && (uint)beforeC < (uint)size;
+                        bool afterOnBoard = (uint)afterR < (uint)size && (uint)afterC < (uint)size;
+                        bool beforeIsPlayer = beforeOnBoard && board[beforeR, beforeC] == player;
+                        bool afterIsPlayer = afterOnBoard && board[afterR, afterC] == player;
+                        if (!beforeIsPlayer && !afterIsPlayer)
+                            threeGap++;
                     }
                 }
             }
@@ -262,45 +253,28 @@ public class GomokuHeuristicEvaluator : StateEvaluator<GomokuGameState, GomokuMo
             {
                 for (int c = 0; c < size; c++)
                 {
-                    int[] windowR = new int[5];
-                    int[] windowC = new int[5];
-                    bool inBounds = true;
-                    for (int i = 0; i < 5; i++)
-                    {
-                        int nr = r + dr * i, nc = c + dc * i;
-                        windowR[i] = nr;
-                        windowC[i] = nc;
-                        if (nr < 0 || nr >= size || nc < 0 || nc >= size)
-                        {
-                            inBounds = false;
-                            break;
-                        }
-                    }
-                    if (!inBounds) continue;
-
+                    int[] rr = { r, r + dr, r + dr * 2, r + dr * 3, r + dr * 4 };
+                    int[] cc = { c, c + dc, c + dc * 2, c + dc * 3, c + dc * 4 };
+                    if ((uint)rr[4] >= (uint)size || (uint)cc[4] >= (uint)size)
+                        continue;
                     int playerCount = 0, emptyCount = 0, oppCount = 0, emptyIdx = -1;
                     for (int i = 0; i < 5; i++)
                     {
-                        int cell = board[windowR[i], windowC[i]];
+                        int cell = board[rr[i], cc[i]];
                         if (cell == player) playerCount++;
                         else if (cell == 0) { emptyCount++; emptyIdx = i; }
                         else oppCount++;
                     }
-                    if (playerCount == 4 && emptyCount == 1 && oppCount == 0)
+                    if (playerCount == 4 && emptyCount == 1 && oppCount == 0 && (emptyIdx == 1 || emptyIdx == 2 || emptyIdx == 3))
                     {
-                        // Only count if the empty is at the leftmost possible position for this pattern
-                        // (i.e., only count if emptyIdx == 1, 2, or 3)
-                        if (emptyIdx == 1 || emptyIdx == 2 || emptyIdx == 3)
-                        {
-                            int beforeR = r - dr, beforeC = c - dc;
-                            int afterR = r + dr * 5, afterC = c + dc * 5;
-                            bool beforeOnBoard = beforeR >= 0 && beforeR < size && beforeC >= 0 && beforeC < size;
-                            bool afterOnBoard = afterR >= 0 && afterR < size && afterC >= 0 && afterC < size;
-                            bool beforeIsPlayer = beforeOnBoard && board[beforeR, beforeC] == player;
-                            bool afterIsPlayer = afterOnBoard && board[afterR, afterC] == player;
-                            if (!beforeIsPlayer && !afterIsPlayer)
-                                fourGap++;
-                        }
+                        int beforeR = r - dr, beforeC = c - dc;
+                        int afterR = r + dr * 5, afterC = c + dc * 5;
+                        bool beforeOnBoard = (uint)beforeR < (uint)size && (uint)beforeC < (uint)size;
+                        bool afterOnBoard = (uint)afterR < (uint)size && (uint)afterC < (uint)size;
+                        bool beforeIsPlayer = beforeOnBoard && board[beforeR, beforeC] == player;
+                        bool afterIsPlayer = afterOnBoard && board[afterR, afterC] == player;
+                        if (!beforeIsPlayer && !afterIsPlayer)
+                            fourGap++;
                     }
                 }
             }
@@ -315,7 +289,7 @@ public class GomokuHeuristicEvaluator : StateEvaluator<GomokuGameState, GomokuMo
         score += WeightFourGap * fourGap;
         score += WeightTouchingOwn * touchingOwn;
         score += WeightTouchingOpponent * touchingOpponent;
-        score += WeightLiberty * liberty;
+        score += WeightLiberty * liberties;
 
         return score;
     }

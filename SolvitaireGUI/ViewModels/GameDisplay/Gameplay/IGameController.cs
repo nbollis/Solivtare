@@ -2,11 +2,11 @@
 
 namespace SolvitaireGUI;
 
-public interface IGameController<out TGameState, TMove>
+public interface IGameController<TGameState, TMove>
     where TGameState : IGameState<TMove>
     where TMove : IMove
 {
-    TGameState CurrentGameState { get; }
+    TGameState CurrentGameState { get; set; }
     bool IsGameActive { get; }
     int CurrentPlayer { get; }
     void ApplyMove(TMove move);

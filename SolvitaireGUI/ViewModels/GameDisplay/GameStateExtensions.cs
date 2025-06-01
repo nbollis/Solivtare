@@ -58,8 +58,6 @@ public static class GameStateExtensions
                 yield return (TAgent)(IAgent<TGameState, TMove>)new RandomAgent<TGameState, TMove>();
                 //yield return (TAgent)(IAgent<TGameState, TMove>)new GomokuGeneticAgent(GomokuChromosome.BestSoFar(), null, 5);
                 break;
-
-
         }
     }
 

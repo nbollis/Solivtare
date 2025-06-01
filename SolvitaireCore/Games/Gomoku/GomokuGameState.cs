@@ -3,7 +3,7 @@
 public class GomokuGameState : BaseGameState<GomokuMove>,
     ITwoPlayerGameState<GomokuMove>, IEquatable<GomokuGameState>
 {
-    public const int DefaultSize = 15;
+    public const int DefaultSize = 7;
     public int BoardSize { get; }
     public int[,] Board { get; private set; }
     public int CurrentPlayer { get; private set; } = 1; // 1 = Black, 2 = White

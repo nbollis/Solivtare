@@ -64,7 +64,17 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
     public ICommand UndoMoveCommand { get; }
 
     // IGameController implementation
-    public TGameState CurrentGameState => GameStateViewModel.GameState;
+    public TGameState CurrentGameState
+    {
+        get => GameStateViewModel.GameState;
+        set
+        {
+            GameStateViewModel = value.ToViewModel(this);
+            OnPropertyChanged(nameof(CurrentGameState));
+            OnPropertyChanged(nameof(GameStateViewModel));
+        }
+    }
+
     public bool IsGameActive => !GameStateViewModel.IsGameWon;
     public int CurrentPlayer => 1; // Single player
 

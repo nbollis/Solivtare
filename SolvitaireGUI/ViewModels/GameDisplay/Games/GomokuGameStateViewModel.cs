@@ -7,7 +7,21 @@ namespace SolvitaireGUI;
 
 public class GomokuGameStateViewModel : TwoPlayerGameStateViewModel<GomokuGameState, GomokuMove>
 {
-    public int BoardSize => GameState.BoardSize;
+    private int _boardSize;
+    public int BoardSize
+    {
+        get => _boardSize;
+        set
+        {
+            if (_boardSize == value) return; 
+
+            _boardSize = value;
+            ResetBoard(_boardSize);
+            OnPropertyChanged(nameof(BoardSize));
+            OnPropertyChanged(nameof(BoardCellCount));
+        }
+    }
+
     public int BoardCellCount => BoardSize * BoardSize;
 
     private int _hoveredColumnIndex = -1;
@@ -24,7 +38,7 @@ public class GomokuGameStateViewModel : TwoPlayerGameStateViewModel<GomokuGameSt
         set { _hoveredRowIndex = value; OnPropertyChanged(nameof(HoveredRowIndex)); }
     }
 
-    public ObservableCollection<int> FlatBoardCells { get; }
+    public ObservableCollection<int> FlatBoardCells { get; private set; }
     public HashSet<int> WinningCellIndices =>
         [..GameState.WinningCells.Select(cell => cell.Row * BoardSize + cell.Col)];
 
@@ -44,6 +58,17 @@ public class GomokuGameStateViewModel : TwoPlayerGameStateViewModel<GomokuGameSt
             FlatBoardCells[i] = GameState.Board[i / BoardSize, i % BoardSize];
         OnPropertyChanged(nameof(WinningCellIndices));
         OnPropertyChanged(nameof(FlatBoardCells));
+    }
+
+    public void ResetBoard(int newSize)
+    {
+        GameState = new GomokuGameState(newSize);
+        _boardSize = newSize;
+        FlatBoardCells = new ObservableCollection<int>(
+            Enumerable.Range(0, BoardCellCount).Select(i => 0)
+        );
+        OnPropertyChanged(nameof(FlatBoardCells));
+        UpdateBoard();
     }
 }
 

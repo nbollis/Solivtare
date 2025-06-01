@@ -36,8 +36,18 @@ public class TwoPlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
 
     #region Gamestate Interactions
 
-    public TGameState CurrentGameState => GameStateViewModel.GameState;
-    public TwoPlayerGameStateViewModel<TGameState, TMove> GameStateViewModel { get; }
+    public TGameState CurrentGameState
+    {
+        get => GameStateViewModel.GameState;
+        set
+        {
+            GameStateViewModel = value.ToTwoPlayerViewModel(this);
+            OnPropertyChanged(nameof(CurrentGameState));
+            OnPropertyChanged(nameof(GameStateViewModel));
+        }
+    }
+
+    public TwoPlayerGameStateViewModel<TGameState, TMove> GameStateViewModel { get; private set; }
     public List<TMove> GetLegalMoves() => GameStateViewModel.GameState.GetLegalMoves();
 
     public ICommand ResetGameCommand { get; }

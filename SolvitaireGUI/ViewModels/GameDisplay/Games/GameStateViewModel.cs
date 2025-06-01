@@ -1,3 +1,4 @@
+using System.Windows.Controls;
 using SolvitaireCore;
 
 namespace SolvitaireGUI;
@@ -7,7 +8,20 @@ public abstract class GameStateViewModel<TGameState, TMove> : BaseViewModel
     where TMove : IMove
 {
     public IGameController<TGameState, TMove>? GameController { get; }
-    public TGameState GameState { get; }
+
+    private TGameState _gameState;
+    public TGameState GameState
+    {
+        get => _gameState;
+        protected set
+        {
+            _gameState = value;
+            if (GameController != null && !GameController.CurrentGameState.Equals(value))
+                GameController.CurrentGameState = value;
+            OnPropertyChanged(nameof(GameState));
+        }
+    }
+
     public bool IsGameWon => GameState.IsGameWon;
     public bool EnableAnimations => GameController?.EnableAnimations ?? true;
 
