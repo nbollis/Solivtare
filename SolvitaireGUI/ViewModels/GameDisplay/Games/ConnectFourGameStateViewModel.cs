@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Windows;
 using System.Windows.Media;
 using SolvitaireCore.ConnectFour;
 
@@ -37,19 +38,27 @@ public class ConnectFourGameStateViewModel : TwoPlayerGameStateViewModel<Connect
     public override void ApplyMove(ConnectFourMove move)
     {
         // This updates the game state, then the board
-        base.ApplyMove(move); 
+        base.ApplyMove(move);
 
-        OnPropertyChanged(nameof(LastMove));
+        // Ensure property changes are on the UI thread
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            OnPropertyChanged(nameof(LastMove));
+        });
+        //OnPropertyChanged(nameof(LastMove));
     }
 
     public override void UpdateBoard()
     {
-        for (int row = 0; row < ConnectFourGameState.Rows; row++)
-        for (int col = 0; col < ConnectFourGameState.Columns; col++)
-            BoardCells[row * ConnectFourGameState.Columns + col].Value = GameState.Board[row, col];
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            for (int row = 0; row < ConnectFourGameState.Rows; row++)
+            for (int col = 0; col < ConnectFourGameState.Columns; col++)
+                BoardCells[row * ConnectFourGameState.Columns + col].Value = GameState.Board[row, col];
 
-        OnPropertyChanged(nameof(BoardCells));
-        OnPropertyChanged(nameof(WinningCellIndices));
+            OnPropertyChanged(nameof(BoardCells));
+            OnPropertyChanged(nameof(WinningCellIndices));
+        });
     }
 }
 
