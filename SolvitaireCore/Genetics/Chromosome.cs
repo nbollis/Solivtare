@@ -7,11 +7,11 @@ namespace SolvitaireCore;
 
 public abstract class Chromosome : IComparable<Chromosome>, IEquatable<Chromosome>
 {
-    private const int RoundingPlace = 2;
+    private const int RoundingPlace = 3;
     protected readonly Random Random;
     protected bool CanFullRandomMutate = true;
-    protected int WeightMinStartValue = -5;
-    protected int WeightMaxStartValue = 5;
+    protected int WeightMinStartValue = -10;
+    protected int WeightMaxStartValue = 10;
     public int SpeciesIndex = -1;
     public double Fitness { get; set; } = double.MinValue;
 

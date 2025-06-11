@@ -174,9 +174,17 @@ public class MaximizingAgent<TGameState, TMove> : BaseAgent<TGameState, TMove>, 
         double bestScore = double.NegativeInfinity;
         foreach (var move in moves)
         {
-            state.ExecuteMove(move);
-            double score = Maximize(state, depth - 1);
-            state.UndoMove(move); 
+            double score;
+            if (move.IsTerminatingMove) // if skip game or other terminating move, evaluate as leaf. Do not recurse
+            {
+                score = Evaluator.EvaluateMove(state, move);
+            }
+            else
+            {
+                state.ExecuteMove(move);
+                score = Maximize(state, depth - 1);
+                state.UndoMove(move);
+            }
 
             if (score > bestScore)
                 bestScore = score;

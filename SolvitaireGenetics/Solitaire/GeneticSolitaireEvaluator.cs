@@ -13,6 +13,7 @@ public class GeneticSolitaireEvaluator : SolitaireEvaluator
         MaximumScore = int.MaxValue;
     }
 
+    // currently only used for move ordering. 
     public override double EvaluateMove(SolitaireGameState state, SolitaireMove move)
     {
         if (move.IsTerminatingMove)
@@ -26,7 +27,7 @@ public class GeneticSolitaireEvaluator : SolitaireEvaluator
         // Foundation moves are mutually exclusive
         if (move.ToPileIndex >= SolitaireGameState.FoundationStartIndex && move.ToPileIndex <= SolitaireGameState.FoundationEndIndex) 
             score += _chromosome.GetWeight(SolitaireChromosome.Move_ToFoundationWeightName);
-        else if (move.FromPileIndex >= SolitaireGameState.FoundationStartIndex && move.ToPileIndex <= SolitaireGameState.FoundationEndIndex)
+        else if (move.FromPileIndex >= SolitaireGameState.FoundationStartIndex && move.FromPileIndex <= SolitaireGameState.FoundationEndIndex)
             score += _chromosome.GetWeight(SolitaireChromosome.Move_FromFoundationWeightName);
 
         // Tableau moves
@@ -163,8 +164,8 @@ public class GeneticSolitaireEvaluator : SolitaireEvaluator
         score += _chromosome.GetWeight(SolitaireChromosome.Skip_FaceUpTableauCount) * faceUpTableauCount;
         score += _chromosome.GetWeight(SolitaireChromosome.Skip_FaceDownTableauCount) * faceDownTableauCount;
 
-        //// Multiply by the number of moves made so far and its weight
-        //score *= chromosome.GetWeight(SolitaireChromosome.MoveCountScalarName) * state.MovesMade;
+        // Multiply by the number of moves made so far and its weight
+        //score *= _chromosome.GetWeight(SolitaireChromosome.MoveCountScalarName) * state.MovesMade;
         return score;
     }
 }

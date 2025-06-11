@@ -44,9 +44,9 @@ public class FitnessPlotStrategy : IPlottingStrategy
 
 
 
-        var diversitySig = plot.Add.Signal(averagePairwiseDiversity);
-        diversitySig.LegendText = "Genetic Diversity";
-        diversitySig.LineWidth = 1;
+        //var diversitySig = plot.Add.Signal(averagePairwiseDiversity);
+        //diversitySig.LegendText = "Genetic Diversity";
+        //diversitySig.LineWidth = 1;
 
         plot.ShowLegend(Alignment.UpperLeft, Orientation.Vertical);
     }

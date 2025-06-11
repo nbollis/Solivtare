@@ -9,12 +9,12 @@ public static class DeckSerializer
     private static readonly JsonSerializerOptions VerboseOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.Never, // Ensure all properties are serialized
-        WriteIndented = true,
+        WriteIndented = false,
     };
     private static readonly JsonSerializerOptions MinimalisticOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.Never, // Ensure all properties are serialized
-        WriteIndented = true,
+        WriteIndented = false,
     };
 
     #region Verbose Card Serialization
@@ -250,7 +250,7 @@ public static class DeckSerializer
             });
         }
 
-        return decks;
+        return decks.OrderByDescending(p => p.TimesWon).ToList();
     }
 
     #endregion

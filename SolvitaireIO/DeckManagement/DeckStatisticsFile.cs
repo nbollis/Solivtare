@@ -43,7 +43,10 @@ public class DeckStatisticsFile : IDeckFile
     {
         lock (_fileLock)
         {
-            return _cache.Values.Select(statistics => statistics.Deck).ToList();
+            return _cache.Values
+                .OrderByDescending(p => p.TimesWon)
+                .Select(statistics => statistics.Deck)
+                .ToList();
         }
     }
 
