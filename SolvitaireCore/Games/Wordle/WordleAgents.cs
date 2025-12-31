@@ -38,3 +38,48 @@ public class RandomWordleAgent : BaseWordleAgent
         return legalMoves[randomIndex];
     }
 }
+
+/// <summary>
+/// Heuristic Wordle agent - uses smart heuristics to pick words
+/// </summary>
+public class HeuristicWordleAgent : BaseWordleAgent, ISearchAgent<WordleGameState, WordleMove>
+{
+    private readonly Random _random = new();
+    
+    public override string Name => "Heuristic Wordle Agent";
+    public int MaxDepth { get; set; } = 1; // Not really used for Wordle, but required by interface
+    public StateEvaluator<WordleGameState, WordleMove> Evaluator { get; }
+
+    public HeuristicWordleAgent()
+    {
+        Evaluator = new HeuristicWordleEvaluator();
+    }
+
+    public override WordleMove GetNextAction(WordleGameState gameState, CancellationToken? cancellationToken = null)
+    {
+        var orderedMoves = Evaluator.OrderMoves(gameState.GetLegalMoves(), gameState, bestFirst: true).ToList();
+        
+        if (orderedMoves.Count == 0)
+            return new WordleMove(gameState.TargetWord);
+
+        // Get the best score
+        double bestScore = orderedMoves[0].MoveScore;
+        
+        // Get all moves with the best score (handle ties)
+        // Use Where instead of TakeWhile to catch all ties, not just consecutive ones
+        var bestMoves = orderedMoves
+            .Where(m => Math.Abs(m.MoveScore - bestScore) < 1e-6)
+            .ToList();
+
+        // Pick randomly among tied best moves
+        if (bestMoves.Count == 1)
+            return bestMoves[0].Move;
+        
+        return bestMoves[_random.Next(bestMoves.Count)].Move;
+    }
+
+    public override double EvaluateMoveWithAgent(WordleGameState gameState, WordleMove move, int? perspectivePlayer = null)
+    {
+        return Evaluator.EvaluateMove(gameState, move);
+    }
+}
