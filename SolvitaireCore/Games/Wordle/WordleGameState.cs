@@ -27,10 +27,13 @@ public class WordleGameState : BaseGameState<WordleMove>, IEquatable<WordleGameS
             throw new ArgumentException("Target word must be a valid answer word", nameof(targetWord));
     }
 
+    public WordleGameState() : this(DefaultMaxGuesses, DefaultWordLength, null) { }
+
     protected override void ResetInternal()
     {
         Guesses.Clear();
-        TargetWord = WordleWordList.GetRandomAnswer();
+        // Keep the current target word when resetting (don't generate a new one)
+        // Target word stays the same - only clear guesses
     }
 
     /// <summary>

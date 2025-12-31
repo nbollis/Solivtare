@@ -1,0 +1,141 @@
+<UserControl x:Class="SolvitaireGUI.WordleBoardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SolvitaireGUI"
+             d:DataContext="{x:Static local:WordleGameStateModel.Instance}"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="500">
+    <UserControl.Resources>
+        <!-- Style for individual letter cells -->
+        <Style x:Key="LetterCellStyle" TargetType="Border">
+            <Setter Property="Width" Value="62"/>
+            <Setter Property="Height" Value="62"/>
+            <Setter Property="Margin" Value="1.5"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderBrush" Value="#D3D6DA"/>
+        </Style>
+
+        <Style x:Key="LetterTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="32"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#FFFFFF">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- Title -->
+            <RowDefinition Height="*"/>     <!-- Game Board -->
+            <RowDefinition Height="Auto"/>  <!-- Input Area -->
+            <RowDefinition Height="Auto"/>  <!-- Status -->
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0" Text="WORDLE" 
+                   FontSize="36" FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   Margin="0,2,0,1"
+                   Foreground="#000000"/>
+
+        <!-- Game Board -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                      HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ItemsControl ItemsSource="{Binding GuessRows}" 
+                          HorizontalAlignment="Center">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <!-- Each guess row -->
+                        <ItemsControl ItemsSource="{Binding Letters}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- Individual letter cell -->
+                                    <Border Style="{StaticResource LetterCellStyle}"
+                                            Background="{Binding BackgroundColor}">
+                                        <TextBlock Text="{Binding Letter}" 
+                                                   Foreground="{Binding ForegroundColor}"
+                                                   Style="{StaticResource LetterTextStyle}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Input Area -->
+        <Grid Grid.Row="2" Margin="20,10,20,10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Input textbox -->
+            <TextBox Grid.Row="0" Grid.Column="0" 
+                     Text="{Binding CurrentInput, UpdateSourceTrigger=PropertyChanged}"
+                     FontSize="20" 
+                     Height="40"
+                     MaxLength="{Binding GameState.WordLength}"
+                     CharacterCasing="Upper"
+                     VerticalContentAlignment="Center"
+                     Margin="0,0,10,0">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Return" Command="{Binding SubmitGuessCommand}"/>
+                    <KeyBinding Key="Enter" Command="{Binding SubmitGuessCommand}"/>
+                </TextBox.InputBindings>
+            </TextBox>
+
+            <!-- Submit button -->
+            <Button Grid.Row="0" Grid.Column="1" 
+                    Content="Submit" 
+                    Command="{Binding SubmitGuessCommand}"
+                    IsEnabled="{Binding CanSubmitGuess}"
+                    Width="80" Height="40"
+                    Style="{StaticResource RoundedButtonStyle}"
+                    Margin="0,0,10,0"/>
+
+            <!-- Clear button -->
+            <Button Grid.Row="0" Grid.Column="2" 
+                    Content="Clear" 
+                    Command="{Binding ClearInputCommand}"
+                    Width="80" Height="40"
+                    Style="{StaticResource RoundedButtonStyle}"/>
+
+            <!-- Help text -->
+            <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                       Text="Type a 5-letter word and press Enter or click Submit"
+                       FontSize="12" 
+                       Foreground="Gray"
+                       HorizontalAlignment="Center"
+                       Margin="0,5,0,0"/>
+        </Grid>
+
+        <!-- Status Message -->
+        <Border Grid.Row="3" 
+                Background="#F0F0F0"
+                Padding="10"
+                BorderBrush="#D3D6DA"
+                BorderThickness="0,1,0,0">
+            <TextBlock Text="{Binding StatusMessage}" 
+                       FontSize="18" 
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"/>
+        </Border>
+    </Grid>
+</UserControl>

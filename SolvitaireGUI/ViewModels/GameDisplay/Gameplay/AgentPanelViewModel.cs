@@ -282,28 +282,62 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
     }
 
     public ObservableCollection<MoveViewModel<TMove>> LegalMoves { get; } = new();
-    public void RefreshLegalMoves()
+    
+    private CancellationTokenSource? _refreshCancellationTokenSource;
+    
+    public async void RefreshLegalMoves()
     {
+        // Cancel any ongoing refresh
+        _refreshCancellationTokenSource?.Cancel();
+        _refreshCancellationTokenSource = new CancellationTokenSource();
+        var token = _refreshCancellationTokenSource.Token;
+
         LegalMoves.Clear();
         if (!_controller.IsGameActive)
             return;
 
-        var state = (TGameState)_controller.CurrentGameState.Clone();
-        var moves = new List<MoveViewModel<TMove>>();
-        foreach (var move in _controller.GetLegalMoves())
+        try
         {
-            double eval = SelectedAgent.EvaluateMoveWithAgent(state, move, _playerNumber);
+            var state = (TGameState)_controller.CurrentGameState.Clone();
+            var legalMoves = _controller.GetLegalMoves();
 
-            moves.Add(new MoveViewModel<TMove>(move, eval));
+            // For games with very large move spaces (like Wordle with 12,000+ moves), 
+            // limit the displayed moves to prevent UI freezing
+            const int MaxDisplayedMoves = 100;
+            var movesToDisplay = legalMoves.Count > MaxDisplayedMoves
+                ? legalMoves.Take(MaxDisplayedMoves).ToList()
+                : legalMoves;
+
+            // Process moves asynchronously to avoid blocking UI thread
+            var moves = await Task.Run(() =>
+            {
+                var result = new List<MoveViewModel<TMove>>();
+                foreach (var move in movesToDisplay)
+                {
+                    if (token.IsCancellationRequested)
+                        break;
+
+                    double eval = SelectedAgent.EvaluateMoveWithAgent(state, move, _playerNumber);
+                    result.Add(new MoveViewModel<TMove>(move, eval));
+                }
+                return result.OrderByDescending(p => p.Evaluation).ToList();
+            }, token);
+
+            if (token.IsCancellationRequested)
+                return;
+
+            // Add to UI on UI thread
+            foreach (var moveVm in moves)
+            {
+                LegalMoves.Add(moveVm);
+            }
+
+            OnPropertyChanged(nameof(IsMyTurn));
         }
-
-        // add them in descending order of eval
-        foreach (var moveVm in moves.OrderByDescending(p => p.Evaluation))
+        catch (OperationCanceledException)
         {
-            LegalMoves.Add(moveVm);
+            // Refresh was cancelled, this is expected
         }
-
-        OnPropertyChanged(nameof(IsMyTurn));
     }
     public Action<int, Color>? SetPlayerColorCallback { get; set; }
 

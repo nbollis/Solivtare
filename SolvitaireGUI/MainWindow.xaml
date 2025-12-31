@@ -34,6 +34,13 @@
                     <local:OnePlayerPlayingView DataContext="{Binding}" />
                 </DataTemplate>
             </local:GameControllerTemplateSelector.SolitaireTemplate >
+            
+            <!-- Wordle Game -->
+            <local:GameControllerTemplateSelector.WordleTemplate>
+                <DataTemplate>
+                    <local:OnePlayerPlayingView DataContext="{Binding}" />
+                </DataTemplate>
+            </local:GameControllerTemplateSelector.WordleTemplate>
         </local:GameControllerTemplateSelector>
     </Window.Resources>
 

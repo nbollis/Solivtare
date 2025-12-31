@@ -4,6 +4,7 @@ using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
 using SolvitaireCore.Gomoku;
 using SolvitaireCore.TicTacToe;
+using SolvitaireCore.Wordle;
 
 namespace SolvitaireGUI;
 
@@ -13,6 +14,7 @@ public class GameControllerTemplateSelector : DataTemplateSelector
     public DataTemplate? TicTacToeTemplate { get; set; }
     public DataTemplate? SolitaireTemplate { get; set; }
     public DataTemplate? GomokuTemplate { get; set; }
+    public DataTemplate? WordleTemplate { get; set; }
     // Add more as needed
 
     public override DataTemplate? SelectTemplate(object item, DependencyObject container)
@@ -21,10 +23,12 @@ public class GameControllerTemplateSelector : DataTemplateSelector
             return ConnectFourTemplate;
         if (item is TwoPlayerGameViewModel<TicTacToeGameState, TicTacToeMove, IAgent<TicTacToeGameState, TicTacToeMove>>)
             return TicTacToeTemplate;
-        if (item is OnePlayerGameViewModel<SolitaireGameState, SolitaireMove, IAgent<SolitaireGameState, SolitaireMove>>)
+        if (item is OnePlayerCardGameViewModel<SolitaireGameState, SolitaireMove, IAgent<SolitaireGameState, SolitaireMove>>)
             return SolitaireTemplate;
         if (item is TwoPlayerGameViewModel<GomokuGameState, GomokuMove, IAgent<GomokuGameState, GomokuMove>>)
             return GomokuTemplate;
+        if (item is OnePlayerGameViewModel<WordleGameState, WordleMove, IAgent<WordleGameState, WordleMove>>)
+            return WordleTemplate;
 
         return base.SelectTemplate(item, container);
     }

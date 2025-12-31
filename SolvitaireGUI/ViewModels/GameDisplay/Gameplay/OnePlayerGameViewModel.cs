@@ -75,7 +75,7 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
         }
     }
 
-    public bool IsGameActive => !GameStateViewModel.IsGameWon;
+    public bool IsGameActive => !GameStateViewModel.IsGameWon && !GameStateViewModel.GameState.IsGameLost;
     public int CurrentPlayer => 1; // Single player
 
     public OnePlayerGameViewModel(TGameState gameState)
@@ -86,7 +86,7 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
         AgentPanel = new AgentPanelViewModel<TGameState, TMove, TAgent>("Agent", 1, [.. possibleAgents], this);
 
         ResetGameCommand = new RelayCommand(ResetGame);
-        NewGameCommand = new RelayCommand(ResetGame);
+        NewGameCommand = new RelayCommand(NewGame);
         UndoMoveCommand = new RelayCommand(UndoMove);
 
         AgentPanel.RefreshLegalMoves();
@@ -100,7 +100,7 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
     protected readonly Stack<TMove> PreviousMoves = new();
     public void ApplyMove(TMove move)
     {
-        if (GameStateViewModel.GameState.IsGameWon)
+        if (GameStateViewModel.GameState.IsGameWon || GameStateViewModel.GameState.IsGameLost)
             return;
         GameStateViewModel.ApplyMove(move);
         ShadowGameState.ExecuteMove(move);
@@ -123,6 +123,10 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
         if (playerNumber != 1)
             return;
 
+        // Check if game is active before getting agent move
+        if (!IsGameActive)
+            return;
+
         // TODO: Handle terminating action
         var move = AgentPanel.SelectedAgent.GetNextAction(ShadowGameState);
         ApplyMove(move);
@@ -130,9 +134,23 @@ public class OnePlayerGameViewModel<TGameState, TMove, TAgent> : BaseViewModel, 
 
     protected virtual void ResetGame()
     {
+        PreviousMoves.Clear();
         GameStateViewModel.GameState.Reset();
         ShadowGameState = (TGameState)GameStateViewModel.GameState.Clone();
         GameStateViewModel.UpdateBoard();
+        AgentPanel.RefreshLegalMoves();
+    }
+
+    protected virtual void NewGame()
+    {
+        // For Wordle, this creates a new game with a new word
+        // For other games, this is the same as reset
+        PreviousMoves.Clear();
+        var newGameState = (TGameState)Activator.CreateInstance(typeof(TGameState))!;
+        GameStateViewModel = newGameState.ToViewModel(this);
+        ShadowGameState = (TGameState)CurrentGameState.Clone();
+        GameStateViewModel.UpdateBoard();
+        OnPropertyChanged(nameof(GameStateViewModel));
         AgentPanel.RefreshLegalMoves();
     }
 

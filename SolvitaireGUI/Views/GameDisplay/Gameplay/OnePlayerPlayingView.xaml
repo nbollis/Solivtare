@@ -61,6 +61,10 @@
                     <local:SolitaireBoardView DataContext="{Binding}" />
                 </DataTemplate>
 
+                <DataTemplate DataType="{x:Type local:WordleGameStateViewModel}">
+                    <local:WordleBoardView DataContext="{Binding}" />
+                </DataTemplate>
+
                 <!-- Add more as needed -->
             </ContentControl.Resources>
         </ContentControl>

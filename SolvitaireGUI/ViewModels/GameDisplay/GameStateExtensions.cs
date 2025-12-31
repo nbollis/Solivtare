@@ -2,6 +2,7 @@
 using SolvitaireCore.ConnectFour;
 using SolvitaireCore.Gomoku;
 using SolvitaireCore.TicTacToe;
+using SolvitaireCore.Wordle;
 using SolvitaireGenetics;
 
 namespace SolvitaireGUI;
@@ -27,6 +28,9 @@ public static class GameStateExtensions
             GomokuGameState gomokuGameState => (GameStateViewModel<TGameState, TMove>)
                     (object)new GomokuGameStateViewModel(gomokuGameState,
                     (IGameController<GomokuGameState, GomokuMove>)controller!),
+            WordleGameState wordleGameState => (GameStateViewModel<TGameState, TMove>)
+                (object)new WordleGameStateViewModel(wordleGameState,
+                    (IGameController<WordleGameState, WordleMove>)controller!),
             _ => throw new NotImplementedException($"No view model for {typeof(TGameState).Name}"),
         };
     }
@@ -57,6 +61,11 @@ public static class GameStateExtensions
                 yield return (TAgent)(IAgent<TGameState, TMove>)new MinimaxAgent<GomokuGameState, GomokuMove>(new GomokuHeuristicEvaluator(), 1);
                 yield return (TAgent)(IAgent<TGameState, TMove>)new RandomAgent<TGameState, TMove>();
                 //yield return (TAgent)(IAgent<TGameState, TMove>)new GomokuGeneticAgent(GomokuChromosome.BestSoFar(), null, 5);
+                break;
+            
+            case WordleGameState:
+                yield return (TAgent)(IAgent<TGameState, TMove>)new RandomWordleAgent();
+                // Add more Wordle agents as they are developed
                 break;
         }
     }

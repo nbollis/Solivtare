@@ -3,10 +3,11 @@ using SolvitaireCore;
 using SolvitaireCore.ConnectFour;
 using SolvitaireCore.Gomoku;
 using SolvitaireCore.TicTacToe;
+using SolvitaireCore.Wordle;
 
 namespace SolvitaireGUI;
 
-public enum GameType { Solitaire, ConnectFour, TicTacToe, Gomoku }
+public enum GameType { Solitaire, ConnectFour, TicTacToe, Gomoku, Wordle }
 
 public class GameHostViewModel : BaseViewModel
 {
@@ -66,6 +67,10 @@ public class GameHostViewModel : BaseViewModel
                     IAgent<GomokuGameState, GomokuMove>>(new GomokuGameState());
                 break;
 
+            case GameType.Wordle:
+                GameControllerViewModel = new OnePlayerGameViewModel<WordleGameState, WordleMove,
+                    IAgent<WordleGameState, WordleMove>>(new WordleGameState());
+                break;
         }
     }
 }
