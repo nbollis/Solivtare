@@ -66,7 +66,7 @@ public static class GameStateExtensions
             case WordleGameState:
                 yield return (TAgent)(IAgent<TGameState, TMove>)new HeuristicWordleAgent();
                 yield return (TAgent)(IAgent<TGameState, TMove>)new RandomWordleAgent();
-                yield return (TAgent)(IAgent<TGameState, TMove>)new WordleGeneticAgent(WordleChromosome.BestSoFar(), null, 1);
+                yield return (TAgent)(IAgent<TGameState, TMove>)new WordleGeneticAgent(WordleChromosome.BestSoFar(), null, null, 1);
                 break;
         }
     }

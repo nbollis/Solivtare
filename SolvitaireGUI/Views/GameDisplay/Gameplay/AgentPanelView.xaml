@@ -95,6 +95,16 @@
                         <local:IntegerTexBoxControl Text="{Binding MaxDepth, UpdateSourceTrigger=PropertyChanged}"
                                                     Margin="2,0,0,0" Width="28" />
                     </StackPanel>
+                    
+                    <!-- First Word (Wordle Agents) -->
+                    <StackPanel Orientation="Horizontal" Margin="8 12 0 0" HorizontalAlignment="Right"
+                                ToolTip="Opening word to always use as first guess" VerticalAlignment="Center"
+                                Visibility="{Binding SupportsFirstWord, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="First Word:" Margin="0,0,4,0" />
+                        <TextBox Text="{Binding FirstWord, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="60" MaxLength="5"
+                                 Style="{StaticResource TextBoxStyle}" />
+                    </StackPanel>
                 </StackPanel>
 
                 <!-- Slider and Text Box -->

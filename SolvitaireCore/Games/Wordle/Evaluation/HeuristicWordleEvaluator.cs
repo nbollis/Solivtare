@@ -28,6 +28,11 @@ public class HeuristicWordleEvaluator : WordleEvaluator
         {'V', 1.0}, {'K', 0.8}, {'J', 0.15}, {'X', 0.15}, {'Q', 0.10}, {'Z', 0.07}
     };
 
+    public HeuristicWordleEvaluator(string? firstWord = null)
+    {
+        FirstWord = firstWord?.ToUpperInvariant();
+    }
+
     protected override double EvaluateWord(string word, WordleGameState state)
     {
         var knowledge = WordleKnowledge.FromGameState(state);

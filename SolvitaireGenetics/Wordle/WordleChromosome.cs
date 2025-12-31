@@ -31,6 +31,9 @@ public class WordleChromosome : Chromosome
     public const string EarlyGameUnknownBonusName = "EarlyGameUnknownBonus";
     public const string MidGamePresentBonusName = "MidGamePresentBonus";
     public const string LateGameCorrectBonusName = "LateGameCorrectBonus";
+    
+    // First word selection (for genetic algorithm - index into predefined word pool)
+    public const string FirstWordIndexName = "FirstWordIndex";
 
     public WordleChromosome(Random random) : base(random)
     {
@@ -57,6 +60,10 @@ public class WordleChromosome : Chromosome
         MutableStatsByName[EarlyGameUnknownBonusName] = GenerateRandomWeight();
         MutableStatsByName[MidGamePresentBonusName] = GenerateRandomWeight();
         MutableStatsByName[LateGameCorrectBonusName] = GenerateRandomWeight();
+        
+        // First word selection (0-based index, will be used to select from word pool)
+        // Initialize to 0 but can be evolved
+        MutableStatsByName[FirstWordIndexName] = 0;
     }
 
     public WordleChromosome() : this(Random.Shared) { }
@@ -90,6 +97,9 @@ public class WordleChromosome : Chromosome
         chromosome.MutableStatsByName[EarlyGameUnknownBonusName] = 1.5;
         chromosome.MutableStatsByName[MidGamePresentBonusName] = 1.2;
         chromosome.MutableStatsByName[LateGameCorrectBonusName] = 1.3;
+        
+        // First word index (default to 0 - will be set by genetic algorithm)
+        chromosome.MutableStatsByName[FirstWordIndexName] = 0;
         
         return chromosome;
     }

@@ -21,9 +21,10 @@ public class GeneticWordleEvaluator : WordleEvaluator
         {'V', 1.0}, {'K', 0.8}, {'J', 0.15}, {'X', 0.15}, {'Q', 0.10}, {'Z', 0.07}
     };
 
-    public GeneticWordleEvaluator(WordleChromosome chromosome)
+    public GeneticWordleEvaluator(WordleChromosome chromosome, string? firstWord = null)
     {
         _chromosome = chromosome;
+        FirstWord = firstWord?.ToUpperInvariant();
         MaximumScore = 10000;
     }
 

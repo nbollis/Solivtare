@@ -10,6 +10,12 @@ public abstract class WordleEvaluator : StateEvaluator<WordleGameState, WordleMo
     protected static readonly HashSetPool<char> CharHashSetPool = new(initialCapacity: 26);
 
     /// <summary>
+    /// Optional first word to always play as the opening guess.
+    /// If set, this word will be scored as int.MaxValue on the first guess.
+    /// </summary>
+    public string? FirstWord { get; protected set; }
+
+    /// <summary>
     /// Tracks what we know about each letter position
     /// </summary>
     protected class WordleKnowledge
@@ -82,8 +88,18 @@ public abstract class WordleEvaluator : StateEvaluator<WordleGameState, WordleMo
 
     public override double EvaluateMove(WordleGameState state, WordleMove move)
     {
+        // Discourage repeated guesses
         if (state.Guesses.Any(p => p.Word == move.Word))
-            return double.MinValue; // Discourage repeated guesses
+            return -MaximumScore;
+
+        // If this is the first guess and we have a configured first word, prioritize it
+        if (state.Guesses.Count == 0 && !string.IsNullOrEmpty(FirstWord))
+        {
+            if (move.Word.Equals(FirstWord, StringComparison.OrdinalIgnoreCase))
+            {
+                return MaximumScore * 5; // Highest possible priority for first word
+            }
+        }
 
         // For Wordle, we evaluate the word directly without simulating the move
         // because we don't know the target word

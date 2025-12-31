@@ -84,6 +84,18 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
             OnPropertyChanged(nameof(MaxDepth)); // Notify MaxDepth may have changed  
             OnPropertyChanged(nameof(IsSearchAgent));
             OnPropertyChanged(nameof(IsGeneticAgentSelected));
+            OnPropertyChanged(nameof(SupportsFirstWord));
+            
+            // Load first word from agent if it has one
+            if (SupportsFirstWord)
+            {
+                var firstWordProperty = _selectedAgent.GetType().GetProperty("FirstWord");
+                if (firstWordProperty != null)
+                {
+                    _firstWord = firstWordProperty.GetValue(_selectedAgent) as string;
+                    OnPropertyChanged(nameof(FirstWord));
+                }
+            }
         }
     }
 
@@ -92,6 +104,54 @@ public class AgentPanelViewModel<TGameState, TMove, TAgent> : BaseViewModel, IGe
     public bool IsGeneticAgentSelected => _selectedAgent.GetType().GetInterfaces()
         .Where(i => i.IsGenericType)
         .Any(i => i.GetGenericTypeDefinition() == typeof(IGeneticAgent<>));
+
+    /// <summary>
+    /// First word configuration for Wordle agents (if supported)
+    /// </summary>
+    private string? _firstWord;
+    public string? FirstWord
+    {
+        get => _firstWord;
+        set
+        {
+            if (_firstWord != value)
+            {
+                _firstWord = value?.ToUpperInvariant();
+                OnPropertyChanged(nameof(FirstWord));
+                UpdateAgentFirstWord();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Whether the selected agent supports first word configuration
+    /// </summary>
+    public bool SupportsFirstWord => SelectedAgent != null && 
+        SelectedAgent.GetType().GetProperty("FirstWord") != null;
+
+    private void UpdateAgentFirstWord()
+    {
+        if (SelectedAgent == null || !SupportsFirstWord)
+            return;
+
+        var firstWordProperty = SelectedAgent.GetType().GetProperty("FirstWord");
+        if (firstWordProperty != null && firstWordProperty.CanWrite)
+        {
+            firstWordProperty.SetValue(SelectedAgent, FirstWord);
+            
+            // Also update the evaluator if the agent has one
+            if (SelectedAgent is ISearchAgent<TGameState, TMove> searchAgent)
+            {
+                var evaluatorFirstWordProperty = searchAgent.Evaluator?.GetType().GetProperty("FirstWord");
+                if (evaluatorFirstWordProperty != null && evaluatorFirstWordProperty.CanWrite)
+                {
+                    evaluatorFirstWordProperty.SetValue(searchAgent.Evaluator, FirstWord);
+                }
+            }
+            
+            RefreshLegalMoves();
+        }
+    }
 
 
     public int? MaxDepth

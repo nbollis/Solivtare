@@ -1,3 +1,5 @@
+using System.Reflection.Metadata.Ecma335;
+
 namespace SolvitaireCore.Wordle;
 
 /// <summary>
@@ -46,17 +48,33 @@ public class HeuristicWordleAgent : BaseWordleAgent, ISearchAgent<WordleGameStat
 {
     private readonly Random _random = new();
     
-    public override string Name => "Heuristic Wordle Agent";
+    public override string Name => string.IsNullOrEmpty(FirstWord) 
+        ? "Heuristic Wordle Agent" 
+        : $"Heuristic Wordle Agent ({FirstWord})";
+    
     public int MaxDepth { get; set; } = 1; // Not really used for Wordle, but required by interface
     public StateEvaluator<WordleGameState, WordleMove> Evaluator { get; }
+    
+    /// <summary>
+    /// Optional first word to always use as opening guess
+    /// </summary>
+    public string? FirstWord { get; set; }
 
-    public HeuristicWordleAgent()
+    public HeuristicWordleAgent(string? firstWord = null)
     {
-        Evaluator = new HeuristicWordleEvaluator();
+        FirstWord = firstWord?.ToUpperInvariant();
+        Evaluator = new HeuristicWordleEvaluator(FirstWord);
     }
 
     public override WordleMove GetNextAction(WordleGameState gameState, CancellationToken? cancellationToken = null)
     {
+        var allMoves = gameState.GetLegalMoves();
+        if (gameState.Guesses.Count == 0 && (FirstWord == "" || FirstWord == null))
+        {
+            var match = allMoves.First(p => p.Word == FirstWord);
+            return match;
+        }
+
         var orderedMoves = Evaluator.OrderMoves(gameState.GetLegalMoves(), gameState, bestFirst: true).ToList();
         
         if (orderedMoves.Count == 0)

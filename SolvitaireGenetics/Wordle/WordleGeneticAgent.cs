@@ -15,6 +15,11 @@ public class WordleGeneticAgent : BaseWordleAgent, ISearchAgent<WordleGameState,
     public int MaxDepth { get; set; } = 1; // Not really used for Wordle
     public StateEvaluator<WordleGameState, WordleMove> Evaluator => _evaluator;
     public WordleChromosome Chromosome { get; init; }
+    
+    /// <summary>
+    /// Optional first word to always use as opening guess
+    /// </summary>
+    public string? FirstWord { get; set; }
 
     public double Fitness
     {
@@ -22,12 +27,15 @@ public class WordleGeneticAgent : BaseWordleAgent, ISearchAgent<WordleGameState,
         set => Chromosome.Fitness = value;
     }
 
-    public WordleGeneticAgent(WordleChromosome chromosome, string? name = null, int maxDepth = 1)
+    public WordleGeneticAgent(WordleChromosome chromosome, string? name = null, string? firstWord = null, int maxDepth = 1)
     {
         Chromosome = chromosome;
-        _evaluator = new GeneticWordleEvaluator(chromosome);
+        FirstWord = firstWord?.ToUpperInvariant();
+        _evaluator = new GeneticWordleEvaluator(chromosome, FirstWord);
         MaxDepth = maxDepth;
-        Name = name ?? "Genetic Wordle Agent";
+        Name = name ?? (string.IsNullOrEmpty(FirstWord) 
+            ? "Genetic Wordle Agent" 
+            : $"Genetic Wordle Agent ({FirstWord})");
     }
 
     public override WordleMove GetNextAction(WordleGameState gameState, CancellationToken? cancellationToken = null)
