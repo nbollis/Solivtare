@@ -69,7 +69,7 @@ public class HeuristicWordleAgent : BaseWordleAgent, ISearchAgent<WordleGameStat
     public override WordleMove GetNextAction(WordleGameState gameState, CancellationToken? cancellationToken = null)
     {
         var allMoves = gameState.GetLegalMoves();
-        if (gameState.Guesses.Count == 0 && (FirstWord == "" || FirstWord == null))
+        if (gameState.Guesses.Count == 0 && FirstWord != "" && FirstWord != null)
         {
             var match = allMoves.First(p => p.Word == FirstWord);
             return match;

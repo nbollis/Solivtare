@@ -7,7 +7,7 @@ namespace SolvitaireCore.Wordle;
 /// </summary>
 public static class WordleWordList
 {
-    private static readonly HashSet<string> _answerWords; // All words that can be answers
+    public static readonly HashSet<string> AnswerWords; // All words that can be answers
     private static readonly HashSet<string> _validGuessWords; // All words that can be guessed
     private static readonly List<string> _answerWordsList;  // All words that can be answers
     private static readonly Random _random = new();
@@ -15,8 +15,8 @@ public static class WordleWordList
     static WordleWordList()
     {
         // Load answer words from embedded resource
-        _answerWords = LoadWordsFromResource("SolvitaireCore.Resources.wodleWords.txt");
-        _answerWordsList = _answerWords.ToList();
+        AnswerWords = LoadWordsFromResource("SolvitaireCore.Resources.wodleWords.txt");
+        _answerWordsList = AnswerWords.ToList();
 
         // Load all valid guess words from embedded resource
         var allWords = LoadWordsFromResource("SolvitaireCore.Resources.allWords.txt");
@@ -28,7 +28,7 @@ public static class WordleWordList
         );
         
         // Ensure all answer words are also valid guesses
-        foreach (var word in _answerWords)
+        foreach (var word in AnswerWords)
         {
             _validGuessWords.Add(word);
         }
@@ -97,7 +97,7 @@ public static class WordleWordList
     /// </summary>
     public static bool IsValidAnswer(string word)
     {
-        return _answerWords.Contains(word.ToUpperInvariant());
+        return AnswerWords.Contains(word.ToUpperInvariant());
     }
 
     /// <summary>

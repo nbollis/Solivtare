@@ -275,7 +275,12 @@ public class GeneticAlgorithmTabViewModel : BaseViewModel
             case ConnectFourGeneticAlgorithmParameters conn:
                 algorithm = new ConnectFourGeneticAlgorithm(conn);
                 if (Parameters.OutputDirectory != null)
-                    conn.SaveToFile(filePath);
+                    conn.SaveToFile(filePath!);
+                break;
+            case WordleGeneticAlgorithmParameters wordleParams:
+                algorithm = new GeneticWordleAlgorithm(wordleParams);
+                if (Parameters.OutputDirectory != null)
+                    wordleParams.SaveToFile(filePath!);
                 break;
         }
 

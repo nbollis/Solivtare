@@ -7,7 +7,8 @@ public enum GeneticAlgorithmType
 {
     Solitaire,
     Quadratic,
-    ConnectFour
+    ConnectFour,
+    Wordle
 }
 
 public static class GeneticAlgorithmTypeExtensions
@@ -19,6 +20,7 @@ public static class GeneticAlgorithmTypeExtensions
             GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParameters(),
             GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParameters(),
             GeneticAlgorithmType.ConnectFour => new ConnectFourGeneticAlgorithmParameters(),
+            GeneticAlgorithmType.Wordle => new WordleGeneticAlgorithmParameters(),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -30,6 +32,7 @@ public static class GeneticAlgorithmTypeExtensions
             GeneticAlgorithmType.Solitaire => new ChromosomeViewModel(SolitaireChromosome.BestSoFar()),
             GeneticAlgorithmType.Quadratic => new ChromosomeViewModel(new QuadraticChromosome(Random.Shared)),
             GeneticAlgorithmType.ConnectFour => new ChromosomeViewModel(ConnectFourChromosome.BestSoFar()),
+            GeneticAlgorithmType.Wordle => new ChromosomeViewModel(WordleChromosome.BestSoFar()),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -41,6 +44,7 @@ public static class GeneticAlgorithmTypeExtensions
             SolitaireGeneticAlgorithmParameters => GeneticAlgorithmType.Solitaire,
             QuadraticGeneticAlgorithmParameters => GeneticAlgorithmType.Quadratic,
             ConnectFourGeneticAlgorithmParameters => GeneticAlgorithmType.ConnectFour,
+            WordleGeneticAlgorithmParameters => GeneticAlgorithmType.Wordle,
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -52,6 +56,7 @@ public static class GeneticAlgorithmTypeExtensions
             GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParametersViewModel(new SolitaireGeneticAlgorithmParameters()),
             GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParametersViewModel(new QuadraticGeneticAlgorithmParameters()),
             GeneticAlgorithmType.ConnectFour => new ConnectFourGeneticAlgorithmParametersViewModel(new ConnectFourGeneticAlgorithmParameters()),
+            GeneticAlgorithmType.Wordle => new WordleGeneticAlgorithmParametersViewModel(new WordleGeneticAlgorithmParameters()),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -63,6 +68,7 @@ public static class GeneticAlgorithmTypeExtensions
             GeneticAlgorithmType.Solitaire => new SolitaireGeneticAlgorithmParametersViewModel((SolitaireGeneticAlgorithmParameters)parameters),
             GeneticAlgorithmType.Quadratic => new QuadraticGeneticAlgorithmParametersViewModel((QuadraticGeneticAlgorithmParameters)parameters),
             GeneticAlgorithmType.ConnectFour => new ConnectFourGeneticAlgorithmParametersViewModel((ConnectFourGeneticAlgorithmParameters)parameters),
+            GeneticAlgorithmType.Wordle => new WordleGeneticAlgorithmParametersViewModel((WordleGeneticAlgorithmParameters)parameters),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -74,6 +80,7 @@ public static class GeneticAlgorithmTypeExtensions
             SolitaireGeneticAlgorithmParameters algorithmParameters => new SolitaireGeneticAlgorithmParametersViewModel(algorithmParameters),
             QuadraticGeneticAlgorithmParameters algorithmParameters => new QuadraticGeneticAlgorithmParametersViewModel(algorithmParameters),
             ConnectFourGeneticAlgorithmParameters algorithmParameters => new ConnectFourGeneticAlgorithmParametersViewModel(algorithmParameters),
+            WordleGeneticAlgorithmParameters algorithmParameters => new WordleGeneticAlgorithmParametersViewModel(algorithmParameters),
             _ => throw new ArgumentOutOfRangeException()
         };
     }

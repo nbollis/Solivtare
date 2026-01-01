@@ -1,0 +1,80 @@
+<UserControl x:Class="SolvitaireGUI.WordleGeneticParametersControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SolvitaireGUI"
+             mc:Ignorable="d" 
+             d:DataContext="{x:Static local:WordleGeneticAlgorithmParametersModel.Instance}"
+             d:DesignHeight="450" d:DesignWidth="300">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" />
+            <!-- Label column -->
+            <ColumnDefinition Width="*" />
+            <!-- Input column -->
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <!-- Spacer -->
+        </Grid.RowDefinitions>
+
+        <!-- Games Per Agent -->
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Games Per Agent:" VerticalAlignment="Center" Margin="5"
+                   ToolTip="Number of Wordle games each agent plays for fitness evaluation" />
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding GamesPerAgent}" Margin="5"
+             Style="{StaticResource TextBoxStyle}" />
+
+        <!-- Max Guesses -->
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Max Guesses:" VerticalAlignment="Center" Margin="5"
+                   ToolTip="Maximum guesses allowed per game (standard Wordle = 6)" />
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding MaxGuesses}" Margin="5"
+             Style="{StaticResource TextBoxStyle}" />
+
+        <!-- Word Length -->
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Word Length:" VerticalAlignment="Center" Margin="5"
+                   ToolTip="Length of words (standard Wordle = 5)" />
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding WordLength}" Margin="5"
+             Style="{StaticResource TextBoxStyle}" />
+
+        <!-- Speed Bonus -->
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Speed Bonus:" VerticalAlignment="Center" Margin="5"
+                   ToolTip="Bonus points per guess saved when winning (e.g., winning in 3 guesses = 3 * speed bonus)" />
+        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding SpeedBonus}" Margin="5"
+             Style="{StaticResource TextBoxStyle}" />
+
+        <!-- Loss Penalty -->
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Loss Penalty:" VerticalAlignment="Center" Margin="5"
+                   ToolTip="Penalty for losing a game (typically negative)" />
+        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding LossPenalty}" Margin="5"
+             Style="{StaticResource TextBoxStyle}" />
+
+        <!-- First Word Pool File -->
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="First Word Pool File:" VerticalAlignment="Center" Margin="5"
+                   ToolTip="Optional: Path to text file with first word candidates (one per line)" />
+        <TextBox Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right" TextAlignment="Right"
+             Text="{Binding FirstWordPoolFile}" Margin="5"
+             Style="{StaticResource TextBoxStyle}" MinWidth="240" />
+
+        <!-- First Word Pool Count (Read-only) -->
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="First Word Pool Count:" VerticalAlignment="Center" Margin="5"
+                   ToolTip="Number of candidate first words available" />
+        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding FirstWordPoolCount}" Margin="5"
+                   VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="Bold" />
+
+        <!-- Use Fixed Target Words -->
+        <TextBlock Grid.Row="7" Grid.Column="0" Text="Use Fixed Target Words:" VerticalAlignment="Center" Margin="5"
+                   ToolTip="Use same target words for consistent agent evaluation" />
+        <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding UseFixedTargetWords}" Margin="5"
+                  VerticalAlignment="Center" HorizontalAlignment="Right" />
+    </Grid>
+</UserControl>

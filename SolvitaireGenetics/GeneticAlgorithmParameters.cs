@@ -48,6 +48,12 @@ public class GeneticAlgorithmParameters
             new JsonSerializerOptions() { Converters = { new ChromosomeConverter<ConnectFourChromosome>() } })
                    ?? throw new InvalidOperationException("Failed to deserialize ConnectFourAlgorithmParameters.");
         }
+        if (json.Contains("\"FirstWordPool\"") || json.Contains("\"GamesPerAgent\""))
+        {
+            return JsonSerializer.Deserialize<WordleGeneticAlgorithmParameters>(json,
+                new JsonSerializerOptions() { Converters = { new ChromosomeConverter<WordleChromosome>() } })
+                   ?? throw new InvalidOperationException("Failed to deserialize WordleGeneticAlgorithmParameters.");
+        }
 
         throw new NotSupportedException("Unknown parameter type in the configuration file.");
     }

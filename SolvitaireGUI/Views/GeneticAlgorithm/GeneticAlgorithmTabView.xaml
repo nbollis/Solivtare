@@ -260,6 +260,10 @@
                                         DataType="{x:Type local:ConnectFourGeneticAlgorithmParametersViewModel}">
                                         <local:ConnectFourGeneticParametersControl />
                                     </DataTemplate>
+                                    <DataTemplate
+                                        DataType="{x:Type local:WordleGeneticAlgorithmParametersViewModel}">
+                                        <local:WordleGeneticParametersControl />
+                                    </DataTemplate>
                                 </ContentControl.Resources>
                             </ContentControl>
                         </StackPanel>

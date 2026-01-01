@@ -113,4 +113,33 @@ public class WordleChromosome : Chromosome
         // This will be updated as genetic algorithm finds better solutions
         return HeuristicBased();
     }
+
+    /// <summary>
+    /// Get first word index as integer (for selecting from word pool)
+    /// </summary>
+    public int GetFirstWordIndex()
+    {
+        return (int)Math.Round(GetWeight(FirstWordIndexName));
+    }
+
+    /// <summary>
+    /// Set first word index (clamped to valid range for word pool)
+    /// </summary>
+    public void SetFirstWordIndex(int index, int maxIndex)
+    {
+        SetWeight(FirstWordIndexName, Math.Clamp(index, 0, maxIndex));
+    }
+
+    /// <summary>
+    /// Mutate first word index as an integer selection (different from continuous weights)
+    /// </summary>
+    public void MutateFirstWordIndex(double mutationRate, int wordPoolSize, Random random)
+    {
+        if (random.NextDouble() < mutationRate)
+        {
+            // Random selection from pool
+            int newIndex = random.Next(0, wordPoolSize);
+            SetWeight(FirstWordIndexName, newIndex);
+        }
+    }
 }
