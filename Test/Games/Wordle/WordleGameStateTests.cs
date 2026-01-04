@@ -9,6 +9,74 @@ public class WordleGameStateTests
     private const string TestTargetWord = "WATER";
     private const string AlternateWord = "WORLD";
 
+
+    public class Results(string condition, int gameCount)
+    {
+        public string Condition { get; init; } = condition;
+        public int GamesPlayed { get; set; } = gameCount;
+        public int GamesWon { get; set; } = 0;
+        public int GamesLost { get; set; } = 0;
+        public int[] MovesMade { get; set; } = Array.Empty<int>();
+
+    }
+
+    [Test]
+    public void RunWords()
+    {
+        int games = WordleWordList.AnswerWords.Count;
+        string[] startWords = ["OCEAN", "SPEAR", "AUDIO", "AISLE", "CRANE", "LIONS"];
+        List<string> allTargetWords = WordleWordList.AnswerWords.ToList();
+       
+        List<HeuristicWordleAgent> agents = new();
+        for (int i = 0; i < startWords.Length; i++)
+            agents.Add(new HeuristicWordleAgent(startWords[i]));
+
+        // Create output directory if it doesn't exist
+        var outDir = @"C:\Users\nboll\Documents\WordleRuns\FirstRun";
+        Directory.CreateDirectory(outDir);
+
+        // Write detailed CSV with one row per agent/game combination
+        var detailedPath = Path.Combine(outDir, "wordle_detailed_results2.csv");
+        using (var detailedWriter = new StreamWriter(new FileStream(detailedPath, FileMode.Create)))
+        {
+            // Header row
+            detailedWriter.WriteLine("AgentName,FirstWord,GameIndex,TargetWord,GuessCount,Won,Lost,Guess1,Guess2,Guess3,Guess4,Guess5,Guess6");
+
+            foreach (var agent in agents)
+                for (int gameIndex = 0; gameIndex < allTargetWords.Count; gameIndex++)
+                {
+                    string targetWord = allTargetWords[gameIndex];
+                    var game = new WordleGameState(targetWord: targetWord);
+
+                    // Play the game
+                    while (!game.IsGameWon && !game.IsGameLost)
+                    {
+                        var action = agent.GetNextAction(game);
+                        game.ExecuteMove(action);
+                    }
+
+                    // Extract guesses (pad with empty strings if fewer than 6)
+                    var guesses = game.Guesses.Select(g => g.Word).ToList();
+                    while (guesses.Count < 6)
+                        guesses.Add("");
+
+                    // Write row: AgentName, FirstWord, GameIndex, TargetWord, GuessCount, Won, Lost, Guess1-6
+                    detailedWriter.WriteLine(
+                        $"{agent.Name}," +
+                        $"{agent.FirstWord ?? "None"}," +
+                        $"{gameIndex}," +
+                        $"{targetWord}," +
+                        $"{game.MovesMade}," +
+                        $"{(game.IsGameWon ? 1 : 0)}," +
+                        $"{(game.IsGameLost ? 1 : 0)}," +
+                        $"{string.Join(",", guesses)}"
+                    );
+                }
+        }
+    }
+
+
+
     [Test]
     public void GameState_Constructor_DefaultValues_ShouldInitializeCorrectly()
     {
